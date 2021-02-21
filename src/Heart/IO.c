@@ -386,7 +386,7 @@ again:
 
 	}
 	oldKey = 0;											// no key found
-	return('�');
+	return('\xBD');
 
 					/* GOT SOMETHING */
 gotit:

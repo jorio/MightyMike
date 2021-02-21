@@ -638,7 +638,7 @@ ObjNode		*nameObj;
 		theChar = CheckKey();
 		EraseObjects();
 
-		if (theChar == '�')								// � is the null key mark
+		if (theChar == '\xBD')							// \xBD is the null key mark
 			goto nokey;
 
 		if (theChar == CHAR_RETURN)						// see if done
