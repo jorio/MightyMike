@@ -344,7 +344,7 @@ short		xDist,yDist;
 						/***********************/
 
 	GetVol(nil,&vRefNum);									// get default volume
-	OpenMikeFile("\p:data:images:radarmap.image",&fRefNum,"\pCant open Radar Image!");
+	OpenMikeFile(":data:images:radarmap.image",&fRefNum,"Cant open Radar Image!");
 	SetFPos(fRefNum,fsFromStart,256*sizeof(RGBColor)+8);	// skip palette & pack header
 
 	PlaySound(SOUND_RADAR);
@@ -441,7 +441,7 @@ Byte	group,type;
 				break;
 
 		default:
-				DoFatalAlert("\pNo food defined for this Scene.");
+				DoFatalAlert("No food defined for this Scene.");
 	}
 
 	newObj = MakeNewShape(group,type,itemPtr->parm[0],itemPtr->x,itemPtr->y,

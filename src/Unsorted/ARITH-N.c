@@ -69,7 +69,7 @@ register	Ptr			sourcePtr;
 
 	srcOriginalPtr = NewPtr(sourceSize);
 	if (srcOriginalPtr == nil)
-		DoFatalAlert("\pCouldnt allocate memory for ART-N pack buffer!");
+		DoFatalAlert("Couldnt allocate memory for ART-N pack buffer!");
 	sourcePtr = srcOriginalPtr;
 
 				/* READ SOURCE DATA */
@@ -138,11 +138,11 @@ register CONTEXT *control_table;
     current_order = gMaxOrder;
     gContexts = (CONTEXT **) calloc( sizeof( CONTEXT * ), 10 );
     if ( gContexts == NULL )
-        DoFatalAlert( "\pFailure #1: allocating context table!" );
+        DoFatalAlert( "Failure #1: allocating context table!" );
     gContexts += 2;
     null_table = (CONTEXT *) calloc( sizeof( CONTEXT ), 1 );
     if ( null_table == NULL )
-        DoFatalAlert( "\pFailure #2: allocating null table!" );
+        DoFatalAlert( "Failure #2: allocating null table!" );
     null_table->max_index = -1;
     gContexts[ -1 ] = null_table;
     for ( i = 0 ; i <= gMaxOrder ; i++ )
@@ -153,7 +153,7 @@ register CONTEXT *control_table;
     null_table->stats =
          (STATS *) calloc( sizeof( STATS ), 256 );
     if ( null_table->stats == NULL )
-        DoFatalAlert( "\pFailure #3: allocating null table!" );
+        DoFatalAlert( "Failure #3: allocating null table!" );
     null_table->max_index = 255;
     for ( i=0 ; i < 256 ; i++ ) {
         null_table->stats[ i ].symbol = (unsigned char) i;
@@ -162,11 +162,11 @@ register CONTEXT *control_table;
 
     control_table = (CONTEXT *) calloc( sizeof(CONTEXT), 1 );
     if ( control_table == NULL )
-        DoFatalAlert( "\pFailure #4: allocating null table!" );
+        DoFatalAlert( "Failure #4: allocating null table!" );
     control_table->stats =
          (STATS *) calloc( sizeof( STATS ), 2 );
     if ( control_table->stats == NULL )
-        DoFatalAlert( "\pFailure #5: allocating null table!" );
+        DoFatalAlert( "Failure #5: allocating null table!" );
     gContexts[ -2 ] = control_table;
     control_table->max_index = 1;
     control_table->stats[ 0 ].symbol = -FLUSH;
@@ -222,15 +222,15 @@ register unsigned int new_size;
             table->stats = (STATS *)
                 realloc( (char *) table->stats, new_size );
         if ( table->links == NULL )
-            DoFatalAlert( "\pFailure #6: allocating new table" );
+            DoFatalAlert( "Failure #6: allocating new table" );
         if ( table->stats == NULL )
-            DoFatalAlert( "\pFailure #7: allocating new table" );
+            DoFatalAlert( "Failure #7: allocating new table" );
         table->stats[ i ].symbol = (unsigned char) symbol;
         table->stats[ i ].counts = 0;
     }
     new_table = (CONTEXT *) calloc( sizeof( CONTEXT ), 1 );
     if ( new_table == NULL )
-        DoFatalAlert( "\pFailure #8: allocating new table" );
+        DoFatalAlert( "Failure #8: allocating new table" );
     new_table->max_index = -1;
     table->links[ i ].next = new_table;
     new_table->lesser_context = lesser_context;
@@ -316,7 +316,7 @@ register unsigned int new_size;
                 table->links = (LINKS *)
                    realloc( (char *) table->links, new_size );
             if ( table->links == NULL )
-                DoFatalAlert( "\pError #9: reallocating table space!" );
+                DoFatalAlert( "Error #9: reallocating table space!" );
             table->links[ index ].next = NULL;
         }
         new_size = sizeof( STATS );
@@ -327,7 +327,7 @@ register unsigned int new_size;
             table->stats = (STATS *)
                 realloc( (char *) table->stats, new_size );
         if ( table->stats == NULL )
-            DoFatalAlert( "\pError #10: reallocating table space!" );
+            DoFatalAlert( "Error #10: reallocating table space!" );
         table->stats[ index ].symbol = (unsigned char) symbol;
         table->stats[ index ].counts = 0;
     }
@@ -475,7 +475,7 @@ register int i;
                 realloc( (char *) table->stats,
                                  sizeof( STATS ) * ( table->max_index + 1 ) );
             if ( table->stats == NULL )
-                DoFatalAlert( "\pError #11: reallocating stats space!" );
+                DoFatalAlert( "Error #11: reallocating stats space!" );
         }
     }
 }

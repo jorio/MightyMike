@@ -69,21 +69,21 @@ long	aLong;
         if (myErr == procNotFound)											// see if done
         	break;
         if (myErr)															// see if other error
-        	DoFatalAlert("\pGetNextProcess failed!");
+        	DoFatalAlert("GetNextProcess failed!");
 
 			/* See if it's us first */
 
 		notFinder = true;
         myErr = SameProcess(&myProc, &processSN, &ourFlag);
         if (myErr)
-        	DoFatalAlert("\pSameProcess failed!");
+        	DoFatalAlert("SameProcess failed!");
 
         infoRec.processInfoLength = sizeof(ProcessInfoRec);
         infoRec.processName = &processName[0];
         infoRec.processAppSpec = &procSpec;
         myErr = GetProcessInformation(&processSN, &infoRec);
         if (myErr)
-        	DoFatalAlert("\pGetProcessInformation failed!");
+        	DoFatalAlert("GetProcessInformation failed!");
 
 
         if (!ourFlag && !finderFound)
@@ -113,12 +113,12 @@ long	aLong;
         {
             otherError = AECreateDesc(typeProcessSerialNumber, (Ptr)&processSN, sizeof(processSN), &theAddress);
             if (otherError)
-         		DoFatalAlert("\pAECreateDesc failed!");
+         		DoFatalAlert("AECreateDesc failed!");
 
       		otherError = AECreateAppleEvent(kCoreEventClass, kAEQuitApplication, &theAddress, kAutoGenerateReturnID,
                                                 kAnyTransactionID, &theEvent);
 	        if (otherError)
-    	    	DoFatalAlert("\pAECreateDesc failed!");
+    	    	DoFatalAlert("AECreateDesc failed!");
 
             AEDisposeDesc(&theAddress);
 

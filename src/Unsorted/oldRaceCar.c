@@ -157,11 +157,11 @@ void InitRaceTrack(void)
 	ClearGlobalFlags();
 	InitObjectManager();
 
-	LoadPlayfield("\p:data:maps:RaceTrack.map");
-	LoadTileSet("\p:data:maps:RaceTrack.tileset");
-	LoadShapeTable("\p:data:shapes:RaceTrack.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+	LoadPlayfield(":data:maps:RaceTrack.map");
+	LoadTileSet(":data:maps:RaceTrack.tileset");
+	LoadShapeTable(":data:shapes:RaceTrack.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 	FadeOutGameCLUT();														// fade out old screen
-	LoadBackground_Direct("\p:data:images:border.image",GET_PALETTE);		// load border pict & USE PALETTE
+	LoadBackground_Direct(":data:images:border.image",GET_PALETTE);		// load border pict & USE PALETTE
 
 	InitMyCar();
 	InitEnemies();
@@ -269,7 +269,7 @@ void InitMyCar(void)
 					gMyX,gMyY,50,MoveMyCar,PLAYFIELD_RELATIVE);
 
 	if (gMyNodePtr == nil)
-		DoFatalAlert("\pCouldnt init MyCar!");
+		DoFatalAlert("Couldnt init MyCar!");
 
 	gMyNodePtr->CType = CTYPE_MYGUY;
 	gMyNodePtr->CBits = CBITS_ALLSOLID;

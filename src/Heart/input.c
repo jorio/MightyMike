@@ -62,7 +62,7 @@ Boolean	gISPInitialized			= false;
 static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 {
 	{													// 0
-		"\pFire Weapon",
+		"Fire Weapon",
 		131,
 		0,
 		0,
@@ -75,7 +75,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 1
-		"\pSelect Weapon",
+		"Select Weapon",
 		136,
 		0,
 		0,
@@ -88,7 +88,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 2
-		"\pMovement",
+		"Movement",
 		146,
 		0,
 		0,
@@ -101,7 +101,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 3
-		"\pBunny Radar",
+		"Bunny Radar",
 		147,
 		0,
 		0,
@@ -114,7 +114,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 4
-		"\pPause",
+		"Pause",
 		137,
 		0,
 		0,
@@ -127,7 +127,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 5
-		"\pToggle Music",
+		"Toggle Music",
 		129,
 		0,
 		0,
@@ -140,7 +140,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 6
-		"\pToggle Sound Effects",
+		"Toggle Sound Effects",
 		129,
 		0,
 		0,
@@ -153,7 +153,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 7
-		"\pRaise Volume",
+		"Raise Volume",
 		145,
 		0,
 		0,
@@ -166,7 +166,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 8
-		"\pLower Volume",
+		"Lower Volume",
 		139,
 		0,
 		0,
@@ -179,7 +179,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 	},
 
 	{													// 9
-		"\pQuit Application",
+		"Quit Application",
 		202,
 		0,
 		0,
@@ -231,7 +231,7 @@ UInt32				count = 0;
         /* SEE IF ISP EXISTS */
 
     if ((void *)ISpStartup == (void *)kUnresolvedCFragSymbolAddress)
-		DoFatalAlert("\pYou do not have Input Sprocket installed.  This game requires Input Sprocket to function.  To install Apple's Game Sprockets, go to www.pangeasoft.net/downloads.html");
+		DoFatalAlert("You do not have Input Sprocket installed.  This game requires Input Sprocket to function.  To install Apple's Game Sprockets, go to www.pangeasoft.net/downloads.html");
 
 	ISpStartup();
 	gISPInitialized = true;
@@ -241,14 +241,14 @@ UInt32				count = 0;
 	iErr = ISpElement_NewVirtualFromNeeds(NUM_CONTROL_NEEDS, gControlNeeds, gVirtualElements, 0);
 	if (iErr)
 	{
-		DoAlert("\pInitInput: ISpElement_NewVirtualFromNeeds failed!");
+		DoAlert("InitInput: ISpElement_NewVirtualFromNeeds failed!");
 		ShowSystemErr(iErr);
 	}
 
 	iErr = ISpInit(NUM_CONTROL_NEEDS, gControlNeeds, gVirtualElements, 'MMik','Mik6', 0, 1000, 0);
 	if (iErr)
 	{
-		DoAlert("\pInitInput: ISpInit failed!");
+		DoAlert("InitInput: ISpInit failed!");
 		ShowSystemErr(iErr);
 	}
 
@@ -256,10 +256,10 @@ UInt32				count = 0;
 			/* ACTIVATE ALL DEVICES */
 
 	if (ISpDevices_Extract(10,&count,dev) != noErr)
-		DoFatalAlert("\pInitInput: ISpDevices_Extract failed!");
+		DoFatalAlert("InitInput: ISpDevices_Extract failed!");
 
 	if (ISpDevices_Activate(count, dev) != noErr)
-		DoFatalAlert("\pInitInput: ISpDevices_Activate failed!");
+		DoFatalAlert("InitInput: ISpDevices_Activate failed!");
 
 	gISpActive = true;
 
@@ -520,7 +520,7 @@ OSStatus		err;
 
 	if (err)
 	{
-		DoAlert("\pGetMouseDelta: ISpElement_GetComplexState failed!");
+		DoAlert("GetMouseDelta: ISpElement_GetComplexState failed!");
 		ShowSystemErr(err);
 	}
 
@@ -532,7 +532,7 @@ OSStatus		err;
 
 	if (err)
 	{
-		DoAlert("\pGetMouseDelta: ISpElement_GetComplexState failed!");
+		DoAlert("GetMouseDelta: ISpElement_GetComplexState failed!");
 		ShowSystemErr(err);
 	}
 
@@ -565,10 +565,10 @@ OSErr		iErr;
 
 		iErr = ISpDevices_Extract(10,&count,dev);
 		if (iErr)
-			DoFatalAlert("\pTurnOnISp: ISpDevices_Extract failed!");
+			DoFatalAlert("TurnOnISp: ISpDevices_Extract failed!");
 		iErr = ISpDevices_Activate(count, dev);
 		if (iErr)
-			DoFatalAlert("\pTurnOnISp: ISpDevices_Activate failed!");
+			DoFatalAlert("TurnOnISp: ISpDevices_Activate failed!");
 
 			/* DEACTIVATE JUST THE MOUSE SINCE WE DONT NEED THAT */
 

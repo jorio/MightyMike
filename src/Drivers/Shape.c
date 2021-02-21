@@ -157,7 +157,7 @@ Ptr		tempPtr;
 long	offset;
 
 	if (groupNum >= MAX_SHAPE_GROUPS)										// see if legal group
-		DoFatalAlert("\pIllegal shape group #");
+		DoFatalAlert("Illegal shape group #");
 
 	newSpritePtr = MakeNewObject(SPRITE_GENRE,x,y,z,moveCall);
 
@@ -319,7 +319,7 @@ long		width;
 static		Rect	box;
 
 	if (shapeNum >= gNumShapesInFile[groupNum])						// see if error
-		DoFatalAlert("\pIllegal Shape #");
+		DoFatalAlert("Illegal Shape #");
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
@@ -329,7 +329,7 @@ static		Rect	box;
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
 
 	if (frameNum >= *((short *)tempPtr))				// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 
 	longPtr = (long *)(tempPtr+(frameNum<<2)+2);	// point to correct frame offset
@@ -691,14 +691,14 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
 	if (shapeNum >= gNumShapesInFile[groupNum])		// see if error
-		DoFatalAlert("\pIllegal Shape #");
+		DoFatalAlert("Illegal Shape #");
 
 	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
 
 	offset = 	*((long *)(SHAPE_HEADER_Ptr+2));	// get offset to FRAME_LIST
 	intPtr = (short *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)						// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 	longPtr = (long *)intPtr;
 	offset = *(longPtr+frameNum);					// get offset to FRAME_HEADER_n
@@ -839,14 +839,14 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
 	if (shapeNum >= gNumShapesInFile[groupNum])		// see if error
-		DoFatalAlert("\pIllegal Shape #");
+		DoFatalAlert("Illegal Shape #");
 
 	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
 
 	offset = 	*((long *)(SHAPE_HEADER_Ptr+2));	// get offset to FRAME_LIST
 	intPtr = (short *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)						// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 	longPtr = (long *)intPtr;
 	offset = *(longPtr+frameNum);					// get offset to FRAME_HEADER_n
@@ -1011,7 +1011,7 @@ Ptr		tmP;
 
 	if (shapeNum >= gNumShapesInFile[groupNum])			// see if error
 	{
-		DoAlert("\pIllegal Shape #");
+		DoAlert("Illegal Shape #");
 		ShowSystemErr(shapeNum);
 	}
 
@@ -1020,7 +1020,7 @@ Ptr		tmP;
 	offset = *((long *)(SHAPE_HEADER_Ptr+2));			// get offset to FRAME_LIST
 	intPtr = (short *)(SHAPE_HEADER_Base + offset);		// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)							// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 	longPtr = (long *)intPtr;
 	offset = *(longPtr+frameNum);						// get offset to FRAME_HEADER_n
@@ -1342,7 +1342,7 @@ static		Ptr		tempPtr,SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	if (shapeNum >= gNumShapesInFile[groupNum])		// see if error
 	{
-		DoAlert("\pIllegal Shape #");
+		DoAlert("Illegal Shape #");
 		ShowSystemErr(shapeNum);
 	}
 
@@ -1351,7 +1351,7 @@ static		Ptr		tempPtr,SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 	offset = 	*((long *)(SHAPE_HEADER_Ptr+2));	// get offset to FRAME_LIST
 	intPtr = (short *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)						// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 	longPtr = (long *)intPtr;
 	offset = *(longPtr+frameNum);					// get offset to FRAME_HEADER_n
@@ -1772,7 +1772,7 @@ static		Ptr		tmP;
 
 	if (shapeNum >= gNumShapesInFile[groupNum])			// see if error
 	{
-		DoAlert("\pIllegal Shape #");
+		DoAlert("Illegal Shape #");
 		ShowSystemErr(shapeNum);
 	}
 
@@ -1781,7 +1781,7 @@ static		Ptr		tmP;
 	offset = *((long *)(SHAPE_HEADER_Ptr+2));			// get offset to FRAME_LIST
 	intPtr = (short *)(SHAPE_HEADER_Base + offset);		// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)							// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 	longPtr = (long *)intPtr;
 	offset = *(longPtr+frameNum);						// get offset to FRAME_HEADER_n
@@ -2691,7 +2691,7 @@ static		long	colCopy;
 
 	if (shapeNum >= gNumShapesInFile[groupNum])			// see if error
 	{
-		DoAlert("\pIllegal Shape #");
+		DoAlert("Illegal Shape #");
 		ShowSystemErr(shapeNum);
 	}
 
@@ -2700,7 +2700,7 @@ static		long	colCopy;
 	offset = *((long *)(SHAPE_HEADER_Ptr+2));			// get offset to FRAME_LIST
 	intPtr = (int *)(SHAPE_HEADER_Base + offset);		// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)							// see if error
-		DoFatalAlert("\pIllegal Frame #");
+		DoFatalAlert("Illegal Frame #");
 
 	longPtr = (long *)intPtr;
 	offset = *(longPtr+frameNum);						// get offset to FRAME_HEADER_n

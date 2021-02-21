@@ -117,7 +117,7 @@ int i;
     {
         dict[ i ] = (struct dictionary *)NewPtrClear( 256 * sizeof ( struct dictionary ));
         if ( dict[ i ] == nil )
-            DoFatalAlert( "\pError allocating dictionary space" );
+            DoFatalAlert( "Error allocating dictionary space" );
     }
 
 
@@ -166,7 +166,7 @@ register	unsigned int count;
 
 	srcOriginalPtr = (unsigned char *)NewPtrClear(sourceSize);
 	if (srcOriginalPtr == nil)
-		DoFatalAlert("\pCouldnt allocate memory for Z pack buffer!");
+		DoFatalAlert("Couldnt allocate memory for Z pack buffer!");
 	sourcePtr = srcOriginalPtr;
 
 				/* READ SOURCE DATA */

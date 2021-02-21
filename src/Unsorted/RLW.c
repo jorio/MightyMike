@@ -23,7 +23,7 @@ register unsigned int	runCount,seed;
 
 	srcOriginalPtr = (unsigned int *)NewPtrClear(sourceSize);
 	if (srcOriginalPtr == nil)
-		DoFatalAlert("\pCouldnt allocate memory for RLW pack buffer!");
+		DoFatalAlert("Couldnt allocate memory for RLW pack buffer!");
 	sourcePtr = srcOriginalPtr;
 
 				/* READ SOURCE DATA */

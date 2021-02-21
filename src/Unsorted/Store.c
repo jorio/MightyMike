@@ -79,12 +79,12 @@ ObjNode		*oldFirstNodePtr;
 
 	gStoreDefType = (StoreDefType **)GetResource('StOr',STORE_RES_BASE+gStoreNum);
 	if (gStoreDefType == nil)
-		DoFatalAlert("\pCouldnt Open Store Resource!");
+		DoFatalAlert("Couldnt Open Store Resource!");
 
 
 				/* LOAD STORE SHAPES */
 
-	LoadShapeTable("\p:data:shapes:storedefault.shapes",GROUP_STORE_DEFAULT,DONT_GET_PALETTE);		// defaults
+	LoadShapeTable(":data:shapes:storedefault.shapes",GROUP_STORE_DEFAULT,DONT_GET_PALETTE);		// defaults
 
 
 				/* INIT STORE SPRITES */
@@ -144,25 +144,25 @@ OSErr		iErr;
 	{
 
 		case	SCENE_JURASSIC:
-				iErr = FSOpen("\p:data:images:jurassicStore.image",vRefNum,&fRefNum);		// open file
+				iErr = FSOpen(":data:images:jurassicStore.image",vRefNum,&fRefNum);		// open file
 				break;
 
 		case	SCENE_CANDY:
-				iErr = FSOpen("\p:data:images:candyStore.image",vRefNum,&fRefNum);
+				iErr = FSOpen(":data:images:candyStore.image",vRefNum,&fRefNum);
 				break;
 
 		case	SCENE_CLOWN:
-				iErr = FSOpen("\p:data:images:clownStore.image",vRefNum,&fRefNum);
+				iErr = FSOpen(":data:images:clownStore.image",vRefNum,&fRefNum);
 				break;
 
 		default:
-				iErr = FSOpen("\p:data:images:jurassicStore.image",vRefNum,&fRefNum);
+				iErr = FSOpen(":data:images:jurassicStore.image",vRefNum,&fRefNum);
 	}
 
 	if (iErr != noErr)
 	{
 		ShowSystemErr(iErr);
-		DoFatalAlert("\pCant open Tienda image!");
+		DoFatalAlert("Cant open Tienda image!");
 	}
 
 	SetFPos(fRefNum,fsFromStart,256*sizeof(RGBColor)+8);				// skip palette & pack header
@@ -241,7 +241,7 @@ register	ObjNode		*newObj;
 
 	newObj = MakeNewShape(GroupNum_StoreCursor,ObjType_StoreCursor,0,ITEM_X,ITEM_Y,100,MoveStoreCursor,SCREEN_RELATIVE);
 	if (newObj == nil)
-		DoFatalAlert("\pCannot alloc Store Cursor!");
+		DoFatalAlert("Cannot alloc Store Cursor!");
 
 	newObj->DrawFlag = FALSE;
 	newObj->EraseFlag = FALSE;

@@ -227,7 +227,7 @@ void InitMe(void)
 					gMyX,gMyY,50,MoveMe,PLAYFIELD_RELATIVE);
 
 	if (gMyNodePtr == nil)
-		DoFatalAlert("\pCouldnt init Me!");
+		DoFatalAlert("Couldnt init Me!");
 
 	gMyNodePtr->CType = CTYPE_MYGUY;
 	gMyNodePtr->CBits = CBITS_TOUCHABLE;

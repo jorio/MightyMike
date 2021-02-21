@@ -503,7 +503,7 @@ Ptr		bytePtr,pfPtr;
 
 	gPlayfield = (unsigned short **)AllocPtr(sizeof(short *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
 	if (gPlayfield == nil)
-		DoFatalAlert("\pNewPtr failed trying to get gPlayfield!");
+		DoFatalAlert("NewPtr failed trying to get gPlayfield!");
 	for (i = 0; i < gPlayfieldTileHeight; i++)						// build 1st dimension of matrix
 	{
 		gPlayfield[i]= (unsigned short *)tempPtr;					// set pointer to row
@@ -523,7 +523,7 @@ Ptr		bytePtr,pfPtr;
 	{
 		gAlternateMap = (Byte **)AllocPtr(sizeof(Byte *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
 		if (gPlayfield == nil)
-			DoFatalAlert("\pNewPtr failed trying to get gAlternateMap!");
+			DoFatalAlert("NewPtr failed trying to get gAlternateMap!");
 		for (i = 0; i < gPlayfieldTileHeight; i++)					// build matrix
 		{
 			gAlternateMap[i]= (Byte *)bytePtr;						// set pointer to row
@@ -643,7 +643,7 @@ long	col,itemCol,itemNum,nextCol,prevCol;
 ObjectEntryType *lastPtr;
 
 	if	(gPlayfieldTileWidth > MAX_PLAYFIELD_WIDTH)				// see if bigger than max allowed
-		DoFatalAlert("\pgPlayfieldTileWidth is greater than MAX_PLAYFIELD_WIDTH!");
+		DoFatalAlert("gPlayfieldTileWidth is greater than MAX_PLAYFIELD_WIDTH!");
 
 					/* GET BASIC INFO */
 
@@ -910,7 +910,7 @@ Boolean		flag;
 			{
 				type = itemPtr->type&ITEM_NUM;						// mask out status bits 15..12
 				if (type > MAX_ITEM_NUM)							// error check!
-					DoFatalAlert("\pIllegal Map Item Type!");
+					DoFatalAlert("Illegal Map Item Type!");
 				else
 				{
 					flag = gItemAddPtrs[type](itemPtr);				// call item's ADD routine
@@ -1276,7 +1276,7 @@ Handle		tempHand;
 
 	tempHand = AllocHandle(sizeof(ObjectEntryType *)*MAX_PLAYFIELD_WIDTH);
 	if (tempHand == nil)
-		DoFatalAlert("\pCouldnt alloc memory for gItemLookupTableX");
+		DoFatalAlert("Couldnt alloc memory for gItemLookupTableX");
 	HLockHi(tempHand);
 	gItemLookupTableX = (ObjectEntryType **)*tempHand;
 }

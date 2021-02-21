@@ -138,7 +138,7 @@ short		width,height;
 	gScreenXOffset = ((width-640)/2)&0xfffffff8;			// 8pix align
 	gScreenYOffset = (height-480)/2;
 	if ((gScreenXOffset<0)||(gScreenYOffset<0))
-		DoFatalAlert("\p640*480 Minimum Screen Required!");
+		DoFatalAlert("640*480 Minimum Screen Required!");
 
 	gScreenAddr += (gScreenYOffset*gScreenRowOffset)+gScreenXOffset;	// calc new addr
 
@@ -149,7 +149,7 @@ short		width,height;
 									/* with a window, so other apps will not mess with our */
 									/* animation via update events in the background */
 
-	gGameWindow = NewCWindow(nil, &screenRect, "\p", true, plainDBox,	// make new window to cover screen
+	gGameWindow = NewCWindow(nil, &screenRect, "", true, plainDBox,	// make new window to cover screen
 								 MOVE_TO_FRONT, false, nil);
 
 	WindowToBlack();
@@ -166,15 +166,15 @@ short		width,height;
 					/* MAKE PLAYFIELD BUFFERS */
 
 	if ((gPFBufferHandle = AllocHandle(PF_BUFFER_HEIGHT*PF_BUFFER_WIDTH)) == nil)
-		DoFatalAlert ("\pNo Memory for gPFBufferHandle!");
+		DoFatalAlert ("No Memory for gPFBufferHandle!");
 	HLockHi(gPFBufferHandle);
 
 	if ((gPFBufferCopyHandle = AllocHandle(PF_BUFFER_HEIGHT*PF_BUFFER_WIDTH)) == nil)
-		DoFatalAlert ("\pNo Memory for gPFBufferCopyHandle!");
+		DoFatalAlert ("No Memory for gPFBufferCopyHandle!");
 	HLockHi(gPFBufferCopyHandle);
 
 	if ((gPFMaskBufferHandle = AllocHandle(PF_BUFFER_HEIGHT*PF_BUFFER_WIDTH)) == nil)
-		DoFatalAlert ("\pNo Memory for gPFMaskBufferHandle!");
+		DoFatalAlert ("No Memory for gPFMaskBufferHandle!");
 	HLockHi(gPFMaskBufferHandle);
 
 
@@ -615,7 +615,7 @@ short		i;
 
 	gOffScreenHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 	if	(gOffScreenHandle == nil)
-		DoFatalAlert("\pNot Enough Memory for OffScreen Buffer!");
+		DoFatalAlert("Not Enough Memory for OffScreen Buffer!");
 	HLock(gOffScreenHandle);
 
 
@@ -623,7 +623,7 @@ short		i;
 
 	if ((gBackgroundHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT))	// get mem for background
 			 == nil)
-		DoFatalAlert ("\pNo Memory for Background buffer!");
+		DoFatalAlert ("No Memory for Background buffer!");
 	HLock(gBackgroundHandle);
 
 
@@ -1126,7 +1126,7 @@ Boolean					confirmIt = false;
         /* SEE IF DSP EXISTS */
 
     if ((void *)DSpStartup == (void *)kUnresolvedCFragSymbolAddress)
-		DoFatalAlert("\pYou do not seem to have Draw Sprocket installed.  This game requires Draw Sprocket to function.  To install Apple's Game Sprockets, go to www.pangeasoft.net/downloads.html");
+		DoFatalAlert("You do not seem to have Draw Sprocket installed.  This game requires Draw Sprocket to function.  To install Apple's Game Sprockets, go to www.pangeasoft.net/downloads.html");
 
 
 		/* startup DrawSprocket */
@@ -1134,7 +1134,7 @@ Boolean					confirmIt = false;
 	theError = DSpStartup();
 	if( theError )
 	{
-		DoFatalAlert("\pDSpStartup failed!");
+		DoFatalAlert("DSpStartup failed!");
 	}
 	gLoadedDrawSprocket = true;
 
@@ -1170,14 +1170,14 @@ Boolean					confirmIt = false;
 	theError = DSpFindBestContext( &displayConfig, &gDisplayContext );
 	if (theError)
 	{
-		DoFatalAlert("\pPrepDrawSprockets: DSpFindBestContext failed");
+		DoFatalAlert("PrepDrawSprockets: DSpFindBestContext failed");
 	}
 
 				/* RESERVE IT */
 
 	theError = DSpContext_Reserve( gDisplayContext, &displayConfig );
 	if( theError )
-		DoFatalAlert("\pPrepDrawSprockets: DSpContext_Reserve failed");
+		DoFatalAlert("PrepDrawSprockets: DSpContext_Reserve failed");
 
 
 			/* MAKE STATE ACTIVE */
@@ -1192,7 +1192,7 @@ Boolean					confirmIt = false;
 	{
 		DSpContext_Release( gDisplayContext );
 		gDisplayContext = nil;
-		DoFatalAlert("\pPrepDrawSprockets: DSpContext_SetState failed");
+		DoFatalAlert("PrepDrawSprockets: DSpContext_SetState failed");
 	}
 }
 

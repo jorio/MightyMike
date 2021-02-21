@@ -447,7 +447,7 @@ Rect	box;
 	{
 //#if BETA
 //Str255	errString;		//-----------
-//		DoAlert("\pAttempted to Double Delete an Object.  Object was already deleted!");
+//		DoAlert("Attempted to Double Delete an Object.  Object was already deleted!");
 //		NumToString(theNode->Type,errString);		//------------
 //		DoFatalAlert(errString);					//---------
 //#else

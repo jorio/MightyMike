@@ -160,18 +160,18 @@ static		long	mem,numToRead,decompSize;
 					/*  OPEN THE FILE */
 
 	iErr = GetVol(volName,&vRefNum);					// get default volume
-	OpenMikeFile(fileName,&gSpinfRefNum,"\pCant open SPIN file!");
+	OpenMikeFile(fileName,&gSpinfRefNum,"Cant open SPIN file!");
 
 					/* GET SIZE OF FILE */
 
 	if	(GetEOF(gSpinfRefNum,&gSpinFileSize) != noErr)
-		DoFatalAlert("\pErr SPIN file EOF!");
+		DoFatalAlert("Err SPIN file EOF!");
 
 				/* ALLOC MEMORY FOR THE FILE */
 
 	gSpinFileHandle = AllocHandle(gSpinFileSize);
 	if (gSpinFileHandle == nil)
-		DoFatalAlert("\pSorry, not enough memory to play SPIN file movie!");
+		DoFatalAlert("Sorry, not enough memory to play SPIN file movie!");
 	HLockHi(gSpinFileHandle);
 	gSpinPtr = *gSpinFileHandle;								// set master process pointer
 	gSpinLoadPtr = *gSpinFileHandle;							// set load pointer
@@ -183,7 +183,7 @@ static		long	mem,numToRead,decompSize;
 
 	iErr = FSRead(gSpinfRefNum,&preLoadSize,gSpinLoadPtr);		// read the preLoad amount only
 	if (iErr != noErr)
-		DoFatalAlert("\pCant Read SPIN file!");
+		DoFatalAlert("Cant Read SPIN file!");
 
 	gSpinLoadPtr += preLoadSize;								// set ptr to next load
 	gSpinFileSize -= preLoadSize;								// dec size of remaining data
@@ -214,7 +214,7 @@ OSErr	iErr;
 
 	iErr = FSRead(gSpinfRefNum,&numBytes,gSpinLoadPtr);			// read it
 	if (iErr != noErr)
-		DoFatalAlert("\pCant Continue to Read SPIN file!");
+		DoFatalAlert("Cant Continue to Read SPIN file!");
 
 	gSpinLoadPtr += numBytes;									// set ptr to next load
 	gSpinFileSize -= numBytes;									// dec size of remaining data
@@ -257,7 +257,7 @@ short		*intPtr;
 
 
 		default:
-				DoFatalAlert("\pNot Pointing to valid SPIN Header!");
+				DoFatalAlert("Not Pointing to valid SPIN Header!");
 	}
 
 
@@ -286,7 +286,7 @@ RGBColor	*rgbPtr,rgb;
 short			i;
 
 	if (*gSpinPtr++ != SPIN_COMMAND_PALETTE)			// verify command
-		DoFatalAlert("\pNot Pointing to SPIN palette command!");
+		DoFatalAlert("Not Pointing to SPIN palette command!");
 
 	rgbPtr = (RGBColor *)(gSpinPtr);					// get ptr to palette data
 	for (i=0; i<256; i++)
@@ -320,7 +320,7 @@ Ptr		framePtrBase;
 	srcPtr = gSpinPtr;
 
 	if (*srcPtr++ != SPIN_COMMAND_FRAMEDATA)			// verify command
-		DoFatalAlert("\pNot Pointing to SPIN Frame command!");
+		DoFatalAlert("Not Pointing to SPIN Frame command!");
 
 	longPtr = (long *)srcPtr;
 	longPtr++;											// skip packed size
@@ -330,7 +330,7 @@ Ptr		framePtrBase;
 					/* GET MEMORY FOR FRAME */
 
 	if ((framePtrBase = AllocPtr(frameSize)) == nil)
-		DoFatalAlert ("\pNo Memory for SPIN Frame!");
+		DoFatalAlert ("No Memory for SPIN Frame!");
 	framePtr = framePtrBase;
 
 						/* UNPACK IT */
@@ -498,7 +498,7 @@ static	 unsigned long	temp;
 	srcPtr = gSpinPtr;								// use register for speed
 
 	if (*srcPtr++ != SPIN_COMMAND_FRAMEDATA)			// verify command
-		DoFatalAlert("\pNot Pointing to SPIN Frame command!");
+		DoFatalAlert("Not Pointing to SPIN Frame command!");
 
 	longPtr = (long *)srcPtr;
 	longPtr++;											// skip packed size
@@ -508,7 +508,7 @@ static	 unsigned long	temp;
 					/* GET MEMORY FOR FRAME */
 
 	if ((framePtrBase = AllocPtr(frameSize)) == nil)
-		DoFatalAlert ("\pNo Memory for SPIN Frame!");
+		DoFatalAlert ("No Memory for SPIN Frame!");
 	framePtr = framePtrBase;
 
 						/* UNPACK IT */

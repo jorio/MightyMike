@@ -72,10 +72,10 @@ void InitSoundTools(void)
 {
 OSErr		iErr;
 short	srcFile;
-static Str255	errStr = "\pCouldnt Open Music Resource File.";
+static Str255	errStr = "Couldnt Open Music Resource File.";
 
 
-	srcFile = OpenMikeRezFile("\p:data:audio:music",errStr);	// open music rez file
+	srcFile = OpenMikeRezFile(":data:audio:music",errStr);	// open music rez file
 
 
 	gMaxChannels = 0;
@@ -109,7 +109,7 @@ static Str255	errStr = "\pCouldnt Open Music Resource File.";
 
 void LoadDefaultSounds(void)
 {
-Str255		error = "\pCouldnt Open Sound Resource File.";
+Str255		error = "Couldnt Open Sound Resource File.";
 OSErr		iErr;
 short			i;
 short			srcFile1,srcFile2;
@@ -118,9 +118,9 @@ short			srcFile1,srcFile2;
 
 						/* OPEN SOUNDS RESOURCE */
 
-	srcFile1 = OpenMikeRezFile("\p:data:audio:general.sounds",error);	// open sound resource fork
+	srcFile1 = OpenMikeRezFile(":data:audio:general.sounds",error);	// open sound resource fork
 	UseResFile( srcFile1 );
-	srcFile2 = OpenMikeRezFile("\p:data:audio:weapon.sounds",error);
+	srcFile2 = OpenMikeRezFile(":data:audio:weapon.sounds",error);
 	UseResFile( srcFile2 );
 
 					/* LOAD ALL EFFECTS */
@@ -130,7 +130,7 @@ short			srcFile1,srcFile2;
 
 		EffectHandles[i] = GetResource('snd ',BASE_EFFECT_RESOURCE+i);
 		if (EffectHandles[i] == nil)
-			DoFatalAlert("\pCouldnt find sound resource.");
+			DoFatalAlert("Couldnt find sound resource.");
 		DetachResource(EffectHandles[i]);							// detach resource from rez file & make a normal Handle
 		if ( iErr = ResError() )
 			ShowSystemErr(iErr);
@@ -275,7 +275,7 @@ void PlaySong(short songNum)
 {
 short	srcFile;
 OSErr 		iErr;
-static Str255	errStr = "\pCouldnt Open Music Resource File.";
+static Str255	errStr = "Couldnt Open Music Resource File.";
 
 	KillSong();											// see if zap existing song
 	MaxMem(&someLong);									// clean up
@@ -283,13 +283,13 @@ static Str255	errStr = "\pCouldnt Open Music Resource File.";
 
 						/* OPEN MUSIC RESOURCE */
 
-	srcFile = OpenMikeRezFile("\p:data:audio:music",errStr);
+	srcFile = OpenMikeRezFile(":data:audio:music",errStr);
 	UseResFile( srcFile );
 
 	SoundHand_Music = GetResource('snd ',songNum);		// load the song
 	if (SoundHand_Music == nil)
 		return;						// (if err, just don't play anything)
-//		DoFatalAlert("\pCouldnt find Music Resource.");
+//		DoFatalAlert("Couldnt find Music Resource.");
 	DetachResource(SoundHand_Music);					// detach resource from rez file & make a normal Handle
 	if ( iErr = ResError() )
 		ShowSystemErr(iErr);
@@ -337,7 +337,7 @@ OSErr	myErr;
 		return(-1);
 
 	if (soundNum >= gNumEffectsLoaded)					// see if illegal sound #
-		DoFatalAlert("\pIllegal sound number!");
+		DoFatalAlert("Illegal sound number!");
 
 	for (theChan=gMusicOnFlag; theChan < gMaxChannels; theChan++)
 	{
@@ -511,14 +511,14 @@ short			srcFile;
 
 						/* OPEN SOUNDS RESOURCE */
 
-	srcFile = OpenMikeRezFile(rezFile,"\pCouldnt Open a Sound Resource File.");	// open sound resource fork
+	srcFile = OpenMikeRezFile(rezFile,"Couldnt Open a Sound Resource File.");	// open sound resource fork
 	UseResFile( srcFile );
 
 					/* LOAD IT */
 
 	AddedHandles[gNumAddedSounds] = EffectHandles[gNumEffectsLoaded] = GetResource('snd ',rezNum);
 	if (AddedHandles[gNumAddedSounds] == nil)
-		DoFatalAlert("\pCouldnt find sound resource.");
+		DoFatalAlert("Couldnt find sound resource.");
 	DetachResource(AddedHandles[gNumAddedSounds]);
 	HNoPurge(EffectHandles[gNumEffectsLoaded]);					// make non-purgeable
 	HLockHi(EffectHandles[gNumEffectsLoaded]);
@@ -585,11 +585,11 @@ void PlayAreaMusic(void)
 
 void LoadAreaSound(void)
 {
-static Str255	jurassic = "\p:data:audio:jurassic.sounds";
-static Str255	candy = "\p:data:audio:candy.sounds";
-static Str255	clown = "\p:data:audio:clown.sounds";
-static Str255	fairy = "\p:data:audio:fairy.sounds";
-static Str255	bargain = "\p:data:audio:bargain.sounds";
+static Str255	jurassic = ":data:audio:jurassic.sounds";
+static Str255	candy = ":data:audio:candy.sounds";
+static Str255	clown = ":data:audio:clown.sounds";
+static Str255	fairy = ":data:audio:fairy.sounds";
+static Str255	bargain = ":data:audio:bargain.sounds";
 
 	switch(gSceneNum)
 	{

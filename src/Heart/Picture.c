@@ -239,9 +239,9 @@ RGBColor		*rgbPtr,rgb;
 	GetVol(nil,&vRefNum);									// get default volume
 
 	if (gPPCFullScreenFlag)
-		OpenMikeFile("\p:data:images:border2.image",&fRefNum,"\pCant open Border Image!");
+		OpenMikeFile(":data:images:border2.image",&fRefNum,"Cant open Border Image!");
 	else
-		OpenMikeFile("\p:data:images:border.image",&fRefNum,"\pCant open Border Image!");
+		OpenMikeFile(":data:images:border.image",&fRefNum,"Cant open Border Image!");
 
 					/* READ & SET THE PALETTE */
 

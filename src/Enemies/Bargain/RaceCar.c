@@ -404,7 +404,7 @@ TileAttribType	*newTile;
 
 	newTile = GetFullMapTileAttribs(newObj->BaseX,newObj->BaseY);	// use attribs to determine start
 	if (!newTile->bits&TILE_ATTRIB_TRACK)
-		DoAlert("\pA RaceCar is not starting on a valid track piece! - fix it!");
+		DoAlert("A RaceCar is not starting on a valid track piece! - fix it!");
 
 	newObj->CurrentTrack = newTile->parm0;					// set track piece #
 	SwitchAnim(newObj,gTrackSegments[newObj->CurrentTrack].carAim);	// get aim

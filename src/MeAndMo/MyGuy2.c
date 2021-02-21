@@ -81,7 +81,7 @@ void TurnMeIntoFrog(void)
 					gRealMePtr->X.Int,gRealMePtr->Y.Int,gRealMePtr->Z,MoveMeFrog,
 					PLAYFIELD_RELATIVE);
 	if (gMyNodePtr == nil)
-		DoFatalAlert("\pCouldnt init Frog!");
+		DoFatalAlert("Couldnt init Frog!");
 
 	gMyNodePtr->TopOff = gRealMePtr->TopOff;		// set box
 	gMyNodePtr->BottomOff = gRealMePtr->BottomOff;

@@ -217,7 +217,7 @@ short		matchNum,i;
 	}
 okay:
 	if (!gTeleportingFlag)											// see if nothing was found
-		DoAlert("\pNo destination for teleporter was found.");
+		DoAlert("No destination for teleporter was found.");
 
 	return(false);
 }

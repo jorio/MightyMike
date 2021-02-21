@@ -86,11 +86,11 @@ Byte		gCurrentPlayer;
 
 static	PlayerSaveType	gPlayerSaveData[2];
 
-static	Str255		p1name = "\p:MightyMike:PeteP1Swap.data";
-static	Str255 		p2name = "\p:MightyMike:PeteP2Swap.data";
+static	Str255		p1name = ":MightyMike:PeteP1Swap.data";
+static	Str255 		p2name = ":MightyMike:PeteP2Swap.data";
 
-static	Str255		gSaveName = "\p:MightyMike:PowerPeteSavedGameData0";
-static	Str255		gSaveName2x = "\p:MightyMike:PowerPeteSavedGameData2x00";
+static	Str255		gSaveName = ":MightyMike:PowerPeteSavedGameData0";
+static	Str255		gSaveName2x = ":MightyMike:PowerPeteSavedGameData2x00";
 short		gLoadOldGameNum;
 Boolean		gLoadOldGameFlag;
 
@@ -176,12 +176,12 @@ void InitGame(void)
 				/* LOAD ART WHICH IS ALWAYS WITH US */
 
 	if (gPPCFullScreenFlag)
-		LoadShapeTable("\p:data:shapes:infobar2.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
+		LoadShapeTable(":data:shapes:infobar2.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
 	else
-		LoadShapeTable("\p:data:shapes:infobar.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
+		LoadShapeTable(":data:shapes:infobar.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
 
-	LoadShapeTable("\p:data:shapes:weapon.shapes",GROUP_WEAPONS,DONT_GET_PALETTE);
-	LoadShapeTable("\p:data:shapes:main.shapes",GROUP_MAIN,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:weapon.shapes",GROUP_WEAPONS,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:main.shapes",GROUP_MAIN,DONT_GET_PALETTE);
 }
 
 
@@ -248,110 +248,110 @@ void LoadAreaArt(void)
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
-				LoadTileSet("\p:data:maps:Jurassic.tileset");
+				LoadTileSet(":data:maps:Jurassic.tileset");
 				FillThermometer(20);
-				LoadShapeTable("\p:data:shapes:jurassic1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:jurassic1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable("\p:data:shapes:jurassic2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:jurassic2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield("\p:data:maps:Jurassic.map-1");
+						LoadPlayfield(":data:maps:Jurassic.map-1");
 						break;
 					case 1:
-						LoadPlayfield("\p:data:maps:Jurassic.map-2");
+						LoadPlayfield(":data:maps:Jurassic.map-2");
 						break;
 					case 2:
-						LoadPlayfield("\p:data:maps:Jurassic.map-3");
+						LoadPlayfield(":data:maps:Jurassic.map-3");
 						break;
 				}
 				FillThermometer(80);
 				break;
 
 		case	SCENE_CANDY:
-				LoadTileSet("\p:data:maps:Candy.tileset");
+				LoadTileSet(":data:maps:Candy.tileset");
 				FillThermometer(20);
-				LoadShapeTable("\p:data:shapes:Candy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:Candy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable("\p:data:shapes:Candy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:Candy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield("\p:data:maps:Candy.map-1");
+						LoadPlayfield(":data:maps:Candy.map-1");
 						break;
 					case 1:
-						LoadPlayfield("\p:data:maps:Candy.map-2");
+						LoadPlayfield(":data:maps:Candy.map-2");
 						break;
 					case 2:
-						LoadPlayfield("\p:data:maps:Candy.map-3");
+						LoadPlayfield(":data:maps:Candy.map-3");
 						break;
 				}
 				FillThermometer(80);
 				break;
 
 		case	SCENE_CLOWN:
-				LoadTileSet("\p:data:maps:Clown.tileset");
+				LoadTileSet(":data:maps:Clown.tileset");
 				FillThermometer(20);
-				LoadShapeTable("\p:data:shapes:clown1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:clown1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable("\p:data:shapes:clown2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:clown2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield("\p:data:maps:Clown.map-1");
+						LoadPlayfield(":data:maps:Clown.map-1");
 						break;
 					case 1:
-						LoadPlayfield("\p:data:maps:Clown.map-2");
+						LoadPlayfield(":data:maps:Clown.map-2");
 						break;
 					case 2:
-						LoadPlayfield("\p:data:maps:Clown.map-3");
+						LoadPlayfield(":data:maps:Clown.map-3");
 						break;
 				}
 				FillThermometer(80);
 				break;
 
 		case	SCENE_FAIRY:
-				LoadTileSet("\p:data:maps:fairy.tileset");
+				LoadTileSet(":data:maps:fairy.tileset");
 				FillThermometer(20);
-				LoadShapeTable("\p:data:shapes:fairy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:fairy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable("\p:data:shapes:fairy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:fairy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield("\p:data:maps:fairy.map-1");
+						LoadPlayfield(":data:maps:fairy.map-1");
 						break;
 					case 1:
-						LoadPlayfield("\p:data:maps:fairy.map-2");
+						LoadPlayfield(":data:maps:fairy.map-2");
 						break;
 					case 2:
-						LoadPlayfield("\p:data:maps:fairy.map-3");
+						LoadPlayfield(":data:maps:fairy.map-3");
 						break;
 				}
 				FillThermometer(80);
   				break;
 
 		case	SCENE_BARGAIN:
-				LoadTileSet("\p:data:maps:bargain.tileset");
+				LoadTileSet(":data:maps:bargain.tileset");
 				FillThermometer(20);
-				LoadShapeTable("\p:data:shapes:bargain1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:bargain1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable("\p:data:shapes:bargain2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":data:shapes:bargain2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield("\p:data:maps:bargain.map-1");
+						LoadPlayfield(":data:maps:bargain.map-1");
 						break;
 					case 1:
-						LoadPlayfield("\p:data:maps:bargain.map-2");
+						LoadPlayfield(":data:maps:bargain.map-2");
 						break;
 					case 2:
-						LoadPlayfield("\p:data:maps:bargain.map-3");
+						LoadPlayfield(":data:maps:bargain.map-3");
 						break;
 				}
 				FillThermometer(80);
@@ -469,14 +469,14 @@ FSSpec		mySpec;
 
 	iErr = FSpCreate(&mySpec,'MMik','sAve',-1);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Create Player Save File.  Disk may be locked or full.");
+		DoFatalAlert("Cannot Create Player Save File.  Disk may be locked or full.");
 
 
 				/*  OPEN THE FILE */
 
 	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Open Player Save File.");
+		DoFatalAlert("Cannot Open Player Save File.");
 
 				/******************/
 				/* WRITE THE DATA */
@@ -485,32 +485,32 @@ FSSpec		mySpec;
 	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
 	iErr = FSWrite(fRefNum,&numBytes,gMyWeapons);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Write to Player Save File.  Disk may be locked or full.");
+		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 														// WRITE OBJECT LIST
 	numBytes = sizeof(ObjNode)*MAX_OBJECTS;
 	iErr = FSWrite(fRefNum,&numBytes,ObjectList);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Write to Player Save File.  Disk may be locked or full.");
+		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 														// WRITE FREE NODE STACK
 	numBytes = sizeof(ObjNode *)*MAX_OBJECTS;
 	iErr = FSWrite(fRefNum,&numBytes,&FreeNodeStack[0]);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Write to Player Save File.  Disk may be locked or full.");
+		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 														// WRITE MASTER ITEM LIST
 	numBytes = sizeof(ObjectEntryType)*gNumItems;
 	iErr = FSWrite(fRefNum,&numBytes,gMasterItemList);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Write to Player Save File.  Disk may be locked or full.");
+		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 
 			/*  CLOSE THE FILE */
 
 	iErr = FSClose(fRefNum);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Close Player Save File.  Disk may be locked or full.");
+		DoFatalAlert("Cannot Close Player Save File.  Disk may be locked or full.");
 
 
 				/* SAVE MISC SMALL STUFF */
@@ -599,7 +599,7 @@ FSSpec		mySpec;
 
 	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Open Player Save File.");
+		DoFatalAlert("Cannot Open Player Save File.");
 
 					/*****************/
 					/* READ THE DATA */
@@ -609,7 +609,7 @@ FSSpec		mySpec;
 	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
 	iErr = FSRead(fRefNum,&numBytes,gMyWeapons);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Read Player Save File.");
+		DoFatalAlert("Cannot Read Player Save File.");
 
 	if (!minimal)
 	{
@@ -620,19 +620,19 @@ FSSpec		mySpec;
 			numBytes = sizeof(ObjNode)*MAX_OBJECTS;
 			iErr = FSRead(fRefNum,&numBytes,ObjectList);
 			if (iErr != noErr)
-				DoFatalAlert("\pError Reading from Player Save File.");
+				DoFatalAlert("Error Reading from Player Save File.");
 
 																// READ FREE NODE STACK
 			numBytes = sizeof(ObjNode *)*MAX_OBJECTS;
 			iErr = FSRead(fRefNum,&numBytes,FreeNodeStack);
 			if (iErr != noErr)
-				DoFatalAlert("\pError Reading from Player Save File.");
+				DoFatalAlert("Error Reading from Player Save File.");
 
 																// READ MASTER ITEM LIST
 			numBytes = sizeof(ObjectEntryType)*gNumItems;
 			iErr = FSRead(fRefNum,&numBytes,gMasterItemList);
 			if (iErr != noErr)
-				DoFatalAlert("\pError Reading from Player Save File.");
+				DoFatalAlert("Error Reading from Player Save File.");
 
 
 						/* LOAD MISC SMALL STUFF */
@@ -654,7 +654,7 @@ FSSpec		mySpec;
 
 	iErr = FSClose(fRefNum);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Close Player Save File.");
+		DoFatalAlert("Cannot Close Player Save File.");
 
 
 			/* LOAD STANDARD INFO (stuff that always gets restored) */
@@ -813,7 +813,7 @@ OSErr		iErr;
 short		fRefNum;
 long		numBytes;
 FSSpec		mySpec;
-Str255		fullErr = "\pCannot Write to Player Save File.  Disk may be locked or full.";
+Str255		fullErr = "Cannot Write to Player Save File.  Disk may be locked or full.";
 Byte		scene,area;
 
 
@@ -862,7 +862,7 @@ Byte		scene,area;
 	iErr = FSpCreate(&mySpec,'MMik','sav2',-1);
 	if (iErr != noErr)
 	{
-		DoAlert("\pCannot Create Player Save File.  Disk may be locked or full.");
+		DoAlert("Cannot Create Player Save File.  Disk may be locked or full.");
 		return;
 	}
 
@@ -870,7 +870,7 @@ Byte		scene,area;
 
 	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot Open Player Save File.");
+		DoFatalAlert("Cannot Open Player Save File.");
 
 
 				/******************/
@@ -934,7 +934,7 @@ Byte		scene,area;
 
 	iErr = FSClose(fRefNum);
 	if (iErr != noErr)
-		DoAlert("\pCannot Close Player Save File.  Disk may be locked or full.");
+		DoAlert("Cannot Close Player Save File.  Disk may be locked or full.");
 }
 
 
@@ -947,7 +947,7 @@ OSErr		iErr;
 short		fRefNum;
 long		numBytes;
 FSSpec		mySpec;
-Str255		errStr	= "\pCannot Read Player Save File.";
+Str255		errStr	= "Cannot Read Player Save File.";
 
 	InitKeys();
 
@@ -1038,7 +1038,7 @@ Str255		errStr	= "\pCannot Read Player Save File.";
 
 	iErr = FSClose(fRefNum);
 	if (iErr != noErr)
-		DoAlert("\pCannot Close Player Save File.");
+		DoAlert("Cannot Close Player Save File.");
 
 	gIsASavedGame[gCurrentPlayer] = true;					// it exists
 
@@ -1352,7 +1352,7 @@ long	*longPtr;
 
 	hRsrc = GetResource('Pref',1000);					// read the resource
 	if (ResError())
-		DoFatalAlert("\pError reading Pref rez!");
+		DoFatalAlert("Error reading Pref rez!");
 
 	HLock(hRsrc);
 	longPtr = (long *)*hRsrc;
@@ -1374,7 +1374,7 @@ OSErr		iErr;
 
 	resHandle = GetResource('Pref',1000);					// get it
 	if (resHandle == nil)
-		DoFatalAlert("\pError reading Pref rez!");
+		DoFatalAlert("Error reading Pref rez!");
 
 	HLock(resHandle);
 	longPtr = (long *)*resHandle;
@@ -1385,7 +1385,7 @@ OSErr		iErr;
 	WriteResource( resHandle );								// update it
 	if (iErr = ResError())
 	{
-		DoAlert("\pCouldnt Update Preferences Resource!  Do not run application off of CD-ROM!");
+		DoAlert("Couldnt Update Preferences Resource!  Do not run application off of CD-ROM!");
 		ShowSystemErr(iErr);
 	}
 	ReleaseResource(resHandle);								// nuke resource

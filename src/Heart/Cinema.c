@@ -144,10 +144,10 @@ re_enter:
 					/* INITIAL LOADING */
 
 	InitObjectManager();
-	LoadShapeTable("\p:data:shapes:title.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
+	LoadShapeTable(":data:shapes:title.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadBackground("\p:data:images:titlepage.image",GET_PALETTE);
+	LoadBackground(":data:images:titlepage.image",GET_PALETTE);
 	DumpBackground();
 
 
@@ -430,23 +430,23 @@ void DoSceneScreen(void)
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
-			LoadIMAGE("\p:data:images:dinoscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:dinoscene.image",SHOW_IMAGE_MODE_FADEIN);
 			break;
 
 		case	SCENE_CANDY:
-			LoadIMAGE("\p:data:images:candyscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:candyscene.image",SHOW_IMAGE_MODE_FADEIN);
 			break;
 
 		case	SCENE_CLOWN:
-			LoadIMAGE("\p:data:images:clownscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:clownscene.image",SHOW_IMAGE_MODE_FADEIN);
 			break;
 
 		case	SCENE_FAIRY:
-			LoadIMAGE("\p:data:images:fairyscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:fairyscene.image",SHOW_IMAGE_MODE_FADEIN);
 			break;
 
 		case	SCENE_BARGAIN:
-			LoadIMAGE("\p:data:images:bargainscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:bargainscene.image",SHOW_IMAGE_MODE_FADEIN);
 			break;
 
 	}
@@ -507,8 +507,8 @@ void	DisplayScores(void)
 short		i;
 
 	EraseCLUT();
-	LoadShapeTable("\p:data:shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
-	LoadBackground("\p:data:images:scores.image",GET_PALETTE);
+	LoadShapeTable(":data:shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
+	LoadBackground(":data:images:scores.image",GET_PALETTE);
 	DumpBackground();							// dump to playfield
 	DumpGameWindow();									// show the whole thing
 
@@ -584,7 +584,7 @@ gotit:
 void ShowLastScore(void)
 {
 
-	LoadShapeTable("\p:data:shapes:highscore.shapes",GROUP_WIN,GET_PALETTE);
+	LoadShapeTable(":data:shapes:highscore.shapes",GROUP_WIN,GET_PALETTE);
 	EraseBackgroundBuffer();
 
 	EraseCLUT();
@@ -596,7 +596,7 @@ void ShowLastScore(void)
 
 	gHtab = VISIBLE_WIDTH/2-50;
 	gVtab = 480/2-50;
-	WriteLn((char *)"\pSCORE");
+	WriteLn((char *)"SCORE");
 
 	gHtab = 250;
 	gVtab = 480/2;
@@ -638,7 +638,7 @@ ObjNode		*nameObj;
 		theChar = CheckKey();
 		EraseObjects();
 
-		if (theChar == '½')								// ½ is the null key mark
+		if (theChar == 'ï¿½')								// ï¿½ is the null key mark
 			goto nokey;
 
 		if (theChar == CHAR_RETURN)						// see if done
@@ -717,7 +717,7 @@ OSErr		iErr;
 	WriteResource( resHandle );								// update it
 	if (iErr = ResError() )
 	{
-		DoAlert("\pCouldnt Update Score Resource!");
+		DoAlert("Couldnt Update Score Resource!");
 		ShowSystemErr(iErr);
 	}
 	ReleaseResource(resHandle);								// nuke resource
@@ -732,7 +732,7 @@ OSErr		iErr;
 	WriteResource( resHandle );								// update it
 	if (iErr = ResError() )
 	{
-		DoAlert("\pCouldnt Update Score Resource!");
+		DoAlert("Couldnt Update Score Resource!");
 		ShowSystemErr(iErr);
 	}
 	ReleaseResource(resHandle);								// nuke resource
@@ -750,7 +750,7 @@ long	size;
 
 	hRsrc = GetResource('sKor',1000);				// read the resource
 	if (ResError() || (hRsrc == nil))
-		DoFatalAlert("\pError reading Scores Resource!");
+		DoFatalAlert("Error reading Scores Resource!");
 
 	size = (sizeof(long)*MAX_HIGH_SCORES);			// get its size
 	BlockMove(*hRsrc,&HighScoreList,size);			// copy into data array
@@ -761,7 +761,7 @@ long	size;
 
 	hRsrc = GetResource('sKor',1001);				// read the resource
 	if (ResError())
-		DoFatalAlert("\pError reading Scores Resource!");
+		DoFatalAlert("Error reading Scores Resource!");
 
 	size = MAX_HIGH_SCORES*(MAX_NAME_LENGTH+1);		// get its size
 	BlockMove(*hRsrc,&HighScoreNames,size);			// copy into data array
@@ -774,7 +774,7 @@ long	size;
 void DoPangeaLogo(void)
 {
 	EraseCLUT();
-	PreLoadSpinFile("\p:data:movies:pangea.spin",DEFAULT_SPIN_PRELOAD_SIZE);	// load the file
+	PreLoadSpinFile(":data:movies:pangea.spin",DEFAULT_SPIN_PRELOAD_SIZE);	// load the file
 	PlaySong(SONG_ID_PANGEA);
 
 	PlaySpinFile(60*5);
@@ -787,7 +787,7 @@ void DoPangeaLogo(void)
 void DoLegal(void)
 {
 	EraseCLUT();
-	LoadIMAGE("\p:data:images:legal.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:legal.image",SHOW_IMAGE_MODE_FADEIN);
 	Wait2(60*6);
 	FadeOutGameCLUT();
 }
@@ -805,10 +805,10 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 					/* INITIAL LOADING */
 
 	InitObjectManager();
-	LoadShapeTable("\p:data:shapes:playerchoose.shapes",GROUP_OVERHEAD,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:playerchoose.shapes",GROUP_OVERHEAD,DONT_GET_PALETTE);
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadBackground("\p:data:images:playerchoose.image",GET_PALETTE);
+	LoadBackground(":data:images:playerchoose.image",GET_PALETTE);
 	DumpBackground();										// dump to playfield
 
 
@@ -817,12 +817,12 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 	batteryObj = MakeNewShape(GroupNum_PCBattery,ObjType_PCBattery,0,BATTERY_X1,BATTERY_Y,
 						100,nil,SCREEN_RELATIVE);
 	if (batteryObj == nil)
-		DoFatalAlert("\pErr: Alloc Battery Cursor");
+		DoFatalAlert("Err: Alloc Battery Cursor");
 
 	batteryObj2 = MakeNewShape(GroupNum_PCBattery,ObjType_PCBattery,0,BATTERY_X3,BATTERY_Y,
 						100,nil,SCREEN_RELATIVE);
 	if (batteryObj2 == nil)
-		DoFatalAlert("\pErr: Alloc Battery Cursor #2");
+		DoFatalAlert("Err: Alloc Battery Cursor #2");
 	batteryObj2->DrawFlag = false;
 
 	gCursorSelection = 0;								// start cursor on 1st item
@@ -989,14 +989,14 @@ ObjNode	*theNode;
 	FadeOutGameCLUT();
 	PlaySong(SONG_ID_RACE);
 	InitObjectManager();
-	LoadShapeTable("\p:data:shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
 	EraseBackgroundBuffer();
-	LoadBackground("\p:data:images:credits1.image",GET_PALETTE);
+	LoadBackground(":data:images:credits1.image",GET_PALETTE);
 	DumpBackground();											// dump to playfield
 
 	textRez = GetResource('Cred',128);							// load credits rez
 	if (textRez == nil)
-		DoFatalAlert("\pNo Credits Rez!");
+		DoFatalAlert("No Credits Rez!");
 	DetachResource(textRez);
 	HLock(textRez);
 	textPtr = *textRez;											// get ptr to text string
@@ -1200,21 +1200,21 @@ short	counter,i;
 					/* INITIAL LOADING */
 
 	InitObjectManager();
-	LoadShapeTable("\p:data:shapes:overheadmap.shapes",GROUP_OVERHEAD,DONT_GET_PALETTE);	// load graphix & palette
+	LoadShapeTable(":data:shapes:overheadmap.shapes",GROUP_OVERHEAD,DONT_GET_PALETTE);	// load graphix & palette
 	EraseCLUT();
 	EraseBackgroundBuffer();
 
 	switch(gDifficultySetting)
 	{
 //		case	DIFFICULTY_NORMAL:
-//				LoadBackground("\p:data:images:overheadmap3.image",GET_PALETTE);
+//				LoadBackground(":data:images:overheadmap3.image",GET_PALETTE);
 //				break;
 		case	DIFFICULTY_EASY:
-				LoadBackground("\p:data:images:overheadmap2.image",GET_PALETTE);
+				LoadBackground(":data:images:overheadmap2.image",GET_PALETTE);
 				break;
 		case	DIFFICULTY_NORMAL:
 		case	DIFFICULTY_HARD:
-				LoadBackground("\p:data:images:overheadmap.image",GET_PALETTE);
+				LoadBackground(":data:images:overheadmap.image",GET_PALETTE);
 				break;
 	}
 
@@ -1339,7 +1339,7 @@ short	counter,i;
 
 void DoNeedToRegisterScreen(void)
 {
-	LoadIMAGE("\p:data:images:register.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:register.image",SHOW_IMAGE_MODE_FADEIN);
 
 	do
 	{
@@ -1370,7 +1370,7 @@ void DoLoseScreen(void)
 					/* INITIAL LOADING */
 
 	PlaySong(SONG_ID_LOSEGAME);
-	LoadIMAGE("\p:data:images:lose.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:lose.image",SHOW_IMAGE_MODE_FADEIN);
 	WaitWhileMusic();
 	StopMusic();
 }
@@ -1402,9 +1402,9 @@ ObjNode	*newObj;
 
 
 	PlaySong(SONG_ID_WINGAME);
-	LoadShapeTable("\p:data:shapes:win.shapes",GROUP_WIN,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:win.shapes",GROUP_WIN,DONT_GET_PALETTE);
 	EraseBackgroundBuffer();
-	LoadBackground("\p:data:images:win.image",GET_PALETTE);
+	LoadBackground(":data:images:win.image",GET_PALETTE);
 	DumpBackground();
 
 						/* LETS DO IT */
@@ -1498,9 +1498,9 @@ ObjNode	*theNode;
 		PlaySong(SONG_ID_WINHUM);
 	else
 		PlaySong(SONG_ID_WINGAMELOOP);
-	LoadShapeTable("\p:data:shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
 	EraseBackgroundBuffer();
-	LoadBackground("\p:data:images:winbw.image",GET_PALETTE);
+	LoadBackground(":data:images:winbw.image",GET_PALETTE);
 	DumpBackground();											// dump to playfield
 
 	if (gDifficultySetting == DIFFICULTY_EASY)
@@ -1513,7 +1513,7 @@ ObjNode	*theNode;
 		textRez = GetResource('Cred',131);
 
 	if (textRez == nil)
-		DoFatalAlert("\pNo WinText Rez!");
+		DoFatalAlert("No WinText Rez!");
 	DetachResource(textRez);
 	HLock(textRez);
 	textPtr = *textRez;											// get ptr to text string
@@ -1619,8 +1619,8 @@ static	short	xCoords[] = {105,319,540};
 	FadeOutGameCLUT();
 	InitObjectManager();
 	EraseBackgroundBuffer();
-	LoadShapeTable("\p:data:shapes:difficulty.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
-	LoadBackground("\p:data:images:diff.image",GET_PALETTE);
+	LoadShapeTable(":data:shapes:difficulty.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
+	LoadBackground(":data:images:diff.image",GET_PALETTE);
 	DumpBackground();
 
 	mode = gDifficultySetting;
@@ -1729,8 +1729,8 @@ ObjNode	*newObj;
 	InitObjectManager();
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadShapeTable("\p:data:shapes:view.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
-	LoadBackground("\p:data:images:head.image",GET_PALETTE);
+	LoadShapeTable(":data:shapes:view.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
+	LoadBackground(":data:images:head.image",GET_PALETTE);
 	DumpBackground();
 
 
@@ -1815,11 +1815,11 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 	ZapShapeTable(GROUP_AREA_SPECIFIC2);
 
 	InitObjectManager();
-	LoadShapeTable("\p:data:shapes:bonus.shapes",GROUP_BONUS,DONT_GET_PALETTE);
+	LoadShapeTable(":data:shapes:bonus.shapes",GROUP_BONUS,DONT_GET_PALETTE);
 	EraseCLUT();
 
 	BlankEntireScreenArea();
-	LoadIMAGE("\p:data:images:bonus.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:bonus.image",SHOW_IMAGE_MODE_FADEIN);
 
 	if (gMusicOnFlag)
 	{

@@ -19,7 +19,7 @@
 
 #define 	REMOVE_ALL_EVENTS	0
 #define		MOVE_TO_FRONT		(WindowPtr)-1L
-#define		NIL_STRING			"\p"
+#define		NIL_STRING			""
 
 #define	GET_PALETTE			true
 #define	DONT_GET_PALETTE	false

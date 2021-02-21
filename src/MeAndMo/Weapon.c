@@ -218,7 +218,7 @@ Byte	i;
 		MakeMikeMessage(MESSAGE_NUM_NICEGUY);
 
 	if (gNumWeaponsIHave >= MAX_WEAPONS)							// see if can add anything
-		DoFatalAlert("\pWeapon inventory Overload!  Call Brian!");
+		DoFatalAlert("Weapon inventory Overload!  Call Brian!");
 
 
 				/* SEE IF ADD TO LIFE */

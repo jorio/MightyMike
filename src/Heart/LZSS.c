@@ -34,13 +34,13 @@ long			decompSize;
 
 	text_buf = (unsigned char *)AllocPtr(sizeof(unsigned char) * (RING_BUFF_SIZE + UPPER_LIM - 1));
 	if (text_buf == nil)
-		DoFatalAlert("\pCouldnt alloc memory for ZS buffer!");
+		DoFatalAlert("Couldnt alloc memory for ZS buffer!");
 
 				/* GET MEMORY FOR LZSS DATA */
 
 	srcOriginalPtr = AllocPtr(sourceSize);
 	if (srcOriginalPtr == nil)
-		DoFatalAlert("\pCouldnt allocate memory for pack buffer!");
+		DoFatalAlert("Couldnt allocate memory for pack buffer!");
 	sourcePtr = (unsigned char *)srcOriginalPtr;
 
 				/* READ LZSS DATA */

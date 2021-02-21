@@ -117,8 +117,8 @@ static	unsigned long seed0 = 0, seed1 = 0, seed2 = 0;
 long		gOriginalSystemVolume = 200;
 long		gOriginalSystemVolumeFudge;
 
-static	Str255		gBasePathName = "\pMightyMike";
-static	Str255		gMemoryErr = "\pTry increasing the applications memory size by selecting Get Info from the finder.";
+static	Str255		gBasePathName = "MightyMike";
+static	Str255		gMemoryErr = "Try increasing the applications memory size by selecting Get Info from the finder.";
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
@@ -398,7 +398,7 @@ short		depth;
 				ShowSystemErr(myErr);
 		}
 		else
-			DoFatalAlert("\pMonitor cannot be set to 256 colors.  Requires 256 colors to run.");
+			DoFatalAlert("Monitor cannot be set to 256 colors.  Requires 256 colors to run.");
 	}
 }
 
@@ -420,7 +420,7 @@ GDHandle gdh;
 		SetDepth(gdh,8,1,1);				// set to 256 color
 	}
 	else
-		DoFatalAlert("\pScreen CLUT cannot be set the way I want?!  Launch me again.");
+		DoFatalAlert("Screen CLUT cannot be set the way I want?!  Launch me again.");
 
 }
 
@@ -444,12 +444,12 @@ long	numToRead,decompSize;
 
 					/*  OPEN THE FILE */
 
-	OpenMikeFile(fileName,&fRefNum,"\pCant open Packed file!");
+	OpenMikeFile(fileName,&fRefNum,"Cant open Packed file!");
 
 					/* GET SIZE OF FILE */
 
 	if	(GetEOF(fRefNum,&fileSize) != noErr)
-		DoFatalAlert("\pErr Packed file EOF!");
+		DoFatalAlert("Err Packed file EOF!");
 	fileSizeCopy = fileSize;							// remember size
 
 					/*	READ DECOMP SIZE */
@@ -457,7 +457,7 @@ long	numToRead,decompSize;
 	numToRead = 4;
 	iErr = FSRead(fRefNum,&numToRead,&decompSize);			// read 4 byte length
 	if (iErr != noErr)
-		DoFatalAlert ("\pError reading Packed data!");
+		DoFatalAlert ("Error reading Packed data!");
 	fileSize -= numToRead;
 
 					/*	READ DECOMP TYPE */
@@ -465,7 +465,7 @@ long	numToRead,decompSize;
 	numToRead = 4;
 	iErr = FSRead(fRefNum,&numToRead,&decompType);			// read compression type
 	if (iErr != noErr)
-		DoFatalAlert ("\pError reading Packed data Header!");
+		DoFatalAlert ("Error reading Packed data Header!");
 	fileSize -= numToRead;
 
 					/* GET MEMORY FOR UNPACKED DATA */
@@ -474,7 +474,7 @@ long	numToRead,decompSize;
 	if (dataHand == nil)
 	{
 		DoAlert (fileName);		//-----------
-		DoFatalAlert2 ("\pNo Memory for Unpacked Data!",gMemoryErr);
+		DoFatalAlert2 ("No Memory for Unpacked Data!",gMemoryErr);
 	}
 	HLockHi(dataHand);
 
@@ -486,7 +486,7 @@ long	numToRead,decompSize;
 
 		case	PACK_TYPE_LZSS:
 				if (LZSS_Decode(fRefNum,*dataHand,fileSize) != decompSize)
-					DoAlert("\pDecomp Sizes Dont match!");
+					DoAlert("Decomp Sizes Dont match!");
 				break;
 
 //		case	PACK_TYPE_ARTN:
@@ -506,7 +506,7 @@ long	numToRead,decompSize;
 				break;
 
 		default:
-				DoFatalAlert("\pUnsupported compression Type!");
+				DoFatalAlert("Unsupported compression Type!");
 
 	}
 
@@ -515,7 +515,7 @@ long	numToRead,decompSize;
 
 	iErr = FSClose(fRefNum);
 	if (iErr != noErr)
-		DoFatalAlert ("\pCant close Packed file!");
+		DoFatalAlert ("Cant close Packed file!");
 
 	HUnlock(dataHand);								// optimize memory
 	MaxMem(&someLong);								// clean up
@@ -538,7 +538,7 @@ Ptr		packetStart,srcPtr;
 	packetStart = (Ptr)&gRLBDecompBuffer[0];
 
 //	if ((packetStart = AllocPtr(DECOMP_PACKET_SIZE)) == nil)
-//		DoFatalAlert2 ("\pNo Memory for RLB UnPack Buffer!",gMemoryErr);
+//		DoFatalAlert2 ("No Memory for RLB UnPack Buffer!",gMemoryErr);
 
 	srcPtr = packetStart;
 
@@ -617,7 +617,7 @@ long	numToRead;
 
 //	srcOriginalPtr = (unsigned short *)AllocPtr(DECOMP_PACKET_SIZE);
 //	if (srcOriginalPtr == nil)
-//		DoFatalAlert("\pCouldnt allocate memory for RLW unpack buffer!");
+//		DoFatalAlert("Couldnt allocate memory for RLW unpack buffer!");
 
 				/* READ FIRST SOURCE PACKET */
 
@@ -817,9 +817,9 @@ long		createdDirID;
 	iErr = FindFolder(kOnSystemDisk,kPreferencesFolderType,kDontCreateFolder,		// locate the folder
 					&gPrefsFolderVRefNum,&gPrefsFolderDirID);
 	if (iErr != noErr)
-		DoFatalAlert("\pCannot locate Preferences folder.  Be sure you have a valid Preferences folder in your System Folder.");
+		DoFatalAlert("Cannot locate Preferences folder.  Be sure you have a valid Preferences folder in your System Folder.");
 
-	iErr = DirCreate(gPrefsFolderVRefNum,gPrefsFolderDirID,"\pMightyMike",&createdDirID);		// make MightyMike folder in there
+	iErr = DirCreate(gPrefsFolderVRefNum,gPrefsFolderDirID,"MightyMike",&createdDirID);		// make MightyMike folder in there
 
 
             /* SEE IF GAME IS REGISTERED OR NOT */
@@ -839,7 +839,7 @@ static void CheckGameRegistration(void)
 {
 OSErr   iErr;
 FSSpec  spec;
-Str255  regFileName = "\p:MightyMike:Info";
+Str255  regFileName = ":MightyMike:Info";
 short		fRefNum;
 long        	numBytes = REG_LENGTH;
 unsigned char	regInfo[REG_LENGTH];
@@ -974,7 +974,7 @@ Str255          regInfo;
                     }
                     else
                     {
-                        DoAlert("\pSorry, that registration code is not valid.  Note that validation codes are case sensitive.  Please try again.");
+                        DoAlert("Sorry, that registration code is not valid.  Note that validation codes are case sensitive.  Please try again.");
                     }
 					break;
 
@@ -1080,9 +1080,9 @@ ColorSpec 	aTable[2];
 //	TextFace(0);
 //	TextSize(9);
 //	TextFont(monaco);
-//	DrawString("\pCharging Batteries:");
+//	DrawString("Charging Batteries:");
 
-	LoadIMAGE("\p:data:images:charging.image",SHOW_IMAGE_MODE_QUICK);
+	LoadIMAGE(":data:images:charging.image",SHOW_IMAGE_MODE_QUICK);
 
 														// draw thermometer box
 
@@ -1137,7 +1137,7 @@ Str255		newString;
 	if (iErr == noErr)
 		return;
 
-	DoFatalAlert("\pCannot find file.  Re-insert the Power Pete CD-ROM and run the application again.");
+	DoFatalAlert("Cannot find file.  Re-insert the Power Pete CD-ROM and run the application again.");
 }
 
 
@@ -1209,7 +1209,7 @@ long				count;
 
 				/* READ TIMER FROM FILE */
 
-	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "\pPimple", &file);
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "Pimple", &file);
 	iErr = FSpOpenDF(&file, fsRdPerm, &refNum);
 	if (iErr)
 		gDemoVersionTimer = 0;
@@ -1241,7 +1241,7 @@ long				count;
 
 				/* CREATE BLANK FILE */
 
-	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "\pPimple", &file);
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "Pimple", &file);
 	FSpDelete(&file);															// delete any existing file
 	iErr = FSpCreate(&file, '????', 'xxxx', smSystemScript);					// create blank file
 	if (iErr)
@@ -1250,7 +1250,7 @@ long				count;
 
 				/* OPEN FILE */
 
-	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "\pPimple", &file);
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "Pimple", &file);
 	iErr = FSpOpenDF(&file, fsRdWrPerm, &refNum);
 	if (iErr)
 		return;

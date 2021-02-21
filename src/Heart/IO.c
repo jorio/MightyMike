@@ -160,7 +160,7 @@ void StartRecordingDemo(void)
 
 	gDemoDataHandle = AllocHandle(MAX_DEMO_SIZE);			// alloc memory for it
 	if (gDemoDataHandle == nil)
-		DoFatalAlert("\pCant allocate memory for record buffer.");
+		DoFatalAlert("Cant allocate memory for record buffer.");
 	HLockHi(gDemoDataHandle);
 	gDemoDataPtr = gPrevDemoDataPtr = *gDemoDataHandle;
 	gDemoSize = 0L;											// init size to 0
@@ -203,12 +203,12 @@ Handle		resHandle;
 
 	PtrToHand(*gDemoDataHandle, &resHandle, gDemoSize);			// make a handle with data
 #ifdef __powerc
-	AddResource( resHandle, 'dEmo', 1000+gStartingScene+(1000*gPPCFullScreenFlag), "\pDemo Data" );		// add resource
+	AddResource( resHandle, 'dEmo', 1000+gStartingScene+(1000*gPPCFullScreenFlag), "Demo Data" );		// add resource
 #else
-	AddResource( resHandle, 'dEmo', 4000+gStartingScene, "\pDemo Data" );		// add resource
+	AddResource( resHandle, 'dEmo', 4000+gStartingScene, "Demo Data" );		// add resource
 #endif
 	if ( ResError() )
-		DoFatalAlert("\pCouldnt Add Demo Resource!");
+		DoFatalAlert("Couldnt Add Demo Resource!");
 	WriteResource( resHandle );									// update it
 	ReleaseResource(resHandle);									// nuke resource
 
@@ -238,7 +238,7 @@ void InitDemoPlayback(void)
 #endif
 
 	if (gDemoDataHandle == nil)
-		DoFatalAlert("\pError reading Demo Resource!");
+		DoFatalAlert("Error reading Demo Resource!");
 
 	DetachResource(gDemoDataHandle);						// detach resource
 	HLockHi(gDemoDataHandle);
@@ -316,7 +316,7 @@ KeyMap tempKeys;
 		}
 
 		if (gDemoSize >= (MAX_DEMO_SIZE - sizeof(KeyMap)))		// see if overflowed
-			DoFatalAlert("\pDemo Record Buffer Overflow!");
+			DoFatalAlert("Demo Record Buffer Overflow!");
 	}
 
 				/* SEE IF QUIT GAME */
@@ -386,7 +386,7 @@ again:
 
 	}
 	oldKey = 0;											// no key found
-	return('½');
+	return('ï¿½');
 
 					/* GOT SOMETHING */
 gotit:
@@ -480,7 +480,7 @@ long		workNum;
 	workNum = num;
 
 	if (numDigits > 9)
-		DoFatalAlert("\pAttempted to print a number longer than 9 digits!");
+		DoFatalAlert("Attempted to print a number longer than 9 digits!");
 
 	for (i=numDigits-1; i>=0; i--)
 	{
