@@ -197,7 +197,7 @@ static		long	mem,numToRead,decompSize;
 // returns true if anything was loaded
 //
 
-static Boolean ContinueSpinLoad(void)
+Boolean ContinueSpinLoad(void)
 {
 long	numBytes;
 OSErr	iErr;
@@ -230,7 +230,7 @@ OSErr	iErr;
 // This routine assumes that we are currently pointing at a header command!
 //
 
-static void GetSpinHeader(void)
+void GetSpinHeader(void)
 {
 short		*intPtr;
 
@@ -280,7 +280,7 @@ short		*intPtr;
 // This routine assumes that we are currently pointing at a palette command!
 //
 
-static void GetSpinPalette(void)
+void GetSpinPalette(void)
 {
 RGBColor	*rgbPtr,rgb;
 short			i;
@@ -486,7 +486,7 @@ short	*intPtr;
 // This routine assumes that we are currently pointing at a frame command!
 //
 
-static void DoSpinFrame(void)
+void DoSpinFrame(void)
 {
 register long	*longPtr;
 register long	frameSize,col,data;
@@ -660,7 +660,7 @@ static	 unsigned long	temp;
 
 /******************** DRAW SPIN FRAME *******************/
 
-static void DrawSpinFrame(Ptr sourcePtr)
+void DrawSpinFrame(Ptr sourcePtr)
 {
 register short	numChunks,y;
 register Byte	x,size;
@@ -886,7 +886,7 @@ register Ptr	srcPtr;
 // Draws with double magification pixels
 //
 
-static void DrawSpinFrame_Double(Ptr sourcePtr)
+void DrawSpinFrame_Double(Ptr sourcePtr)
 {
 register unsigned short	numChunks,y;
 register Byte			x,size;
@@ -1108,7 +1108,7 @@ register Ptr			srcPtr;
 // INPUT: speed = # microseconds to wait
 //
 
-static void RegulateSpinSpeed(long speed)
+void RegulateSpinSpeed(long speed)
 {
     RegulateSpeed(speed/2);
 }

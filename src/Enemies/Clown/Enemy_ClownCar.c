@@ -260,7 +260,7 @@ void MoveCarClown(void)
 
 /************** DO CAR CLOWN MOVE ******************/
 
-static void DoCarClownMove(void)
+void DoCarClownMove(void)
 {
 long	xAcc,yAcc;
 
@@ -337,7 +337,7 @@ long	xAcc,yAcc;
 
 /**************** UPDATE CAR CLOWN *******************/
 
-static void UpdateCarClown(void)
+void UpdateCarClown(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);

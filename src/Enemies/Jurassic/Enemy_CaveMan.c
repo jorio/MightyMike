@@ -314,7 +314,7 @@ void MoveCaveman_Roller(void)
 
 /**************** UPDATE CAVEMAN *******************/
 
-static void UpdateCaveman(void)
+void UpdateCaveman(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -383,7 +383,7 @@ void DoCavemanMove(void)
 // gThisNodePtr = ptr to caveman doing the rolling
 //
 
-static void RollWheel(void)
+void RollWheel(void)
 {
 register	ObjNode		*newObj;
 register	Byte	animNum;
@@ -456,7 +456,7 @@ void MoveStoneWheel(void)
 //
 //
 
-static void ThrowABone(void)
+void ThrowABone(void)
 {
 register	ObjNode		*newObj;
 short		x,fudgeX;
@@ -554,7 +554,7 @@ void MoveBone(void)
 //
 //
 
-static void DoUngaBunga(void)
+void DoUngaBunga(void)
 {
 register	ObjNode *newObj;
 

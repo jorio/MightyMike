@@ -140,7 +140,7 @@ register	ObjNode  *theNode;
 
 /************************ MAKE HATCHLING ********************/
 
-static void MakeHatchling(short x, short y)
+void MakeHatchling(short x, short y)
 {
 register	ObjNode		*newObj;
 

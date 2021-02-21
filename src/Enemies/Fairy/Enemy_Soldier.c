@@ -118,7 +118,7 @@ void MoveSoldier(void)
 
 /************** DO SOLDIER MOVE ******************/
 
-static void DoSoldierMove(void)
+void DoSoldierMove(void)
 {
 short	dist;
 

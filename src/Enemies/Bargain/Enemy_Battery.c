@@ -135,7 +135,7 @@ void MoveBattery(void)
 
 /***************** GUESS BATTERY ANIM *************************/
 
-static short	GuessBatteryAnim(short x, short y)
+short	GuessBatteryAnim(short x, short y)
 {
 short	diffX,diffY;
 

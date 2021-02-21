@@ -130,7 +130,7 @@ void MoveWitch(void)
 
 /**************** UPDATE WITCH *******************/
 
-static void UpdateWitch(void)
+void UpdateWitch(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -143,7 +143,7 @@ static void UpdateWitch(void)
 
 /************** DO WITCH MOVE ******************/
 
-static void DoWitchMove(void)
+void DoWitchMove(void)
 {
 long	xAcc,yAcc;
 
@@ -208,7 +208,7 @@ long	xAcc,yAcc;
 //
 //
 
-static void DoWitchHaha(void)
+void DoWitchHaha(void)
 {
 register	ObjNode *newObj;
 

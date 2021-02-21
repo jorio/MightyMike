@@ -737,7 +737,7 @@ void SetItemDeleteWindow(void)
 
 /****************** SCROLL PLAYFIELD: DOWN **********************/
 
-static void ScrollPlayfield_Down(void)
+void ScrollPlayfield_Down(void)
 {
 long	row,col,x,mapRow,right;
 
@@ -774,7 +774,7 @@ long	row,col,x,mapRow,right;
 
 /****************** SCROLL PLAYFIELD: UP **********************/
 
-static void ScrollPlayfield_Up(void)
+void ScrollPlayfield_Up(void)
 {
 long	row,col,x,right;
 
@@ -813,7 +813,7 @@ long	row,col,x,right;
 // playfield actually scrolls to the left, but new data added on right side
 //
 
-static void ScrollPlayfield_Right(void)
+void ScrollPlayfield_Right(void)
 {
 long	row,col,y,mapCol,mapRowTop,mapRowBot;
 
@@ -849,7 +849,7 @@ long	row,col,y,mapCol,mapRowTop,mapRowBot;
 
 /****************** SCROLL PLAYFIELD: LEFT **********************/
 
-static void ScrollPlayfield_Left(void)
+void ScrollPlayfield_Left(void)
 {
 long	row,col,y,mapRowTop,mapRowBot,mapCol;
 
@@ -888,7 +888,7 @@ long	row,col,y,mapRowTop,mapRowBot,mapCol;
 // Given this range, scan for items.  Coords are in row/col values.
 //
 
-static void ScanForPlayfieldItems(long top, long bottom, long left, long right)
+void ScanForPlayfieldItems(long top, long bottom, long left, long right)
 {
 ObjectEntryType *itemPtr;
 long	row,type;
@@ -1014,7 +1014,7 @@ long	scrollDX,scrollDY;
 // Moves the view window depending on MyGuy's direction
 //
 
-static void UpdateViewWindow(void)
+void UpdateViewWindow(void)
 {
 long	dir;
 
@@ -1407,7 +1407,7 @@ double		t1,t2,t3,t4;
 
 /************************ DRAW A TILE ***********************/
 
-static void DrawATile(unsigned short tileNum, short row, short col, Boolean maskFlag)
+void DrawATile(unsigned short tileNum, short row, short col, Boolean maskFlag)
 {
 unsigned char *destPtr,*srcPtr,*destCopyPtr;
 long		height,i;

@@ -116,7 +116,7 @@ void MoveRex(void)
 
 /**************** UPDATE REX *******************/
 
-static void UpdateRex(void)
+void UpdateRex(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -129,7 +129,7 @@ static void UpdateRex(void)
 
 /************** DO REX MOVE ******************/
 
-static void DoRexMove(void)
+void DoRexMove(void)
 {
 long	xAcc,yAcc;
 

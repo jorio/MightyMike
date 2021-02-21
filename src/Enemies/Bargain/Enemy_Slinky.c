@@ -134,7 +134,7 @@ short	anim;
 
 /***************** GUESS SLINKY ANIM *************************/
 
-static short	GuessSlinkyAnim(short fromAnim, short x, short y)
+short	GuessSlinkyAnim(short fromAnim, short x, short y)
 {
 short	diffX,diffY,toAnim,i;
 Boolean	wall;
@@ -253,7 +253,7 @@ Boolean	wall;
 
 /************** CALC SLINKY BOX ****************/
 
-static void CalcSlinkyBox(void)
+void CalcSlinkyBox(void)
 {
 	switch(gThisNodePtr->SubType)
 	{

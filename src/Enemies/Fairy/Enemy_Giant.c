@@ -231,7 +231,7 @@ void MoveGiant_Land(void)
 
 /******************** MAKE GIANT DEATH RING ********************/
 
-static void MakeGiantDeathRing(void)
+void MakeGiantDeathRing(void)
 {
 register ObjNode	*newNode;
 short	i;

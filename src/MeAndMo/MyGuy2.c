@@ -230,7 +230,7 @@ update:
 
 /*************** UPDATE ME FROG ***************/
 
-static void UpdateMeFrog(void)
+void UpdateMeFrog(void)
 {
 	gRealMePtr->X.Int = gThisNodePtr->X.Int;			// update the "real" me with some info
 	gRealMePtr->Y.Int = gThisNodePtr->Y.Int;

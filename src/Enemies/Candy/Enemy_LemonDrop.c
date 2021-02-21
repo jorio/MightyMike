@@ -139,7 +139,7 @@ void MoveLemon(void)
 
 /****************** SQUEEZE LEMON *********************/
 
-static void SqueezeLemon(void)
+void SqueezeLemon(void)
 {
 static	long lemonDX[8] = {0,DRIP_SPEED,DRIP_SPEED,DRIP_SPEED,0,-DRIP_SPEED,-DRIP_SPEED,-DRIP_SPEED};
 static	long lemonDY[8] = {-DRIP_SPEED,-DRIP_SPEED,0,DRIP_SPEED,DRIP_SPEED,DRIP_SPEED,0,-DRIP_SPEED};

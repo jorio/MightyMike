@@ -241,7 +241,7 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 // This is called whenever a shape table is moved in memory or loaded
 //
 
-static void CreateShapeHeaderPointers(long groupNum)
+void CreateShapeHeaderPointers(long groupNum)
 {
 long		i;
 short		*intPtr;
@@ -980,7 +980,7 @@ long	x,y;
 // Draws shape obj into Playfield circular buffer
 //
 
-static void DrawPFSprite(ObjNode *theNodePtr)
+void DrawPFSprite(ObjNode *theNodePtr)
 {
 long	width,height,i;
 long	drawHeight,y;
@@ -1224,7 +1224,7 @@ Ptr		tmP;
 
 /************************ ERASE PLAYFIELD SPRITE ********************/
 
-static void ErasePFSprite(ObjNode *theNodePtr)
+void ErasePFSprite(ObjNode *theNodePtr)
 {
 long	width,height,drawWidth,y;
 long	i;
@@ -2237,7 +2237,7 @@ static		Ptr		tmP;
 
 /************************ ERASE PLAYFIELD SPRITE ********************/
 
-static void ErasePFSprite(ObjNode *theNodePtr)
+void ErasePFSprite(ObjNode *theNodePtr)
 {
 register	short	width,height,drawWidth,y;
 register	long	col;
@@ -2653,7 +2653,7 @@ static		short		drawHeight,originalY;
 // Draws shape obj into Playfield circular buffer
 //
 
-static void DrawPFSprite(ObjNode *theNodePtr)
+void DrawPFSprite(ObjNode *theNodePtr)
 {
 register	int		width,height;
 register	int		drawHeight,y;

@@ -197,7 +197,7 @@ void MoveFlowerClown_Squirt(void)
 
 /**************** UPDATE FLOWERCLOWN *******************/
 
-static void UpdateFlowerClown(void)
+void UpdateFlowerClown(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -222,7 +222,7 @@ static void UpdateFlowerClown(void)
 
 /************** DO FLOWERCLOWN MOVE ******************/
 
-static void DoFlowerClownMove(void)
+void DoFlowerClownMove(void)
 {
 
 				/* ACCEL TOWARD ME */
@@ -264,7 +264,7 @@ static void DoFlowerClownMove(void)
 //
 //
 
-static void ThrowFlowerClownSquirt(void)
+void ThrowFlowerClownSquirt(void)
 {
 register	ObjNode		*newObj;
 short			x,sub;

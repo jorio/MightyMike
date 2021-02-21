@@ -129,7 +129,7 @@ void MoveMagicHat(void)
 
 /************************ MAKE HATBUNNY ********************/
 
-static void MakeHatBunny(void)
+void MakeHatBunny(void)
 {
 register	ObjNode		*newObj;
 
@@ -213,7 +213,7 @@ register ObjNode	*theNode;
 
 /**************** UPDATE HATBUNNY *******************/
 
-static void UpdateHatBunny(void)
+void UpdateHatBunny(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -238,7 +238,7 @@ static void UpdateHatBunny(void)
 
 /************** DO HATBUNNY MOVE ******************/
 
-static void DoHatBunnyMove(void)
+void DoHatBunnyMove(void)
 {
 
 				/* ACCEL TOWARD ME */

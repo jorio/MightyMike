@@ -188,7 +188,7 @@ next:
 // Add BG Collisions to Collision List.  Called by CollisionDetect above.
 //
 
-static void AddBGCollisions(ObjNode *theNode)
+void AddBGCollisions(ObjNode *theNode)
 {
 //Boolean	TLCornerFlag,BLCornerFlag,TRCornerFlag,BRCornerFlag;
 short		oldRow,left,right,oldCol,top,bottom;

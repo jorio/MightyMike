@@ -109,7 +109,7 @@ void MoveTop(void)
 
 /**************** UPDATE TOP *******************/
 
-static void UpdateTop(void)
+void UpdateTop(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -122,7 +122,7 @@ static void UpdateTop(void)
 
 /************** DO TOP MOVE ******************/
 
-static void DoTopMove(void)
+void DoTopMove(void)
 {
 long	xAcc,yAcc;
 

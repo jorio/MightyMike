@@ -116,7 +116,7 @@ void MoveDragon(void)
 
 /**************** UPDATE DRAGON *******************/
 
-static void UpdateDragon(void)
+void UpdateDragon(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -129,7 +129,7 @@ static void UpdateDragon(void)
 
 /************** DO DRAGON MOVE ******************/
 
-static void DoDragonMove(void)
+void DoDragonMove(void)
 {
 long	xAcc,yAcc;
 

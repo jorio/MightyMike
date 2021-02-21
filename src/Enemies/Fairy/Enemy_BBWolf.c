@@ -116,7 +116,7 @@ void MoveBBWolf(void)
 
 /**************** UPDATE BBWOLF *******************/
 
-static void UpdateBBWolf(void)
+void UpdateBBWolf(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -129,7 +129,7 @@ static void UpdateBBWolf(void)
 
 /************** DO BBWOLF MOVE ******************/
 
-static void DoBBWolfMove(void)
+void DoBBWolfMove(void)
 {
 long	xAcc,yAcc;
 

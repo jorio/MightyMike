@@ -249,7 +249,7 @@ void MoveClown_PieThrower2(void)
 
 /**************** UPDATE CLOWN *******************/
 
-static void UpdateClown(void)
+void UpdateClown(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -274,7 +274,7 @@ static void UpdateClown(void)
 
 /************** DO CLOWN MOVE ******************/
 
-static void DoClownMove(void)
+void DoClownMove(void)
 {
 
 				/* ACCEL TOWARD ME */
@@ -316,7 +316,7 @@ static void DoClownMove(void)
 //
 //
 
-static void ThrowClownPie(void)
+void ThrowClownPie(void)
 {
 register	ObjNode		*newObj;
 short			x,sub;
@@ -399,7 +399,7 @@ void MoveClownPie(void)
 
 /**************** DO CLOWN LAUGH *****************/
 
-static void DoClownLaugh(void)
+void DoClownLaugh(void)
 {
 register	ObjNode *newObj;
 

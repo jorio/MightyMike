@@ -130,7 +130,7 @@ void MoveGBear(void)
 
 /**************** UPDATE GBEAR*******************/
 
-static void UpdateGBear(void)
+void UpdateGBear(void)
 {
 	if (gThisNodePtr->Health != GBEAR_HEALTH)			// see if hit
 		goto update;
@@ -159,7 +159,7 @@ update:
 
 /************** DO GBEARMOVE ******************/
 
-static void DoGBearMove(void)
+void DoGBearMove(void)
 {
 
 				/* ACCEL TOWARD ME */
@@ -198,7 +198,7 @@ static void DoGBearMove(void)
 
 /************************ EXPLODE GUMMY *******************/
 
-static void ExplodeGummy(void)
+void ExplodeGummy(void)
 {
 register	ObjNode		*newObj;
 short			i;
@@ -264,7 +264,7 @@ void MoveTinyGummy(void)
 
 /**************** UPDATE TINY GUMMY *******************/
 
-static void UpdateTinyGummy(void)
+void UpdateTinyGummy(void)
 {
 
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
@@ -294,7 +294,7 @@ static void UpdateTinyGummy(void)
 //
 //
 
-static void DoGummyHaha(void)
+void DoGummyHaha(void)
 {
 register	ObjNode *newObj;
 

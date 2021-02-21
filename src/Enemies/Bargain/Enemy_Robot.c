@@ -121,7 +121,7 @@ void MoveRobot(void)
 
 /************** DO ROBOT MOVE ******************/
 
-static void DoRobotMove(void)
+void DoRobotMove(void)
 {
 short	dist;
 
@@ -195,7 +195,7 @@ short	dist;
 
 /**************** DO ROBOT DANGER *****************/
 
-static void DoRobotDanger(void)
+void DoRobotDanger(void)
 {
 register	ObjNode *newObj;
 

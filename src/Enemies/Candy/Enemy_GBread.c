@@ -194,7 +194,7 @@ void MoveGBread_Pop(void)
 
 /**************** UPDATE GBREAD*******************/
 
-static void UpdateGBread(void)
+void UpdateGBread(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -219,7 +219,7 @@ static void UpdateGBread(void)
 
 /************** DO GBREADMOVE ******************/
 
-static void DoGBreadMove(void)
+void DoGBreadMove(void)
 {
 
 				/* ACCEL TOWARD ME */
@@ -261,7 +261,7 @@ static void DoGBreadMove(void)
 //
 //
 
-static void PopAButton(void)
+void PopAButton(void)
 {
 register	ObjNode		*newObj;
 short			x;

@@ -717,7 +717,7 @@ void MoveShield(void)
 
 /******************** FIRE RING SHOT ********************/
 
-static void FireRingShot(void)
+void FireRingShot(void)
 {
 register ObjNode	*newNode;
 short	i;
@@ -791,7 +791,7 @@ void MoveFireRing(void)
 
 /******************* START NUKE ********************/
 
-static void StartNuke(void)
+void StartNuke(void)
 {
 register	ObjNode		*newObj;
 

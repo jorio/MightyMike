@@ -630,7 +630,7 @@ Boolean	horizFlag,vertFlag;
 
 /******************* CONTROL ME BY KEYBOARD *************************/
 
-static void ControlMeByKeyboard(Boolean *horizFlag, Boolean *vertFlag)
+void ControlMeByKeyboard(Boolean *horizFlag, Boolean *vertFlag)
 {
 	if (GetKeyState(kKey_Forward))
 	{
@@ -699,7 +699,7 @@ static void ControlMeByKeyboard(Boolean *horizFlag, Boolean *vertFlag)
 // Pin velocity to max allowed speed
 //
 
-static void PinMyDeltas(void)
+void PinMyDeltas(void)
 {
 	if (gMeOnWaterFlag)					// WATER PIN
 	{
@@ -1040,7 +1040,7 @@ void UpdateMe(void)
 // Updates me without checking blinkie
 //
 
-static void UpdateMe_NoBlinkie(void)
+void UpdateMe_NoBlinkie(void)
 {
 	gMyNodePtr->DrawFlag = true;
 
@@ -1127,7 +1127,7 @@ static	Byte	oldDirection;
 // Sets me to the appropriate walking animation
 //
 
-static void SetMyWalkAnim(void)
+void SetMyWalkAnim(void)
 {
 	switch(gMyMode)
 	{
@@ -1181,7 +1181,7 @@ void SetMyStandAnim(void)
 // Sets me to the appropriate swim animation
 //
 
-static void SetMySwimAnim(void)
+void SetMySwimAnim(void)
 {
 	if (gMyNodePtr->SubType != gMySwimAnims[gMyDirection])				// see if already correct
 		SwitchAnim(gMyNodePtr,gMySwimAnims[gMyDirection]);				// set
@@ -1190,7 +1190,7 @@ static void SetMySwimAnim(void)
 
 /*********************** ME HIT BONUS OBJECT **********************/
 
-static void MeHitBonusObject(ObjNode *targetNode)
+void MeHitBonusObject(ObjNode *targetNode)
 {
 						/* SEE IF HIT WEAPON POWERUP */
 
@@ -1275,7 +1275,7 @@ static void MeHitBonusObject(ObjNode *targetNode)
 // NOTE: It does not call IGotHurt, that is called later by the caller routine.
 //
 
-static void MeHitEnemyObject(ObjNode *targetNode)
+void MeHitEnemyObject(ObjNode *targetNode)
 {
 Boolean	delFlag;
 
@@ -1451,7 +1451,7 @@ void StartMyThrow(void)
 
 /******************* CHECK IF ME ON MOVING PLATFORM *********************/
 
-static void CheckIfMeOnMPlatform(void)
+void CheckIfMeOnMPlatform(void)
 {
 register	ObjNode		*thisNodePtr;
 
@@ -1527,7 +1527,7 @@ short		numItems,num;
 // PUT SMOKE TRAIL ON FEET
 //
 
-static void MakeFeetSmoke(void)
+void MakeFeetSmoke(void)
 {
 register ObjNode	*newObj;
 

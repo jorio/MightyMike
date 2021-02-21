@@ -213,7 +213,7 @@ void MoveDoggy_Jump(void)
 
 /**************** UPDATE DOGGY *******************/
 
-static void UpdateDoggy(void)
+void UpdateDoggy(void)
 {
 	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
@@ -224,7 +224,7 @@ static void UpdateDoggy(void)
 
 /************** DO DOGGY MOVE ******************/
 
-static void DoDoggyMove(void)
+void DoDoggyMove(void)
 {
 long	xAcc,yAcc;
 
@@ -287,7 +287,7 @@ long	xAcc,yAcc;
 
 /**************** DO DOG ROAR *****************/
 
-static void DoDogRoar(void)
+void DoDogRoar(void)
 {
 register	ObjNode *newObj;
 

@@ -72,7 +72,7 @@ short	i,num,size;
 // Adds 1 tile anim to the list
 //
 
-static void Add1TileAnim(TileAnimEntryType	*intPtr)
+void Add1TileAnim(TileAnimEntryType	*intPtr)
 {
 	gTileAnims[gNumTileAnims].count = 0;
 	gTileAnims[gNumTileAnims].index = 0;
