@@ -8,14 +8,15 @@
 /* EXTERNALS   */
 /***************/
 
+#include <SDL.h>
 #include "myglobals.h"
-#include <folders.h>
-#include <pictutils.h>
-#include <palettes.h>
-#include <osutils.h>
-#include <timer.h>
-#include <inputsprocket.h>
-#include <textutils.h>
+//#include <folders.h>
+//#include <pictutils.h>
+//#include <palettes.h>
+//#include <osutils.h>
+//#include <timer.h>
+//#include <inputsprocket.h>
+//#include <textutils.h>
 #include "windows.h"
 #include "io.h"
 #include "object.h"
@@ -23,7 +24,7 @@
 #include "arith-n.h"
 #include "lzw.h"
 #include "misc.h"
-#include "sound.h"
+//#include "sound.h"
 #include "sound2.h"
 #include "picture.h"
 #include "input.h"
@@ -101,7 +102,7 @@ static	short	gOldMouseX,gOldMouseY;			// for mouse delta calculation
 
 									// MENU BAR HIDE/SHOW STUFF
 static	short	oldMBarHeight;
-static	RgnHandle	mBarRgn;
+//static	RgnHandle	mBarRgn;
 
 static	short			gNumScreenResets = 0;
 
@@ -122,7 +123,7 @@ static	Str255		gMemoryErr = "Try increasing the applications memory size by sele
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
-long	gCPUType;
+Boolean		gIsPPC603_604 = false;		// TODO source port: what does this trigger?
 
 Boolean     gGameIsRegistered = false;
 
@@ -147,7 +148,7 @@ Str255		numStr;
 
 	RestoreDefaultCLUT();
 	ShowCursor();
-	NumToString((long)err, numStr);
+	NumToStringC((long)err, numStr);
 	DoAlert (numStr);
 	MyShowMenuBar();
 	RestoreDefaultCLUT();
@@ -157,41 +158,37 @@ Str255		numStr;
 
 /*********************** DO ALERT *******************/
 
-void DoAlert(Str255 s)
+void DoAlert(const char* s)
 {
+	fprintf(stderr, "MIKE ALERT: %s\n", s);
+
 	RestoreDefaultCLUT();
-	ShowCursor();
-	ParamText(s,NIL_STRING,NIL_STRING,NIL_STRING);
-	Alert(ERROR_ALERT_ID,nil);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Mighty Mike", s, NULL);
 }
 
 
 /*********************** DO FATAL ALERT *******************/
 
-void DoFatalAlert(Str255 s)
+void DoFatalAlert(const char* s)
 {
+	fprintf(stderr, "MIKE FATAL ALERT: %s\n", s);
+
 	RestoreDefaultCLUT();
-	InitCursor();
-//	if (gGameWindow != nil)
-//		DisposeWindow(gGameWindow);
-	ParamText(s,NIL_STRING,NIL_STRING,NIL_STRING);
-	Alert(ERROR_ALERT_ID,nil);
-	MyShowMenuBar();
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike", s, NULL);
 	CleanQuit();
 }
 
 
 /*********************** DO FATAL ALERT 2 *******************/
 
-void DoFatalAlert2(Str255 s1, Str255 s2)
+void DoFatalAlert2(const char* s1, const char* s2)
 {
+	static char alertbuf[1024];
+	snprintf(alertbuf, 1024, "%s\n%s", s1, s2);
+	fprintf(stderr, "MIKE FATAL ALERT: %s\n", alertbuf);
+
 	RestoreDefaultCLUT();
-	InitCursor();
-//	if (gGameWindow != nil)
-//   	DisposeWindow(gGameWindow);
-	ParamText(s1,s2,NIL_STRING,NIL_STRING);
-	Alert(ERROR_ALERT2_ID,nil);
-	MyShowMenuBar();
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike", alertbuf, NULL);
 	CleanQuit();
 }
 
@@ -380,6 +377,8 @@ void WaitWhileMusic(void)
 
 void CheckScreenDepth(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 GDHandle 	gdh;
 OSErr 		myErr;
 short		depth;
@@ -400,6 +399,7 @@ short		depth;
 		else
 			DoFatalAlert("Monitor cannot be set to 256 colors.  Requires 256 colors to run.");
 	}
+#endif
 }
 
 
@@ -410,6 +410,8 @@ short		depth;
 
 void ResetScreen(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 GDHandle gdh;
 
 	RestoreDefaultCLUT();
@@ -421,7 +423,7 @@ GDHandle gdh;
 	}
 	else
 		DoFatalAlert("Screen CLUT cannot be set the way I want?!  Launch me again.");
-
+#endif
 }
 
 
@@ -942,6 +944,8 @@ short   i,j;
 
 static void DoRegistrationDialog(unsigned char *out)
 {
+	TODO_REWRITE_THIS();
+#if 0
 DialogPtr 		myDialog;
 Boolean			dialogDone = false, isValid;
 short			itemType,itemHit;
@@ -988,7 +992,7 @@ Str255          regInfo;
 		}
 	}
 	DisposeDialog(myDialog);
-
+#endif
 }
 
 

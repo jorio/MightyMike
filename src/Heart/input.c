@@ -10,12 +10,14 @@
 /***************/
 
 #include <stdlib.h>
+#if 0
 #include <DrawSprocket.h>
 #include <InputSprocket.h>
 #include <CursorDevices.h>
 #include <Traps.h>
 #include <TextUtils.h>
 #include <FixMath.h>
+#endif
 #include "myglobals.h"
 #include "misc.h"
 #include "input.h"
@@ -25,7 +27,6 @@ extern	unsigned long 		gOriginalSystemVolume;
 extern	short				gMainAppRezFile;
 extern	Byte				gDemoMode;
 extern	Boolean				gAbortedFlag,gGameOverFlag,gAbortDemoFlag;
-extern	DSpContextReference gDisplayContext;
 
 /**********************/
 /*     PROTOTYPES     */
@@ -38,7 +39,7 @@ static void InitMouseDevice(void);
 /*    CONSTANTS             */
 /****************************/
 
-#define	USE_ISP		1
+#define	USE_ISP		0
 
 
 /**********************/
@@ -59,6 +60,7 @@ Boolean	gISPInitialized			= false;
 #define	NEED_NUM_MOUSEMOTION	4
 #define	NUM_CONTROL_NEEDS		10
 
+#if USE_ISP
 static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 {
 	{													// 0
@@ -194,7 +196,7 @@ static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
 
 
 ISpElementReference	gVirtualElements[NUM_CONTROL_NEEDS];
-
+#endif
 
 short	gNeedToKey[NUM_CONTROL_NEEDS] =				// table to convert need # into key equate value
 {
@@ -606,6 +608,8 @@ UInt32		count = 0;
 
 void DoKeyConfigDialog(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 	FlushEvents (everyEvent, REMOVE_ALL_EVENTS);
 
 				/* DO ISP CONFIG DIALOG */
@@ -615,6 +619,7 @@ void DoKeyConfigDialog(void)
 	ISpConfigure(nil);
 	TurnOffISp();
 	HideCursor();
+#endif
 }
 
 

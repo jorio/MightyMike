@@ -10,9 +10,9 @@
 /***************/
 
 #include "myglobals.h"
-#include <pictutils.h>
-#include <palettes.h>
-#include <gestalt.h>
+//#include <pictutils.h>
+//#include <palettes.h>
+//#include <gestalt.h>
 #include "windows.h"
 #include "playfield.h"
 #include "object.h"
@@ -52,7 +52,8 @@ extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	unsigned char	gInterlaceMode;
 extern	long			gDX,gDY,gSumDX,gSumDY;
 extern	Boolean			gTeleportingFlag;
-extern	long			gMySumDX,gMySumDY,gMyDX,gMyDY,gCPUType;
+extern	long			gMySumDX,gMySumDY,gMyDX,gMyDY;
+extern	Boolean			gIsPPC603_604;
 
 
 static void DisplayPlayfield603_604(void);
@@ -1618,7 +1619,7 @@ long		*s,*d;
 
 			/* IF ON POWER PC 603 OR 604, USE ALTERNATE VERSION */
 
-	if ((gCPUType == gestaltCPU603) || (gCPUType == gestaltCPU604))
+	if (gIsPPC603_604)
 	{
 		DisplayPlayfield603_604();
 		return;

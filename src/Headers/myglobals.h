@@ -4,8 +4,8 @@
 /*   By Brian Greenstone    */
 /****************************/
 
-#include "Equates.h"
-#include "Structures.h"
+#include "equates.h"
+#include "structures.h"
 
 #define		BETA	0			//-------------- 0 for final
 

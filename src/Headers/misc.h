@@ -13,9 +13,9 @@
 
 extern void	ClearGlobalFlags(void);
 extern void	ShowSystemErr(OSErr);
-extern void	DoAlert(Str255);
-extern void	DoFatalAlert(Str255);
-extern void	DoFatalAlert2(Str255, Str255);
+extern void	DoAlert(const char*);
+extern void	DoFatalAlert(const char*);
+extern void	DoFatalAlert2(const char*, const char*);
 extern void	TellCopyToHD(void);
 extern void	CleanQuit(void);
 extern void	MyHideMenuBar(void);
@@ -50,3 +50,5 @@ extern void	SetMyRandomSeed(unsigned long);
 void GetDemoTimer(void);
 void SaveDemoTimer(void);
 
+#define TODO_REWRITE_ASM()		DoFatalAlert2("REWRITE 68K ASM HERE!", __func__)
+#define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)

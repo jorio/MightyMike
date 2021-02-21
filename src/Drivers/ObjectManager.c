@@ -766,6 +766,8 @@ static		long		*srcStartPtr,*destStartPtr;
 
 			col = (160-width)<<1;
 
+			TODO_REWRITE_ASM();
+#if 0		// TODO REWRITE ASM!
 			asm
 			{
 					jmp		@inline(col)
@@ -942,6 +944,7 @@ static		long		*srcStartPtr,*destStartPtr;
 					move.l	(srcPtr)+,(destPtr)+
 
 			}
+#endif
 
 			destStartPtr += gScreenRowOffsetLW;				// Bump to start of next row.
 			srcStartPtr += (OFFSCREEN_WIDTH>>2);

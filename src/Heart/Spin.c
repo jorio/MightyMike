@@ -9,11 +9,11 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-#include <pictutils.h>
+//#include <pictutils.h>
 #include "spin.h"
 #include "misc.h"
 #include "io.h"
-#include <timer.h>
+//#include <timer.h>
 #include "sound2.h"
 #include "windows.h"
 
@@ -521,6 +521,9 @@ static	 unsigned long	temp;
 			count = (-count)+1;
 			frameSize -= count;
 			col = (32-(count>>2))<<1;						// see how many longs we need
+
+			TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 			asm
 			{
 					move.b	(srcPtr)+,data					// get data byte (upper 3 bytes are trash)
@@ -569,6 +572,8 @@ static	 unsigned long	temp;
 					move.l	data,(framePtr)+
 					move.l	data,(framePtr)+
 			}
+#endif
+
 			switch(count&b11)							// do remainder of line
 			{
 				case 3:
@@ -593,6 +598,9 @@ static	 unsigned long	temp;
 			data = count&b11;								// (use data as temp storage for remainder)
 			count >>= 2;									// see how many longs
 			col = (32-count)<<1;
+
+			TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 			asm
 			{
 					jmp		@inline2(col)
@@ -634,6 +642,8 @@ static	 unsigned long	temp;
 
 
 			}
+#endif
+
 			switch(data)															// do remainder of line
 			{
 				case 3:
@@ -674,10 +684,13 @@ register Ptr	srcPtr;
 	}
 
 	srcPtr = StripAddress(sourcePtr);
+	TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 	asm
 	{
 		move.w	(srcPtr)+,numChunks							// get # chunks to update
 	}
+#endif
 
 	if (numChunks == 0)
 		return;
@@ -687,16 +700,22 @@ register Ptr	srcPtr;
 
 	do
 	{
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 			move.b	(srcPtr)+,x								// get Y coord (in longs)
 			move.w	(srcPtr)+,y								// get X coord
 			move.b  (srcPtr)+,size							// get SIZE (# longs)
 		}
+#endif
 
 		destPtr = (long *)(gScreenLookUpTable[y+gSpinY]+gSpinX)+x;		// point to screen
 
 		col = (160-size)<<1;
+
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 				jmp		@inline(col)
@@ -873,6 +892,7 @@ register Ptr	srcPtr;
 				move.l	(srcPtr)+,(destPtr)+
 				move.l	(srcPtr)+,(destPtr)+
 		}
+#endif
 
 	}while(--numChunks);
 
@@ -894,10 +914,13 @@ register long			*destPtr,*destPtr2,col;
 register Ptr			srcPtr;
 
 	srcPtr = StripAddress(sourcePtr);
+	TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 	asm
 	{
 		move.w	(srcPtr)+,numChunks							// get # chunks to update
 	}
+#endif
 
 	if (numChunks == 0)
 		return;
@@ -907,17 +930,22 @@ register Ptr			srcPtr;
 
 	do
 	{
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 			move.b	(srcPtr)+,x								// get Y coord (in longs)
 			move.w	(srcPtr)+,y								// get X coord
 			move.b  (srcPtr)+,size							// get SIZE (# longs)
 		}
+#endif
 
 		destPtr = (long *)(gScreenLookUpTable[(y<<1)+gSpinY]+gSpinX)+(x<<1); // point to screen
 		destPtr2 = destPtr+gScreenRowOffsetLW;
 
 		col = (160-(size<<1))*14;
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 				jmp		@inline(col)
@@ -1094,6 +1122,7 @@ register Ptr			srcPtr;
 				DrawDoubleMac
 				DrawDoubleMac
 		}
+#endif
 
 	}while(--numChunks);
 

@@ -454,7 +454,7 @@ static	aimXlate[16] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
 			gThisNodePtr->BaseX += nextOffsetsX[gTrackSegments[currentTrack].exitSide2]; // move to next tile reverse
 			gThisNodePtr->BaseY += nextOffsetsY[gTrackSegments[currentTrack].exitSide2];
 		}
-again:
+
 		newTile = GetFullMapTileAttribs(gThisNodePtr->BaseX,gThisNodePtr->BaseY);	// see what's @ the new spot
 
 		if (newTile->bits&TILE_ATTRIB_TRACK)								// make sure its a track piece

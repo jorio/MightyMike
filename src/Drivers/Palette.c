@@ -9,7 +9,7 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-#include <pictutils.h>
+//#include <pictutils.h>
 #include "misc.h"
 
 extern	Handle		gShapeTableHandle[];

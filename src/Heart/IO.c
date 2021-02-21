@@ -110,40 +110,6 @@ Boolean		gSpaceButtonDownFlag;
 Boolean		gAbortDemoFlag,gGameIsDemoFlag;
 
 
-/********************  HOME *******************/
-
-void Home(void)
-{
-	gHtab = 20+gScreenXOffset;
-	gVtab = 30+gScreenYOffset;
-	MoveTo(gHtab,gVtab);
-}
-
-/**************** DO CR ******************/
-
-void DoCR(void)
-{
-FontInfo	fInfo;
-
-		GetFontInfo(&fInfo);				/* how far to move gVtab */
-		gHtab += fInfo.widMax;
-
-		gHtab = 80+gScreenXOffset;
-		gVtab += fInfo.ascent + fInfo.descent + fInfo.leading;
-		MoveTo(gHtab,gVtab);
-}
-
-/****************** PRINT CHAR *************/
-
-void PrintChar(char c)
-{
-		if (c == CHAR_RETURN)
-			DoCR();							/* do CR */
-		else
-			DrawChar(c);					/* draw char */
-}
-
-
 /*************** START RECORDING DEMO *****************/
 //
 // Begins to record key commands for playback later

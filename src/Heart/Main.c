@@ -9,8 +9,8 @@
 /*    EXTERNALS             */
 /****************************/
 #include "myglobals.h"
-#include <sound.h>
-#include <files.h>
+//#include <sound.h>
+//#include <files.h>
 #include "objecttypes.h"
 #include "windows.h"
 #include "picture.h"
@@ -111,6 +111,8 @@ short		gMainAppRezFile;
 
 void ToolBoxInit(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
  	MaxApplZone();
  	MoreMasters();	MoreMasters();	MoreMasters();	MoreMasters();
  	MoreMasters();	MoreMasters();	MoreMasters();	MoreMasters();
@@ -124,6 +126,7 @@ void ToolBoxInit(void)
 	TEInit();
 	InitDialogs(nil);
 	InitCursor();
+#endif
 
 	gMainAppRezFile = CurResFile();
 

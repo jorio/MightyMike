@@ -9,13 +9,13 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-#include <qdoffscreen.h>
-#include <pictutils.h>
+//#include <qdoffscreen.h>
+//#include <pictutils.h>
 #include "windows.h"
 #include "playfield.h"
 #include "object.h"
 #include "misc.h"
-#include 	<DrawSprocket.h>
+//#include 	<DrawSprocket.h>
 
 extern	Boolean		gPPCFullScreenFlag;
 extern	Handle		gBackgroundHandle;
@@ -73,7 +73,7 @@ long			*gPFCopyLookUpTable = nil;
 long			*gPFMaskLookUpTable = nil;
 
 Boolean			gLoadedDrawSprocket = false;
-DSpContextReference 	gDisplayContext = nil;
+//DSpContextReference 	gDisplayContext = nil;
 
 
 /********************** ERASE OFFSCREEN BUFFER ********************/
@@ -111,6 +111,8 @@ Ptr 	tempPtr;
 
 void MakeGameWindow(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 Rect		screenRect;
 short		width,height;
 
@@ -181,6 +183,7 @@ short		width,height;
 	SetPort(gGameWindow);
 	BuildLookUpTables();											// build all graphic lookup tbls
 	EraseGameWindow();												// erase buffer & screen
+#endif
 }
 
 
@@ -765,6 +768,8 @@ static		long	x,y;
 
 		col = (112-width)<<1;
 
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 				jmp		@inline(col)
@@ -890,6 +895,7 @@ static		long	x,y;
 				move.l	(srcPtr)+,(destPtr)+
 
 			}
+#endif
 
 		destStartPtr += (OFFSCREEN_WIDTH>>2);		// next row
 		srcStartPtr += (OFFSCREEN_WIDTH>>2);
@@ -927,6 +933,8 @@ static		long	x,y;
 
 		col = (160-width)*6;
 
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 				jmp		@inline(col)
@@ -1103,6 +1111,7 @@ static		long	x,y;
 				move.l	#0xffffffff,(destPtr)+
 
 			}
+#endif
 
 		destStartPtr += gScreenRowOffsetLW;				// next row
 	}
@@ -1119,6 +1128,8 @@ static		long	x,y;
 
 static void PrepDrawSprockets(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 DSpContextAttributes 	displayConfig;
 OSStatus 				theError;
 Boolean					confirmIt = false;
@@ -1194,6 +1205,7 @@ Boolean					confirmIt = false;
 		gDisplayContext = nil;
 		DoFatalAlert("PrepDrawSprockets: DSpContext_SetState failed");
 	}
+#endif
 }
 
 
@@ -1201,6 +1213,8 @@ Boolean					confirmIt = false;
 
 void CleanupDisplay(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 OSStatus 		theError;
 
 	if (gDisplayContext != nil)
@@ -1226,7 +1240,7 @@ OSStatus 		theError;
 //    	gdh = GetMainDevice();
 //	    SetDepth(gdh,16,1,1);				//------ set to 16-bit
 //    }
-
+#endif
 }
 
 

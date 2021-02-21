@@ -1409,6 +1409,8 @@ static		Ptr		tempPtr,SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 		destPtr = destStartPtr;								// get line start ptr
 
 		col = (112-width)<<3;								// 8 bytes/macro
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 			move.l	d0,oldD0								// keep old d0 since I'm illegally using it!
@@ -1537,6 +1539,7 @@ static		Ptr		tempPtr,SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 				move.l	oldD0,D0							// restore d0 since I was illegally using it!
 		}
+#endif
 
 		destStartPtr += (OFFSCREEN_WIDTH>>2);				// next row
 	} while(--height);
@@ -1603,6 +1606,8 @@ static		Rect	box;
 
 		col = (112-width)<<1;
 
+		TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 		asm
 		{
 				jmp		@inline(col)
@@ -1727,6 +1732,7 @@ static		Rect	box;
 				move.l	(srcPtr)+,(destPtr)+
 				move.l	(srcPtr)+,(destPtr)+
 			}
+#endif
 
 		destStartPtr += (OFFSCREEN_WIDTH>>2);		// next row
 		srcStartPtr += (OFFSCREEN_WIDTH>>2);
@@ -1885,6 +1891,9 @@ static		Ptr		tmP;
 					maskPtr = maskStartPtr;
 
 					col = (112-(width>>2))<<3;							// 8 bytes/macro
+
+					TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 					asm
 					{
 						move.l	d0,oldD0								// keep old d0 since I'm illegally using it!
@@ -2013,6 +2022,7 @@ static		Ptr		tmP;
 
 							move.l	oldD0,D0							// restore d0 since I was illegally using it!
 					}
+#endif
 
 					for (col=(width&b11); col; col--)				// draw remaining pixels
 					{
@@ -2063,6 +2073,9 @@ static		Ptr		tmP;
 					tileMaskPtr = (long *)tileMaskStartPtr;
 
 					col = (112-(width>>2))<<4;							// 16 bytes/macro
+
+					TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 					asm
 					{
 						movem	d0/d1/a0,-(sp)
@@ -2193,6 +2206,7 @@ static		Ptr		tmP;
 							move.l	a0,tileMaskPtr
 							movem	(sp)+,d0/d1/a0
 					}
+#endif
 
 					tmP = (Ptr)tileMaskPtr;
 					for (col=(width&b11); col; col--)				// draw remaining pixels
@@ -2286,6 +2300,8 @@ static		short	drawHeight,originalY;
 
 			col = colCopy;							// assume didnt change
 
+			TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 			asm
 			{
 					jmp		@inline(col)
@@ -2410,12 +2426,16 @@ static		short	drawHeight,originalY;
 					move.l	(srcPtr)+,(destPtr)+
 					move.l	(srcPtr)+,(destPtr)+
 				}
+#endif
 
 			for (col = (width&b11); col > 0; col--)		// do remaining pixels
+				TODO_REWRITE_ASM();
+#if 0			// TODO REWRITE ASM!
 				asm
 				{
 					move.b	(srcPtr)+,(destPtr)+
 				}
+#endif
 
 
 			if (++y >=  PF_BUFFER_HEIGHT)					// see if wrap buffer vertically
@@ -2490,6 +2510,8 @@ static		short		drawHeight,originalY;
 
 				col = (112-(width>>2))<<1;						// max size = 112*4 = 448
 
+				TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 				asm
 				{
 						jmp		@inline(col)
@@ -2614,13 +2636,17 @@ static		short		drawHeight,originalY;
 						move.l	(srcPtr)+,(destPtr)+
 						move.l	(srcPtr)+,(destPtr)+
 					}
+#endif
 
 				for (col = (width&b11); col > 0; col--)		// do remaining pixels
 				{
+					TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 					asm
 					{
 						move.b	(srcPtr)+,(destPtr)+
 					}
+#endif
 				}
 			} // end if skip
 
@@ -2806,6 +2832,9 @@ static		long	colCopy;
 				maskPtr = maskStartPtr;
 
 				col = colCopy;									// get value
+
+				TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 				asm
 				{
 					move.l	d0,oldD0								// keep old d0 since I'm illegally using it!
@@ -2934,6 +2963,7 @@ static		long	colCopy;
 
 						move.l	oldD0,D0							// restore d0 since I was illegally using it!
 				}
+#endif
 
 				for (col=(width&b11); col; col--)				// draw remaining pixels
 				{
@@ -2983,6 +3013,9 @@ static		long	colCopy;
 				tileMaskPtr = (long *)tileMaskStartPtr;
 
 				col = colCopy;							// 16 bytes/macro
+
+				TODO_REWRITE_ASM();
+#if 0	// TODO REWRITE ASM!
 				asm
 				{
 					movem	d0/d1/a0,-(sp)
@@ -3113,6 +3146,7 @@ static		long	colCopy;
 						move.l	a0,tileMaskPtr
 						movem	(sp)+,d0/d1/a0
 				}
+#endif
 
 				tmP = (Ptr)tileMaskPtr;
 				for (col=(width&b11); col; col--)				// draw remaining pixels

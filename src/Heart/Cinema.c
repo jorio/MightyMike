@@ -178,7 +178,6 @@ re_enter:
 	songFlag = true;
 	FadeInGameCLUT();
 
-again:
 	do
 	{
 		RegulateSpeed2(1);
@@ -1351,10 +1350,13 @@ void DoNeedToRegisterScreen(void)
 
 void DoDemoExpiredScreen(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 	RestoreDefaultCLUT();
 	ShowCursor();
 	Alert(403,nil);
     CleanQuit();
+#endif
 }
 
 

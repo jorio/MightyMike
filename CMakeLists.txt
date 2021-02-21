@@ -199,9 +199,16 @@ if(NOT MSVC)
 		-Wno-multichar
 		-Wno-unknown-pragmas
 		-Wno-unused-parameter
+
 		$<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>
 
-		-Werror=implicit-function-declaration
+		-Wno-missing-braces						# TODO: REMOVEME
+		-Wno-parentheses						# TODO: REMOVEME
+#		-Werror=implicit-function-declaration	# TODO: UNCOMMENTME
+		-Wno-implicit-fallthrough				#TODO: REMOVEME  (for ILD macro)
+		-Wno-unused-variable					#TODO: REMOVEME
+		-Wno-implicit-int						#TODO: REMOVEME
+
 		-Werror=return-type
 	)
 else()

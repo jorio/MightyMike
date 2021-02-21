@@ -18,9 +18,6 @@ enum
 };
 
 
-extern void	Home(void);
-extern void	DoCR(void);
-extern void	PrintChar(char);
 extern void	StartRecordingDemo(void);
 extern void	SaveDemoData(void);
 extern void	InitDemoPlayback(void);
