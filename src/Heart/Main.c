@@ -111,7 +111,7 @@ short		gMainAppRezFile;
 
 void ToolBoxInit(void)
 {
-	TODO_REWRITE_THIS();
+	TODO_REWRITE_THIS_MINOR();
 #if 0
  	MaxApplZone();
  	MoreMasters();	MoreMasters();	MoreMasters();	MoreMasters();
@@ -1399,7 +1399,7 @@ OSErr		iErr;
 /******************** PROGRAM MAIN ENTRY  *******************/
 /************************************************************/
 
-void main(void)
+void GameMain(void)
   {
 	ToolBoxInit();
  	MaxApplZone();

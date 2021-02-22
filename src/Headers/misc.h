@@ -2,6 +2,8 @@
 // MISC.H
 //
 
+#include <stdio.h>
+
 #define MAX_GLOBAL_FLAGS		10
 #define gGlobFlag_MeDoneDead	gGlobalFlagList[0]		// flag set when I'm done with death anim
 
@@ -52,3 +54,4 @@ void SaveDemoTimer(void);
 
 #define TODO_REWRITE_ASM()		DoFatalAlert2("REWRITE 68K ASM HERE!", __func__)
 #define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)
+#define TODO_REWRITE_THIS_MINOR()		printf("TODO: rewrite this! %s\n", __func__)

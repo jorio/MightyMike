@@ -1216,7 +1216,7 @@ Boolean					confirmIt = false;
 
 void CleanupDisplay(void)
 {
-	TODO_REWRITE_THIS();
+	TODO_REWRITE_THIS_MINOR();
 #if 0
 OSStatus 		theError;
 

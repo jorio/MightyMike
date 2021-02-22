@@ -107,6 +107,7 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_Rex.c
 	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_Triceratops.c
 	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_Turtle.c
+	${GAME_SRCDIR}/Main.cpp
 )
 
 #set(GAME_HEADERS
