@@ -1331,35 +1331,6 @@ short	counter,i;
 }
 
 
-/**************** DO NEED TO REGISTER SCREEN ***********************/
-//
-// Called when player completes 1st level and game stops since not registered.
-//
-
-void DoNeedToRegisterScreen(void)
-{
-	LoadIMAGE(":data:images:register.image",SHOW_IMAGE_MODE_FADEIN);
-
-	do
-	{
-		ReadKeyboard();
-	}while((!GetKeyState(KEY_RETURN)) && (!GetKeyState(KEY_SPACE)));
-}
-
-/**************** DO DEMO EXPIRED SCREEN ***********************/
-
-void DoDemoExpiredScreen(void)
-{
-	TODO_REWRITE_THIS();
-#if 0
-	RestoreDefaultCLUT();
-	ShowCursor();
-	Alert(403,nil);
-    CleanQuit();
-#endif
-}
-
-
 /******************** DO LOSE SCREEN ********************/
 
 void DoLoseScreen(void)

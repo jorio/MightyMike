@@ -49,8 +49,6 @@ extern short	OpenMikeRezFile(Str255, Str255);
 extern unsigned long	MyRandomLong(void);
 extern unsigned short	MyRandomShort(void);
 extern void	SetMyRandomSeed(unsigned long);
-void GetDemoTimer(void);
-void SaveDemoTimer(void);
 
 #define TODO_REWRITE_ASM()		DoFatalAlert2("REWRITE 68K ASM HERE!", __func__)
 #define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)

@@ -142,5 +142,3 @@ extern void	DoHeadScreen(void);
 extern void	MoveHead(void);
 extern void	ShowBonusScreen(void);
 extern void	PrintBonusNum(long, short, short, short);
-void DoNeedToRegisterScreen(void);
-void DoDemoExpiredScreen(void);

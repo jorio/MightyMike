@@ -43,10 +43,6 @@ extern	Boolean			gMusicOnFlag,gAbortDemoFlag,gISPInitialized;
 /*    PROTOTYPES             */
 /****************************/
 
-static void CheckGameRegistration(void);
-static Boolean ValidateRegistrationNumber(unsigned char *regInfo);
-static void DoRegistrationDialog(unsigned char *out);
-
 /****************************/
 /*    CONSTANTS             */
 /****************************/
@@ -124,8 +120,6 @@ static	Str255		gMemoryErr = "Try increasing the applications memory size by sele
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
 Boolean		gIsPPC603_604 = false;		// TODO source port: what does this trigger?
-
-Boolean     gGameIsRegistered = false;
 
 unsigned long       gDemoVersionTimer = 0;
 
@@ -205,8 +199,6 @@ static Boolean beenHereFlag = false;
 		goto	exit;
 
 	CleanupDisplay();								// unloads Draw Sprocket
-
-    SaveDemoTimer();
 
 exit:
 
@@ -824,180 +816,7 @@ long		createdDirID;
 		DoFatalAlert("Cannot locate Preferences folder.  Be sure you have a valid Preferences folder in your System Folder.");
 
 	iErr = DirCreate(gPrefsFolderVRefNum,gPrefsFolderDirID,"MightyMike",&createdDirID);		// make MightyMike folder in there
-
-
-            /* SEE IF GAME IS REGISTERED OR NOT */
-
-#if !OEM
-    CheckGameRegistration();
-#else
-    gGameIsRegistered = true;
-#endif
-
 }
-
-
-/********************** CHECK GAME REGISTRATION *************************/
-
-static void CheckGameRegistration(void)
-{
-OSErr   iErr;
-FSSpec  spec;
-Str255  regFileName = ":MightyMike:Info";
-short		fRefNum;
-long        	numBytes = REG_LENGTH;
-unsigned char	regInfo[REG_LENGTH];
-
-            /* GET SPEC TO REG FILE */
-
-	iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, regFileName, &spec);
-    if (iErr)
-        goto game_not_registered;
-
-
-            /*************************/
-            /* VALIDATE THE REG FILE */
-            /*************************/
-
-            /* READ REG DATA */
-
-    if (FSpOpenDF(&spec,fsCurPerm,&fRefNum) != noErr)
-        goto game_not_registered;
-
-	FSRead(fRefNum,&numBytes,regInfo);
-
-    FSClose(fRefNum);
-
-            /* VALIDATE IT */
-
-    if (!ValidateRegistrationNumber(&regInfo[0]))
-        goto game_not_registered;
-
-    gGameIsRegistered = true;
-    return;
-
-        /* GAME IS NOT REGISTERED YET, SO DO DIALOG */
-
-game_not_registered:
-
-    DoRegistrationDialog(&regInfo[0]);
-
-    if (gGameIsRegistered)                                  // see if write out reg file
-    {
-	    FSpDelete(&spec);	                                // delete existing file if any
-	    iErr = FSpCreate(&spec,'MMik','xxxx',-1);
-        if (iErr == noErr)
-        {
-        	numBytes = REG_LENGTH;
-			FSpOpenDF(&spec,fsCurPerm,&fRefNum);
-			FSWrite(fRefNum,&numBytes,regInfo);
-		    FSClose(fRefNum);
-     	}
-    }
-
-            /* DEMO MODE */
-    else
-    {
-		/* SEE IF TIMER HAS EXPIRED */
-
-        GetDemoTimer();
-    	if (gDemoVersionTimer > ((GAME_FPS * 60) * 60))		// let play for n minutes
-    	{
-    		DoDemoExpiredScreen();
-    		CleanQuit();
-    	}
-    }
-
-}
-
-
-/********************* VALIDATE REGISTRATION NUMBER ******************/
-
-static Boolean ValidateRegistrationNumber(unsigned char *regInfo)
-{
-short   i,j;
-
-            /* EXTRACT COMPONENTS */
-
-    for (i = 0, j = REG_LENGTH-1; i < REG_LENGTH; i += 2, j -= 2)     // get checksum
-    {
-        Byte    value,c,d;
-
-		if ((regInfo[i] >= 'a') && (regInfo[i] <= 'z'))	// convert to upper case
-			regInfo[i] = 'A' + (regInfo[i] - 'a');
-
-		if ((regInfo[j] >= 'a') && (regInfo[j] <= 'z'))	// convert to upper case
-			regInfo[j] = 'A' + (regInfo[j] - 'a');
-
-        value = regInfo[i] - 'A';           // convert letter to digit 0..9
-        c = ('R' - regInfo[j]);             // convert character to number
-
-        d = c - value;                      // the difference should be == i
-
-        if (d != 0)
-            return(false);
-    }
-
-    return(true);
-}
-
-
-/****************** DO REGISTRATION DIALOG *************************/
-
-static void DoRegistrationDialog(unsigned char *out)
-{
-	TODO_REWRITE_THIS();
-#if 0
-DialogPtr 		myDialog;
-Boolean			dialogDone = false, isValid;
-short			itemType,itemHit;
-ControlHandle	itemHandle;
-Rect			itemRect;
-Str255          regInfo;
-
-	FlushEvents ( everyEvent, REMOVE_ALL_EVENTS);
-	myDialog = GetNewDialog(128,nil,MOVE_TO_FRONT);
-
-				/* DO IT */
-
-	while(dialogDone == false)
-	{
-		ModalDialog(nil, &itemHit);
-		switch (itemHit)
-		{
-			case	1:									        // Register
-					GetDialogItem(myDialog,4,&itemType,(Handle *)&itemHandle,&itemRect);
-					GetDialogItemText((Handle)itemHandle,regInfo);
-                    BlockMove(&regInfo[1], &regInfo[0], 100);         // shift out length byte
-
-                    isValid = ValidateRegistrationNumber(regInfo);    // validate the number
-
-                    if (isValid == true)
-                    {
-                        gGameIsRegistered = true;
-                        dialogDone = true;
-                        BlockMove(regInfo, out, REG_LENGTH);		// copy to output
-                    }
-                    else
-                    {
-                        DoAlert("Sorry, that registration code is not valid.  Note that validation codes are case sensitive.  Please try again.");
-                    }
-					break;
-
-            case    2:                                  // Demo
-                    dialogDone = true;
-                    break;
-
-			case 	3:									// QUIT
-                    CleanQuit();
-					break;
-		}
-	}
-	DisposeDialog(myDialog);
-#endif
-}
-
-
 
 
 #pragma mark -
@@ -1200,75 +1019,4 @@ void SetMyRandomSeed(unsigned long seed)
 	seed1 = 0;
 	seed2 = 0;
 }
-
-#pragma mark -
-
-
-/******************* GET DEMO TIMER *************************/
-
-void GetDemoTimer(void)
-{
-OSErr				iErr;
-short				refNum;
-FSSpec				file;
-long				count;
-
-				/* READ TIMER FROM FILE */
-
-	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "Pimple", &file);
-	iErr = FSpOpenDF(&file, fsRdPerm, &refNum);
-	if (iErr)
-		gDemoVersionTimer = 0;
-	else
-	{
-		count = sizeof(gDemoVersionTimer);
-		iErr = FSRead(refNum, &count,  &gDemoVersionTimer);			// read data from file
-		if (iErr)
-		{
-			FSClose(refNum);
-			FSpDelete(&file);										// file is corrupt, so delete
-			gDemoVersionTimer = 0;
-			return;
-		}
-		FSClose(refNum);
-	}
-
-}
-
-
-/************************ SAVE DEMO TIMER ******************************/
-
-void SaveDemoTimer(void)
-{
-FSSpec				file;
-OSErr				iErr;
-short				refNum;
-long				count;
-
-				/* CREATE BLANK FILE */
-
-	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "Pimple", &file);
-	FSpDelete(&file);															// delete any existing file
-	iErr = FSpCreate(&file, '????', 'xxxx', smSystemScript);					// create blank file
-	if (iErr)
-		return;
-
-
-				/* OPEN FILE */
-
-	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, "Pimple", &file);
-	iErr = FSpOpenDF(&file, fsRdWrPerm, &refNum);
-	if (iErr)
-		return;
-
-				/* WRITE DATA */
-
-	count = sizeof(gDemoVersionTimer);
-	FSWrite(refNum, &count, &gDemoVersionTimer);
-	FSClose(refNum);
-}
-
-
-
-
 

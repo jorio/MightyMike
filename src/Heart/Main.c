@@ -53,7 +53,7 @@ extern	short		gMyHealth,gMyMaxHealth;
 extern	WeaponType	gMyWeapons[];
 extern	Byte		gNumWeaponsIHave,gCurrentWeaponIndex;
 extern	short		gLastNonDeathX,gLastNonDeathY;
-extern	Boolean		gMyKeys[6],gAbortDemoFlag,gGameIsDemoFlag,gGameIsRegistered;
+extern	Boolean		gMyKeys[6],gAbortDemoFlag,gGameIsDemoFlag;
 extern	short		gPrefsFolderVRefNum,gDemoMode,gNumBunnies;
 extern	long		gPrefsFolderDirID,NodeStackFront;
 #if __USE_PF_VARS
@@ -377,9 +377,6 @@ long	r;
 
 again:
 
-    if (!gGameIsRegistered)                     // if not registered, then time demo
-        GetDemoTimer();
-
     TurnOnISp();                                // lets use ISp
 
 	do
@@ -422,9 +419,6 @@ again:
 			(!gFinishedArea) && (!gAbortDemoFlag));
 
 	TurnOffISp();                               // well, we dont need ISp anymore
-
-    if (!gGameIsRegistered)                     // if not registered, then save demo timer
-        SaveDemoTimer();
 }
 
 
@@ -1064,27 +1058,19 @@ short	maxScenes;
 
 				/* SEE HOW MANY LEVELS TO PLAY */
 
-    if (gGameIsRegistered)                              // not registerd, then only allow to play 1 level
+	switch(gDifficultySetting)
 	{
-    	switch(gDifficultySetting)
-    	{
-    //		case	DIFFICULTY_NORMAL:
-    //				maxScenes = 4;
-    //				break;
-    		case	DIFFICULTY_EASY:
-    				maxScenes = 3;
-    				break;
-    		case	DIFFICULTY_NORMAL:
-    		case	DIFFICULTY_HARD:
-    				maxScenes = 5;
-    				break;
-    	}
-    }
-    else
-    {
-        maxScenes = 1;
-        gStartingScene = 0;
-    }
+//		case	DIFFICULTY_NORMAL:
+//				maxScenes = 4;
+//				break;
+		case	DIFFICULTY_EASY:
+				maxScenes = 3;
+				break;
+		case	DIFFICULTY_NORMAL:
+		case	DIFFICULTY_HARD:
+				maxScenes = 5;
+				break;
+	}
 
 	for (gSceneNum = gStartingScene; gSceneNum < maxScenes; gSceneNum++)	// do each Scene
 	{
@@ -1131,8 +1117,7 @@ retry_area:	PlayArea();											// PLAY IT
 		}
 	}
 
-	if (gGameIsRegistered)
-    	gWinFlag = true;						                // if got here, then must have won
+	gWinFlag = true;											// if got here, then must have won
 
 
 game_over:
@@ -1143,15 +1128,10 @@ game_over:
 
 	if (!gGameIsDemoFlag)										// if demo, then dont bother with final stuff
 	{
-		if (gGameIsRegistered)
-		{
-			if (gWinFlag)											// see if won or lost
-				DoWinScreen();
-			else
-				DoLoseScreen();
-		}
+		if (gWinFlag)											// see if won or lost
+			DoWinScreen();
 		else
-			DoNeedToRegisterScreen();
+			DoLoseScreen();
 
 		AddHighScore(gScore);									// try to add to high scores
 	}
