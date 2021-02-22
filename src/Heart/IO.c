@@ -18,7 +18,6 @@
 #include "input.h"
 
 
-extern	long	gScreenXOffset,gScreenYOffset;
 extern	long		gScore;
 extern	Byte	gStartingScene;
 extern	Boolean	gPPCFullScreenFlag;

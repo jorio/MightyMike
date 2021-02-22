@@ -45,8 +45,6 @@ extern	union_gX;
 extern	union_gY;
 extern	short			gMyDirection;
 extern	ObjNode			*gThisNodePtr,*gMyNodePtr;
-extern	GDHandle		gMainScreen;
-extern	PixMapHandle	gMainScreenPixMap;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	unsigned char	gInterlaceMode;

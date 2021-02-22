@@ -13,11 +13,7 @@
 #include "misc.h"
 
 extern	Handle		gShapeTableHandle[];
-extern	GDHandle		gMainScreen;
-extern	PixMapHandle	gMainScreenPixMap;
-extern	Ptr				gScreenAddr;
 extern	char  			gMMUMode;
-extern	long			gScreenRowOffsetLW;
 
 /****************************/
 /*    CONSTANTS             */

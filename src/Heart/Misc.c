@@ -31,7 +31,6 @@
 #include "objecttypes.h"
 #include "cinema.h"
 
-extern	WindowPtr		gGameWindow;
 extern	PaletteHandle	gGamePalette;
 extern	short				gColorListSize;
 extern	Handle			gShapeTableHandle[];

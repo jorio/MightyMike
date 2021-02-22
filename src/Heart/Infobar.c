@@ -22,14 +22,10 @@
 #include "main.h"
 #include "input.h"
 
-extern	GDHandle		gMainScreen;
-extern	PixMapHandle	gMainScreenPixMap;
-extern	Ptr				gScreenAddr;
 extern	char  			gMMUMode;
 extern	Boolean			ImDeadFlag;
 extern	Byte			gCurrentWeaponType,gSceneNum;
 extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	long			NumObjects,gDifficultySetting;
 extern	short		gNumEnemies,gNumBunnies,gDemoMode;
 extern	WeaponType		gMyWeapons[];

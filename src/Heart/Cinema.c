@@ -28,7 +28,6 @@ extern	Handle		gOffScreenHandle;
 extern	Handle		gShapeTableHandle;
 extern	Handle		gBackgroundHandle;
 extern	long		gDX,gDY,gDifficultySetting;
-extern	long		gScreenXOffset,gScreenYOffset;
 extern	ObjNode		*gThisNodePtr;
 extern	long		gScore;
 extern	short		gHtab,gVtab,gDemoMode,gLoadOldGameNum,gMyMaxHealth;

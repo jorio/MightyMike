@@ -21,7 +21,6 @@
 
 extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
 extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	WindowPtr		gGameWindow;
 extern	union_gX;
 extern	union_gY;
 extern	CollisionRec	gCollisionList[];

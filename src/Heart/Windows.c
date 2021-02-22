@@ -55,9 +55,7 @@ Handle			gPFBufferHandle = nil;
 Handle			gPFBufferCopyHandle = nil;
 Handle			gPFMaskBufferHandle = nil;
 
-GDHandle		gMainScreen;			// SCREEN ACCESS
-PixMapHandle	gMainScreenPixMap;
-Ptr				gScreenAddr;
+Ptr				gScreenAddr;			// SCREEN ACCESS
 char  			gMMUMode;
 long			gScreenRowOffset;		// offset for bytes
 long			gScreenRowOffsetLW;		// offset for Long Words
@@ -113,6 +111,8 @@ void MakeGameWindow(void)
 {
 	TODO_REWRITE_THIS();
 #if 0
+GDHandle		gMainScreen;			// SCREEN ACCESS
+PixMapHandle	gMainScreenPixMap;
 Rect		screenRect;
 short		width,height;
 

@@ -23,20 +23,15 @@
 
 extern	ObjNode			*gThisNodePtr,*FirstNodePtr,*gMyNodePtr;
 extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	WindowPtr		gGameWindow;
 extern	union_gX;
 extern	union_gY;
 extern	Byte			gCurrentWeaponType,gSceneNum;
 extern	long			gNumCoins;
 extern	Boolean			gShootButtonDownFlag;
 extern	unsigned char	gInterlaceMode;
-extern	GDHandle		gMainScreen;
-extern	PixMapHandle	gMainScreenPixMap;
-extern	Ptr				gScreenAddr;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	WindowPtr		gGameWindow;
 extern	long			gPFLookUpTable[PF_BUFFER_HEIGHT];
 extern	int				gScrollX,gScrollY;
 extern	Handle			gPFBufferHandle,gPFBufferCopyHandle;

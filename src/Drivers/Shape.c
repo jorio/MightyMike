@@ -18,8 +18,6 @@
 extern	Handle		gOffScreenHandle;
 extern	Handle		gBackgroundHandle;
 extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	GDHandle		gMainScreen;
-extern	PixMapHandle	gMainScreenPixMap;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
