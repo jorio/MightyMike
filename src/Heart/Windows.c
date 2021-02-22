@@ -199,6 +199,8 @@ void EraseGameWindow (void)
 
 void WindowToBlack(void)
 {
+	TODO_REWRITE_THIS();
+#if 0
 GrafPort	killMenuBar;
 									/* This covers up the menu bar */
 									/* and fills the screen with black */
@@ -206,6 +208,7 @@ GrafPort	killMenuBar;
 	OpenPort((GrafPtr)&killMenuBar);
 	BackColor(blackColor);
 	EraseRect(&killMenuBar.portRect);
+#endif
 }
 
 /********************** DUMP GAME WINDOW ****************/

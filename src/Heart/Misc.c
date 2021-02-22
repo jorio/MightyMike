@@ -210,8 +210,10 @@ static Boolean beenHereFlag = false;
 
 exit:
 
+#if 0
     if (gISPInitialized)
    		ISpShutdown();
+#endif
 
 //	RestoreDefaultCLUT();
 
