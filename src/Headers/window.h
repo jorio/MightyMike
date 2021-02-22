@@ -42,3 +42,4 @@ extern void	EraseStore(void);
 extern void	DisplayStoreBuffer(void);
 extern void	BlankEntireScreenArea(void);
 
+void PresentIndexedFramebuffer(void);

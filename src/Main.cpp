@@ -14,9 +14,10 @@
 
 extern "C"
 {
-	// bare minimum from Windows.c to satisfy externs in game code
-	SDL_Window*			gSDLWindow = nullptr;
-	SDL_Renderer*		gSDLRenderer = nullptr;
+	// Satisfy externs in game code
+	SDL_Window*			gSDLWindow		= nullptr;
+	SDL_Renderer*		gSDLRenderer	= nullptr;
+	SDL_Texture*		gSDLTexture		= nullptr;
 //	WindowPtr gCoverWindow = nullptr;
 //	UInt32* gCoverWindowPixPtr = nullptr;
 
@@ -82,16 +83,16 @@ int CommonMain(int argc, const char** argv)
 	if (!gSDLWindow)
 		throw std::runtime_error("Couldn't create SDL window.");
 
-	gSDLRenderer = SDL_CreateRenderer(
-			gSDLWindow,
-			-1,
-			SDL_RENDERER_PRESENTVSYNC);
+	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, -1, SDL_RENDERER_PRESENTVSYNC);
 	if (!gSDLRenderer)
 		throw std::runtime_error("Couldn't create SDL renderer.");
 
-	SDL_SetRenderDrawColor(gSDLRenderer, 128, 128, 255, 255);
-	SDL_RenderClear(gSDLRenderer);
-	SDL_RenderPresent(gSDLRenderer);
+	gSDLTexture = SDL_CreateTexture(gSDLRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 640, 480);
+	if (!gSDLTexture)
+		throw std::runtime_error("Couldn't create SDL texture.");
+
+	SDL_RenderSetLogicalSize(gSDLRenderer, 640, 480);
+	SDL_RenderSetIntegerScale(gSDLRenderer, SDL_TRUE);
 
 	// Set up globals that the game expects
 //	gCoverWindow = Pomme::Graphics::GetScreenPort();

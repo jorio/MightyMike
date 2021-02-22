@@ -22,6 +22,7 @@ extern	Ptr				gScreenAddr;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	Boolean			gPPCFullScreenFlag;
+extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 
 /****************************/
 /*    CONSTANTS             */
@@ -152,11 +153,8 @@ RGBColor		*rgbPtr,rgb;
 
 void LoadIMAGE(Str255 fileName,short showMode)
 {
-
 Handle		theImageHand;
-register	short		i,x,y,width,height,*intPtr;
 RGBColor	*rgbPtr,rgb;
-long		*source,*dest,*destStart;
 
 	EraseCLUT();
 
@@ -166,7 +164,8 @@ long		*source,*dest,*destStart;
 					/* GET COLOR INFO FOR PICTURE */
 
 	rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
-	for (i=0; i<256; i++)
+	ByteswapInts(2, 256*3, rgbPtr);						// byteswap colors (each component is 16-bit)
+	for (short i = 0; i < 256; i++)
 	{
 		rgb = *rgbPtr++;								// get a color
 		SetEntryColor(gGamePalette,i,&rgb);				// set
@@ -174,11 +173,21 @@ long		*source,*dest,*destStart;
 
 				/* DUMP PIXEL IMAGE INTO BUFFER */
 
-	intPtr = (short *)rgbPtr;								// get width & height
-	width = (*intPtr++)>>2;
-	height = *intPtr++;
+	int16_t* int16Ptr = (int16_t *)rgbPtr;				// get width & height
+	ByteswapInts(2, 2, int16Ptr);						// byteswap width, height
+	int16_t width = *int16Ptr++;
+	int16_t height = *int16Ptr++;
 
-	destStart = (long *)gScreenAddr;					// init pointers
+	GAME_ASSERT(width * height == sizeof(gIndexedFramebuffer));
+	BlockMove((void*) int16Ptr, gIndexedFramebuffer, width * height);
+
+	PresentIndexedFramebuffer();
+
+#if 0
+//long		*source,*dest,*destStart;
+	width >>= 2;
+
+	destStart = (long *)*gOffScreenHandle;				// init pointers
 	source = (long *)StripAddress((Ptr)intPtr);
 
 //	gMMUMode = true32b;									// we must do this in 32bit addressing mode
@@ -194,6 +203,7 @@ long		*source,*dest,*destStart;
 	}
 
 //	SwapMMUMode(&gMMUMode);								// Restore addressing mode
+#endif
 
 	DisposeHandle(theImageHand);					// nuke image data
 

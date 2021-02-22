@@ -16,6 +16,7 @@
 extern void	ClearGlobalFlags(void);
 extern void	ShowSystemErr(OSErr);
 extern void	DoAlert(const char*);
+void DoAssert(const char* msg, const char* file, int line);
 extern void	DoFatalAlert(const char*);
 extern void	DoFatalAlert2(const char*, const char*);
 extern void	TellCopyToHD(void);
@@ -53,3 +54,16 @@ extern void	SetMyRandomSeed(unsigned long);
 #define TODO_REWRITE_ASM()		DoFatalAlert2("REWRITE 68K ASM HERE!", __func__)
 #define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)
 #define TODO_REWRITE_THIS_MINOR()		printf("TODO: rewrite this! %s\n", __func__)
+
+
+#define GAME_ASSERT(condition)											\
+	do {																\
+		if (!(condition))												\
+			DoAssert(#condition, __func__, __LINE__);					\
+	} while(0)
+
+#define GAME_ASSERT_MESSAGE(condition, message)							\
+	do {																\
+		if (!(condition))												\
+			DoAssert(message, __func__, __LINE__);						\
+	} while(0)

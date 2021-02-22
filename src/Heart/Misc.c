@@ -160,6 +160,18 @@ void DoAlert(const char* s)
 }
 
 
+/*********************** DO ASSERT *******************/
+
+void DoAssert(const char* msg, const char* file, int line)
+{
+	printf("NANOSAUR ASSERTION FAILED: %s - %s:%d\n", msg, file, line);
+	static char alertbuf[1024];
+	snprintf(alertbuf, 1024, "%s\n%s:%d", msg, file, line);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Nanosaur: Assertion Failed!", alertbuf, NULL);
+	ExitToShell();
+}
+
+
 /*********************** DO FATAL ALERT *******************/
 
 void DoFatalAlert(const char* s)
@@ -426,10 +438,12 @@ Handle LoadPackedFile(Str255 fileName)
 {
 OSErr		iErr;
 short		fRefNum,vRefNum;
-long		fileSize,fileSizeCopy,decompType;
+long		fileSize,fileSizeCopy;
 Str255		volName;
 Handle		dataHand;
-long	numToRead,decompSize;
+long		numToRead;
+int32_t		decompSize;
+int32_t		decompType;
 
 	MaxMem(&someLong);									// clean up
 	CompactMem(maxSize);
@@ -450,17 +464,19 @@ long	numToRead,decompSize;
 					/*	READ DECOMP SIZE */
 
 	numToRead = 4;
-	iErr = FSRead(fRefNum,&numToRead,&decompSize);			// read 4 byte length
+	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompSize);			// read 4 byte length
 	if (iErr != noErr)
 		DoFatalAlert ("Error reading Packed data!");
+	ByteswapInts(numToRead, 1, &decompSize);
 	fileSize -= numToRead;
 
 					/*	READ DECOMP TYPE */
 
 	numToRead = 4;
-	iErr = FSRead(fRefNum,&numToRead,&decompType);			// read compression type
+	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompType);			// read compression type
 	if (iErr != noErr)
 		DoFatalAlert ("Error reading Packed data Header!");
+	ByteswapInts(numToRead, 1, &decompType);
 	fileSize -= numToRead;
 
 					/* GET MEMORY FOR UNPACKED DATA */

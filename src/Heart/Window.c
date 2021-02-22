@@ -17,6 +17,8 @@
 #include "misc.h"
 //#include 	<DrawSprocket.h>
 
+#include <SDL.h>
+
 extern	Boolean		gPPCFullScreenFlag;
 extern	Handle		gBackgroundHandle;
 extern	Ptr			gSHAPE_HEADER_Ptrs[];
@@ -30,6 +32,11 @@ extern long	PF_TILE_WIDTH;
 extern long	PF_WINDOW_TOP;
 extern long	PF_WINDOW_LEFT;
 #endif
+
+
+extern SDL_Window*			gSDLWindow;
+extern SDL_Renderer*		gSDLRenderer;
+extern SDL_Texture*			gSDLTexture;
 
 
 /****************************/
@@ -71,6 +78,10 @@ long			*gPFMaskLookUpTable = nil;
 
 Boolean			gLoadedDrawSprocket = false;
 //DSpContextReference 	gDisplayContext = nil;
+
+uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
+uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
+
 
 
 /********************** ERASE OFFSCREEN BUFFER ********************/
@@ -1252,14 +1263,29 @@ OSStatus 		theError;
 }
 
 
+/****************** PRESENT FRAMEBUFFER *************************/
 
+void PresentIndexedFramebuffer(void)
+{
+	uint8_t* rgba = &gRGBAFramebuffer[0];
+	const uint8_t* indexed = &gIndexedFramebuffer[0];
 
+	for (int y = 0; y < VISIBLE_HEIGHT; y++)
+	{
+		for (int x = 0; x < VISIBLE_WIDTH; x++)
+		{
+			rgba[0] = 0xFF;
+			rgba[1] = *indexed;
+			rgba[2] = *indexed;
+			rgba[3] = *indexed;
 
+			rgba += 4;
+			indexed += 1;
+		}
+	}
 
-
-
-
-
-
-
-
+	SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
+	SDL_RenderClear(gSDLRenderer);
+	SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
+	SDL_RenderPresent(gSDLRenderer);
+}
