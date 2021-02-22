@@ -15,7 +15,7 @@
 #include "io.h"
 //#include <timer.h>
 #include "sound2.h"
-#include "windows.h"
+#include "window.h"
 
 extern	PaletteHandle	gGamePalette;
 extern	char  			gMMUMode;

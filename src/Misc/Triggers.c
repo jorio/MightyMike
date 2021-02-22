@@ -9,7 +9,7 @@
 /*    EXTERNALS             */
 /****************************/
 #include "myglobals.h"
-#include "windows.h"
+#include "window.h"
 #include "object.h"
 #include "triggers.h"
 #include "playfield.h"

@@ -17,7 +17,7 @@
 //#include <timer.h>
 //#include <inputsprocket.h>
 //#include <textutils.h>
-#include "windows.h"
+#include "window.h"
 #include "io.h"
 #include "object.h"
 #include "bitio.h"

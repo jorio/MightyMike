@@ -60,7 +60,7 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Heart/Misc.c
 	${GAME_SRCDIR}/Heart/Picture.c
 	${GAME_SRCDIR}/Heart/Spin.c
-	${GAME_SRCDIR}/Heart/Windows.c
+	${GAME_SRCDIR}/Heart/Window.c
 	${GAME_SRCDIR}/Heart/Main.c
 	${GAME_SRCDIR}/Drivers/Animation.c
 	${GAME_SRCDIR}/Drivers/ObjectManager.c

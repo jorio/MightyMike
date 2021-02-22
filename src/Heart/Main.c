@@ -12,7 +12,7 @@
 //#include <sound.h>
 //#include <files.h>
 #include "objecttypes.h"
-#include "windows.h"
+#include "window.h"
 #include "picture.h"
 #include "playfield.h"
 #include "myguy.h"

@@ -13,7 +13,7 @@
 //#include <pictutils.h>
 //#include <palettes.h>
 //#include <gestalt.h>
-#include "windows.h"
+#include "window.h"
 #include "playfield.h"
 #include "object.h"
 #include "enemy.h"

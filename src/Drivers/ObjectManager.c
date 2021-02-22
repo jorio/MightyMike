@@ -10,7 +10,7 @@
 /***************/
 #include "myglobals.h"
 #include "playfield.h"
-#include "windows.h"
+#include "window.h"
 #include "object.h"
 #include "misc.h"
 #include "shape.h"

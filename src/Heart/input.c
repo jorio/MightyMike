@@ -21,7 +21,7 @@
 #include "myglobals.h"
 #include "misc.h"
 #include "input.h"
-#include "windows.h"
+#include "window.h"
 
 extern	unsigned long 		gOriginalSystemVolume;
 extern	short				gMainAppRezFile;

@@ -8,7 +8,7 @@
 /****************************/
 /*    EXTERNALS             */
 /****************************/
-#include "windows.h"
+#include "window.h"
 #include "object.h"
 #include "triggers.h"
 #include "shape.h"

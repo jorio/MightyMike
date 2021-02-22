@@ -1,5 +1,5 @@
 /****************************/
-/*        WINDOWS           */
+/*        WINDOW            */
 /* (c)1994 Pangea Software  */
 /* By Brian Greenstone      */
 /****************************/
@@ -11,7 +11,7 @@
 #include "myglobals.h"
 //#include <qdoffscreen.h>
 //#include <pictutils.h>
-#include "windows.h"
+#include "window.h"
 #include "playfield.h"
 #include "object.h"
 #include "misc.h"

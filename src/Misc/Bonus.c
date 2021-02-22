@@ -10,7 +10,7 @@
 /****************************/
 #include "myglobals.h"
 //#include <fixmath.h>
-#include "windows.h"
+#include "window.h"
 #include "enemy.h"
 #include "object.h"
 #include "bonus.h"

@@ -11,7 +11,7 @@
 #include "myglobals.h"
 //#include <pictutils.h>
 //#include <palettes.h>
-#include "windows.h"
+#include "window.h"
 #include "picture.h"
 #include "misc.h"
 
