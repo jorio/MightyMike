@@ -17,7 +17,7 @@
 #include "sound2.h"
 #include "window.h"
 
-extern	PaletteHandle	gGamePalette;
+extern	GamePalette		gGamePalette;
 extern	char  			gMMUMode;
 extern	long			gScreenLookUpTable[];
 extern	long		gFrames,gScreenRowOffsetLW,gScreenRowOffset;

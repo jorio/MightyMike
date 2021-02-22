@@ -15,8 +15,7 @@
 #include "picture.h"
 #include "misc.h"
 
-extern	PaletteHandle	gGamePalette;
-extern short				gColorListSize;
+extern	GamePalette		gGamePalette;
 extern	Handle			gOffScreenHandle;
 extern	Ptr				gScreenAddr;
 extern	char  			gMMUMode;
@@ -55,7 +54,7 @@ RGBColor	*rgbPtr,rgb;
 					/* GET COLOR INFO FOR IMAGE */
 	if (getPalFlag)
 	{
-		gColorListSize = 256;								// assume its a full palette
+//		gColorListSize = 256;								// assume its a full palette
 		rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
 		for (i=0; i<256; i++)
 		{
@@ -106,7 +105,7 @@ RGBColor		*rgbPtr,rgb;
 					/* GET COLOR INFO FOR IMAGE */
 	if (getPalFlag)
 	{
-		gColorListSize = 256;								// assume its a full palette
+//		gColorListSize = 256;								// assume its a full palette
 		rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
 		for (i=0; i<256; i++)
 		{
@@ -154,7 +153,6 @@ RGBColor		*rgbPtr,rgb;
 void LoadIMAGE(Str255 fileName,short showMode)
 {
 Handle		theImageHand;
-RGBColor	*rgbPtr,rgb;
 
 	EraseCLUT();
 
@@ -163,17 +161,16 @@ RGBColor	*rgbPtr,rgb;
 
 					/* GET COLOR INFO FOR PICTURE */
 
-	rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
+	RGBColor* rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
 	ByteswapInts(2, 256*3, rgbPtr);						// byteswap colors (each component is 16-bit)
-	for (short i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++)
 	{
-		rgb = *rgbPtr++;								// get a color
-		SetEntryColor(gGamePalette,i,&rgb);				// set
+		gGamePalette[i] = RGBColorToU32(&rgbPtr[i]);
 	}
 
 				/* DUMP PIXEL IMAGE INTO BUFFER */
 
-	int16_t* int16Ptr = (int16_t *)rgbPtr;				// get width & height
+	int16_t* int16Ptr = (int16_t *)(*theImageHand + (256*2*3));				// get width & height
 	ByteswapInts(2, 2, int16Ptr);						// byteswap width, height
 	int16_t width = *int16Ptr++;
 	int16_t height = *int16Ptr++;
@@ -209,7 +206,7 @@ RGBColor	*rgbPtr,rgb;
 
 						/* LETS SEE IT */
 
-	gColorListSize = 255;							// force the CLUT size
+//	gColorListSize = 255;							// force the CLUT size
 
 	switch(showMode)
 	{
@@ -259,7 +256,7 @@ RGBColor		*rgbPtr,rgb;
 	rgbPtr = (RGBColor *)AllocPtr(256*sizeof(RGBColor));	// alloc memory to hold colors
 	numToRead = 256*sizeof(RGBColor);
 	FSRead(fRefNum,&numToRead,(Ptr)rgbPtr);					// read color data
-	gColorListSize = 256;
+//	gColorListSize = 256;
 	for (i=0; i<256; i++)
 	{
 		rgb = *rgbPtr++;									// get a color

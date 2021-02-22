@@ -25,12 +25,8 @@ extern	char  			gMMUMode;
 /*     VARIABLES      */
 /**********************/
 
-PaletteHandle	gGamePalette = nil;
-static	PaletteHandle	gBackUpPalette = nil;
-
-static	ColorSpec 		gDefaultCLUT[256];
-
-short			gColorListSize;
+GamePalette				gGamePalette;
+static	GamePalette		gBackUpPalette;
 
 static	Boolean			gSceenBlankedFlag = false;
 
@@ -39,23 +35,10 @@ static	Boolean			gSceenBlankedFlag = false;
 
 void InitPaletteStuff(void)
 {
-short	i;
-short err;
-
-	gGamePalette = NewPalette(256,nil,pmTolerant+pmExplicit,0);		// create empty palette
-	gBackUpPalette = NewPalette(256,nil,pmTolerant+pmExplicit,0);	// create empty palette
-
-	for (i=0; i<255; i++)				// deprotect all colors
+	for (int i = 0; i < 256; i++)
 	{
-		ReserveEntry(i,false);
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-
-		ProtectEntry(i,false);
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
+		gGamePalette[i]		= 0xFF000000 | i;
+		gBackUpPalette[i]	= 0xFF000000 | i;
 	}
 }
 
@@ -74,24 +57,24 @@ RGBColor	rgbColor,*colorEntryPtr;
 	cOffPtr = (long *)(*gShapeTableHandle[groupNum]);				// get ptr to Color Table offset
 
 	intPtr = (short *)((*cOffPtr)+(*gShapeTableHandle[groupNum]));	// get ptr to color header
-	gColorListSize = *intPtr++;							// # entries in color list
+	short colorListSize = *intPtr++;							// # entries in color list
 	colorEntryPtr = (RGBColor *)intPtr;					// point to color list
 
 
 					/* BUILD THE PALETTE */
 
-	for (i=0; i<gColorListSize; i++)
+	for (i=0; i<colorListSize; i++)
 	{
 		rgbColor = *colorEntryPtr++;					// get color
-		SetEntryColor(gGamePalette,i,&rgbColor);		// set color
+		gGamePalette[i] = RGBColorToU32(&rgbColor);		// set color
 	}
 
 				/* IF <256, THEN FORCE LAST COLOR TO BLACK */
 
-	if (gColorListSize<256)
+	if (colorListSize<256)
 	{
 		rgbColor.red = rgbColor.blue = rgbColor.green = 0x0000;
-		SetEntryColor(gGamePalette,255,&rgbColor);		// set color
+		gGamePalette[255] = RGBColorToU32(&rgbColor);	// set color
 	}
 }
 
@@ -274,26 +257,6 @@ se1:
 	gSceenBlankedFlag = true;
 }
 
-
-
-/******************* SEE IF COLOR IS IN GAME PALETTE *******************/
-
-Boolean ColorInGamePalette(RGBColor rgb)
-{
-static	short	i;
-static	RGBColor rgb2;
-
-	for (i=0; i<gColorListSize; i++)			// see if color already in palette
-	{
-		GetEntryColor(gGamePalette,i,&rgb2);	// get gamepal color
-		if ((rgb2.red == rgb.red) &&
-			(rgb2.green == rgb.green) &&
-			(rgb.blue == rgb2.blue))
-			return(true);
-	}
-
-	return(false);
-}
 
 
 /************************ FADE OUT GAME CLUT ********************/

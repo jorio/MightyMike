@@ -31,8 +31,6 @@
 #include "enemy5.h"
 #include "racecar.h"
 
-extern	PaletteHandle	gGamePalette;
-extern 	short				gColorListSize;
 extern	Handle			gOffScreenHandle;
 extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];

@@ -31,8 +31,6 @@
 #include "objecttypes.h"
 #include "cinema.h"
 
-extern	PaletteHandle	gGamePalette;
-extern	short				gColorListSize;
 extern	Handle			gShapeTableHandle[];
 extern	long			gScreenXOffset,gScreenYOffset;
 extern	long			gFrames,someLong;

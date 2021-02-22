@@ -22,7 +22,6 @@
 extern	Boolean		gPPCFullScreenFlag;
 extern	Handle		gBackgroundHandle;
 extern	Ptr			gSHAPE_HEADER_Ptrs[];
-extern	Handle		gPlayfieldCopy;
 extern	ObjNode		*gMyNodePtr;
 extern	short		gLevelNum;
 extern	unsigned char	gInterlaceMode;
@@ -33,7 +32,7 @@ extern long	PF_WINDOW_TOP;
 extern long	PF_WINDOW_LEFT;
 #endif
 
-
+extern	GamePalette			gGamePalette;
 extern SDL_Window*			gSDLWindow;
 extern SDL_Renderer*		gSDLRenderer;
 extern SDL_Texture*			gSDLTexture;
@@ -1267,20 +1266,16 @@ OSStatus 		theError;
 
 void PresentIndexedFramebuffer(void)
 {
-	uint8_t* rgba = &gRGBAFramebuffer[0];
+	uint32_t* rgba = (uint32_t*) gRGBAFramebuffer;
 	const uint8_t* indexed = &gIndexedFramebuffer[0];
 
 	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
 		for (int x = 0; x < VISIBLE_WIDTH; x++)
 		{
-			rgba[0] = 0xFF;
-			rgba[1] = *indexed;
-			rgba[2] = *indexed;
-			rgba[3] = *indexed;
-
-			rgba += 4;
-			indexed += 1;
+			*rgba = gGamePalette[*indexed];
+			rgba++;
+			indexed++;
 		}
 	}
 

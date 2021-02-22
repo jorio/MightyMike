@@ -30,6 +30,15 @@
 /**************** PROTOTYPES *****************/
 
 
+typedef uint32_t GamePalette[256];
+
+static inline uint32_t RGBColorToU32(const RGBColor* color)
+{
+	return	0x000000FF
+			| ((color->red   >> 8) << 24)
+			| ((color->green >> 8) << 16)
+			| ((color->blue  >> 8) << 8);
+}
 
 
 			/* PALETTE */
@@ -40,10 +49,8 @@ extern void	RestoreDefaultCLUT(void);
 extern void	ActivateCLUT(void);
 extern void	FadeInGameCLUT(void);
 extern void	EraseCLUT(void);
-extern Boolean	ColorInGamePalette(RGBColor);
 extern void	FadeOutGameCLUT(void);
 extern void	MakeBackUpPalette(void);
-extern void	DrawColors(void);
 
 			/* ANIMATION */
 
