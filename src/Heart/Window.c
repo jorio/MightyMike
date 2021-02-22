@@ -49,13 +49,12 @@ static void PrepDrawSprockets(void);
 /**********************/
 
 										// GAME STUFF
-WindowPtr		gGameWindow = nil;
 Handle			gOffScreenHandle = nil;
 Handle			gPFBufferHandle = nil;
 Handle			gPFBufferCopyHandle = nil;
 Handle			gPFMaskBufferHandle = nil;
 
-Ptr				gScreenAddr;			// SCREEN ACCESS
+Ptr				gScreenAddr	= nil /* TODO: nuke me, use offscreen buffer for everything */;			// SCREEN ACCESS
 char  			gMMUMode;
 long			gScreenRowOffset;		// offset for bytes
 long			gScreenRowOffsetLW;		// offset for Long Words
@@ -109,13 +108,13 @@ Ptr 	tempPtr;
 
 void MakeGameWindow(void)
 {
-	TODO_REWRITE_THIS();
-#if 0
+WindowPtr		gGameWindow = nil;
 GDHandle		gMainScreen;			// SCREEN ACCESS
 PixMapHandle	gMainScreenPixMap;
 Rect		screenRect;
 short		width,height;
 
+#if 0
 	PrepDrawSprockets();			// use DSp just to resize screen
 
 
@@ -153,6 +152,10 @@ short		width,height;
 
 	gGameWindow = NewCWindow(nil, &screenRect, "", true, plainDBox,	// make new window to cover screen
 								 MOVE_TO_FRONT, false, nil);
+#endif
+	gScreenXOffset = 0;
+	gScreenYOffset = 0;
+
 
 	WindowToBlack();
 	InitScreenBuffers();
@@ -180,10 +183,9 @@ short		width,height;
 	HLockHi(gPFMaskBufferHandle);
 
 
-	SetPort(gGameWindow);
+//	SetPort(gGameWindow);
 	BuildLookUpTables();											// build all graphic lookup tbls
 	EraseGameWindow();												// erase buffer & screen
-#endif
 }
 
 
@@ -199,7 +201,7 @@ void EraseGameWindow (void)
 
 void WindowToBlack(void)
 {
-	TODO_REWRITE_THIS();
+	TODO_REWRITE_THIS_MINOR();
 #if 0
 GrafPort	killMenuBar;
 									/* This covers up the menu bar */
@@ -218,6 +220,8 @@ GrafPort	killMenuBar;
 
 void DumpGameWindow(void)
 {
+	TODO_REWRITE_THIS_MINOR();
+#if 0
 register	long			*destPtr,*srcPtr;
 register	short				row;
 register	long			*srcStartPtr,*destStartPtr;
@@ -421,6 +425,7 @@ register	long			*srcStartPtr,*destStartPtr;
 		}
 
 //		SwapMMUMode(&gMMUMode);						/* Restore addressing mode */
+#endif
 }
 
 
