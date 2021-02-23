@@ -21,8 +21,8 @@ extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long			gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-extern	long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
+extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
+extern	uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 extern	long			gScrollX,gScrollY;
 extern	long			gRegionClipTop[],gRegionClipBottom[],
 						gRegionClipLeft[],gRegionClipRight[];
@@ -44,7 +44,9 @@ extern	long PF_WINDOW_LEFT;
 /****************************/
 
 static void ErasePFSpriteInterlaced(ObjNode *theNodePtr);
-
+static void CreateShapeHeaderPointers(long groupNum);
+static void DrawPFSprite(ObjNode *theNodePtr);
+static void ErasePFSprite(ObjNode *theNodePtr);
 
 /****************************/
 /*    CONSTANTS             */
@@ -152,7 +154,7 @@ ObjNode *MakeNewShape(long groupNum,long type,long subType,short x, short y, sho
 {
 ObjNode	*newSpritePtr;
 Ptr		tempPtr;
-long	offset;
+int32_t	offset;
 
 	if (groupNum >= MAX_SHAPE_GROUPS)										// see if legal group
 		DoFatalAlert("Illegal shape group #");
@@ -203,7 +205,8 @@ long	offset;
 
 						/* INIT PTR TO ANIM_LIST */
 
-	offset = *((long *)(tempPtr+SHAPE_HEADER_ANIM_LIST));	// get offset to ANIM_LIST
+	offset = Byteswap32(tempPtr+SHAPE_HEADER_ANIM_LIST);	// get offset to ANIM_LIST
+
 	newSpritePtr->AnimsList = tempPtr+offset+2;				// set ptr to ANIM_LIST
 															// but skip 1st word: #anims!!!!
 
@@ -239,25 +242,23 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 // This is called whenever a shape table is moved in memory or loaded
 //
 
-void CreateShapeHeaderPointers(long groupNum)
+static void CreateShapeHeaderPointers(long groupNum)
 {
-long		i;
-short		*intPtr;
-long		*longPtr,offset;
-Ptr			shapeTablePtr;
+	Ptr shapeTablePtr = *gShapeTableHandle[groupNum];				// get ptr to shape table
 
-	shapeTablePtr = *gShapeTableHandle[groupNum];				// get ptr to shape table
+	int32_t offsetToShapeList = Byteswap32(shapeTablePtr + SF_HEADER__SHAPE_LIST);		// get ptr to offset to SHAPE_LIST
 
-	longPtr = (long *)((shapeTablePtr)+SF_HEADER__SHAPE_LIST);	// get ptr to offset to SHAPE_LIST
-	intPtr = (short *)((shapeTablePtr)+(*longPtr));				// get ptr to SHAPE_LIST
+	Ptr shapeList = shapeTablePtr + offsetToShapeList;				// get ptr to SHAPE_LIST
 
-	gNumShapesInFile[groupNum] = *intPtr++;						// get # shapes in the file
-	longPtr = (long *)intPtr;
+	gNumShapesInFile[groupNum] = Byteswap16(shapeList);				// get # shapes in the file
+	shapeList += 2;
 
-	for (i=0; i<gNumShapesInFile[groupNum]; i++)
+	for (int i = 0; i < gNumShapesInFile[groupNum]; i++)
 	{
-		offset = *(longPtr++);									// get offset to SHAPE_HEADER_n
-		gSHAPE_HEADER_Ptrs[groupNum][i] = StripAddress(shapeTablePtr)+offset;	// save ptr to SHAPE_HEADER
+		uint32_t offset = Byteswap32(shapeList);					// get offset to SHAPE_HEADER_n
+		shapeList += 4;
+
+		gSHAPE_HEADER_Ptrs[groupNum][i] = shapeTablePtr + offset;	// save ptr to SHAPE_HEADER
 	}
 }
 
@@ -811,15 +812,18 @@ short		*intPtr;
 
 void DrawASprite(ObjNode *theNodePtr)
 {
-long	width,i;
-long	*destPtr,*srcPtr,*maskPtr;
-long	height;
-long	*destStartPtr,*longPtr;
-short	*intPtr;
-long	frameNum;
-long	x,y,offset;
+int32_t	width,i;
+int32_t	*destPtr32;
+const int32_t*			maskPtr32;
+const int32_t*			srcPtr32;
+int32_t	height;
+int32_t	*destStartPtr32;
+const int32_t*			ptr32;
+const int16_t*			ptr16;
+int32_t	frameNum;
+int32_t	x,y,offset;
 Rect	oldBox;
-long	shapeNum,groupNum;
+int32_t	shapeNum,groupNum;
 Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	if (theNodePtr->PFCoordsFlag)					// see if do special PF Draw code
@@ -841,20 +845,20 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
 
-	offset = 	*((long *)(SHAPE_HEADER_Ptr+2));	// get offset to FRAME_LIST
-	intPtr = (short *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
-	if (frameNum >= *intPtr++)						// see if error
+	offset = Byteswap32(SHAPE_HEADER_Ptr+2);		// get offset to FRAME_LIST
+	ptr16 = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
+	if (frameNum >= Byteswap16(ptr16++))			// see if error
 		DoFatalAlert("Illegal Frame #");
 
-	longPtr = (long *)intPtr;
-	offset = *(longPtr+frameNum);					// get offset to FRAME_HEADER_n
+	ptr32 = (int32_t *)ptr16;
+	offset = Byteswap32(ptr32+frameNum);				// get offset to FRAME_HEADER_n
 
-	intPtr = (short *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_HEADER
+	ptr16 = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_HEADER
 
-	width = (*intPtr++)>>2;								// get word width
-	height = *intPtr++;									// get height
-	x += *intPtr++;										// use position offsets
-	y += *intPtr++;
+	width = Byteswap16(ptr16++)>>2;					// get word width
+	height = Byteswap16(ptr16++);					// get height
+	x += Byteswap16Signed(ptr16++);					// use position offsets
+	y += Byteswap16Signed(ptr16++);
 
 	oldBox = theNodePtr->drawBox;						// remember old box
 
@@ -867,19 +871,19 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 	if	((y+height) > gRegionClipBottom[theNodePtr->ClipNum])	// see if need to clip height
 		height -= (y+height)-gRegionClipBottom[theNodePtr->ClipNum];
 
-	longPtr = (long *)intPtr;
-	offset = *longPtr++;								// get offset to PIXEL_DATA
-	srcPtr = (long *)(SHAPE_HEADER_Base + offset);		// get ptr to PIXEL_DATA
-	offset = *longPtr++;								// get offset to MASK_DATA
-	maskPtr = (long *)(SHAPE_HEADER_Base + offset);		// get ptr to MASK_DATA
+	ptr32 = (int32_t *)ptr16;
+	offset = Byteswap32(ptr32++);							// get offset to PIXEL_DATA
+	srcPtr32 = (int32_t *)(SHAPE_HEADER_Base + offset);		// get ptr to PIXEL_DATA
+	offset = Byteswap32(ptr32++);							// get offset to MASK_DATA
+	maskPtr32 = (int32_t *)(SHAPE_HEADER_Base + offset);	// get ptr to MASK_DATA
 
 	if (y < gRegionClipTop[theNodePtr->ClipNum])			// see if need to clip TOP
 	{
 		offset = gRegionClipTop[theNodePtr->ClipNum]-y;
 		y = gRegionClipTop[theNodePtr->ClipNum];
 		height -= offset;
-		srcPtr += offset*width;
-		maskPtr += offset*width;
+		srcPtr32 += offset*width;
+		maskPtr32 += offset*width;
 	}
 
 	if (theNodePtr->UpdateBoxFlag)						// see if using update regions
@@ -890,7 +894,7 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 		theNodePtr->drawBox.bottom = y+height;
 	}
 
-	destStartPtr = (long *)(gOffScreenLookUpTable[y]+x);	// calc draw addr
+	destStartPtr32 = (int32_t *)(gOffScreenLookUpTable[y]+x);	// calc draw addr
 
 						/* DO THE DRAW */
 	if (height <= 0)										// special check for illegal heights
@@ -898,12 +902,16 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	do
 	{
-		destPtr = destStartPtr;								// get line start ptr
+		destPtr32 = destStartPtr32;								// get line start ptr
 
 		for (i=width; i; i--)
-			*destPtr++ = (*destPtr & (*maskPtr++)) | (*srcPtr++);
+		{
+			*destPtr32 = (*destPtr32 & (*maskPtr32++)) | (*srcPtr32);			// TODO byteswap here?
+			destPtr32++;
+			srcPtr32++;
+		}
 
-		destStartPtr += (OFFSCREEN_WIDTH>>2);				// next row
+		destStartPtr32 += (OFFSCREEN_WIDTH>>2);				// next row
 	} while(--height);
 
 
@@ -978,7 +986,7 @@ long	x,y;
 // Draws shape obj into Playfield circular buffer
 //
 
-void DrawPFSprite(ObjNode *theNodePtr)
+static void DrawPFSprite(ObjNode *theNodePtr)
 {
 long	width,height,i;
 long	drawHeight,y;
@@ -1222,7 +1230,7 @@ Ptr		tmP;
 
 /************************ ERASE PLAYFIELD SPRITE ********************/
 
-void ErasePFSprite(ObjNode *theNodePtr)
+static void ErasePFSprite(ObjNode *theNodePtr)
 {
 long	width,height,drawWidth,y;
 long	i;

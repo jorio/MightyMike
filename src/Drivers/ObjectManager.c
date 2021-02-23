@@ -20,8 +20,7 @@ extern	Handle		gBackgroundHandle;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long			gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-extern	long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
+extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
 
 
 /****************************/

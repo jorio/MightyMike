@@ -54,12 +54,10 @@ enum
 
 void AnimateASprite(ObjNode *theNodePtr)
 {
-register	unsigned	short	opcode;
-register	unsigned	short	operand;
-register	AnimEntryType	*AnimDataPtr;
-register	Boolean	doMore;
-register	Ptr		tempPtr;
-register	long	offset;
+Ptr			animDataPtr;
+bool		doMore;
+Ptr			tempPtr;
+int32_t		offset;
 
 	if	(theNodePtr->AnimsList == nil)					// exit if no anim list
 		return;
@@ -79,12 +77,13 @@ register	long	offset;
 	{
 		doMore = false;
 
-		offset = *(long *)((theNodePtr->AnimsList)+((theNodePtr->SubType)<<2));	// get offset to ANIM_DATA
-		AnimDataPtr	=	(AnimEntryType *)((theNodePtr->SHAPE_HEADER_Ptr)+offset+1);		// get ptr to ANIM_DATA
-		AnimDataPtr += theNodePtr->AnimLine++;				// correct index into data
+		offset = Byteswap32(theNodePtr->AnimsList + theNodePtr->SubType*4);				// get offset to ANIM_DATA
+		GAME_ASSERT(offset >= 0 && offset < 99000000);
 
-		opcode = AnimDataPtr->opcode;								// get opcode
-		operand = AnimDataPtr->operand;							// get operand
+		theNodePtr->AnimLine++;
+		animDataPtr = (theNodePtr->SHAPE_HEADER_Ptr) + offset + 1 + theNodePtr->AnimLine*4;
+		uint16_t opcode		= Byteswap16(animDataPtr+0);
+		uint16_t operand	= Byteswap16(animDataPtr+2);
 
 		switch (opcode)
 		{

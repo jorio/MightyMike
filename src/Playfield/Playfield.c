@@ -33,7 +33,6 @@
 
 extern	Handle			gOffScreenHandle;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 extern	long			*gPFMaskLookUpTable;
 extern	long			*gPFLookUpTable,*gPFCopyLookUpTable;
 extern	Boolean	(*gItemAddPtrs[])(ObjectEntryType *);

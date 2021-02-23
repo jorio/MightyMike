@@ -184,6 +184,7 @@ re_enter:
 		MoveObjects();
 		DrawObjects();
 		DumpUpdateRegions();
+		PresentIndexedFramebuffer();
 
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)

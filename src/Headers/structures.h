@@ -124,15 +124,6 @@ struct CollisionRec
 };
 typedef struct CollisionRec CollisionRec;
 
-				/* ANIMATION STRUCTURES */
-
-struct AnimEntryType
-{
-	short	opcode;
-	short	operand;
-};
-typedef struct AnimEntryType AnimEntryType;
-
 
 				/* GLOBAL COORDS STRUCT */
 			/* actually defined on Object.c */

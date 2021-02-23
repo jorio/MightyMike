@@ -67,13 +67,13 @@ Handle			gPFMaskBufferHandle = nil;
 uint8_t*		gScreenAddr	= gIndexedFramebuffer;	// SCREEN ACCESS
 char  			gMMUMode;
 long			gScreenRowOffset = 640;		// offset for bytes
-long			gScreenRowOffsetLW;		// offset for Long Words
+long			gScreenRowOffsetLW = 640/4;		// offset for Long Words
 long			gScreenXOffset,gScreenYOffset;
 
 
 uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-long			gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
+uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
+uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 
 long			*gPFLookUpTable = nil;
 long			*gPFCopyLookUpTable = nil;
@@ -231,212 +231,21 @@ GrafPort	killMenuBar;
 
 void DumpGameWindow(void)
 {
-	TODO_REWRITE_THIS_MINOR();
-#if 0
-register	long			*destPtr,*srcPtr;
-register	short				row;
-register	long			*srcStartPtr,*destStartPtr;
-
-
 				/* GET SCREEN PIXMAP INFO */
 
-	destStartPtr = (long *)gScreenAddr;
-	srcStartPtr	= 	(long *)(gOffScreenLookUpTable[0]+WINDOW_OFFSET);
-
-//	gMMUMode = true32b;									// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
+	uint32_t* destPtr	= (uint32_t *)gScreenAddr;
+	uint32_t* srcPtr	= (uint32_t *)(gOffScreenLookUpTable[0]+WINDOW_OFFSET);
 
 
 						/* DO THE QUICK COPY */
 
-		for (row=0; row<VISIBLE_HEIGHT; row++)
-		{
-			destPtr = destStartPtr;						// get line start ptrs
-			srcPtr = srcStartPtr;
+	for (int row = 0; row < VISIBLE_HEIGHT; row++)
+	{
+		memcpy(destPtr, srcPtr, VISIBLE_WIDTH);
 
-			*destPtr++ = *srcPtr++;						// in-line 640 byte copy code
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//10..19
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//20..29
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//30..39
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//40..49
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//50..59
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//60..69
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//70..79
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//80..89
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//90..99
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//100..109
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//110..119
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//120..129
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//130..139
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//140..149
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-			*destPtr++ = *srcPtr++;						//150..159
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-			*destPtr++ = *srcPtr++;
-
-
-			destStartPtr += gScreenRowOffsetLW;				// Bump to start of next row.
-			srcStartPtr += (OFFSCREEN_WIDTH/4);
-		}
-
-//		SwapMMUMode(&gMMUMode);						/* Restore addressing mode */
-#endif
+		destPtr += gScreenRowOffsetLW;				// Bump to start of next row.
+		srcPtr += (OFFSCREEN_WIDTH/4);
+	}
 }
 
 
@@ -448,14 +257,7 @@ register	long			*srcStartPtr,*destStartPtr;
 
 void DumpBackground(void)
 {
-register	long	*destPtr,*srcPtr,i;
-
-	destPtr = 	(long *)gOffScreenLookUpTable[0];
-	srcPtr	= 	(long *)gBackgroundLookUpTable[0];
-
-	for (i=0; i<(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT/4); i++)
-			*destPtr++ = *srcPtr++;
-
+	memcpy(gOffScreenLookUpTable[0], gBackgroundLookUpTable[0], OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 }
 
 
@@ -498,8 +300,6 @@ long	i;
 
 void WipeScreenBuffers(void)
 {
-short		i;
-
 	if (gOffScreenHandle != nil)
 	{
 		DisposeHandle(gOffScreenHandle);
@@ -512,10 +312,10 @@ short		i;
 		gBackgroundHandle = nil;
 	}
 
-	for (i = 0; i < OFFSCREEN_HEIGHT; i++)
+	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
-		gOffScreenLookUpTable[i] = 0xffffffffL;
-		gBackgroundLookUpTable[i] = 0xffffffffL;
+		gOffScreenLookUpTable[i] = nil;
+		gBackgroundLookUpTable[i] = nil;
 	}
 }
 

@@ -14,6 +14,7 @@
 #include "window.h"
 #include "picture.h"
 #include "misc.h"
+#include <string.h>
 
 extern	GamePalette		gGamePalette;
 extern	Handle			gOffScreenHandle;
@@ -40,50 +41,41 @@ Handle	gBackgroundHandle = nil;
 
 void LoadBackground(Str255 fileName,Boolean getPalFlag)
 {
-register	long	*source,*dest;
-long		*destStart;
-Handle		theImageHand;
-register 	short		i,x,y,width,height,*intPtr;
-RGBColor	*rgbPtr,rgb;
-
 	EraseBackgroundBuffer();
 
-	theImageHand = LoadPackedFile(fileName);				// load & unpack image file
+	Handle theImageHand = LoadPackedFile(fileName);				// load & unpack image file
 
 
 					/* GET COLOR INFO FOR IMAGE */
 	if (getPalFlag)
 	{
-//		gColorListSize = 256;								// assume its a full palette
-		rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
-		for (i=0; i<256; i++)
+		RGBColor* rgbPtr = (RGBColor *)(*theImageHand);			// get ptr to palette data
+		ByteswapInts(2, 256*3, rgbPtr);							// byteswap colors (each component is 16-bit)
+		for (int i = 0; i < 256; i++)
 		{
-			rgb = *rgbPtr++;								// get a color
-			SetEntryColor(gGamePalette,i,&rgb);				// set
+			gGamePalette[i] = RGBColorToU32(&rgbPtr[i]);
 		}
 	}
 
 
 						/* DRAW THE IMAGE */
 
-	intPtr = (short *)(*theImageHand + (sizeof(RGBColor)*256));	// get width & height
-	width = (*intPtr++)>>2;
-	height = *intPtr++;
+	int16_t* ptr16 = (int16_t *)(*theImageHand + (256*2*3));	// get width & height
+	int16_t width	= Byteswap16(ptr16++);
+	int16_t height	= Byteswap16(ptr16++);
 
-	destStart = (long *)((*gBackgroundHandle)+WINDOW_OFFSET);			// init pointers
-	source = (long *)intPtr;
+	Ptr dest = (*gBackgroundHandle)+WINDOW_OFFSET;				// init pointers
+	Ptr source = (Ptr)ptr16;
 
-	for (y=0; y<height; y++)
+	for (int y = 0; y < height; y++)
 	{
-		dest = destStart;
-		for (x=0; x<width; x++)
-		{
-			*dest++ = *source++;							// get a pixel
-		}
-		destStart += (OFFSCREEN_WIDTH>>2);					// next row
+		memcpy(dest, source, width);
+
+		dest += OFFSCREEN_WIDTH;								// next row
+		source += width;
 	}
 
-	DisposeHandle(theImageHand);							// zap image data
+	DisposeHandle(theImageHand);								// zap image data
 }
 
 /************************ LOAD BACKGROUND: DIRECT *****************/
@@ -93,6 +85,7 @@ RGBColor	*rgbPtr,rgb;
 
 void LoadBackground_Direct(Str255 fileName,Boolean getPalFlag)
 {
+	TODO_REWRITE_THIS();
 register	long	*source,*dest;
 long		*destStart;
 Handle		theImageHand;
@@ -170,37 +163,14 @@ Handle		theImageHand;
 
 				/* DUMP PIXEL IMAGE INTO BUFFER */
 
-	int16_t* int16Ptr = (int16_t *)(*theImageHand + (256*2*3));				// get width & height
-	ByteswapInts(2, 2, int16Ptr);						// byteswap width, height
-	int16_t width = *int16Ptr++;
-	int16_t height = *int16Ptr++;
+	int16_t* ptr16	= (int16_t *)(*theImageHand + (256*2*3));	// get width & height
+	int16_t width	= Byteswap16(ptr16++);
+	int16_t height	= Byteswap16(ptr16++);
 
 	GAME_ASSERT(width * height == sizeof(gIndexedFramebuffer));
-	BlockMove((void*) int16Ptr, gIndexedFramebuffer, width * height);
+	memcpy(gIndexedFramebuffer, ptr16, width*height);
 
 	PresentIndexedFramebuffer();
-
-#if 0
-//long		*source,*dest,*destStart;
-	width >>= 2;
-
-	destStart = (long *)*gOffScreenHandle;				// init pointers
-	source = (long *)StripAddress((Ptr)intPtr);
-
-//	gMMUMode = true32b;									// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
-
-	for (y=0; y<height; y++)
-	{
-		dest = destStart;
-		for (x=0; x<width; x++)							// copy it
-			*dest++ = *source++;
-		destStart += gScreenRowOffsetLW;				// next row
-	}
-
-//	SwapMMUMode(&gMMUMode);								// Restore addressing mode
-#endif
 
 	DisposeHandle(theImageHand);					// nuke image data
 
