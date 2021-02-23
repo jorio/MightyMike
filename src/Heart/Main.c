@@ -1391,8 +1391,10 @@ void GameMain(void)
 	gPPCFullScreenFlag = false;					// assume no
 
 #if __USE_PF_VARS
+#if 0	// SRCPORT RM
 	gALLOCATED_MEMORY = FreeMem();				// see how much allocated for application
  	if (gALLOCATED_MEMORY > (6500000L))
+#endif
  	{
  		PF_TILE_HEIGHT	=	14;					// dimensions of scrolling Playfield
 		PF_TILE_WIDTH	=	21;
