@@ -8,6 +8,7 @@
 /***************/
 /* EXTERNALS   */
 /***************/
+#include <string.h>
 #include "myglobals.h"
 //#include <pictutils.h>
 #include "spin.h"
@@ -27,33 +28,24 @@ extern	long		gFrames,gScreenRowOffsetLW,gScreenRowOffset;
 /*    CONSTANTS             */
 /****************************/
 
-#define		DrawDoubleMac	move.w	(srcPtr),col		\
-							move.b	(srcPtr)+,col		\
-							swap	col					\
-							move.w	(srcPtr),col		\
-							move.b	(srcPtr)+,col		\
-							move.l	col,(destPtr)+		\
-							move.l	col,(destPtr2)+
-
-
 struct SpinHeaderType
 {
-	short			width;				// width in pixels
-	short			height;
-	short			fps;
+	int16_t			width;				// width in pixels
+	int16_t			height;
+	int16_t			fps;
 };
 typedef struct SpinHeaderType SpinHeaderType;
 
 struct SpinExtendedHeaderType
 {
-	short		versNo;
-	short		width;				// width in pixels
-	short		height;
-	short		fps;
+	int16_t		versNo;
+	int16_t		width;				// width in pixels
+	int16_t		height;
+	int16_t		fps;
 	Boolean		zoomFlag;
 	Byte		undefined1;
-	short		undefined2;
-	short		undefined3;
+	int16_t		undefined2;
+	int16_t		undefined3;
 };
 typedef struct SpinExtendedHeaderType SpinExtendedHeaderType;
 
@@ -119,6 +111,8 @@ unsigned long	time;
 					DoSpinFrame();
 					break;
 		}
+
+		PresentIndexedFramebuffer();
 
 						/* CHECK FOR LIMITED DURATIONS */
 
@@ -233,27 +227,29 @@ OSErr	iErr;
 
 void GetSpinHeader(void)
 {
-short		*intPtr;
-
 	switch(*gSpinPtr++)								// see if NORMAL OR EXTENDED Headers
 	{
 		case	SPIN_COMMAND_HEADER:
-				intPtr = (short *)gSpinPtr;
-				gSpinHeader.width = *intPtr++;					// get WIDTH
-				gSpinHeader.height = *intPtr++;					// get HEIGHT
-				gSpinHeader.fps	= *intPtr++;					// get FPS
-				gSpinPtr += sizeof(SpinHeaderType);				// skip header
+				// WARNING: shorts are not aligned to 16-bit boundaries
+				gSpinHeader.width	= Byteswap16(gSpinPtr+0);	// get WIDTH
+				gSpinHeader.height	= Byteswap16(gSpinPtr+2);	// get HEIGHT
+				gSpinHeader.fps		= Byteswap16(gSpinPtr+4);	// get FPS
+				gSpinPtr += 6;				// skip header
 				gDoublePix = false;
 				break;
 
 		case	SPIN_COMMAND_EXTENDEDHEADER:
+				DoFatalAlert("SPIN extended header not supported!");
+#if 0
 				intPtr = (short *)gSpinPtr;
 				intPtr++;										// skip versNo
+				ByteswapInts(2, 3, gSpinPtr);					// byteswap the next 3 shorts
 				gSpinHeader.width = *intPtr++;					// get WIDTH
 				gSpinHeader.height = *intPtr++;					// get HEIGHT
 				gSpinHeader.fps	= *intPtr++;					// get FPS
 				gSpinHeader.zoomFlag = gDoublePix = *((Ptr)(intPtr));	// get zoomflag
 				gSpinPtr += sizeof(SpinExtendedHeaderType);		// skip header
+#endif
 				break;
 
 
@@ -293,27 +289,21 @@ short			i;
 	for (i=0; i<256; i++)
 	{
 		rgb = *rgbPtr++;								// get a color
-		SetEntryColor(gGamePalette,i,&rgb);				// set
+		gGamePalette[i] = RGBColorToU32(&rgb);			// set
 	}
 
 	gSpinPtr = (Ptr)rgbPtr;								// update file pointer
 }
 
 
-#ifdef __MWERKS__
-//=======================================================================================
-//                  POWERPC CODE
-//=======================================================================================
-
 /**************** DO SPIN FRAME *****************/
 //
 // This routine assumes that we are currently pointing at a frame command!
 //
 
-static void DoSpinFrame(void)
+void DoSpinFrame(void)
 {
-long	*longPtr;
-long	frameSize,data;
+long	frameSize;
 Byte	count;
 Ptr		framePtr,srcPtr;
 Ptr		framePtrBase;
@@ -323,10 +313,9 @@ Ptr		framePtrBase;
 	if (*srcPtr++ != SPIN_COMMAND_FRAMEDATA)			// verify command
 		DoFatalAlert("Not Pointing to SPIN Frame command!");
 
-	longPtr = (long *)srcPtr;
-	longPtr++;											// skip packed size
-	frameSize = *longPtr++;								// get unpacked size
-	srcPtr = (Ptr)longPtr;
+	srcPtr += 4;										// skip packed size
+	frameSize = Byteswap32(srcPtr);						// get unpacked size
+	srcPtr += 4;
 
 					/* GET MEMORY FOR FRAME */
 
@@ -343,25 +332,25 @@ Ptr		framePtrBase;
 		{
 			count = (-count)+1;
 			frameSize -= count;
-			data = *srcPtr++;								// get data byte (upper 3 bytes are trash)
+			uint8_t data = *srcPtr++;						// get data byte (upper 3 bytes are trash)
 
-			for (;count>0; count--)
-				*framePtr++ = data;
+			memset(framePtr, data, count);
+			framePtr += count;
 		}
 		else												// (+) means NON-PACKED data
 		{
 			count++;
 			frameSize -= count;
 
-			while((StripAddress(srcPtr)+count+200) > StripAddress(gSpinLoadPtr))	// see if @ end of current buffer (200 is leeway margin)
+			while(srcPtr+count+200 > gSpinLoadPtr)			// see if @ end of current buffer (200 is leeway margin)
 			{
 				if (!ContinueSpinLoad())					// keep loading until we have enough or its @ EOF
 					break;
 			}
 
-			for (; count>0; count--)
-				*framePtr++ = *srcPtr++;
-
+			memcpy(framePtr, srcPtr, count);
+			framePtr += count;
+			srcPtr += count;
 		}
 	} while (frameSize > 0);
 
@@ -378,759 +367,32 @@ Ptr		framePtrBase;
 
 /******************** DRAW SPIN FRAME *******************/
 
-static void DrawSpinFrame(Ptr sourcePtr)
+void DrawSpinFrame(Ptr srcPtr)
 {
-short	numChunks,y;
-Byte	x,size;
-long	*destPtr;
-Ptr		srcPtr;
-short	*intPtr,i;
-long	*longPtr;
+	GAME_ASSERT_MESSAGE(!gDoublePix, "draw doubled was removed");	// see if draw doubled
 
-	if (gDoublePix)											// see if draw doubled
-	{
-		DrawSpinFrame_Double(sourcePtr);
-		return;
-	}
-
-	intPtr = (short *)sourcePtr;
-	numChunks = *intPtr++;									// get # chunks to update
-	srcPtr = StripAddress((Ptr)intPtr);
+	short numChunks = Byteswap16(srcPtr);					// get # chunks to update
+	srcPtr += 2;
 
 	if (numChunks == 0)
 		return;
 
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
 	do
 	{
-		x = *srcPtr++;										// get X coord (in longs)
-		intPtr = (short *)srcPtr;
-		y = *intPtr++;										// get Y coord
-		srcPtr = (Ptr)intPtr;
-		size = *srcPtr++;									// get SIZE (# longs)
+		int x = *srcPtr;				srcPtr += 1;		// get X coord (in longs)
+		int y = Byteswap16(srcPtr);		srcPtr += 2;		// get Y coord
+		int size = *srcPtr;				srcPtr += 1;		// get SIZE (# longs)
 
-		destPtr = (long *)(gScreenLookUpTable[y+gSpinY]+gSpinX)+x;		// point to screen
+		x *= 4;												// X and size were given in longs to pre-optimize
+		size *= 4;											// memory copy on 68k.
 
-		longPtr = (long *)srcPtr;
-		for (i=0; i < size; i++)							// copy data
-			*destPtr++ = *longPtr++;
-		srcPtr = (Ptr)longPtr;
+		uint8_t* destPtr = gScreenLookUpTable[y+gSpinY] + gSpinX + x;	// point to screen
+		memcpy(destPtr, srcPtr, size);						// copy data
+		srcPtr += size;
 
 	}while(--numChunks);
-
-//	SwapMMUMode(&gMMUMode);								// Restore addressing mode
 }
 
-
-
-/******************** DRAW SPIN FRAME: DOUBLE *******************/
-//
-// Draws with double magification pixels
-//
-
-static void DrawSpinFrame_Double(Ptr sourcePtr)
-{
-unsigned short	numChunks,y;
-Byte	x,size,pixel;
-Ptr		destPtr,destPtr2;
-long	i;
-Ptr		srcPtr;
-short	*intPtr;
-
-	intPtr = (short *)sourcePtr;
-	numChunks = *intPtr++;									// get # chunks to update
-	srcPtr = StripAddress((Ptr)intPtr);
-
-	if (numChunks == 0)
-		return;
-
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
-	do
-	{
-		x = *srcPtr++;										// get Y coord (in longs)
-		intPtr = (short *)srcPtr;
-		y = *intPtr;										// get X coord
-		srcPtr = (Ptr)intPtr;
-		size = *srcPtr;										// get SIZE (# longs)
-
-		destPtr = (Ptr)(gScreenLookUpTable[(y<<1)+gSpinY]+gSpinX)+(x<<1); // point to screen
-		destPtr2 = destPtr+gScreenRowOffset;
-
-		size <<= 2;							// convert to # bytes wide
-		for (i=0; i < size; i++)
-		{
-			pixel = *srcPtr++;
-			*destPtr++ = pixel;
-			*destPtr++ = pixel;
-			*destPtr2++ = pixel;
-			*destPtr2++ = pixel;
-		}
-
-
-	}while(--numChunks);
-
-//	SwapMMUMode(&gMMUMode);								// Restore addressing mode
-}
-
-
-//=======================================================================================
-//                  68000 CODE
-//=======================================================================================
-
-#else
-/**************** DO SPIN FRAME *****************/
-//
-// This routine assumes that we are currently pointing at a frame command!
-//
-
-void DoSpinFrame(void)
-{
-register long	*longPtr;
-register long	frameSize,col,data;
-register Byte	count;
-register Ptr	framePtr,srcPtr;
-static	 Ptr	framePtrBase;
-static	 unsigned long	temp;
-
-	srcPtr = gSpinPtr;								// use register for speed
-
-	if (*srcPtr++ != SPIN_COMMAND_FRAMEDATA)			// verify command
-		DoFatalAlert("Not Pointing to SPIN Frame command!");
-
-	longPtr = (long *)srcPtr;
-	longPtr++;											// skip packed size
-	frameSize = *longPtr++;								// get unpacked size
-	srcPtr = (Ptr)longPtr;
-
-					/* GET MEMORY FOR FRAME */
-
-	if ((framePtrBase = AllocPtr(frameSize)) == nil)
-		DoFatalAlert ("No Memory for SPIN Frame!");
-	framePtr = framePtrBase;
-
-						/* UNPACK IT */
-	do
-	{
-		count = *srcPtr++;									// get count byte
-
-		if (count > 0x7f)									// (-) means PACKED data
-		{
-			count = (-count)+1;
-			frameSize -= count;
-			col = (32-(count>>2))<<1;						// see how many longs we need
-
-			TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-			asm
-			{
-					move.b	(srcPtr)+,data					// get data byte (upper 3 bytes are trash)
-
-					move.l	#0,temp
-					move.b	data,temp						// build a full long value
-					or.b	data,temp+1
-					or.b	data,temp+2
-					or.b	data,temp+3
-					move.l	temp,data
-
-					jmp		@inline(col)
-
-				@inline
-					move.l	data,(framePtr)+			//0..15 longs
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-
-					move.l	data,(framePtr)+			//16..31 longs
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-					move.l	data,(framePtr)+
-			}
-#endif
-
-			switch(count&b11)							// do remainder of line
-			{
-				case 3:
-						*framePtr++ = data;
-				case 2:
-						*framePtr++ = data;
-				case 1:
-						*framePtr++ = data;
-			}
-		}
-		else												// (+) means NON-PACKED data
-		{
-			count++;
-			frameSize -= count;
-
-			while((StripAddress(srcPtr)+count+200) > StripAddress(gSpinLoadPtr))	// see if @ end of current buffer (200 is leeway margin)
-			{
-				if (!ContinueSpinLoad())					// keep loading until we have enough or its @ EOF
-					break;
-			}
-
-			data = count&b11;								// (use data as temp storage for remainder)
-			count >>= 2;									// see how many longs
-			col = (32-count)<<1;
-
-			TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-			asm
-			{
-					jmp		@inline2(col)
-
-				@inline2
-					move.l	(srcPtr)+,(framePtr)+	//0..15 longs
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-
-					move.l	(srcPtr)+,(framePtr)+	//16..31 longs
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-					move.l	(srcPtr)+,(framePtr)+
-
-
-			}
-#endif
-
-			switch(data)															// do remainder of line
-			{
-				case 3:
-						*framePtr++ = *srcPtr++;
-				case 2:
-						*framePtr++ = *srcPtr++;
-				case 1:
-						*framePtr++ = *srcPtr++;
-			}
-
-		}
-	} while (frameSize > 0);
-
-						/* UPDATE THE SCREEN */
-
-	DrawSpinFrame(framePtrBase);
-
-					/* CLEANUP & EXIT */
-
-	DisposePtr(framePtrBase);								// nuke expanded frame data
-	gSpinPtr =	srcPtr;										// update file ptr
-}
-
-
-/******************** DRAW SPIN FRAME *******************/
-
-void DrawSpinFrame(Ptr sourcePtr)
-{
-register short	numChunks,y;
-register Byte	x,size;
-register long	*destPtr,col;
-register Ptr	srcPtr;
-
-	if (gDoublePix)											// see if draw doubled
-	{
-		DrawSpinFrame_Double(sourcePtr);
-		return;
-	}
-
-	srcPtr = StripAddress(sourcePtr);
-	TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-	asm
-	{
-		move.w	(srcPtr)+,numChunks							// get # chunks to update
-	}
-#endif
-
-	if (numChunks == 0)
-		return;
-
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
-	do
-	{
-		TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-		asm
-		{
-			move.b	(srcPtr)+,x								// get Y coord (in longs)
-			move.w	(srcPtr)+,y								// get X coord
-			move.b  (srcPtr)+,size							// get SIZE (# longs)
-		}
-#endif
-
-		destPtr = (long *)(gScreenLookUpTable[y+gSpinY]+gSpinX)+x;		// point to screen
-
-		col = (160-size)<<1;
-
-		TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-		asm
-		{
-				jmp		@inline(col)
-
-			@inline
-				move.l	(srcPtr)+,(destPtr)+	//0..15 longs
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//16..31
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-
-				move.l	(srcPtr)+,(destPtr)+	//32..47
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//48..63
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//64..79
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//80..95
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//96..111
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//112..127
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//128..143
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-
-				move.l	(srcPtr)+,(destPtr)+	//144..159
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-				move.l	(srcPtr)+,(destPtr)+
-		}
-#endif
-
-	}while(--numChunks);
-
-//	SwapMMUMode(&gMMUMode);								// Restore addressing mode
-}
-
-
-
-/******************** DRAW SPIN FRAME: DOUBLE *******************/
-//
-// Draws with double magification pixels
-//
-
-void DrawSpinFrame_Double(Ptr sourcePtr)
-{
-register unsigned short	numChunks,y;
-register Byte			x,size;
-register long			*destPtr,*destPtr2,col;
-register Ptr			srcPtr;
-
-	srcPtr = StripAddress(sourcePtr);
-	TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-	asm
-	{
-		move.w	(srcPtr)+,numChunks							// get # chunks to update
-	}
-#endif
-
-	if (numChunks == 0)
-		return;
-
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
-	do
-	{
-		TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-		asm
-		{
-			move.b	(srcPtr)+,x								// get Y coord (in longs)
-			move.w	(srcPtr)+,y								// get X coord
-			move.b  (srcPtr)+,size							// get SIZE (# longs)
-		}
-#endif
-
-		destPtr = (long *)(gScreenLookUpTable[(y<<1)+gSpinY]+gSpinX)+(x<<1); // point to screen
-		destPtr2 = destPtr+gScreenRowOffsetLW;
-
-		col = (160-(size<<1))*14;
-		TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
-		asm
-		{
-				jmp		@inline(col)
-
-			@inline
-				DrawDoubleMac								//0..15 (reads a word, writes a long)
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//16..31
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-
-				DrawDoubleMac								//32..47
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//48..63
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//64..79
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//80..95
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//96..111
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//112..127
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//128..143
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-
-				DrawDoubleMac								//144..159
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-				DrawDoubleMac
-		}
-#endif
-
-	}while(--numChunks);
-
-//	SwapMMUMode(&gMMUMode);								// Restore addressing mode
-}
-
-#endif
 
 
 /******************** REGULATE SPIN SPEED ***************/

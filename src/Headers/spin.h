@@ -22,5 +22,4 @@ extern void	GetSpinHeader(void);
 extern void	GetSpinPalette(void);
 extern void	DoSpinFrame(void);
 extern void	DrawSpinFrame(Ptr);
-extern void	DrawSpinFrame_Double(Ptr);
 extern void	RegulateSpinSpeed(long);
