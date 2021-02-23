@@ -203,7 +203,7 @@ long		offset;
 	mySndCmd.cmd = soundCmd;							// install sample in the channel
 	mySndCmd.param1 = 0;
 	mySndCmd.param2 = (long)(*SoundHand_Music+offset);		// pointer to SoundHeader
-	SndDoCommand(gSndChannel[0], &mySndCmd, true);
+	SndDoImmediate(gSndChannel[0], &mySndCmd);
 
 	mySndCmd.cmd = freqCmd;								// call this to START sound & keep looping
 	mySndCmd.param1 = 0;
