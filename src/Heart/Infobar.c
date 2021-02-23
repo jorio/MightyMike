@@ -25,7 +25,7 @@
 extern	char  			gMMUMode;
 extern	Boolean			ImDeadFlag;
 extern	Byte			gCurrentWeaponType,gSceneNum;
-extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
+extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	long			NumObjects,gDifficultySetting;
 extern	short		gNumEnemies,gNumBunnies,gDemoMode;
 extern	WeaponType		gMyWeapons[];

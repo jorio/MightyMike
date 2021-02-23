@@ -18,8 +18,9 @@
 #include "window.h"
 
 extern	GamePalette		gGamePalette;
+extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 extern	char  			gMMUMode;
-extern	long			gScreenLookUpTable[];
+extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	long		gFrames,gScreenRowOffsetLW,gScreenRowOffset;
 
 /****************************/

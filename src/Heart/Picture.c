@@ -17,7 +17,7 @@
 
 extern	GamePalette		gGamePalette;
 extern	Handle			gOffScreenHandle;
-extern	Ptr				gScreenAddr;
+extern	uint8_t*		gScreenAddr;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	Boolean			gPPCFullScreenFlag;

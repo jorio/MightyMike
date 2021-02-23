@@ -32,7 +32,7 @@
 #include "racecar.h"
 
 extern	Handle			gOffScreenHandle;
-extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
+extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 extern	long			*gPFMaskLookUpTable;
 extern	long			*gPFLookUpTable,*gPFCopyLookUpTable;

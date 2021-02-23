@@ -54,20 +54,24 @@ static void PrepDrawSprockets(void);
 /*     VARIABLES      */
 /**********************/
 
+
+uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
+uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
+
 										// GAME STUFF
 Handle			gOffScreenHandle = nil;
 Handle			gPFBufferHandle = nil;
 Handle			gPFBufferCopyHandle = nil;
 Handle			gPFMaskBufferHandle = nil;
 
-Ptr				gScreenAddr	= nil /* TODO: nuke me, use offscreen buffer for everything */;			// SCREEN ACCESS
+uint8_t*		gScreenAddr	= gIndexedFramebuffer;	// SCREEN ACCESS
 char  			gMMUMode;
-long			gScreenRowOffset;		// offset for bytes
+long			gScreenRowOffset = 640;		// offset for bytes
 long			gScreenRowOffsetLW;		// offset for Long Words
 long			gScreenXOffset,gScreenYOffset;
 
 
-long			gScreenLookUpTable[VISIBLE_HEIGHT];
+uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 long			gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
 long			gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 
@@ -77,9 +81,6 @@ long			*gPFMaskLookUpTable = nil;
 
 Boolean			gLoadedDrawSprocket = false;
 //DSpContextReference 	gDisplayContext = nil;
-
-uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
-uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
 
 
 
@@ -469,7 +470,7 @@ long	i;
 					/* BUILD SCREEN LOOKUP TABLE */
 
 	for (i=0; i<VISIBLE_HEIGHT; i++)
-		gScreenLookUpTable[i] = (long)gScreenAddr + (gScreenRowOffset*i);
+		gScreenLookUpTable[i] = gScreenAddr + (gScreenRowOffset*i);
 
 
 					/* BUILD PLAYFIELD LOOKUP TABLES */
@@ -947,12 +948,13 @@ static		long	x,y;
 
 	for (; height > 0; height--)
 	{
+		printf("TODO! %s\n", __func__ );
+
+#if 0	// TODO REWRITE ASM!
 		destPtr = destStartPtr;						// get line start ptrs
 
 		col = (160-width)*6;
 
-		TODO_REWRITE_ASM();
-#if 0	// TODO REWRITE ASM!
 		asm
 		{
 				jmp		@inline(col)

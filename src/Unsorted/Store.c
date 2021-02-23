@@ -31,7 +31,7 @@ extern	Boolean			gShootButtonDownFlag;
 extern	unsigned char	gInterlaceMode;
 extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
-extern	long			gScreenLookUpTable[VISIBLE_HEIGHT];
+extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	long			gPFLookUpTable[PF_BUFFER_HEIGHT];
 extern	int				gScrollX,gScrollY;
 extern	Handle			gPFBufferHandle,gPFBufferCopyHandle;
