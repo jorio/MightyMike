@@ -40,6 +40,16 @@ static inline uint32_t RGBColorToU32(const RGBColor* color)
 			| ((color->blue  >> 8) << 8);
 }
 
+static inline RGBColor U32ToRGBColor(const uint32_t color)
+{
+	return (RGBColor)
+	{
+			((color >> 24) & 0xFF) << 8,
+			((color >> 16) & 0xFF) << 8,
+			((color >> 8) & 0xFF) << 8,
+	};
+}
+
 
 			/* PALETTE */
 
@@ -50,7 +60,6 @@ extern void	ActivateCLUT(void);
 extern void	FadeInGameCLUT(void);
 extern void	EraseCLUT(void);
 extern void	FadeOutGameCLUT(void);
-extern void	MakeBackUpPalette(void);
 
 			/* ANIMATION */
 

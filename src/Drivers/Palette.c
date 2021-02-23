@@ -9,17 +9,17 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-//#include <pictutils.h>
 #include "misc.h"
+#include "window.h"
+#include <string.h>
 
 extern	Handle		gShapeTableHandle[];
-extern	char  			gMMUMode;
 
 /****************************/
 /*    CONSTANTS             */
 /****************************/
 
-#define	PALOFF	0
+static const int kFadeFrameDelayTicks = 2;
 
 /**********************/
 /*     VARIABLES      */
@@ -42,6 +42,19 @@ void InitPaletteStuff(void)
 	}
 }
 
+/********************* MAKE BACKUP PALETTE *******************/
+
+static void MakeBackUpPalette(void)
+{
+	memcpy(gBackUpPalette, gGamePalette, sizeof(GamePalette));
+}
+
+/********************* RESTORE BACKUP PALETTE *******************/
+
+static void RestoreBackUpPalette(void)
+{
+	memcpy(gGamePalette, gBackUpPalette, sizeof(GamePalette));
+}
 
 /****************************** BUILD SHAPE PALETTE ********************/
 //
@@ -104,50 +117,9 @@ short	i;
 
 void ActivateCLUT(void)
 {
-ColorSpec aTable[256];
-short		i;
-RGBColor	rgbColor;
-short	err;
+	// No-op in source port -- gGamePalette is automatically applied to the image by our renderer.
 
-
-					/* BUILD THE CLUT */
-
-	for (i=0; i<255; i++)
-	{
-		ReserveEntry(i,false);
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-
-		ProtectEntry(i,false);							// make accessable
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-
-		GetEntryColor(gGamePalette,i,&rgbColor);		// get color from palette
-		aTable[i].rgb = rgbColor;
-		aTable[i].value = i;
-	}
-se1:
-		SetEntries(0,255-1,aTable);						// use it
-		err = QDError();
-		if (err)
-		{
-			ResetScreen();
-			goto se1;
-		}
-
-				/* LOCK THE CLUT */
-
-	for (i=0; i<255; i++)
-	{
-		ProtectEntry(i,true);							// lock it there!
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-	}
-
-gSceenBlankedFlag = false;
+	gSceenBlankedFlag = false;
 }
 
 
@@ -155,60 +127,28 @@ gSceenBlankedFlag = false;
 
 void FadeInGameCLUT(void)
 {
-ColorSpec 	aTable[256];
-short			i;
-RGBColor	rgbColor;
-short		err;
-short 		brightness;
-long		red,green,blue;
+	MakeBackUpPalette();
 
 						/* FADE IN THE CLUT */
 
-	for	(brightness = 4; brightness <= 100; brightness += 8)
+	for (int brightness = 4; brightness <= 100; brightness += 8)
 	{
-		for (i=0; i<255; i++)
+		for (int i = 0; i < 255; i++)
 		{
-			ReserveEntry(i,false);
-			err = QDError();
-			if (err)
-				ShowSystemErr(err);
-
-			ProtectEntry(i,false);							// make accessable
-			err = QDError();
-			if (err)
-				ShowSystemErr(err);
-
-			GetEntryColor(gGamePalette,i,&rgbColor);		// get color from palette
-			red = rgbColor.red;
-			green = rgbColor.green;
-			blue = rgbColor.blue;
-
-			rgbColor.red = (short)((red*brightness)/100);
-			rgbColor.green = (short)((green*brightness)/100);
-			rgbColor.blue = (short)((blue*brightness)/100);
-			aTable[i].rgb = rgbColor;
-			aTable[i].value = i;
-
+			RGBColor rgbColor = U32ToRGBColor(gBackUpPalette[i]);	// get color from palette
+			rgbColor.red	= (short)((int32_t)rgbColor.red		* brightness /100);
+			rgbColor.green	= (short)((int32_t)rgbColor.green	* brightness /100);
+			rgbColor.blue	= (short)((int32_t)rgbColor.blue	* brightness /100);
+			gGamePalette[i] = RGBColorToU32(&rgbColor);				// set it
 		}
-se1:
-		SetEntries(0,255-1,aTable);							// use it
-		err = QDError();
-		if (err)
-		{
-			ResetScreen();
-			goto se1;
-		}
+
+		PresentIndexedFramebuffer();
+		Wait(kFadeFrameDelayTicks);
 	}
 
-					/* LOCK THE CLUT */
+						/* SET TO ORIGINAL PALETTE TO BE SURE */
 
-	for (i=0; i<255; i++)
-	{
-		ProtectEntry(i,true);								// lock it there!
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-	}
+	RestoreBackUpPalette();
 
 						/* RESET GAME WINDOW'S PALETTE */
 
@@ -219,39 +159,14 @@ se1:
 
 void EraseCLUT(void)
 {
-ColorSpec	aTable[256];
-short			i;
-RGBColor	rgbColor;
-short		err;
+	RGBColor rgbColor = {0, 0, 0};
+	uint32_t color = RGBColorToU32(&rgbColor);
 
-#if PALOFF
-	return;	//----------
-#endif
-					/* ZAP 0..254 */
+			/* ZAP 0..254 */
 
-	rgbColor.red = rgbColor.green = rgbColor.blue = 0;
-
-	for (i=0; i<255; i++)
+	for (int i = 0; i < 255; i++)
 	{
-		ReserveEntry(i,false);
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-
-		ProtectEntry(i,false);					// make accessable
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
-		aTable[i].rgb = rgbColor;				// assign color
-		aTable[i].value = 0;
-	}
-se1:
-	SetEntries(0,255-1,aTable);					// use them
-	err = QDError();
-	if (err)
-	{
-		ResetScreen();
-		goto se1;
+		gGamePalette[0] = color;				// assign color
 	}
 
 	gSceenBlankedFlag = true;
@@ -266,17 +181,6 @@ se1:
 
 void FadeOutGameCLUT(void)
 {
-register  long	red,green,blue;
-ColorSpec 	aTable[256];
-short			i;
-RGBColor	rgbColor;
-short		err;
-short 		brightness;
-
-#if PALOFF
-	return;	//----------
-#endif
-
 	if (gSceenBlankedFlag)									// see if already out
 		return;
 
@@ -285,51 +189,19 @@ short 		brightness;
 
 						/* FADE OUT THE CLUT */
 
-	for	(brightness = 96; brightness >= 0; brightness -= 8)
+	for (int brightness = 96; brightness >= 0; brightness -= 8)
 	{
-		for (i=0; i<255; i++)
+		for (int i = 0; i < 255; i++)
 		{
-			ReserveEntry(i,false);
-			err = QDError();
-			if (err)
-				ShowSystemErr(err);
-
-			ProtectEntry(i,false);							// make accessable
-			err = QDError();
-			if (err)
-				ShowSystemErr(err);
-
-			GetEntryColor(gBackUpPalette,i,&rgbColor);		// get color from palette
-			red = rgbColor.red;
-			green = rgbColor.green;
-			blue = rgbColor.blue;
-
-			rgbColor.red = (short)((red*brightness)/100);
-			rgbColor.green = (short)((green*brightness)/100);
-			rgbColor.blue = (short)((blue*brightness)/100);
-			aTable[i].rgb = rgbColor;
-			aTable[i].value = i;
-
+			RGBColor rgbColor = U32ToRGBColor(gBackUpPalette[i]);	// get color from palette
+			rgbColor.red	= (short)((int)rgbColor.red		* brightness /100);
+			rgbColor.green	= (short)((int)rgbColor.green	* brightness /100);
+			rgbColor.blue	= (short)((int)rgbColor.blue	* brightness /100);
+			gGamePalette[i] = RGBColorToU32(&rgbColor);				// set it
 		}
-se1:
-		SetEntries(0,255-1,aTable);			// use it
-		err = QDError();
-		if (err)
-		{
-			ResetScreen();
-			goto se1;
-		}
-	}
 
-
-					/* LOCK THE CLUT */
-
-	for (i=0; i<255; i++)
-	{
-		ProtectEntry(i,true);								// lock it there!
-		err = QDError();
-		if (err)
-			ShowSystemErr(err);
+		PresentIndexedFramebuffer();
+		Wait(kFadeFrameDelayTicks);
 	}
 
 
@@ -338,19 +210,3 @@ se1:
 	gSceenBlankedFlag = true;
 
 }
-
-
-/********************* MAKE BACKUP PALETTE *******************/
-
-void MakeBackUpPalette(void)
-{
-
-	CopyPalette(gGamePalette,gBackUpPalette,0,0,255);
-
-}
-
-
-
-
-
-
