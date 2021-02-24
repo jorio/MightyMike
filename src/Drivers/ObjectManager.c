@@ -681,6 +681,8 @@ void DumpUpdateRegions(void)
 	}
 
 	numRegions = 0;								// reset # regions to 0
+
+	PresentIndexedFramebuffer();
 }
 
 
