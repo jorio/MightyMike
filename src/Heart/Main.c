@@ -1070,6 +1070,8 @@ short	maxScenes;
 		case	DIFFICULTY_HARD:
 				maxScenes = 5;
 				break;
+		default:
+				DoFatalAlert("Unknown difficulty setting");
 	}
 
 	for (gSceneNum = gStartingScene; gSceneNum < maxScenes; gSceneNum++)	// do each Scene
@@ -1330,7 +1332,7 @@ void OptimizeMemory(void)
 void LoadPrefs(void)
 {
 Handle	hRsrc;
-long	*longPtr;
+int32_t	*longPtr;
 
 
 	hRsrc = GetResource('Pref',1000);					// read the resource
@@ -1338,10 +1340,10 @@ long	*longPtr;
 		DoFatalAlert("Error reading Pref rez!");
 
 	HLock(hRsrc);
-	longPtr = (long *)*hRsrc;
+	longPtr = (int32_t *)*hRsrc;
 
-	gInterlaceMode = *longPtr++;
-	gDifficultySetting = *longPtr++;
+	gInterlaceMode		= Byteswap32Signed(longPtr++);
+	gDifficultySetting	= Byteswap32Signed(longPtr++);
 
 	ReleaseResource(hRsrc);							// nuke resource
 }
