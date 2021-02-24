@@ -14,6 +14,7 @@
 #include "object.h"
 #include "misc.h"
 #include "shape.h"
+#include <string.h>
 
 extern	Handle		gOffScreenHandle;
 extern	Handle		gBackgroundHandle;
@@ -640,43 +641,29 @@ void SimpleObjectMove(void)
 
 void DumpUpdateRegions(void)
 {
-long		*destPtr,*srcPtr;
-short		height;
-long		*srcStartPtr,*destStartPtr;
-Byte		width;
-long		top,bottom,left,right;
-short		regionNum,i;
-
 	if (numRegions == 0)
 		return;
-
-						/* GET SCREEN PIXMAP INFO */
-
-//	gMMUMode = true32b;							// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
 
 
 					/* UPDATE ALL OF THE REGIONS */
 
-	for (regionNum=0; regionNum<numRegions; regionNum++)
+	for (int regionNum = 0; regionNum < numRegions; regionNum++)
 	{
-		top = 	(long)regionList[regionNum].top;
-		bottom = regionList[regionNum].bottom;
-		height = bottom-top;
+		int top		= regionList[regionNum].top;
+		int bottom	= regionList[regionNum].bottom;
+		int height	= bottom-top;
 
-		left = 	regionList[regionNum].left;
-		right =	regionList[regionNum].right;
+		int left	= 	regionList[regionNum].left;
+		int right	=	regionList[regionNum].right;
 
-		width = ((right-left)>>2)+1;
+		int width = ((right-left)>>2)+1;				// in longs
+		width <<= 2;									// convert back to bytes
 
-		if ((top-OFFSCREEN_WINDOW_TOP) < 0)
-			SysBeep(0);
-		if ((left-OFFSCREEN_WINDOW_LEFT) < 0)
-			SysBeep(0);
+		GAME_ASSERT(top-OFFSCREEN_WINDOW_TOP >= 0);
+		GAME_ASSERT(left-OFFSCREEN_WINDOW_LEFT >= 0);
 
-		srcStartPtr = (long *)(gOffScreenLookUpTable[top]+left);
-		destStartPtr = (long *)(gScreenLookUpTable[top-OFFSCREEN_WINDOW_TOP]+
-						left-OFFSCREEN_WINDOW_LEFT);
+		const uint8_t* srcPtr	= gOffScreenLookUpTable[top]+left;
+		uint8_t* destPtr		= gScreenLookUpTable[top-OFFSCREEN_WINDOW_TOP] + left-OFFSCREEN_WINDOW_LEFT;
 
 						/* DO THE QUICK COPY */
 
@@ -685,20 +672,14 @@ short		regionNum,i;
 
 		do
 		{
-			destPtr = destStartPtr;						// get line start ptrs
-			srcPtr = srcStartPtr;
+			memcpy(destPtr, srcPtr, width);
 
-			for (i=0; i<width; i++)
-				*destPtr++ = *srcPtr++;
-
-			destStartPtr += gScreenRowOffsetLW;				// Bump to start of next row.
-			srcStartPtr += (OFFSCREEN_WIDTH>>2);
+			destPtr += gScreenRowOffset;				// Bump to start of next row.
+			srcPtr += OFFSCREEN_WIDTH;
 
 		} while (--height);
-
 	}
 
-//	SwapMMUMode(&gMMUMode);						// Restore addressing mode
 	numRegions = 0;								// reset # regions to 0
 }
 

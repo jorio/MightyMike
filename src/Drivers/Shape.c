@@ -14,6 +14,7 @@
 #include "object.h"
 #include "misc.h"
 #include "shape.h"
+#include <string.h>
 
 extern	Handle		gOffScreenHandle;
 extern	Handle		gBackgroundHandle;
@@ -906,9 +907,10 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 		for (i=width; i; i--)
 		{
-			*destPtr32 = (*destPtr32 & (*maskPtr32++)) | (*srcPtr32);			// TODO byteswap here?
+			*destPtr32 = (*destPtr32 & *maskPtr32) | (*srcPtr32);
 			destPtr32++;
 			srcPtr32++;
+			maskPtr32++;
 		}
 
 		destStartPtr32 += (OFFSCREEN_WIDTH>>2);				// next row
@@ -940,19 +942,14 @@ update:
 
 void EraseASprite(ObjNode *theNodePtr)
 {
-long	*destPtr,*destStartPtr,*srcPtr,*srcStartPtr;
-long	i;
-long	width,height;
-long	x,y;
-
 	if (theNodePtr->PFCoordsFlag)					// see if do special PF Erase code
 	{
 		ErasePFSprite(theNodePtr);
 		return;
 	}
 
-	x = theNodePtr->drawBox.left;					// get x coord
-	y = theNodePtr->drawBox.top;					// get y coord
+	int x = theNodePtr->drawBox.left;				// get x coord
+	int y = theNodePtr->drawBox.top;				// get y coord
 
 	if ((x < 0) ||									// see if out of bounds
 		(x >= OFFSCREEN_WIDTH) ||
@@ -960,24 +957,23 @@ long	x,y;
 		(y >= OFFSCREEN_HEIGHT))
 			return;
 
-	width = (((theNodePtr->drawBox.right)-x)>>2)+2;
-	height = (theNodePtr->drawBox.bottom)-y;
+	int width = (((theNodePtr->drawBox.right)-x)>>2)+2;		// in longs
+	width <<= 2;											// convert back to bytes
 
-	destStartPtr = (long *)(gOffScreenLookUpTable[y]+x);	// calc read/write addrs
-	srcStartPtr = (long *)(gBackgroundLookUpTable[y]+x);
+	int height = (theNodePtr->drawBox.bottom)-y;
+
+
+	uint8_t*		destPtr	= gOffScreenLookUpTable[y]+x;	// calc read/write addrs
+	const uint8_t*	srcPtr	= gBackgroundLookUpTable[y]+x;
 
 						/* DO THE ERASE */
 
 	for (; height > 0; height--)
 	{
-		destPtr = destStartPtr;						// get line start ptrs
-		srcPtr = srcStartPtr;
+		memcpy(destPtr, srcPtr, width);
 
-		for (i=width; i; i--)
-			*destPtr++ = *srcPtr++;
-
-		destStartPtr += (OFFSCREEN_WIDTH>>2);		// next row
-		srcStartPtr += (OFFSCREEN_WIDTH>>2);
+		destPtr	+= OFFSCREEN_WIDTH;		// next row
+		srcPtr	+= OFFSCREEN_WIDTH;
 	}
 }
 
