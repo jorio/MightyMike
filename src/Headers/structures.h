@@ -40,20 +40,29 @@ struct ObjNode
 	Boolean		PFCoordsFlag;	// set if x/y coords are global playfield coords, not offscreen buffer coords
 	Boolean		TileMaskFlag;	// set if PF draw should use tile masks
 	union {
-		long L;
-		short Frac;
-		short	Int;
+		int32_t	L;
+		struct
+		{
+			int16_t Frac;
+			int16_t Int;
+		};
 	}YOffset;					// offset for y draw position on playfield
 	short		ClipNum;		// clipping region # to use
 	union {
-		long L;
-		short Frac;
-		short	Int;
+		int32_t L;
+		struct
+		{
+			int16_t Frac;
+			int16_t Int;
+		};
 	}X;							// x coord (low word is fraction)
 	union {
-		long L;
-		short Frac;
-		short	Int;
+		int32_t L;
+		struct
+		{
+			int16_t Frac;
+			int16_t Int;
+		};
 	}Y;							// y coord (low word is fraction)
 	long		OldX;			// old x coord (no fraction)
 	long		OldY;			// old y coord
