@@ -309,6 +309,7 @@ long	growBytes;
 
 void DrawOnBackground(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
+	DoAlert("Implement Me! DrawOnBackground");
 register	long	col,height;
 register	long	*destPtr,*srcPtr,*maskPtr,*dest2Ptr;
 long		*dest2StartPtr,*destStartPtr;
@@ -396,6 +397,7 @@ static		Rect	box;
 
 void DrawOnBackground_NoMask(long x,long y,long groupNum,long shapeNum,long frameNum, Boolean updateFlag)
 {
+	DoAlert("Implement Me! DrawOnBackground_NoMask");
 register	long	col;
 register	long	height;
 register	long	*destPtr,*srcPtr,*dest2Ptr;
@@ -478,31 +480,24 @@ Rect		box;
 
 void DrawFrameToScreen(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
-register	long	col,height;
-register	long	*destPtr,*srcPtr,*maskPtr;
-register	long	*destStartPtr;
-long		width;
 Ptr			tempPtr,shapePtr;
-long		*longPtr,offset;
-short		*intPtr;
+int32_t 	offset;
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
 	shapePtr = 	gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
 
-	offset = *((long *)(shapePtr+2));				// get offset to FRAME_LIST
+	offset = Byteswap32Signed(shapePtr+2);			// get offset to FRAME_LIST
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
 
-	longPtr = (long *)(tempPtr+(frameNum<<2)+2);	// point to correct frame offset
-	offset = *longPtr;								// get offset to FRAME_HEADER
+	offset = Byteswap32Signed(tempPtr+(frameNum<<2)+2);	// get offset to frame's FRAME_HEADER
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_HEADER
 
 
-	intPtr = (short *)tempPtr;						// get height & width of frame
-	width = (*intPtr++)>>2;							// word width
-	height = *intPtr++;
-	x += *intPtr++;									// use position offsets
-	y += *intPtr++;
+	int width = Byteswap16Signed(tempPtr)>>2;		// word width
+	int height = Byteswap16Signed(tempPtr+2);
+	x += Byteswap16Signed(tempPtr+4);				// use position offsets
+	y += Byteswap16Signed(tempPtr+6);
 
 	if ((x < 0) ||									// see if out of bounds
 		(x >= VISIBLE_WIDTH) ||
@@ -510,32 +505,31 @@ short		*intPtr;
 		(y >= VISIBLE_HEIGHT))
 			return;
 
-	longPtr = (long *)intPtr;
-	srcPtr = (long *)((*longPtr++)+shapePtr);		// point to pixel data
-	maskPtr = (long *)((*longPtr)+shapePtr);		// point to mask data
-	destStartPtr = (long *)(gScreenLookUpTable[y]+x);		// point to screen
+	tempPtr += 8;
 
-//	gMMUMode = true32b;									// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
+	uint32_t*	srcPtr			= shapePtr + Byteswap32Signed(tempPtr);
+	uint32_t*	maskPtr			= shapePtr + Byteswap32Signed(tempPtr + 4);
+	uint32_t*	destStartPtr	= gScreenLookUpTable[y] + x;
 
 
 						/* DO THE DRAW */
 
 	do
 	{
-		destPtr = destStartPtr;							// get line start ptr
+		uint32_t* destPtr = destStartPtr;							// get line start ptr
 
-		col = width;
+		int col = width;
 		do
 		{
-			*destPtr++ = (*destPtr & (*maskPtr++)) | (*srcPtr++);
-		}while (--col > 0);
+			*destPtr = (*destPtr & *maskPtr) | (*srcPtr);
+			destPtr++;
+			maskPtr++;
+			srcPtr++;
+		} while (--col > 0);
 
 		destStartPtr += gScreenRowOffsetLW;			// next row
 	}
 	while (--height > 0);
-
-//	SwapMMUMode(&gMMUMode);						// Restore addressing mode
 }
 
 
@@ -549,6 +543,7 @@ short		*intPtr;
 
 void DrawFrameToScreen_NoMask(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
+	DoAlert("Implement me! DrawFrameToScreen_NoMask");
 register	long	col,height;
 register	long	*destPtr,*srcPtr;
 register	long	*destStartPtr;
@@ -673,6 +668,7 @@ register	long	x2;
 
 void DrawSpriteAt(ObjNode *theNodePtr,long x, long y, Ptr destBufferBaseAddr, long rowBytes)
 {
+	DoAlert("Implement me! DrawSpriteAt");
 register	long	width;
 register	long	col;
 register	long	*destPtr,*srcPtr,*maskPtr;
@@ -747,6 +743,7 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 void DrawFrameAt_NoMask(long x,long y,long groupNum,long shapeNum,long frameNum, Ptr destBufferBaseAddr, long rowBytes)
 {
+	DoAlert("Implement me! DrawFrameAt_NoMask");
 register	long		col,height;
 register	long	*destPtr,*srcPtr;
 register	long	*destStartPtr;
@@ -984,6 +981,7 @@ void EraseASprite(ObjNode *theNodePtr)
 
 static void DrawPFSprite(ObjNode *theNodePtr)
 {
+	DoAlert("Implement me! DrawPFSprite");
 long	width,height,i;
 long	drawHeight,y;
 Ptr		destPtrB,srcPtrB,maskPtrB;
@@ -1228,6 +1226,7 @@ Ptr		tmP;
 
 static void ErasePFSprite(ObjNode *theNodePtr)
 {
+	DoAlert("Implement me! ErasePFSprite");
 long	width,height,drawWidth,y;
 long	i;
 double	*destPtr,*srcPtr;

@@ -460,20 +460,12 @@ long		workNum;
 
 /****************** WRITELN *******************/
 
-void WriteLn(char *string)
+void WriteLn(char *cString)
 {
-Ptr		charPtr;
-char	ch;
-short		i;
-short	length;
-
-	charPtr = (Ptr)string;						// point to string
-	length = *charPtr++;						// get length byte
-
-	for (i=0; i<length; i++)
+	while (*cString)
 	{
-		ch	= *charPtr++;						// get char
-		PrintBigChar(ch);
+		PrintBigChar(*cString);
+		cString++;
 	}
 
 	DumpUpdateRegions();

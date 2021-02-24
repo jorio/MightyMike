@@ -458,14 +458,9 @@ void DoSceneScreen(void)
 
 void ClearHighScores(void)
 {
-short		i,n;
-
-
-	for (i=0; i<MAX_HIGH_SCORES; i++)
+	for (int i = 0; i < MAX_HIGH_SCORES; i++)
 	{
-		for (n=1; n<=MAX_NAME_LENGTH; n++)				// init name string
-			HighScoreNames[i][n] = ' ';
-		HighScoreNames[i][0] = MAX_NAME_LENGTH;
+		HighScoreNames[i][0] = '\0';
 
 		HighScoreList[i] = 0;							// init score
 	}
@@ -568,7 +563,7 @@ gotit:
 
 
 	HighScoreList[i] = newScore;							// put new score in spot
-	HighScoreNames[i][0] = 0;								// erase old name from spot
+	HighScoreNames[i][0] = '\0';							// erase old name from spot
 
 
 	DisplayScores();										// put em up there
@@ -594,7 +589,7 @@ void ShowLastScore(void)
 
 	gHtab = VISIBLE_WIDTH/2-50;
 	gVtab = 480/2-50;
-	WriteLn((char *)"SCORE");
+	WriteLn("SCORE");
 
 	gHtab = 250;
 	gVtab = 480/2;
@@ -649,7 +644,7 @@ ObjNode		*nameObj;
 			if (i>0)
 			{
 				i--;
-				HighScoreNames[n][0] = i;
+				HighScoreNames[n][i] = '\0';
 				gHtab = NAME_HTAB;						// set coords of name
 				gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
 				SetRect(&eraseRect,gHtab+OFFSCREEN_WINDOW_LEFT-30,gVtab+OFFSCREEN_WINDOW_TOP-20,
@@ -670,9 +665,8 @@ ObjNode		*nameObj;
 			if (theChar >= 'a')
 				theChar -= 0x20;					// convert to upper case
 
-			HighScoreNames[n][i+1] = theChar;		// put char into string
+			HighScoreNames[n][i] = theChar;			// put char into string
 			i++;
-			HighScoreNames[n][0] = i;				// save length byte
 			gHtab = NAME_HTAB;						// set coords of name
 			gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
 			SetRect(&eraseRect,gHtab+OFFSCREEN_WINDOW_LEFT-30,gVtab+OFFSCREEN_WINDOW_TOP-20,
