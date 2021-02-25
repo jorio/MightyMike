@@ -209,11 +209,11 @@ void InitArea(void)
 	ClearGlobalFlags();
 	InitObjectManager();
 
+	BuildItemList();											// creates playfield item list (used to be called in InitPlayfield)
 	InitMe();
 	InitEnemies();
 	InitBullets();
 	InitKeys();
-	BuildItemList();											// creates playfield item list (used to be called in InitPlayfield)
 	CountBunnies();
 	LoadCurrentPlayer(false);									// load current player's info (for 2 player mode)
 	InitPlayfield();											// must init playfield *after* InitMe!

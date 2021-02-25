@@ -48,20 +48,20 @@ static	TileAnimEntryType	gTileAnims[MAX_TILE_ANIMS];
 // INPUT: pointer to TILE_ANIM_LIST in tileset file
 //
 
-void PrepareTileAnims(short *intPtr)
+void PrepareTileAnims(int16_t *intPtr)
 {
 short	i,num,size;
 
 	gNumTileAnims = 0;								// start @ 0
 
-	num = *intPtr++;								// get # tile anims
+	num = Byteswap16Signed(intPtr++);				// get # tile anims
 
 	for (i=0; i < num; i++)
 	{
 		intPtr += (16/2);							// skip over animName (16 byte string)
 		Add1TileAnim((TileAnimEntryType	*)intPtr);
 		intPtr += 2;
-		size = *intPtr++;							// get #frames
+		size = Byteswap16Signed(intPtr++);			// get #frames
 		intPtr += size;								// skip over to next anim
 	}
 }

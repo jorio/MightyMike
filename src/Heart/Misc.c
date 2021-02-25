@@ -797,10 +797,12 @@ ColorSpec 	aTable[2];
 
 				/* SETUP B&W&R PALETTE */
 
+#if 0
 	ReserveEntry(0,false);
 	ProtectEntry(0,false);
 	ReserveEntry(1,false);
 	ProtectEntry(1,false);
+#endif
 	aTable[0].rgb.red =
 	aTable[0].rgb.green =
 	aTable[0].rgb.blue = 0xffff;						// white
@@ -829,9 +831,11 @@ ColorSpec 	aTable[2];
 
 														// draw thermometer box
 
+TODO_REWRITE_THIS_MINOR();
+#if 0
 	SetRect(&theRect,gThermometerX,gThermometerY,gThermometerX+200,gThermometerY+16);
 	FrameRect(&theRect);
-
+#endif
 }
 
 
@@ -839,6 +843,8 @@ ColorSpec 	aTable[2];
 
 void FillThermometer(short percent)
 {
+	TODO_REWRITE_THIS_MINOR();
+#if 0
 Rect	theRect;
 
 	percent *= 2;
@@ -847,6 +853,7 @@ Rect	theRect;
 	SetRect(&theRect,gThermometerX+1,gThermometerY+1,
 			gThermometerX+percent-2,gThermometerY+16-1);
 	PaintRect(&theRect);
+#endif
 }
 
 

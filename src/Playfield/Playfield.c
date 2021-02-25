@@ -277,7 +277,7 @@ static	Byte	**gAlternateMap = nil;
 long			gScrollX,gScrollY;
 long			gScrollRow,gScrollCol,gOldScrollRow,gOldScrollCol;
 
-short			gNumItems;
+short			gNumItems = -1;
 static	ObjectEntryType	**gItemLookupTableX = nil;
 ObjectEntryType *gMasterItemList = nil;
 
@@ -389,10 +389,10 @@ void SetTileColorMasks(short *intPtr)
 {
 short		num,i;
 
-	num = *intPtr++;							// get # of xparent colors
+	num = Byteswap16Signed(intPtr++);						// get # of xparent colors
 	for (i = 0; i < num; i++)
 	{
-		gColorMaskArray[*intPtr++] = false;
+		gColorMaskArray[Byteswap16Signed(intPtr++)] = false;
 	}
 }
 
@@ -412,29 +412,28 @@ Ptr	tileSetPtr;
 		DisposeHandle(gTileSetHandle);
 
 	gTileSetHandle = LoadPackedFile(fileName);				// load the file
-	HLockHi(gTileSetHandle);
-	tileSetPtr = StripAddress(*gTileSetHandle);				// get fixed ptr
+	tileSetPtr = *gTileSetHandle;							// get fixed ptr
 
 
 
 				/* GET POINTER TO TILE_DEFINITIONS */
 
-	gTilesPtr = tileSetPtr+*(long *)(tileSetPtr+6)+2;	// base + offset + 2 (skip # tiles word)
+	gTilesPtr = tileSetPtr+ Byteswap32Signed(tileSetPtr+6) + 2;		// base + offset + 2 (skip # tiles word)
 
 
 				/* GET POINTER TO TILE_XLATE_TABLE */
 
-	gTileXlatePtr = (short *)(tileSetPtr+*(long *)(tileSetPtr+10)+2);	// base + offset + 2 (skip # entries word)
-
+	gTileXlatePtr = tileSetPtr+Byteswap32Signed(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
+	printf("TODO: >>>>>>>>> Byteswap gTileXLatePtr!!!!! <<<<<<<<<\n");
 
 				/* GET POINTER TO TILE_ATTRIBUTES */
 
-	gTileAttributes = (TileAttribType *)(tileSetPtr+*(long *)(tileSetPtr+14)+2); // base + offset + 2 (skip # entries word)
+	gTileAttributes = (TileAttribType *)(tileSetPtr+Byteswap32Signed(tileSetPtr+14)+2); // base + offset + 2 (skip # entries word)
 
 
-	PrepareTileAnims((short *)(tileSetPtr+*(long *)(tileSetPtr+22)));	// pass ptr to TILE_ANIM_LIST
+	PrepareTileAnims(tileSetPtr+Byteswap32Signed(tileSetPtr+22));	// pass ptr to TILE_ANIM_LIST
 
-	SetTileColorMasks((short *)(tileSetPtr+*(long *)(tileSetPtr+26)));	// pass ptr to TILE_XPARENT_LIST
+	SetTileColorMasks(tileSetPtr+Byteswap32Signed(tileSetPtr+26));	// pass ptr to TILE_XPARENT_LIST
 }
 
 
@@ -469,6 +468,10 @@ void DisposeCurrentMapData(void)
 		DisposeHandle(gTileSetHandle);
 		gTileSetHandle = nil;
 	}
+
+	gNumItems = -1;
+	gMasterItemList = nil;	// this is just a pointer within gPlayfieldHandle, no need to dispose of it
+
 }
 
 
@@ -479,29 +482,29 @@ void DisposeCurrentMapData(void)
 
 void LoadPlayfield(Str255 fileName)
 {
-unsigned short	*tempPtr;
+uint16_t	*tempPtr;
 long	i;
 Ptr		bytePtr,pfPtr;
 
 	gPlayfieldHandle = LoadPackedFile(fileName);					// load the file
-	HLockHi(gPlayfieldHandle);
 
-	pfPtr = StripAddress(*gPlayfieldHandle);						// get fixed ptr
+	pfPtr = *gPlayfieldHandle;										// get fixed ptr
 
 
 				/* BUILD MAP ARRAY */
 
-	tempPtr = (unsigned short *)(pfPtr+*(long *)(pfPtr+2));			// point to MAP_IMAGE
-	gPlayfieldTileWidth = *tempPtr++;								// get dimensions
-	gPlayfieldTileHeight = *tempPtr++;
+	tempPtr = (uint16_t *)(pfPtr + Byteswap32Signed(pfPtr+2));		// point to MAP_IMAGE
+	gPlayfieldTileWidth = Byteswap16(tempPtr++);					// get dimensions
+	gPlayfieldTileHeight = Byteswap16(tempPtr++);
 	gPlayfieldWidth = gPlayfieldTileWidth<<TILE_SIZE_SH;
 	gPlayfieldHeight = gPlayfieldTileHeight<<TILE_SIZE_SH;
 
-	gPlayfield = (unsigned short **)AllocPtr(sizeof(short *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
+	gPlayfield = (uint16_t **)AllocPtr(sizeof(uint16_t *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
 	if (gPlayfield == nil)
 		DoFatalAlert("NewPtr failed trying to get gPlayfield!");
 	for (i = 0; i < gPlayfieldTileHeight; i++)						// build 1st dimension of matrix
 	{
+		ByteswapInts(2, gPlayfieldTileWidth, tempPtr);
 		gPlayfield[i]= (unsigned short *)tempPtr;					// set pointer to row
 		tempPtr += gPlayfieldTileWidth;								// next row
 	}
@@ -509,7 +512,7 @@ Ptr		bytePtr,pfPtr;
 
 			/* GET ALTERNATE MAP */
 
-	bytePtr = (Ptr)(pfPtr+*(long *)(pfPtr+10));						// point to ALTERNATE_MAP
+	bytePtr = (Ptr)(pfPtr + Byteswap32Signed(pfPtr+10));						// point to ALTERNATE_MAP
 	if (bytePtr == nil)
 	{
 		gAlternateMap = nil;										// no alt map to load
@@ -634,7 +637,6 @@ long		right,left,top,bottom;
 void BuildItemList(void)
 {
 long	offset;
-short	*intPtr;
 long	col,itemCol,itemNum,nextCol,prevCol;
 ObjectEntryType *lastPtr;
 
@@ -643,13 +645,18 @@ ObjectEntryType *lastPtr;
 
 					/* GET BASIC INFO */
 
-	offset = *(long *)(*gPlayfieldHandle+6);					// get offset to OBJECT_LIST
-	intPtr = (short *)(*gPlayfieldHandle+offset);				// get pointer to OBJECT_LIST
-	gNumItems = *intPtr++;										// get # items in file
+	offset = Byteswap32Signed(*gPlayfieldHandle+6);						// get offset to OBJECT_LIST
+	gNumItems = Byteswap16Signed(*gPlayfieldHandle+offset);				// get # items in file
 	if (gNumItems == 0)
 		return;
-	gMasterItemList = (ObjectEntryType *)intPtr;				// point to items in file
+	gMasterItemList = (ObjectEntryType *)(*gPlayfieldHandle+offset+2);	// point to items in file
 
+					/* BYTESWAP ALL OBJECT ENTRY STRUCTS */
+
+	// Ensure the in-memory representation of the struct is tightly-packed to match the struct's layout on disk
+	_Static_assert(sizeof(struct ObjectEntryType) == 4+4+2+4, "ObjectEntryType has incorrect size!");
+
+	ByteswapStructs("2ih4b", sizeof(ObjectEntryType), gNumItems, gMasterItemList);
 
 				/* BUILD HORIZ LOOKUP TABLE */
 

@@ -14,12 +14,18 @@
 
 			/* PLAYFIELD ITEM RECORD */
 
+#pragma pack(push, 1)	// This struct must be tightly packed to match the on-disk representation.
+						// (A static assert in the code enforces this.)
+
 typedef struct ObjectEntryType
 {
-	long			x,y;
-	short			type;
+	int32_t			x;
+	int32_t			y;
+	int16_t			type;
 	Byte			parm[4];
 }ObjectEntryType;
+
+#pragma pack(pop)		// Stop tight packing of structs
 
 
 			/*  OBJECT RECORD STRUCTURE */

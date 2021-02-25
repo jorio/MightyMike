@@ -46,6 +46,10 @@ extern	short			gEnemyFreezeTimer;
 extern	short			gShieldTimer;
 extern	Boolean			gFinishedArea;
 
+extern	short			gNumItems;
+extern	ObjectEntryType	*gMasterItemList;
+
+
 /****************************/
 /*    CONSTANTS             */
 /****************************/
@@ -1487,38 +1491,30 @@ register	ObjNode		*thisNodePtr;
 
 void FindMyInitCoords(void)
 {
-long	offset;
-short		*intPtr,itemNum;
-ObjectEntryType *itemPtr;
-short		numItems,num;
-
 	gMyInitX = 250;						// assume these coords
 	gMyInitY = 300;
 
-
-					/* GET BASIC INFO */
-
-	offset = *(long *)(*gPlayfieldHandle+6);					// get offset to OBJECT_LIST
-	intPtr = (short *)(*gPlayfieldHandle+offset);					// get pointer to OBJECT_LIST
-	numItems = *intPtr++;										// get # items in file
-	if (numItems == 0)
-		return;
-	itemPtr = (ObjectEntryType *)intPtr;						// point to items in file
-
-
 				/* SCAN FOR ME */
 
-	for (itemNum = 0; itemNum < numItems; itemNum++)
+	// Item list must have been initialized before calling MyInitCoords
+	GAME_ASSERT(gNumItems > 0);
+	GAME_ASSERT(gMasterItemList);
+
+	for (int itemNum = 0; itemNum < gNumItems; itemNum++)
 	{
-		num = itemPtr[itemNum].type&ITEM_NUM;					// get item #
-		if (num == MY_INIT_ITEM_NUM)							// see if its me
+		ObjectEntryType* item = &gMasterItemList[itemNum];
+
+		int16_t num = item->type&ITEM_NUM;			// get item #
+		if (num == MY_INIT_ITEM_NUM)				// see if its me
 		{
-			gMyInitX = itemPtr[itemNum].x;
-			gMyInitY = itemPtr[itemNum].y;
-			itemPtr[itemNum].type |= ITEM_IN_USE;				// set in-use flag
-			break;
+			gMyInitX = item->x;
+			gMyInitY = item->y;
+			item->type |= ITEM_IN_USE;				// set in-use flag
+			return;
 		}
 	}
+
+	DoFatalAlert("FindMyInitCoords: item type 29 not found");
 }
 
 
