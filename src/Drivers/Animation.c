@@ -77,13 +77,12 @@ int32_t		offset;
 	{
 		doMore = false;
 
-		offset = Byteswap32(theNodePtr->AnimsList + theNodePtr->SubType*4);				// get offset to ANIM_DATA
-		GAME_ASSERT(offset >= 0 && offset < 99000000);
+		offset = Byteswap32Signed(theNodePtr->AnimsList + (theNodePtr->SubType<<2));	// get offset to ANIM_DATA
+		animDataPtr	=	(theNodePtr->SHAPE_HEADER_Ptr+offset+1);		// get ptr to ANIM_DATA
+		animDataPtr +=  (theNodePtr->AnimLine++) << 2;
 
-		theNodePtr->AnimLine++;
-		animDataPtr = (theNodePtr->SHAPE_HEADER_Ptr) + offset + 1 + theNodePtr->AnimLine*4;
-		uint16_t opcode		= Byteswap16(animDataPtr+0);
-		uint16_t operand	= Byteswap16(animDataPtr+2);
+		int16_t opcode		= Byteswap16Signed(animDataPtr+0);
+		int16_t operand	= Byteswap16Signed(animDataPtr+2);
 
 		switch (opcode)
 		{
