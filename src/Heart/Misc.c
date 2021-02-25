@@ -137,12 +137,8 @@ void ShowSystemErr(OSErr err)
 {
 Str255		numStr;
 
-	RestoreDefaultCLUT();
-	ShowCursor();
 	NumToStringC((long)err, numStr);
 	DoAlert (numStr);
-	MyShowMenuBar();
-	RestoreDefaultCLUT();
 	CleanQuit();
 }
 
@@ -153,7 +149,6 @@ void DoAlert(const char* s)
 {
 	fprintf(stderr, "MIKE ALERT: %s\n", s);
 
-	RestoreDefaultCLUT();
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Mighty Mike", s, NULL);
 }
 
@@ -176,7 +171,6 @@ void DoFatalAlert(const char* s)
 {
 	fprintf(stderr, "MIKE FATAL ALERT: %s\n", s);
 
-	RestoreDefaultCLUT();
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike", s, NULL);
 	CleanQuit();
 }
@@ -190,7 +184,6 @@ void DoFatalAlert2(const char* s1, const char* s2)
 	snprintf(alertbuf, 1024, "%s\n%s", s1, s2);
 	fprintf(stderr, "MIKE FATAL ALERT: %s\n", alertbuf);
 
-	RestoreDefaultCLUT();
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike", alertbuf, NULL);
 	CleanQuit();
 }
@@ -216,8 +209,6 @@ exit:
    		ISpShutdown();
 #endif
 
-//	RestoreDefaultCLUT();
-
 	ShowCursor();
 //	MyShowMenuBar();
 	SetDefaultOutputVolume(gOriginalSystemVolume);	// reset to entry volume
@@ -225,38 +216,6 @@ exit:
 	ExitToShell();
 }
 
-
-
-/************************ HIDE/SHOW MENU BAR **************************/
-
-void MyHideMenuBar(void)
-{
-#if 0
-	Rect	mBarRect;
-
-	oldMBarHeight = GetMBarHeight();
-	LMSetMBarHeight(0);			/* make the Menu Bar's height zero */
-	SetRect(&mBarRect, qd.screenBits.bounds.left, qd.screenBits.bounds.top,
-			qd.screenBits.bounds.right, qd.screenBits.bounds.top + oldMBarHeight);
-	mBarRgn = NewRgn();
-	RectRgn(mBarRgn, &mBarRect);
-	UnionRgn(LMGetGrayRgn(), mBarRgn, LMGetGrayRgn());/* tell the desktop it covers the menu
-													 * bar
-													 */
-	PaintOne(nil, mBarRgn);	/* redraw desktop */
-#endif
-}
-
-void MyShowMenuBar(void)
-{
-#if 0
-	LMSetMBarHeight(oldMBarHeight);	/* make the menu bar's height normal */
-	DiffRgn(LMGetGrayRgn(), mBarRgn, LMGetGrayRgn());	/* remove the menu bar from the
-													 * desktop
-													 */
-	DisposeRgn(mBarRgn);
-#endif
-}
 
 
 /************************* WAIT ***********************/
@@ -373,60 +332,6 @@ void WaitWhileMusic(void)
 			DoSoundMaintenance(true);						// (must be after readkeyboard)
 		} while(IsMusicPlaying() && (!gAbortDemoFlag));
 	}
-}
-
-
-/******************** CHECK SCREEN DEPTH **************/
-
-void CheckScreenDepth(void)
-{
-	TODO_REWRITE_THIS();
-#if 0
-GDHandle 	gdh;
-OSErr 		myErr;
-short		depth;
-
-	gdh = GetMainDevice();
-
-	depth = (*(*gdh)->gdPMap)->pixelSize;			// get current pixel depth
-
-	if (depth != 8)
-	{
-
-		if (HasDepth(gdh,8,0,0))						// see if supports 256
-		{
-			myErr = SetDepth(gdh,8,1,1);				// set to 256 color
-			if (myErr)
-				ShowSystemErr(myErr);
-		}
-		else
-			DoFatalAlert("Monitor cannot be set to 256 colors.  Requires 256 colors to run.");
-	}
-#endif
-}
-
-
-/*********************** RESET SCREEN ********************/
-//
-// If a -154 error occurs, this seems to help sometimes
-//
-
-void ResetScreen(void)
-{
-	TODO_REWRITE_THIS();
-#if 0
-GDHandle gdh;
-
-	RestoreDefaultCLUT();
-	if (gNumScreenResets++ < 2)
-	{
-		gdh = GetMainDevice();
-//		SetDepth(gdh,1,1,0);				// set to 2 color
-		SetDepth(gdh,8,1,1);				// set to 256 color
-	}
-	else
-		DoFatalAlert("Screen CLUT cannot be set the way I want?!  Launch me again.");
-#endif
 }
 
 

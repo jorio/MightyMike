@@ -92,27 +92,6 @@ RGBColor	rgbColor,*colorEntryPtr;
 }
 
 
-
-/************************ RESTORE DEFAULT CLUT **********************/
-//
-// Actually just de-reserves all of the CLUT entries
-//
-
-void	RestoreDefaultCLUT()
-{
-short	i;
-
-	for (i=0; i<256; i++)
-	{
-		ReserveEntry(i,false);
-		ProtectEntry(i,false);							// make accessable
-	}
-
-	RestoreDeviceClut(nil);
-	gSceenBlankedFlag = false;
-}
-
-
 /************************ ACTIVATE CLUT ********************/
 
 void ActivateCLUT(void)
