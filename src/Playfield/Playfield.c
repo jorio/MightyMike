@@ -21,7 +21,6 @@
 #include "triggers.h"
 #include "bonus.h"
 #include "misc.h"
-#include "tileanim.h"
 #include "miscanims.h"
 #include "objecttypes.h"
 #include "weapon.h"
@@ -86,6 +85,8 @@ Boolean	gPPCFullScreenFlag = false;
 #define	VIEW_FACTOR		100				// amount to shift view for look-space
 
 #define	MAX_PLAYFIELD_WIDTH	1000L		// max tiles wide the PF will ever be
+
+#define	MAX_TILE_ANIMS	50						// max # of tile anims
 
 
 
@@ -295,6 +296,10 @@ static	short			gShakeyScreenCount;
 
 static	Ptr				gMaxItemAddress;								// addr of last item in current item list
 
+// Source port note: moved from TileAnim.c
+static	short			gNumTileAnims;
+static	TileAnimEntryType	gTileAnims[MAX_TILE_ANIMS];
+
 
 /**********************/
 /*     TABLES         */
@@ -378,33 +383,17 @@ long		i;
 }
 
 
-/******************** SET TILE COLOR MASKS *********************/
-//
-// Activates color xparency on certain colors in palette.
-//
-// INPUT: intPtr = points to xparent color list in tile data
-//
-
-void SetTileColorMasks(short *intPtr)
-{
-short		num,i;
-
-	num = Byteswap16Signed(intPtr++);						// get # of xparent colors
-	for (i = 0; i < num; i++)
-	{
-		gColorMaskArray[Byteswap16Signed(intPtr++)] = false;
-	}
-}
-
-
 /********************* LOAD TILESET **********************/
 //
 // Loads a tileset into memory & does all initialization.
 //
 
+
 void LoadTileSet(Str255 fileName)
 {
-Ptr	tileSetPtr;
+Ptr	tileSetPtr					= nil;
+Ptr tileAnimList				= nil;
+int16_t* tileXparentList		= nil;
 
 	ClearTileColorMasks();									// clear this to begin with
 
@@ -414,26 +403,92 @@ Ptr	tileSetPtr;
 	gTileSetHandle = LoadPackedFile(fileName);				// load the file
 	tileSetPtr = *gTileSetHandle;							// get fixed ptr
 
+			/* GET OFFSETS */
+
+	int offsetToTileDefinitions			= Byteswap32Signed(tileSetPtr+6)+2;		// base + offset + 2 (skip # tiles word)
+	int offsetToXlateTable				= Byteswap32Signed(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
+	int offsetToTileAttributes			= Byteswap32Signed(tileSetPtr+14)+2;	// base + offset + 2 (skip # entries word)
+	int offsetToTileAnimList			= Byteswap32Signed(tileSetPtr+22)+2;
+	int offsetToTileXparentColorList	= Byteswap32Signed(tileSetPtr+26)+2;
+
+	GAME_ASSERT(offsetToTileDefinitions	< offsetToXlateTable);
+	GAME_ASSERT(offsetToXlateTable		< offsetToTileAttributes);
+	GAME_ASSERT(offsetToTileAttributes	< offsetToTileAnimList);
+	GAME_ASSERT(offsetToTileAnimList	< offsetToTileXparentColorList);
+
+			/* GET ENTRY COUNTS */
+
+	int numTileDefinitions				= Byteswap16Signed(tileSetPtr + offsetToTileDefinitions			- 2	);
+	int numXlateEntries					= Byteswap16Signed(tileSetPtr + offsetToXlateTable				- 2	);
+	int numTileAttributeEntries			= Byteswap16Signed(tileSetPtr + offsetToTileAttributes			- 2	);
+	gNumTileAnims						= Byteswap16Signed(tileSetPtr + offsetToTileAnimList			- 2	);
+	int numTileXparentColors			= Byteswap16Signed(tileSetPtr + offsetToTileXparentColorList	- 2	);
+
+			/* GET POINTERS TO TABLES */
+
+	gTilesPtr			=						(	tileSetPtr + offsetToTileDefinitions		);
+	gTileXlatePtr		=	(int16_t *)			(	tileSetPtr + offsetToXlateTable				);
+	gTileAttributes		=	(TileAttribType *)	(	tileSetPtr + offsetToTileAttributes			);
+	tileAnimList		=						(	tileSetPtr + offsetToTileAnimList			);
+	tileXparentList		=	(int16_t *)			(	tileSetPtr + offsetToTileXparentColorList	);
+
+			/* BYTESWAP STUFF */
+
+	// Byteswap gTileXlatePtr
+	ByteswapInts(2, numXlateEntries, gTileXlatePtr);
+
+	// Byteswap gTileAttributes
+	ByteswapStructs("Hh4b", sizeof(TileAttribType), numTileAttributeEntries, gTileAttributes);
+
+	// Byteswap tileXparentList
+	ByteswapInts(2, numTileXparentColors, tileXparentList);
+
+	/***************** PREPARE TILE ANIMS ***********************/
+	//
+	// Source port note: moved from TileAnim.c
+	//
+
+	GAME_ASSERT(gNumTileAnims >= 0);
+	GAME_ASSERT(gNumTileAnims <= MAX_TILE_ANIMS);
+	Ptr currentTileAnimData = tileAnimList;
+	for (int i = 0; i < gNumTileAnims; i++)
+	{
+		GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, currentTileAnimData));
+
+		char name[16];
+		uint8_t nameLength = *currentTileAnimData;
+		GAME_ASSERT(nameLength <= 15);
+		BlockMove(currentTileAnimData+1, name, nameLength);
+		name[nameLength] = '\0';
+
+		TileAnimDefType* tileAnimDef = (TileAnimDefType*) (currentTileAnimData + 16);
+		ByteswapInts(2, 3, currentTileAnimData+16);
+
+		printf("PrepareTileAnims #%d: \"%s\", %d frames\n", i, name, tileAnimDef->numFrames);
+
+		// Set tile anim
+		gTileAnims[i].count = 0;
+		gTileAnims[i].index = 0;
+		gTileAnims[i].defPtr = tileAnimDef;
+
+		// Advance pointer to next tile anim data
+		currentTileAnimData += 16 + 2*3 + 2*tileAnimDef->numFrames;
+	}
 
 
-				/* GET POINTER TO TILE_DEFINITIONS */
+	/******************** SET TILE COLOR MASKS *********************/
+	//
+	// Activates color xparency on certain colors in palette.
+	//
 
-	gTilesPtr = tileSetPtr+ Byteswap32Signed(tileSetPtr+6) + 2;		// base + offset + 2 (skip # tiles word)
+	for (int i = 0; i < numTileXparentColors; i++)
+	{
+		GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, (Ptr) &tileXparentList[i]));
+		GAME_ASSERT(tileXparentList[i] >= 0);
+		GAME_ASSERT(tileXparentList[i] < sizeof(gColorMaskArray));
 
-
-				/* GET POINTER TO TILE_XLATE_TABLE */
-
-	gTileXlatePtr = tileSetPtr+Byteswap32Signed(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
-	printf("TODO: >>>>>>>>> Byteswap gTileXLatePtr!!!!! <<<<<<<<<\n");
-
-				/* GET POINTER TO TILE_ATTRIBUTES */
-
-	gTileAttributes = (TileAttribType *)(tileSetPtr+Byteswap32Signed(tileSetPtr+14)+2); // base + offset + 2 (skip # entries word)
-
-
-	PrepareTileAnims(tileSetPtr+Byteswap32Signed(tileSetPtr+22));	// pass ptr to TILE_ANIM_LIST
-
-	SetTileColorMasks(tileSetPtr+Byteswap32Signed(tileSetPtr+26));	// pass ptr to TILE_XPARENT_LIST
+		gColorMaskArray[tileXparentList[i]] = false;
+	}
 }
 
 
@@ -1419,7 +1474,6 @@ unsigned char	*copyOfSrc;
 unsigned long	rowS,colS;								// shifted version of row & col
 Byte		pixel;
 Ptr			destPtrB,srcPtrB;
-static long	fillFs[2] = {0xFFFFFFFFL,0XFFFFFFFFL};
 
 					/* CALC DEST POINTERS */
 
@@ -1428,8 +1482,11 @@ static long	fillFs[2] = {0xFFFFFFFFL,0XFFFFFFFFL};
 
 					/* CALC TILE DEFINITION ADDR */
 
-	copyOfSrc = srcPtr = (unsigned char *)(gTilesPtr+
-					((long)(gTileXlatePtr[tileNum&TILENUM_MASK])<<(TILE_SIZE_SH*2)));
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, &gTileXlatePtr[tileNum & TILENUM_MASK]));
+
+	int xlate = gTileXlatePtr[tileNum&TILENUM_MASK];
+
+	copyOfSrc = srcPtr = (unsigned char *)(gTilesPtr + (xlate<<(TILE_SIZE_SH*2)));
 	destPtr = (unsigned char *)destStartPtr;
 	destCopyPtr = (unsigned char *)destCopyStartPtr;
 
@@ -2298,4 +2355,66 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 }
 
 
+
+/**************** UPDATE TILE ANIMATION **********************/
+// Source port note: moved from TileAnim.c
+
+void UpdateTileAnimation(void)
+{
+unsigned long	row;
+unsigned short	newTile;
+register unsigned short	targetTile,*intPtr,*basePtr;
+register long	col;
+register long	x,y,animNum;
+unsigned long 	origRow,origCol;
+
+	origRow = gScrollRow % PF_TILE_HEIGHT;									// calc row in buffer
+	origCol = gScrollCol % PF_TILE_WIDTH;									// calc col in buffer
+
+	for (animNum = 0; animNum < gNumTileAnims; animNum++)
+	{
+						/* CHECK COUNTER */
+
+		if ((gTileAnims[animNum].count -= gTileAnims[animNum].defPtr->speed) < 0)
+		{
+			gTileAnims[animNum].count = 0x100;								// reset counter
+
+						/* SCAN VISIBLE AREA FOR TARGET TILE */
+
+			targetTile = gTileAnims[animNum].defPtr->baseTile;				// get target basetile
+			newTile = gTileAnims[animNum].defPtr->tileNums[gTileAnims[animNum].index];	// get tile to draw
+
+			basePtr = (unsigned short *)&gPlayfield[gScrollRow][gScrollCol]; // get ptr to start of scan
+
+			row = origRow;													// get modable row
+
+			y = 0;
+			do
+			{
+				intPtr = basePtr;											// get ptr to start of horiz scan
+				col = origCol;
+				x = PF_TILE_WIDTH;
+
+				do
+				{
+					if ((*intPtr++ & TILENUM_MASK) == targetTile)
+						DrawATile_Simple(newTile,row,col);
+
+					if (++col >= PF_TILE_WIDTH)								// see if column wrap
+						col = 0;
+				} while (--x);
+
+				if (++row >= PF_TILE_HEIGHT)								// see if row wrap
+					row = 0;
+
+				basePtr += gPlayfieldTileWidth;								// next row in map
+			} while (++y < PF_TILE_HEIGHT);
+
+
+			y = ++gTileAnims[animNum].index;								// increment index
+			if (y  >= gTileAnims[animNum].defPtr->numFrames)				// see if at end of sequence
+				gTileAnims[animNum].index = 0;
+		}
+	}
+}
 

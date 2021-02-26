@@ -77,7 +77,6 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Misc/Traps.c
 	${GAME_SRCDIR}/Misc/Triggers.c
 	${GAME_SRCDIR}/Playfield/Playfield.c
-	${GAME_SRCDIR}/Playfield/TileAnim.c
 	${GAME_SRCDIR}/Enemies/Bargain/Enemy_8Ball.c
 	${GAME_SRCDIR}/Enemies/Bargain/Enemy_Battery.c
 	${GAME_SRCDIR}/Enemies/Bargain/Enemy_doggy.c

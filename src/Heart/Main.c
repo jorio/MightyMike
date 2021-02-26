@@ -27,7 +27,6 @@
 #include "miscanims.h"
 #include "spin.h"
 #include "weapon.h"
-#include "tileanim.h"
 #include "shape.h"
 #include "io.h"
 #include "racecar.h"

@@ -68,18 +68,37 @@ enum
 
 #define	TILE_ATTRIB_ALLSOLID	(TILE_ATTRIB_TOPSOLID|TILE_ATTRIB_BOTTOMSOLID|TILE_ATTRIB_LEFTSOLID|TILE_ATTRIB_RIGHTSOLID)
 
+
 struct TileAttribType
 {
-	unsigned short	bits;
-	short			parm0;
+	uint16_t		bits;
+	int16_t			parm0;
 	Byte			parm1,parm2;
-	short			undefined;					// used to make data stuct even 8 bytes
+	Byte			padding[2];					// used to make data stuct even 8 bytes
 };
 typedef struct TileAttribType TileAttribType;
 
 
+struct TileAnimDefType
+{
+	int16_t		speed;					// speed of anim
+	uint16_t	baseTile;				// base tile # to animate
+	int16_t		numFrames;				// # frames in sequence
+	uint16_t 	tileNums[];				// the tile sequence
+};
+typedef struct TileAnimDefType TileAnimDefType;
+
+
+struct TileAnimEntryType
+{
+	int16_t		count;					// current speed count
+	uint8_t		index;					// index into sequence
+	TileAnimDefType	*defPtr;			// pointer to definition
+};
+typedef struct TileAnimEntryType TileAnimEntryType;
+
+
 extern void	ClearTileColorMasks(void);
-extern void	SetTileColorMasks(short *);
 extern void	LoadTileSet(Str255);
 extern void	DisposeCurrentMapData(void);
 extern void	LoadPlayfield(Str255);
@@ -107,3 +126,5 @@ extern void	StartShakeyScreen(short);
 extern short	MoveOnPath(long, Boolean);
 extern Boolean	NilAdd(ObjectEntryType *);
 extern void	CreatePlayfieldPermanentMemory(void);
+extern void	UpdateTileAnimation(void);
+
