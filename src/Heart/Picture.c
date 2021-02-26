@@ -204,11 +204,10 @@ Handle		theImageHand;
 void LoadBorderImage(void)
 {
 short			width,height;
-register short	i,k;
 long			numToRead;
 short			fRefNum,vRefNum;
-register Ptr	linePtr,destPtr,srcPtr;
-RGBColor		*rgbPtr,rgb;
+Ptr				linePtr,destPtr,srcPtr;
+RGBColor		*rgbPtr = nil;
 
 
 					/* OPEN THE FILE */
@@ -223,16 +222,17 @@ RGBColor		*rgbPtr,rgb;
 					/* READ & SET THE PALETTE */
 
 	SetFPos(fRefNum,fsFromStart,8);							// skip pack header
-	rgbPtr = (RGBColor *)AllocPtr(256*sizeof(RGBColor));	// alloc memory to hold colors
 	numToRead = 256*sizeof(RGBColor);
-	FSRead(fRefNum,&numToRead,(Ptr)rgbPtr);					// read color data
-//	gColorListSize = 256;
-	for (i=0; i<256; i++)
+	rgbPtr = (RGBColor *)AllocPtr(numToRead);				// alloc memory to hold colors
+	FSRead(fRefNum, &numToRead, (Ptr)rgbPtr);				// read color data
+	GAME_ASSERT(numToRead == 256*sizeof(RGBColor));
+	ByteswapInts(2, 256*3, rgbPtr);							// convert colors from big endian
+	for (int i = 0; i < 256; i++)
 	{
-		rgb = *rgbPtr++;									// get a color
-		SetEntryColor(gGamePalette,i,&rgb);					// set
+		gGamePalette[i] = RGBColorToU32(&rgbPtr[i]);		// set colors in palette
 	}
 	DisposePtr((Ptr)rgbPtr);
+	rgbPtr = nil;
 
 	SetFPos(fRefNum,fsFromStart,256*sizeof(RGBColor)+8);	// skip palette & pack header
 
@@ -243,20 +243,20 @@ RGBColor		*rgbPtr,rgb;
 	numToRead = 2;
 	FSRead(fRefNum,&numToRead,&height);						// read height
 
-	linePtr = AllocPtr(width*4);							// alloc memory to hold 4 lines of data
+	width	= Byteswap16Signed(&width);						// convert from big endian
+	height	= Byteswap16Signed(&height);
 
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
+	linePtr = AllocPtr(width*4);							// alloc memory to hold 4 lines of data
 
 	destPtr = gScreenAddr;
 	height = height/4;
-	for (i = 0; i < height; i++)
+	for (int i = 0; i < height; i++)
 	{
 		numToRead = width*4;								// read 4 lines of data
 		FSRead(fRefNum,&numToRead,linePtr);
 
-		srcPtr = StripAddress(linePtr);
-		for (k=0; k < 4; k++)
+		srcPtr = linePtr;
+		for (int k = 0; k < 4; k++)
 		{
 			BlockMove(srcPtr,destPtr,width);				// plot line
 			destPtr += gScreenRowOffset;					// next row
@@ -264,11 +264,7 @@ RGBColor		*rgbPtr,rgb;
 		}
 	}
 
-//	SwapMMUMode(&gMMUMode);									// Restore addressing mode
-
 	FSClose(fRefNum);
-	DisposePtr((Ptr)linePtr);
+	DisposePtr(linePtr);
 }
-
-
 
