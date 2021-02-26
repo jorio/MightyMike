@@ -458,7 +458,8 @@ Rect	box;
 	{
 		FirstNodePtr = (ObjNode *)theNode->NextNode;
 		tempNode = (ObjNode *)theNode->NextNode;
-		tempNode->PrevNode = nil;
+		if (tempNode)
+			tempNode->PrevNode = nil;
 	}
 	else if (theNode->NextNode == nil)				// special case last node
 	{
