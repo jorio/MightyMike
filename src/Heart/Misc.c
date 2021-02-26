@@ -348,10 +348,6 @@ long		numToRead;
 int32_t		decompSize;
 int32_t		decompType;
 
-	MaxMem(&someLong);									// clean up
-	CompactMem(maxSize);
-
-
 	iErr = GetVol(volName,&vRefNum);					// get default volume
 
 					/*  OPEN THE FILE */
@@ -370,6 +366,7 @@ int32_t		decompType;
 	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompSize);			// read 4 byte length
 	if (iErr != noErr)
 		DoFatalAlert ("Error reading Packed data!");
+	GAME_ASSERT(numToRead == 4);
 	ByteswapInts(numToRead, 1, &decompSize);
 	fileSize -= numToRead;
 
@@ -379,6 +376,7 @@ int32_t		decompType;
 	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompType);			// read compression type
 	if (iErr != noErr)
 		DoFatalAlert ("Error reading Packed data Header!");
+	GAME_ASSERT(numToRead == 4);
 	ByteswapInts(numToRead, 1, &decompType);
 	fileSize -= numToRead;
 
@@ -390,7 +388,6 @@ int32_t		decompType;
 		DoAlert (fileName);		//-----------
 		DoFatalAlert2 ("No Memory for Unpacked Data!",gMemoryErr);
 	}
-	HLockHi(dataHand);
 
 	switch(decompType)
 	{
@@ -428,13 +425,31 @@ int32_t		decompType;
 					/*  CLOSE THE FILE */
 
 	iErr = FSClose(fRefNum);
-	if (iErr != noErr)
-		DoFatalAlert ("Cant close Packed file!");
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Can't close Packed file!");
 
-	HUnlock(dataHand);								// optimize memory
-	MaxMem(&someLong);								// clean up
-	CompactMem(maxSize);
-	HLockHi(dataHand);
+
+					/*  DUMP UNPACKED DATA TO FILE (FOR DEBUGGING ONLY) */
+
+#if _DEBUG
+	char debugPathBuffer[256];
+	snprintf(debugPathBuffer, sizeof(debugPathBuffer), "/tmp/MikeUnpack_%s",fileName);
+
+	for (char* c = debugPathBuffer; *c; c++)	// replace colon characters in path
+		if (*c == ':')
+			*c = '=';
+
+	FILE* debugFile = fopen(debugPathBuffer, "wb");
+	if (debugFile)
+	{
+		fwrite(*dataHand, 1, GetHandleSize(dataHand), debugFile);
+		fclose(debugFile);
+		printf("Wrote: %s\n", debugPathBuffer);
+	}
+	else
+	{
+		DoFatalAlert2("Couldn't open debug file for writing", debugPathBuffer);
+	}
+#endif
 
 	return(dataHand);								// return handle to unpacked data
 }
