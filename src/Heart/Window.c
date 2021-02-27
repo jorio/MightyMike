@@ -75,9 +75,9 @@ uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
 uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 
-long			*gPFLookUpTable = nil;
-long			*gPFCopyLookUpTable = nil;
-long			*gPFMaskLookUpTable = nil;
+Ptr				*gPFLookUpTable = nil;
+Ptr				*gPFCopyLookUpTable = nil;
+Ptr				*gPFMaskLookUpTable = nil;
 
 Boolean			gLoadedDrawSprocket = false;
 //DSpContextReference 	gDisplayContext = nil;
@@ -174,9 +174,9 @@ short		width,height;
 
 				/* ALLOC MEM FOR PF LOOKUP TABLES */
 
-	gPFLookUpTable = (long *)NewPtr(PF_BUFFER_HEIGHT*sizeof(long));
-	gPFCopyLookUpTable = (long *)NewPtr(PF_BUFFER_HEIGHT*sizeof(long));
-	gPFMaskLookUpTable = (long *)NewPtr(PF_BUFFER_HEIGHT*sizeof(long));
+	gPFLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFCopyLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFMaskLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
 
 
 					/* MAKE PLAYFIELD BUFFERS */
@@ -271,14 +271,11 @@ long	i;
 
 	for (i=0; i<PF_BUFFER_HEIGHT; i++)
 	{
-		gPFLookUpTable[i] = (long)(*gPFBufferHandle)+(i*PF_BUFFER_WIDTH);
-		gPFLookUpTable[i] = (long)StripAddress((Ptr)gPFLookUpTable[i]);
+		gPFLookUpTable[i] = (*gPFBufferHandle)+(i*PF_BUFFER_WIDTH);
 
-		gPFCopyLookUpTable[i] = (long)(*gPFBufferCopyHandle)+(i*PF_BUFFER_WIDTH);
-		gPFCopyLookUpTable[i] = (long)StripAddress((Ptr)gPFCopyLookUpTable[i]);
+		gPFCopyLookUpTable[i] = (*gPFBufferCopyHandle)+(i*PF_BUFFER_WIDTH);
 
-		gPFMaskLookUpTable[i] = (long)(*gPFMaskBufferHandle)+(i*PF_BUFFER_WIDTH);
-		gPFMaskLookUpTable[i] = (long)StripAddress((Ptr)gPFMaskLookUpTable[i]);
+		gPFMaskLookUpTable[i] = (*gPFMaskBufferHandle)+(i*PF_BUFFER_WIDTH);
 	}
 }
 
@@ -320,30 +317,20 @@ void WipeScreenBuffers(void)
 
 void EraseStore(void)
 {
-register	long	*destPtr;
+int32_t	*destPtr;
 register	short		height,width;
-register	long	destAdd,size,i;
-Ptr		a,b;
+register	long	destAdd,size;
 
 				/* COPY PF BUFFER 2 TO BUFFER 1 TO ERASE STORE IMAGE */
 
 	size = GetHandleSize(gPFBufferHandle);
-	a = *gPFBufferHandle;
-	b = *gPFBufferCopyHandle;
-	for (i = 0; i < size; i++)
-	{
-		*a++ = *b++;
-	}
+	memcpy(*gPFBufferHandle, *gPFBufferCopyHandle, size);
 
 				/* ERASE INTERLACING ZONE FROM MAIN SCREEN */
 
 	if (gInterlaceMode)
 	{
-//		gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//		SwapMMUMode(&gMMUMode);
-
-
-		destPtr = (long *)(gScreenLookUpTable[PF_WINDOW_TOP+1]+PF_WINDOW_LEFT);
+		destPtr = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP+1]+PF_WINDOW_LEFT);
 		destAdd = gScreenRowOffsetLW*2-(PF_WINDOW_WIDTH>>2);
 
 		for ( height = PF_WINDOW_HEIGHT>>1; height > 0; height--)
@@ -354,8 +341,6 @@ Ptr		a,b;
 			}
 			destPtr += destAdd;
 		}
-
-//		SwapMMUMode(&gMMUMode);						// Restore addressing mode
 	}
 }
 
@@ -368,26 +353,23 @@ Ptr		a,b;
 
 void DisplayStoreBuffer(void)
 {
-long 	*srcPtr,*destPtr,*destStart;
+int32_t	*srcPtr,*destPtr,*destStart;
 long	x,y,width,height;
 
-	srcPtr = (long *)(gPFLookUpTable[0]);
+	srcPtr = (int32_t *)(gPFLookUpTable[0]);
 	if (gPPCFullScreenFlag)								// special for playfield display size
 	{
 		width = 13*32/4;
 		height = 12*32;
-		destStart = (long *)(gScreenLookUpTable[PF_WINDOW_TOP+22]+PF_WINDOW_LEFT+110);
+		destStart = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP+22]+PF_WINDOW_LEFT+110);
 	}
 	else
 	{
 		width = (PF_WINDOW_WIDTH/4);
 		height = PF_WINDOW_HEIGHT;
-		destStart = (long *)(gScreenLookUpTable[PF_WINDOW_TOP]+PF_WINDOW_LEFT);
+		destStart = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP]+PF_WINDOW_LEFT);
 	}
 
-
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
 
 	for (y = 0; y < height; y++)
 	{
@@ -397,8 +379,6 @@ long	x,y,width,height;
 			*destPtr++ = *srcPtr++;
 		destStart += gScreenRowOffsetLW;
 	}
-
-//	SwapMMUMode(&gMMUMode);						// Restore addressing mode
 }
 
 
@@ -445,16 +425,14 @@ short		i;
 
 	for (i=0; i<OFFSCREEN_HEIGHT; i++)
 	{
-		gOffScreenLookUpTable[i] = (long)(*gOffScreenHandle)+(i*OFFSCREEN_WIDTH);
-		gOffScreenLookUpTable[i] = (long)StripAddress((Ptr)gOffScreenLookUpTable[i]);
+		gOffScreenLookUpTable[i] = (*gOffScreenHandle)+(i*OFFSCREEN_WIDTH);
 
 	}
 					/* BUILD BACKGROUND LOOKUP TABLE */
 
 	for (i=0; i<OFFSCREEN_HEIGHT; i++)
 	{
-		gBackgroundLookUpTable[i] = (long)(*gBackgroundHandle)+(i*OFFSCREEN_WIDTH);
-		gBackgroundLookUpTable[i] = (long)StripAddress((Ptr)gBackgroundLookUpTable[i]);
+		gBackgroundLookUpTable[i] = (*gBackgroundHandle)+(i*OFFSCREEN_WIDTH);
 	}
 
 
@@ -475,7 +453,7 @@ short		i;
 
 void EraseScreenArea(Rect theArea)
 {
-long	*destPtr,*destStartPtr,*srcPtr,*srcStartPtr;
+int32_t	*destPtr,*destStartPtr,*srcPtr,*srcStartPtr;
 short	i;
 short	width,height;
 long	x,y;
@@ -486,8 +464,8 @@ long	x,y;
 	width = (theArea.right - x)>>2;
 	height = (theArea.bottom - y);
 
-	destStartPtr = (long *)(gOffScreenLookUpTable[y]+x);	// calc read/write addrs
-	srcStartPtr = (long *)(gBackgroundLookUpTable[y]+x);
+	destStartPtr = (int32_t *)(gOffScreenLookUpTable[y]+x);	// calc read/write addrs
+	srcStartPtr = (int32_t *)(gBackgroundLookUpTable[y]+x);
 
 						/* DO THE ERASE */
 

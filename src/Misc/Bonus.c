@@ -47,7 +47,7 @@ extern	ObjNode			*gMyNodePtr;
 extern	long			gScrollX,gScrollY;
 extern	Byte			gCurrentWeaponType,gSceneNum;
 extern	char  			gMMUMode;
-extern	long			*gPFLookUpTable;
+extern	Ptr				*gPFLookUpTable;
 extern	short			gEnemyFreezeTimer,gSpeedyTimer;
 extern	ObjNode			*gMyNodePtr;
 extern	Byte			gNumBullets;
@@ -332,6 +332,7 @@ void DecBunnyCount(void)
 
 void DisplayBunnyRadar(void)
 {
+	DoAlert("TODO: DisplayBunnyRadar: types");
 short			width,height;
 register short	i,k;
 long		numToRead;

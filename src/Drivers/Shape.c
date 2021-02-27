@@ -27,10 +27,10 @@ extern	uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 extern	long			gScrollX,gScrollY;
 extern	long			gRegionClipTop[],gRegionClipBottom[],
 						gRegionClipLeft[],gRegionClipRight[];
-extern	long			*gPFLookUpTable;
-extern	long			*gPFCopyLookUpTable;
+extern	Ptr				*gPFLookUpTable;
+extern	Ptr				*gPFCopyLookUpTable;
 extern	unsigned		short	**gPlayfield;
-extern	long			*gPFMaskLookUpTable;
+extern	Ptr				*gPFMaskLookUpTable;
 extern	unsigned char	gInterlaceMode;
 extern	short			gPlayfieldWidth,gPlayfieldHeight;
 

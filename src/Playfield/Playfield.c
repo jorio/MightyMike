@@ -33,8 +33,9 @@
 
 extern	Handle			gOffScreenHandle;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long			*gPFMaskLookUpTable;
-extern	long			*gPFLookUpTable,*gPFCopyLookUpTable;
+extern	Ptr				*gPFMaskLookUpTable;
+extern	Ptr				*gPFLookUpTable;
+extern	Ptr				*gPFCopyLookUpTable;
 extern	Boolean	(*gItemAddPtrs[])(ObjectEntryType *);
 extern	long				gMyX,gMyY;
 extern	long				gRegionClipTop[],gRegionClipBottom[],gRegionClipLeft[],gRegionClipRight[];
