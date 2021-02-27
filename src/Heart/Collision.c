@@ -22,9 +22,8 @@ extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
 extern	short			gPlayfieldWidth,gPlayfieldHeight;
 extern	ObjNode		*FirstNodePtr;
 extern	ObjNode		*gThisNodePtr;
-extern	union_gX;
-extern	union_gY;
-
+extern	MikeFixed	gX;
+extern	MikeFixed	gY;
 
 /****************************/
 /*    CONSTANTS             */

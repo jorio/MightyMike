@@ -28,6 +28,18 @@ typedef struct ObjectEntryType
 #pragma pack(pop)		// Stop tight packing of structs
 
 
+
+typedef union MikeFixed
+{
+	int32_t			L;
+	struct
+	{
+		int16_t		Frac;
+		int16_t		Int;
+	};
+} MikeFixed;
+
+
 			/*  OBJECT RECORD STRUCTURE */
 
 
@@ -45,31 +57,10 @@ struct ObjNode
 	Boolean		AnimFlag;		// set if animate this object
 	Boolean		PFCoordsFlag;	// set if x/y coords are global playfield coords, not offscreen buffer coords
 	Boolean		TileMaskFlag;	// set if PF draw should use tile masks
-	union {
-		int32_t	L;
-		struct
-		{
-			int16_t Frac;
-			int16_t Int;
-		};
-	}YOffset;					// offset for y draw position on playfield
+	MikeFixed	YOffset;		// offset for y draw position on playfield
 	short		ClipNum;		// clipping region # to use
-	union {
-		int32_t L;
-		struct
-		{
-			int16_t Frac;
-			int16_t Int;
-		};
-	}X;							// x coord (low word is fraction)
-	union {
-		int32_t L;
-		struct
-		{
-			int16_t Frac;
-			int16_t Int;
-		};
-	}Y;							// y coord (low word is fraction)
+	MikeFixed	X;				// x coord (low word is fraction)
+	MikeFixed	Y;				// y coord (low word is fraction)
 	long		OldX;			// old x coord (no fraction)
 	long		OldY;			// old y coord
 	Rect		drawBox;		// box obj was last drawn to
@@ -138,22 +129,6 @@ struct CollisionRec
 	ObjNode		*objectPtr;		// object that collides with (if object type)
 };
 typedef struct CollisionRec CollisionRec;
-
-
-				/* GLOBAL COORDS STRUCT */
-			/* actually defined on Object.c */
-
-#define union_gX union {	\
-	long L;			\
-	char Frac;		\
-	short	Int;		\
-	} gX
-
-#define union_gY union {	\
-	long L;			\
-	short Frac;		\
-	short	Int;		\
-	} gY
 
 
 			/* SAVED PLAYER INFO */

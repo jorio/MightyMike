@@ -30,8 +30,8 @@
 
 extern	ObjNode			*gThisNodePtr,*FirstNodePtr,*gShieldNodePtr;
 extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	union_gX;
-extern	union_gY;
+extern	MikeFixed		gX;
+extern	MikeFixed		gY;
 extern	CollisionRec	gCollisionList[];
 extern	short			gNumCollisions;
 extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;

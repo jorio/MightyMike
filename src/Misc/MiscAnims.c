@@ -20,8 +20,8 @@
 
 extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
 extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	union_gX;
-extern	union_gY;
+extern	MikeFixed		gX;
+extern	MikeFixed		gY;
 extern	CollisionRec	gCollisionList[];
 extern	Byte			gPlayerMode,gCurrentPlayer;
 extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;

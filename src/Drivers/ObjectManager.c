@@ -55,17 +55,8 @@ ObjNode		*gThisNodePtr,*gMostRecentlyAddedNode;
 
 long		gDX,gDY,gSumDX,gSumDY;		// global object stuff
 
-union {
-	long L;
-	short Frac;
-	short	Int;
-	} gX;
-
-union {
-	long L;
-	short Frac;
-	short	Int;
-	} gY;
+MikeFixed	gX;
+MikeFixed	gY;
 
 long		gRegionClipTop[MAX_CLIP_REGIONS],gRegionClipBottom[MAX_CLIP_REGIONS],
 			gRegionClipLeft[MAX_CLIP_REGIONS],gRegionClipRight[MAX_CLIP_REGIONS];

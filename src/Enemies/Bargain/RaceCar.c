@@ -21,8 +21,8 @@
 #include "io.h"
 #include "infobar.h"
 
-extern	union_gX;
-extern	union_gY;
+extern	MikeFixed	gX;
+extern	MikeFixed	gY;
 extern	long		gMyX,gMyY;
 extern	short		gMyInitX,gMyInitY;
 extern	ObjNode		*gMyNodePtr;
