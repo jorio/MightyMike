@@ -29,6 +29,7 @@
 #include "enemy4.h"
 #include "enemy5.h"
 #include "racecar.h"
+#include <string.h>
 
 extern	Handle			gOffScreenHandle;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
@@ -89,174 +90,6 @@ Boolean	gPPCFullScreenFlag = false;
 #define	MAX_TILE_ANIMS	50						// max # of tile anims
 
 
-
-
-#define	ILD(dest_,src_,width_)		\
-			switch(width_)					\
-			{								\
-			case	80:						\
-					dest_[79] = src_[79];	\
-			case	79:						\
-					dest_[78] = src_[78];	\
-			case	78:						\
-					dest_[77] = src_[77];	\
-			case	77:						\
-					dest_[76] = src_[76];	\
-			case	76:						\
-					dest_[75] = src_[75];	\
-			case	75:						\
-					dest_[74] = src_[74];	\
-			case	74:						\
-					dest_[73] = src_[73];	\
-			case	73:						\
-					dest_[72] = src_[72];	\
-			case	72:						\
-					dest_[71] = src_[71];	\
-			case	71:						\
-					dest_[70] = src_[70];	\
-			case	70:						\
-					dest_[69] = src_[69];	\
-			case	69:						\
-					dest_[68] = src_[68];	\
-			case	68:						\
-					dest_[67] = src_[67];	\
-			case	67:						\
-					dest_[66] = src_[66];	\
-			case	66:						\
-					dest_[65] = src_[65];	\
-			case	65:						\
-					dest_[64] = src_[64];	\
-			case	64:						\
-					dest_[63] = src_[63];	\
-			case	63:						\
-					dest_[62] = src_[62];	\
-			case	62:						\
-					dest_[61] = src_[61];	\
-			case	61:						\
-					dest_[60] = src_[60];	\
-			case	60:						\
-					dest_[59] = src_[59];	\
-			case	59:						\
-					dest_[58] = src_[58];	\
-			case	58:						\
-					dest_[57] = src_[57];	\
-			case	57:						\
-					dest_[56] = src_[56];	\
-			case	56:						\
-					dest_[55] = src_[55];	\
-			case	55:						\
-					dest_[54] = src_[54];	\
-			case	54:						\
-					dest_[53] = src_[53];	\
-			case	53:						\
-					dest_[52] = src_[52];	\
-			case	52:						\
-					dest_[51] = src_[51];	\
-			case	51:						\
-					dest_[50] = src_[50];	\
-			case	50:						\
-					dest_[49] = src_[49];	\
-			case	49:						\
-					dest_[48] = src_[48];	\
-			case	48:						\
-					dest_[47] = src_[47];	\
-			case	47:						\
-					dest_[46] = src_[46];	\
-			case	46:						\
-					dest_[45] = src_[45];	\
-			case	45:						\
-					dest_[44] = src_[44];	\
-			case	44:						\
-					dest_[43] = src_[43];	\
-			case	43:						\
-					dest_[42] = src_[42];	\
-			case	42:						\
-					dest_[41] = src_[41];	\
-			case	41:						\
-					dest_[40] = src_[40];	\
-			case	40:						\
-					dest_[39] = src_[39];	\
-			case	39:						\
-					dest_[38] = src_[38];	\
-			case	38:						\
-					dest_[37] = src_[37];	\
-			case	37:						\
-					dest_[36] = src_[36];	\
-			case	36:						\
-					dest_[35] = src_[35];	\
-			case	35:						\
-					dest_[34] = src_[34];	\
-			case	34:						\
-					dest_[33] = src_[33];	\
-			case	33:						\
-					dest_[32] = src_[32];	\
-			case	32:						\
-					dest_[31] = src_[31];	\
-			case	31:						\
-					dest_[30] = src_[30];	\
-			case	30:						\
-					dest_[29] = src_[29];	\
-			case	29:						\
-					dest_[28] = src_[28];	\
-			case	28:						\
-					dest_[27] = src_[27];	\
-			case	27:						\
-					dest_[26] = src_[26];	\
-			case	26:						\
-					dest_[25] = src_[25];	\
-			case	25:						\
-					dest_[24] = src_[24];	\
-			case	24:						\
-					dest_[23] = src_[23];	\
-			case	23:						\
-					dest_[22] = src_[22];	\
-			case	22:						\
-					dest_[21] = src_[21];	\
-			case	21:						\
-					dest_[20] = src_[20];	\
-			case	20:						\
-					dest_[19] = src_[19];	\
-			case	19:						\
-					dest_[18] = src_[18];	\
-			case	18:						\
-					dest_[17] = src_[17];	\
-			case	17:						\
-					dest_[16] = src_[16];	\
-			case	16:						\
-					dest_[15] = src_[15];	\
-			case	15:						\
-					dest_[14] = src_[14];	\
-			case	14:						\
-					dest_[13] = src_[13];	\
-			case	13:						\
-					dest_[12] = src_[12];	\
-			case	12:						\
-					dest_[11] = src_[11];	\
-			case	11:						\
-					dest_[10] = src_[10];	\
-			case	10:						\
-					dest_[9] = src_[9];	\
-			case	9:						\
-					dest_[8] = src_[8];	\
-			case	8:						\
-					dest_[7] = src_[7];	\
-			case	7:						\
-					dest_[6] = src_[6];	\
-			case	6:						\
-					dest_[5] = src_[5];	\
-			case	5:						\
-					dest_[4] = src_[4];	\
-			case	4:						\
-					dest_[3] = src_[3];	\
-			case	3:						\
-					dest_[2] = src_[2];	\
-			case	2:						\
-					dest_[1] = src_[1];	\
-			case	1:						\
-					dest_[0] = src_[0];	\
-			}							\
-			dest_ += width_;	\
-			src_ += width_;
 
 
 
@@ -1667,7 +1500,8 @@ unsigned long	rowS,colS;								// shifted version of row & col
 
 void DisplayPlayfield(void)
 {
-uint64_t	*destPtr,*srcPtr;
+uint64_t	*destPtr;
+const uint64_t	*srcPtr;
 int32_t		top,left,width;
 uint32_t	height;
 int32_t		numSegments,seg;
@@ -1677,7 +1511,6 @@ uint32_t	heights[4];
 int32_t		widths[4];
 int32_t		srcAdd,destAdd;
 int32_t		method;
-int32_t		*s,*d;
 
 			/* IF ON POWER PC 603 OR 604, USE ALTERNATE VERSION */
 
@@ -1779,8 +1612,9 @@ int32_t		*s,*d;
 
 	if (method == 0)
 	{
-uint64_t	*destPtr2,*srcPtr2;
-int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
+uint64_t		*destPtr2;
+const uint64_t	*srcPtr2;
+int32_t			width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 		for (seg = 0; seg < 4; seg+=2)
 		{
@@ -1802,7 +1636,10 @@ int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
 			do
 			{
 
-				ILD(destPtr,srcPtr,width)
+				memcpy(destPtr, srcPtr, width<<3);
+				destPtr += width;
+				srcPtr += width;
+
 
 				switch(pixWid&b111)
 				{
@@ -1822,8 +1659,8 @@ int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				if (((long)destPtr2 & b11) == 3)				// IF ON ALIGNMENT OF 3, DRAW WITH LONGS TO AVOID POWERMAC BUS GLITCH!!!!
 				{
-					s = (int32_t *)srcPtr2;
-					d = (int32_t *)destPtr2;
+					int32_t* s = (int32_t *)srcPtr2;
+					int32_t* d = (int32_t *)destPtr2;
 					for (top=0; top < (width2*2); top++)
 						*d++ = *s++;
 					destPtr2 += width2;
@@ -1831,7 +1668,9 @@ int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
 				}
 				else
 				{
-					ILD(destPtr2,srcPtr2,width2);
+					memcpy(destPtr2, srcPtr2, width2<<3);
+					destPtr2 += width2;
+					srcPtr2 += width2;
 				}
 
 				switch(pixWid2&b111)
@@ -1881,8 +1720,8 @@ int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				if (((long)destPtr & b11) == 3)				// IF ON ALIGNMENT OF 3, DRAW WITH LONGS TO AVOID POWERMAC BUS GLITCH!!!!
 				{
-					s = (int32_t *)srcPtr;
-					d = (int32_t *)destPtr;
+					int32_t* s = (int32_t *)srcPtr;
+					int32_t* d = (int32_t *)destPtr;
 					for (top=0; top < (width*2); top++)
 						*d++ = *s++;
 					destPtr += width;
@@ -1890,7 +1729,9 @@ int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
 				}
 				else
 				{
-					ILD(destPtr,srcPtr,width)
+					memcpy(destPtr, srcPtr, width<<3);
+					destPtr += width;
+					srcPtr += width;
 				}
 
 				switch(pixWid&b111)								// draw remainder

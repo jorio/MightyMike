@@ -75,62 +75,6 @@ static void ErasePFSprite(ObjNode *theNodePtr);
 						MOVE.L    D0,(destPtr)+
 
 
-#define	ILD(dest_,src_,width_)		\
-			switch(width_)					\
-			{								\
-			case	25:						\
-					dest_[24] = src_[24];	\
-			case	24:						\
-					dest_[23] = src_[23];	\
-			case	23:						\
-					dest_[22] = src_[22];	\
-			case	22:						\
-					dest_[21] = src_[21];	\
-			case	21:						\
-					dest_[20] = src_[20];	\
-			case	20:						\
-					dest_[19] = src_[19];	\
-			case	19:						\
-					dest_[18] = src_[18];	\
-			case	18:						\
-					dest_[17] = src_[17];	\
-			case	17:						\
-					dest_[16] = src_[16];	\
-			case	16:						\
-					dest_[15] = src_[15];	\
-			case	15:						\
-					dest_[14] = src_[14];	\
-			case	14:						\
-					dest_[13] = src_[13];	\
-			case	13:						\
-					dest_[12] = src_[12];	\
-			case	12:						\
-					dest_[11] = src_[11];	\
-			case	11:						\
-					dest_[10] = src_[10];	\
-			case	10:						\
-					dest_[9] = src_[9];	\
-			case	9:						\
-					dest_[8] = src_[8];	\
-			case	8:						\
-					dest_[7] = src_[7];	\
-			case	7:						\
-					dest_[6] = src_[6];	\
-			case	6:						\
-					dest_[5] = src_[5];	\
-			case	5:						\
-					dest_[4] = src_[4];	\
-			case	4:						\
-					dest_[3] = src_[3];	\
-			case	3:						\
-					dest_[2] = src_[2];	\
-			case	2:						\
-					dest_[1] = src_[1];	\
-			case	1:						\
-					dest_[0] = src_[0];	\
-			}							\
-			dest_ += width_;	\
-			src_ += width_;
 
 
 /**********************/
@@ -1265,7 +1209,8 @@ static void ErasePFSprite(ObjNode *theNodePtr)
 {
 long	width,height,drawWidth,y;
 long	i;
-uint64_t	*destPtr,*srcPtr;
+uint64_t	*destPtr;
+const uint64_t *srcPtr;
 Ptr		destPtrB,srcPtrB;
 Ptr		destStartPtr;
 Ptr		srcStartPtr,originalSrcStartPtr;
@@ -1300,12 +1245,10 @@ long	drawHeight,originalY;
 		for (drawHeight = 0; drawHeight < height; drawHeight++)
 		{
 			destPtr = (uint64_t *)destStartPtr;					// get line start ptr
-			srcPtr = (uint64_t *)srcStartPtr;
+			srcPtr = (const uint64_t *)srcStartPtr;
 
-//			for (i=(width>>3); i ; i--)
-//				*destPtr++ = *srcPtr++;							// erase doubles
-
-			ILD(destPtr,srcPtr,width>>3)
+			for (i=(width>>3); i ; i--)
+				*destPtr++ = *srcPtr++;							// erase doubles
 
 
 			destPtrB = (Ptr)destPtr;
