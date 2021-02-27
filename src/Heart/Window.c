@@ -212,16 +212,8 @@ void EraseGameWindow (void)
 
 void WindowToBlack(void)
 {
-	TODO_REWRITE_THIS_MINOR();
-#if 0
-GrafPort	killMenuBar;
-									/* This covers up the menu bar */
-									/* and fills the screen with black */
-
-	OpenPort((GrafPtr)&killMenuBar);
-	BackColor(blackColor);
-	EraseRect(&killMenuBar.portRect);
-#endif
+	memset(gIndexedFramebuffer, 0xFF, VISIBLE_WIDTH * VISIBLE_HEIGHT);
+	PresentIndexedFramebuffer();
 }
 
 /********************** DUMP GAME WINDOW ****************/
@@ -522,32 +514,24 @@ long	x,y;
 
 void BlankScreenArea(Rect theArea)
 {
-long	*destPtr,*destStartPtr;
-short	i;
+uint8_t	*destPtr;
 short	width,height;
 long	x,y;
 
 
-	width = (theArea.right - (x = theArea.left))>>2;
+	width = (theArea.right - (x = theArea.left));
 	height = (theArea.bottom - (y = theArea.top));
 
-	destStartPtr = (long *)(gScreenLookUpTable[y]+x);	// calc write addr
+	destPtr = gScreenLookUpTable[y] + x;			// calc write addr
 
 						/* DO THE ERASE */
 
-//	gMMUMode = true32b;									// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
 	for (; height > 0; height--)
 	{
-		destPtr = destStartPtr;						// get line start ptrs
+		memset(destPtr, 0xFF, width);
 
-		for (i=0; i < width; i++)
-			*destPtr++ = 0xffffffffL;
-
-		destStartPtr += gScreenRowOffsetLW;				// next row
+		destPtr += gScreenRowOffset;				// next row
 	}
-//	SwapMMUMode(&gMMUMode);								// Restore addressing mode
 }
 
 
