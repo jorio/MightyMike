@@ -593,7 +593,8 @@ register	ObjNode 	*nodePtr,*nextNode;
 				FirstNodePtr = nextNode;				// next is now the 1st node
 				nextNode->PrevNode = nil;
 				nodePtr->NextNode = nextNode->NextNode;
-				nextNode->NextNode->PrevNode = nodePtr;	// next's next's prev now pts to current
+				if (nextNode->NextNode)
+					nextNode->NextNode->PrevNode = nodePtr;	// next's next's prev now pts to current
 				nodePtr->PrevNode = nextNode;
 				nextNode->NextNode = nodePtr;
 			}
