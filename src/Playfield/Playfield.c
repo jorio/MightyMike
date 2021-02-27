@@ -48,10 +48,7 @@ extern	unsigned char	gInterlaceMode;
 extern	long			gDX,gDY,gSumDX,gSumDY;
 extern	Boolean			gTeleportingFlag;
 extern	long			gMySumDX,gMySumDY,gMyDX,gMyDY;
-extern	Boolean			gIsPPC603_604;
 
-
-static void DisplayPlayfield603_604(void);
 
 /****************************/
 /*    CONSTANTS             */
@@ -1492,269 +1489,6 @@ unsigned long	rowS,colS;								// shifted version of row & col
 #endif
 
 
-#if 1
-/********************* DISPLAY PLAYFIELD ***************/
-//
-// Dump Current playfield area to the screen
-//
-
-void DisplayPlayfield(void)
-{
-uint64_t	*destPtr;
-const uint64_t	*srcPtr;
-int32_t		top,left,width;
-uint32_t	height;
-int32_t		numSegments,seg;
-Ptr			destPtrs[4];
-Ptr			srcPtrs[4];
-uint32_t	heights[4];
-int32_t		widths[4];
-int32_t		srcAdd,destAdd;
-int32_t		method;
-
-			/* IF ON POWER PC 603 OR 604, USE ALTERNATE VERSION */
-
-	if (gIsPPC603_604)
-	{
-		DisplayPlayfield603_604();
-		return;
-	}
-
-	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
-	left = (gScrollX % PF_BUFFER_WIDTH);
-
-	if (gShakeyScreenCount)									// see if do shakey screen
-	{
-		short		shakeyScreenX,shakeyScreenY;
-
-		gShakeyScreenCount--;
-		shakeyScreenX = MyRandomLong()&b1111 - 8;
-		shakeyScreenY = MyRandomLong()&b1111 - 8;
-		if ((top += shakeyScreenY) < 0)
-			top = 0;
-		if ((left += shakeyScreenX) < 0)
-			left = 0;
-		if ((top >= PF_BUFFER_HEIGHT))
-			top = PF_BUFFER_HEIGHT-1;
-		if ((left >= PF_BUFFER_WIDTH))
-			left = PF_BUFFER_WIDTH-1;
-	}
-
-
-	if ((left+(PF_WINDOW_WIDTH-1)) > PF_BUFFER_WIDTH)		// see if 2 horiz segments
-	{
-
-						/* 2 HORIZ SEGMENTS */
-
-		if ((top+(PF_WINDOW_HEIGHT-1)) > PF_BUFFER_HEIGHT)	// see if 2 vertical segments
-		{
-			method = 0;
-			numSegments = 4;
-			widths[0] = widths[2] = (PF_BUFFER_WIDTH-left);
-			heights[0] = heights[1] = PF_BUFFER_HEIGHT-top;
-			destPtrs[1] = (destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								+PF_WINDOW_LEFT)) + widths[0];
-
-			widths[1] = widths[3] = (PF_WINDOW_WIDTH-widths[0]);
-			heights[2] = heights[3] = PF_WINDOW_HEIGHT-heights[0];
-
-			srcPtrs[2] = (Ptr)(gPFLookUpTable[0]+left);
-
-			destPtrs[3] = (Ptr)((destPtrs[2] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP+heights[0]]+PF_WINDOW_LEFT))+widths[0]);
-			srcPtrs[3] = (Ptr)(gPFLookUpTable[0]);
-			srcPtrs[0] = (srcPtrs[1] = (Ptr)(gPFLookUpTable[top])) + left;
-		}
-		else														// 1 vertical segment
-		{
-			method = 1;
-			numSegments = 2;
-			srcPtrs[0] = (Ptr)((srcPtrs[1] = (Ptr)(gPFLookUpTable[top]))+left);
-			widths[0] = PF_BUFFER_WIDTH-left;
-			heights[0] = heights[1] = PF_WINDOW_HEIGHT;
-
-			destPtrs[1] = (Ptr)((destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								PF_WINDOW_LEFT))+widths[0]);
-			widths[1] = (PF_WINDOW_WIDTH-widths[0]);
-		}
-	}
-					/* ONLY 1 HORIZ SEGMENT */
-	else
-	{
-		if ((top+(PF_WINDOW_HEIGHT-1)) > PF_BUFFER_HEIGHT)			// see if 2 vertical segments
-		{
-			method = 2;
-			numSegments = 2;
-			destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								PF_WINDOW_LEFT);
-			widths[0] = widths[1] = PF_WINDOW_WIDTH;
-			heights[1] = PF_WINDOW_HEIGHT-(heights[0] = PF_BUFFER_HEIGHT-top);
-
-			destPtrs[1] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP+heights[0]]+
-								PF_WINDOW_LEFT);
-			srcPtrs[1] = (Ptr)(gPFLookUpTable[0]+left);
-			srcPtrs[0] = (Ptr)(gPFLookUpTable[top]+left);
-		}
-		else														// 1 vertical segment
-		{
-			method = 3;
-			numSegments = 1;
-			destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								PF_WINDOW_LEFT);
-			srcPtrs[0] = (Ptr)gPFLookUpTable[top]+left;
-			widths[0] = PF_WINDOW_WIDTH;
-			heights[0] = PF_WINDOW_HEIGHT;
-		}
-	}
-
-					/**********************************/
-					/* SPECIAL CASE METHOD 0 / 4 SEGS */
-					/**********************************/
-
-	if (method == 0)
-	{
-uint64_t		*destPtr2;
-const uint64_t	*srcPtr2;
-int32_t			width2,srcAdd2,destAdd2,pixWid,pixWid2;
-
-		for (seg = 0; seg < 4; seg+=2)
-		{
-			destPtr		= (uint64_t *)destPtrs[0+seg];
-			srcPtr		= (uint64_t *)srcPtrs[0+seg];
-			destPtr2	= (uint64_t *)destPtrs[1+seg];
-			srcPtr2		= (uint64_t *)srcPtrs[1+seg];
-
-			height = heights[0+seg];					// set height
-			width = (pixWid = widths[0+seg])>>3;		// set double width
-			width2 = (pixWid2 = widths[1+seg])>>3;		// set double width
-
-			srcAdd = (PF_BUFFER_WIDTH>>3)-width;		// calc line add (for normal display)
-			destAdd = (gScreenRowOffsetLW>>1)-width;
-			srcAdd2 = (PF_BUFFER_WIDTH>>3)-width2;		// calc line add (for normal display)
-			destAdd2 = (gScreenRowOffsetLW>>1)-width2;
-
-						/* DO 1ST SEG */
-			do
-			{
-
-				memcpy(destPtr, srcPtr, width<<3);
-				destPtr += width;
-				srcPtr += width;
-
-
-				switch(pixWid&b111)
-				{
-					case	7:		*((Ptr)destPtr+6) = *((Ptr)srcPtr+6);
-					case	6:		*((Ptr)destPtr+5) = *((Ptr)srcPtr+5);
-					case	5:		*((Ptr)destPtr+4) = *((Ptr)srcPtr+4);
-					case	4:		*((Ptr)destPtr+3) = *((Ptr)srcPtr+3);
-					case	3:		*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
-					case	2:		*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
-					case	1:		*((Ptr)destPtr) = *((Ptr)srcPtr);
-				}
-
-
-						/* DO 2ND SEG */
-
-//				w = pixWid2;
-
-				if (((long)destPtr2 & b11) == 3)				// IF ON ALIGNMENT OF 3, DRAW WITH LONGS TO AVOID POWERMAC BUS GLITCH!!!!
-				{
-					int32_t* s = (int32_t *)srcPtr2;
-					int32_t* d = (int32_t *)destPtr2;
-					for (top=0; top < (width2*2); top++)
-						*d++ = *s++;
-					destPtr2 += width2;
-					srcPtr2 += width2;
-				}
-				else
-				{
-					memcpy(destPtr2, srcPtr2, width2<<3);
-					destPtr2 += width2;
-					srcPtr2 += width2;
-				}
-
-				switch(pixWid2&b111)
-				{
-					case	7:		*((Ptr)destPtr2+6) = *((Ptr)srcPtr2+6);
-					case	6:		*((Ptr)destPtr2+5) = *((Ptr)srcPtr2+5);
-					case	5:		*((Ptr)destPtr2+4) = *((Ptr)srcPtr2+4);
-					case	4:		*((Ptr)destPtr2+3) = *((Ptr)srcPtr2+3);
-					case	3:		*((Ptr)destPtr2+2) = *((Ptr)srcPtr2+2);
-					case	2:		*((Ptr)destPtr2+1) = *((Ptr)srcPtr2+1);
-					case	1:		*((Ptr)destPtr2) = *((Ptr)srcPtr2);
-				}
-
-				srcPtr += srcAdd;							// next line
-				destPtr += destAdd;
-				srcPtr2 += srcAdd2;
-				destPtr2 += destAdd2;
-			} while (--height);
-		}
-	}
-	else
-	{
-					/**********************************/
-					/* NORMAL CASE METHOD 1..3        */
-					/**********************************/
-
-						/* COPY THE SEGMENTS */
-
-		for (seg=0; seg < numSegments; seg++)
-		{
-			uint64_t	*destStartPtr,*srcStartPtr;
-			int32_t		pixWid;
-
-			destStartPtr	= (uint64_t *)destPtrs[seg];
-			srcStartPtr		= (uint64_t *)srcPtrs[seg];
-
-			height = heights[seg];						// set height
-			width = (pixWid = widths[seg])>>3;			// set double width
-
-			srcAdd = (PF_BUFFER_WIDTH>>3);				// calc line rowdoubles
-			destAdd = (gScreenRowOffsetLW>>1);
-
-			do
-			{
-				destPtr = destStartPtr;
-				srcPtr = srcStartPtr;
-
-				if (((long)destPtr & b11) == 3)				// IF ON ALIGNMENT OF 3, DRAW WITH LONGS TO AVOID POWERMAC BUS GLITCH!!!!
-				{
-					int32_t* s = (int32_t *)srcPtr;
-					int32_t* d = (int32_t *)destPtr;
-					for (top=0; top < (width*2); top++)
-						*d++ = *s++;
-					destPtr += width;
-					srcPtr += width;
-				}
-				else
-				{
-					memcpy(destPtr, srcPtr, width<<3);
-					destPtr += width;
-					srcPtr += width;
-				}
-
-				switch(pixWid&b111)								// draw remainder
-				{
-					case	7:		*((Ptr)destPtr+6) = *((Ptr)srcPtr+6);
-					case	6:		*((Ptr)destPtr+5) = *((Ptr)srcPtr+5);
-					case	5:		*((Ptr)destPtr+4) = *((Ptr)srcPtr+4);
-					case	4:		*((Ptr)destPtr+3) = *((Ptr)srcPtr+3);
-					case	3:		*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
-					case	2:		*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
-					case	1:		*((Ptr)destPtr) = *((Ptr)srcPtr);
-				}
-
-				srcStartPtr += srcAdd;									// next line
-				destStartPtr += destAdd;
-
-			} while (--height);
-		}
-	}
-}
-
-#else
-
 /********************* DISPLAY PLAYFIELD ***************/
 //
 // Dump Current playfield area to the screen
@@ -1771,208 +1505,6 @@ Ptr			srcPtrs[4];
 unsigned long	heights[4];
 long		widths[4];
 long		srcAdd,destAdd;
-long		method,i;
-
-	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
-	left = (gScrollX % PF_BUFFER_WIDTH);
-
-	if (gShakeyScreenCount)									// see if do shakey screen
-	{
-		short		shakeyScreenX,shakeyScreenY;
-
-		gShakeyScreenCount--;
-		shakeyScreenX = MyRandomLong()&b1111 - 8;
-		shakeyScreenY = MyRandomLong()&b1111 - 8;
-		if ((top += shakeyScreenY) < 0)
-			top = 0;
-		if ((left += shakeyScreenX) < 0)
-			left = 0;
-		if ((top >= PF_BUFFER_HEIGHT))
-			top = PF_BUFFER_HEIGHT-1;
-		if ((left >= PF_BUFFER_WIDTH))
-			left = PF_BUFFER_WIDTH-1;
-	}
-
-
-	if ((left+(PF_WINDOW_WIDTH-1)) > PF_BUFFER_WIDTH)		// see if 2 horiz segments
-	{
-
-						/* 2 HORIZ SEGMENTS */
-
-		if ((top+(PF_WINDOW_HEIGHT-1)) > PF_BUFFER_HEIGHT)	// see if 2 vertical segments
-		{
-			method = 0;
-			numSegments = 4;
-			widths[0] = widths[2] = (PF_BUFFER_WIDTH-left);
-			heights[0] = heights[1] = PF_BUFFER_HEIGHT-top;
-			destPtrs[1] = (destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								+PF_WINDOW_LEFT)) + widths[0];
-
-			widths[1] = widths[3] = (PF_WINDOW_WIDTH-widths[0]);
-			heights[2] = heights[3] = PF_WINDOW_HEIGHT-heights[0];
-
-			srcPtrs[2] = (Ptr)(gPFLookUpTable[0]+left);
-
-			destPtrs[3] = (Ptr)((destPtrs[2] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP+heights[0]]+PF_WINDOW_LEFT))+widths[0]);
-			srcPtrs[3] = (Ptr)(gPFLookUpTable[0]);
-			srcPtrs[0] = (srcPtrs[1] = (Ptr)(gPFLookUpTable[top])) + left;
-		}
-		else														// 1 vertical segment
-		{
-			method = 1;
-			numSegments = 2;
-			srcPtrs[0] = (Ptr)((srcPtrs[1] = (Ptr)(gPFLookUpTable[top]))+left);
-			widths[0] = PF_BUFFER_WIDTH-left;
-			heights[0] = heights[1] = PF_WINDOW_HEIGHT;
-
-			destPtrs[1] = (Ptr)((destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								PF_WINDOW_LEFT))+widths[0]);
-			widths[1] = (PF_WINDOW_WIDTH-widths[0]);
-		}
-	}
-					/* ONLY 1 HORIZ SEGMENT */
-	else
-	{
-		if ((top+(PF_WINDOW_HEIGHT-1)) > PF_BUFFER_HEIGHT)			// see if 2 vertical segments
-		{
-			method = 2;
-			numSegments = 2;
-			destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								PF_WINDOW_LEFT);
-			widths[0] = widths[1] = PF_WINDOW_WIDTH;
-			heights[1] = PF_WINDOW_HEIGHT-(heights[0] = PF_BUFFER_HEIGHT-top);
-
-			destPtrs[1] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP+heights[0]]+
-								PF_WINDOW_LEFT);
-			srcPtrs[1] = (Ptr)(gPFLookUpTable[0]+left);
-			srcPtrs[0] = (Ptr)(gPFLookUpTable[top]+left);
-		}
-		else														// 1 vertical segment
-		{
-			method = 3;
-			numSegments = 1;
-			destPtrs[0] = (Ptr)(gScreenLookUpTable[PF_WINDOW_TOP]+
-								PF_WINDOW_LEFT);
-			srcPtrs[0] = (Ptr)gPFLookUpTable[top]+left;
-			widths[0] = PF_WINDOW_WIDTH;
-			heights[0] = PF_WINDOW_HEIGHT;
-		}
-	}
-
-					/**********************************/
-					/* SPECIAL CASE METHOD 0 / 4 SEGS */
-					/**********************************/
-
-	if (method == 0)
-	{
-		Ptr		destPtr2,srcPtr2;
-		long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
-
-		for (seg = 0; seg < 4; seg+=2)
-		{
-			destPtr = destPtrs[0+seg];
-			srcPtr	= srcPtrs[0+seg];
-			destPtr2 = destPtrs[1+seg];
-			srcPtr2	= srcPtrs[1+seg];
-
-			height = heights[0+seg];					// set height
-			width = (pixWid = widths[0+seg]);			// set width
-			width2 = (pixWid2 = widths[1+seg]);			// set width
-
-			srcAdd = (PF_BUFFER_WIDTH)-width;			// calc line add (for normal display)
-			destAdd = (gScreenRowOffset)-width;
-			srcAdd2 = (PF_BUFFER_WIDTH)-width2;			// calc line add (for normal display)
-			destAdd2 = (gScreenRowOffset)-width2;
-
-						/* DO 1ST SEG */
-			do
-			{
-				BlockMove(srcPtr, destPtr, width);
-//				for (i = 0; i < width; i++)
-//					destPtr[i] = srcPtr[i];
-				destPtr += width;
-				srcPtr += width;
-
-
-						/* DO 2ND SEG */
-
-				BlockMove(srcPtr2, destPtr2, width2);
-//				for (i = 0; i < width2; i++)
-//					destPtr2[i] = srcPtr2[i];
-				destPtr2 += width2;
-				srcPtr2 += width2;
-
-				srcPtr += srcAdd;							// next line
-				destPtr += destAdd;
-				srcPtr2 += srcAdd2;
-				destPtr2 += destAdd2;
-			} while (--height);
-		}
-	}
-	else
-	{
-					/**********************************/
-					/* NORMAL CASE METHOD 1..3        */
-					/**********************************/
-
-						/* COPY THE SEGMENTS */
-
-		for (seg=0; seg < numSegments; seg++)
-		{
-			Ptr		destStartPtr,srcStartPtr;
-			long	pixWid;
-
-			destStartPtr = destPtrs[seg];
-			srcStartPtr	= srcPtrs[seg];
-
-			height = heights[seg];						// set height
-			width = (pixWid = widths[seg]);			// set width
-
-			srcAdd = (PF_BUFFER_WIDTH);				// calc line rowdoubles
-			destAdd = (gScreenRowOffset);
-
-			do
-			{
-				destPtr = destStartPtr;
-				srcPtr = srcStartPtr;
-
-				BlockMove(srcPtr, destPtr, width);
-//				for (i = 0; i < width; i++)
-//					destPtr[i] = srcPtr[i];
-
-				destPtr += width;
-				srcPtr += width;
-
-				srcStartPtr += srcAdd;									// next line
-				destStartPtr += destAdd;
-
-			} while (--height);
-		}
-	}
-}
-
-
-
-#endif
-
-/********************* DISPLAY PLAYFIELD 603 / 604 ***************/
-//
-// Special version for 603 & 604 processors.  Uses longs instead
-// of doubles to blit the data in the hope that misaligned
-// accesses will be minimized
-//
-
-static void DisplayPlayfield603_604(void)
-{
-register long		*destPtr,*srcPtr;
-register long		top,left,width;
-register unsigned long	height;
-long		numSegments,seg;
-Ptr			destPtrs[4];
-Ptr			srcPtrs[4];
-unsigned long	heights[4];
-long		widths[4];
-register long		srcAdd,destAdd;
 long		method;
 
 	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
@@ -2067,60 +1599,38 @@ long		method;
 
 	if (method == 0)
 	{
-register long	*destPtr2,*srcPtr2;
-register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
+		Ptr		destPtr2,srcPtr2;
+		long	width2,srcAdd2,destAdd2;
 
 		for (seg = 0; seg < 4; seg+=2)
 		{
-			destPtr = (long *)destPtrs[0+seg];
-			srcPtr	= (long *)srcPtrs[0+seg];
-			destPtr2 = (long *)destPtrs[1+seg];
-			srcPtr2	= (long *)srcPtrs[1+seg];
+			destPtr = destPtrs[0+seg];
+			srcPtr	= srcPtrs[0+seg];
+			destPtr2 = destPtrs[1+seg];
+			srcPtr2	= srcPtrs[1+seg];
 
 			height = heights[0+seg];					// set height
-			width = (pixWid = widths[0+seg])>>2;		// set long width
-			width2 = (pixWid2 = widths[1+seg])>>2;		// set long width
+			width = widths[0+seg];						// set width
+			width2 = widths[1+seg];						// set width
 
-			srcAdd = (PF_BUFFER_WIDTH>>2)-width;		// calc line add (for normal display)
-			destAdd = gScreenRowOffsetLW-width;
-			srcAdd2 = (PF_BUFFER_WIDTH>>2)-width2;		// calc line add (for normal display)
-			destAdd2 = (gScreenRowOffsetLW)-width2;
+			srcAdd = (PF_BUFFER_WIDTH)-width;			// calc line add (for normal display)
+			destAdd = (gScreenRowOffset)-width;
+			srcAdd2 = (PF_BUFFER_WIDTH)-width2;			// calc line add (for normal display)
+			destAdd2 = (gScreenRowOffset)-width2;
 
 						/* DO 1ST SEG */
 			do
 			{
-				for (top = 0; top < width; top++)		// copy longs
-					destPtr[top] = srcPtr[top];
+				BlockMove(srcPtr, destPtr, width);
 				destPtr += width;
 				srcPtr += width;
-
-				switch(pixWid&b11)						// copy remaining pixels
-				{
-					case	3:
-							*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
-					case	2:
-							*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
-					case	1:
-							*((Ptr)destPtr) = *((Ptr)srcPtr);
-				}
 
 
 						/* DO 2ND SEG */
 
-				for (top=0; top < width2; top++)		// copy longs
-					destPtr2[top] = srcPtr2[top];
+				BlockMove(srcPtr2, destPtr2, width2);
 				destPtr2 += width2;
 				srcPtr2 += width2;
-
-				switch(pixWid2&b11)							// copy remaining pixels
-				{
-					case	3:
-							*((Ptr)destPtr2+2) = *((Ptr)srcPtr2+2);
-					case	2:
-							*((Ptr)destPtr2+1) = *((Ptr)srcPtr2+1);
-					case	1:
-							*((Ptr)destPtr2) = *((Ptr)srcPtr2);
-				}
 
 				srcPtr += srcAdd;							// next line
 				destPtr += destAdd;
@@ -2131,7 +1641,6 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 	}
 	else
 	{
-
 					/**********************************/
 					/* NORMAL CASE METHOD 1..3        */
 					/**********************************/
@@ -2140,42 +1649,35 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 		for (seg=0; seg < numSegments; seg++)
 		{
-			destPtr = (long *)destPtrs[seg];
-			srcPtr	= (long *)srcPtrs[seg];
+			Ptr		destStartPtr,srcStartPtr;
+
+			destStartPtr = destPtrs[seg];
+			srcStartPtr	= srcPtrs[seg];
 
 			height = heights[seg];						// set height
-			width = (widths[seg])>>2;					// set long-width
+			width = widths[seg];						// set width
 
-			srcAdd = (PF_BUFFER_WIDTH>>2)-width;		// calc line add (for normal display)
-			destAdd = (gScreenRowOffsetLW)-width;
+			srcAdd = (PF_BUFFER_WIDTH);				// calc line rowdoubles
+			destAdd = (gScreenRowOffset);
 
 			do
 			{
-				for (top = 0; top < width; top++)		// copy longs
-					destPtr[top] = srcPtr[top];
+				destPtr = destStartPtr;
+				srcPtr = srcStartPtr;
+
+				BlockMove(srcPtr, destPtr, width);
+
 				destPtr += width;
 				srcPtr += width;
 
-
-				top = widths[seg]&b11;					// draw remainder
-
-				switch(top)
-				{
-					case	3:
-							*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
-					case	2:
-							*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
-					case	1:
-							*((Ptr)destPtr) = *((Ptr)srcPtr);
-				}
-
-				srcPtr += srcAdd;							// next line
-				destPtr += destAdd;
+				srcStartPtr += srcAdd;									// next line
+				destStartPtr += destAdd;
 
 			} while (--height);
 		}
 	}
 }
+
 
 
 

@@ -116,8 +116,6 @@ static	Str255		gMemoryErr = "Try increasing the applications memory size by sele
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
-Boolean		gIsPPC603_604 = false;		// TODO source port: what does this trigger?
-
 unsigned long       gDemoVersionTimer = 0;
 
 /**************** CLEAR GLOBAL FLAGS ****************/
