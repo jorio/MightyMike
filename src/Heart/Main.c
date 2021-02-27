@@ -394,6 +394,8 @@ again:
 		UpdateInfoBar();
 		EraseObjects();
 
+		PresentIndexedFramebuffer();
+
 //		if (GetKeyState(kKey_Pause))			    // see if pause
 //			ShowPaused();
 

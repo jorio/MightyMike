@@ -72,6 +72,8 @@ void InitEnemies(void)
 
 Boolean DoEnemyCollisionDetect(unsigned long CType)
 {
+	puts("Implement me! DoEnemyCollisionDetect");
+	return false;
 register	short	i,originalX,originalY,offset;
 register	TileAttribType *tileAttribs;
 register	unsigned short	bits;

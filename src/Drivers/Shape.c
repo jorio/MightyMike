@@ -1263,10 +1263,9 @@ Ptr		tmP;
 
 static void ErasePFSprite(ObjNode *theNodePtr)
 {
-	DoAlert("Implement me! ErasePFSprite");
 long	width,height,drawWidth,y;
 long	i;
-double	*destPtr,*srcPtr;
+uint64_t	*destPtr,*srcPtr;
 Ptr		destPtrB,srcPtrB;
 Ptr		destStartPtr;
 Ptr		srcStartPtr,originalSrcStartPtr;
@@ -1300,8 +1299,8 @@ long	drawHeight,originalY;
 	{
 		for (drawHeight = 0; drawHeight < height; drawHeight++)
 		{
-			destPtr = (double *)destStartPtr;					// get line start ptr
-			srcPtr = (double *)srcStartPtr;
+			destPtr = (uint64_t *)destStartPtr;					// get line start ptr
+			srcPtr = (uint64_t *)srcStartPtr;
 
 //			for (i=(width>>3); i ; i--)
 //				*destPtr++ = *srcPtr++;							// erase doubles
