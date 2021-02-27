@@ -1019,17 +1019,16 @@ void EraseASprite(ObjNode *theNodePtr)
 
 static void DrawPFSprite(ObjNode *theNodePtr)
 {
-	DoAlert("Implement me! DrawPFSprite");
 long	width,height,i;
 long	drawHeight,y;
 Ptr		destPtrB,srcPtrB,maskPtrB;
-long	*destPtr,*srcPtr,*maskPtr;
+int32_t	*destPtr,*srcPtr,*maskPtr;
 Ptr		tileMaskStartPtr;
-long	*tileMaskPtr;
-long	*longPtr;
+int32_t	*tileMaskPtr;
+int32_t	*longPtr;
 Ptr		destStartPtr,srcStartPtr,originalSrcStartPtr;
 Ptr		originalMaskStartPtr,maskStartPtr;
-short	*intPtr;
+int16_t	*intPtr;
 long	frameNum,x;
 long	offset;
 long	realWidth,originalY,topToClip,leftToClip;
@@ -1055,15 +1054,15 @@ Ptr		tmP;
 
 	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
 
-	offset = *((long *)(SHAPE_HEADER_Ptr+2));			// get offset to FRAME_LIST
-	intPtr = (short *)(SHAPE_HEADER_Base + offset);		// get ptr to FRAME_LIST
+	offset = *((int32_t *)(SHAPE_HEADER_Ptr+2));		// get offset to FRAME_LIST
+	intPtr = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
 	if (frameNum >= *intPtr++)							// see if error
 		DoFatalAlert("Illegal Frame #");
 
-	longPtr = (long *)intPtr;
+	longPtr = (int32_t *)intPtr;
 	offset = *(longPtr+frameNum);						// get offset to FRAME_HEADER_n
 
-	intPtr = (short *)(SHAPE_HEADER_Base + offset);		// get ptr to FRAME_HEADER
+	intPtr = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_HEADER
 
 	drawWidth = realWidth = width = *intPtr++;			// get pixel width
 	height = *intPtr++;									// get height
@@ -1138,7 +1137,7 @@ Ptr		tmP;
 		numHSegs = 1;
 
 	leftToClip += (topToClip*realWidth);
-	longPtr = (long *)intPtr;
+	longPtr = (int32_t *)intPtr;
 	offset = (*longPtr++)+leftToClip;							// get offset to PIXEL_DATA
 	originalSrcStartPtr = srcStartPtr = 						// get ptr to PIXEL_DATA
 			(Ptr)(SHAPE_HEADER_Base + offset);
@@ -1157,9 +1156,9 @@ Ptr		tmP;
 		{
 			for (drawHeight = 0; drawHeight < height; drawHeight++)
 			{
-				destPtr = (long *)destStartPtr;					// get line start ptr
-				srcPtr = (long *)srcStartPtr;
-				maskPtr = (long *)maskStartPtr;
+				destPtr = (int32_t *)destStartPtr;					// get line start ptr
+				srcPtr = (int32_t *)srcStartPtr;
+				maskPtr = (int32_t *)maskStartPtr;
 
 				for (i=(width>>2); i ; i--)					// draw longs
 					*destPtr++ = (*destPtr & (*maskPtr++)) | (*srcPtr++);
@@ -1204,10 +1203,10 @@ Ptr		tmP;
 		{
 			for (drawHeight = 0; drawHeight < height; drawHeight++)
 			{
-				destPtr = (long *)destStartPtr;								// get line start ptr
-				srcPtr = (long *)srcStartPtr;
-				maskPtr = (long *)maskStartPtr;
-				tileMaskPtr = (long *)tileMaskStartPtr;
+				destPtr = (int32_t *)destStartPtr;								// get line start ptr
+				srcPtr = (int32_t *)srcStartPtr;
+				maskPtr = (int32_t *)maskStartPtr;
+				tileMaskPtr = (int32_t *)tileMaskStartPtr;
 
 				for (i=(width>>2); i ; i--)
 				{
