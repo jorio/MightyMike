@@ -1667,17 +1667,17 @@ unsigned long	rowS,colS;								// shifted version of row & col
 
 void DisplayPlayfield(void)
 {
-register double		*destPtr,*srcPtr;
-register long		top,left,width;
-register unsigned long	height;
-long		numSegments,seg;
+uint64_t	*destPtr,*srcPtr;
+int32_t		top,left,width;
+uint32_t	height;
+int32_t		numSegments,seg;
 Ptr			destPtrs[4];
 Ptr			srcPtrs[4];
-unsigned long	heights[4];
-long		widths[4];
-register long		srcAdd,destAdd;
-long		method;
-long		*s,*d;
+uint32_t	heights[4];
+int32_t		widths[4];
+int32_t		srcAdd,destAdd;
+int32_t		method;
+int32_t		*s,*d;
 
 			/* IF ON POWER PC 603 OR 604, USE ALTERNATE VERSION */
 
@@ -1779,15 +1779,15 @@ long		*s,*d;
 
 	if (method == 0)
 	{
-register double	*destPtr2,*srcPtr2;
-register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
+uint64_t	*destPtr2,*srcPtr2;
+int32_t		width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 		for (seg = 0; seg < 4; seg+=2)
 		{
-			destPtr = (double *)destPtrs[0+seg];
-			srcPtr	= (double *)srcPtrs[0+seg];
-			destPtr2 = (double *)destPtrs[1+seg];
-			srcPtr2	= (double *)srcPtrs[1+seg];
+			destPtr		= (uint64_t *)destPtrs[0+seg];
+			srcPtr		= (uint64_t *)srcPtrs[0+seg];
+			destPtr2	= (uint64_t *)destPtrs[1+seg];
+			srcPtr2		= (uint64_t *)srcPtrs[1+seg];
 
 			height = heights[0+seg];					// set height
 			width = (pixWid = widths[0+seg])>>3;		// set double width
@@ -1806,20 +1806,13 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				switch(pixWid&b111)
 				{
-					case	7:
-							*((Ptr)destPtr+6) = *((Ptr)srcPtr+6);
-					case	6:
-							*((Ptr)destPtr+5) = *((Ptr)srcPtr+5);
-					case	5:
-							*((Ptr)destPtr+4) = *((Ptr)srcPtr+4);
-					case	4:
-							*((Ptr)destPtr+3) = *((Ptr)srcPtr+3);
-					case	3:
-							*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
-					case	2:
-							*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
-					case	1:
-							*((Ptr)destPtr) = *((Ptr)srcPtr);
+					case	7:		*((Ptr)destPtr+6) = *((Ptr)srcPtr+6);
+					case	6:		*((Ptr)destPtr+5) = *((Ptr)srcPtr+5);
+					case	5:		*((Ptr)destPtr+4) = *((Ptr)srcPtr+4);
+					case	4:		*((Ptr)destPtr+3) = *((Ptr)srcPtr+3);
+					case	3:		*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
+					case	2:		*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
+					case	1:		*((Ptr)destPtr) = *((Ptr)srcPtr);
 				}
 
 
@@ -1829,8 +1822,8 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				if (((long)destPtr2 & b11) == 3)				// IF ON ALIGNMENT OF 3, DRAW WITH LONGS TO AVOID POWERMAC BUS GLITCH!!!!
 				{
-					s = (long *)srcPtr2;
-					d = (long *)destPtr2;
+					s = (int32_t *)srcPtr2;
+					d = (int32_t *)destPtr2;
 					for (top=0; top < (width2*2); top++)
 						*d++ = *s++;
 					destPtr2 += width2;
@@ -1843,20 +1836,13 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				switch(pixWid2&b111)
 				{
-					case	7:
-							*((Ptr)destPtr2+6) = *((Ptr)srcPtr2+6);
-					case	6:
-							*((Ptr)destPtr2+5) = *((Ptr)srcPtr2+5);
-					case	5:
-							*((Ptr)destPtr2+4) = *((Ptr)srcPtr2+4);
-					case	4:
-							*((Ptr)destPtr2+3) = *((Ptr)srcPtr2+3);
-					case	3:
-							*((Ptr)destPtr2+2) = *((Ptr)srcPtr2+2);
-					case	2:
-							*((Ptr)destPtr2+1) = *((Ptr)srcPtr2+1);
-					case	1:
-							*((Ptr)destPtr2) = *((Ptr)srcPtr2);
+					case	7:		*((Ptr)destPtr2+6) = *((Ptr)srcPtr2+6);
+					case	6:		*((Ptr)destPtr2+5) = *((Ptr)srcPtr2+5);
+					case	5:		*((Ptr)destPtr2+4) = *((Ptr)srcPtr2+4);
+					case	4:		*((Ptr)destPtr2+3) = *((Ptr)srcPtr2+3);
+					case	3:		*((Ptr)destPtr2+2) = *((Ptr)srcPtr2+2);
+					case	2:		*((Ptr)destPtr2+1) = *((Ptr)srcPtr2+1);
+					case	1:		*((Ptr)destPtr2) = *((Ptr)srcPtr2);
 				}
 
 				srcPtr += srcAdd;							// next line
@@ -1876,11 +1862,11 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 		for (seg=0; seg < numSegments; seg++)
 		{
-			register double	*destStartPtr,*srcStartPtr;
-			register long	pixWid;
+			uint64_t	*destStartPtr,*srcStartPtr;
+			int32_t		pixWid;
 
-			destStartPtr = (double *)destPtrs[seg];
-			srcStartPtr	= (double *)srcPtrs[seg];
+			destStartPtr	= (uint64_t *)destPtrs[seg];
+			srcStartPtr		= (uint64_t *)srcPtrs[seg];
 
 			height = heights[seg];						// set height
 			width = (pixWid = widths[seg])>>3;			// set double width
@@ -1895,8 +1881,8 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				if (((long)destPtr & b11) == 3)				// IF ON ALIGNMENT OF 3, DRAW WITH LONGS TO AVOID POWERMAC BUS GLITCH!!!!
 				{
-					s = (long *)srcPtr;
-					d = (long *)destPtr;
+					s = (int32_t *)srcPtr;
+					d = (int32_t *)destPtr;
 					for (top=0; top < (width*2); top++)
 						*d++ = *s++;
 					destPtr += width;
@@ -1909,20 +1895,13 @@ register long	width2,srcAdd2,destAdd2,pixWid,pixWid2;
 
 				switch(pixWid&b111)								// draw remainder
 				{
-					case	7:
-							*((Ptr)destPtr+6) = *((Ptr)srcPtr+6);
-					case	6:
-							*((Ptr)destPtr+5) = *((Ptr)srcPtr+5);
-					case	5:
-							*((Ptr)destPtr+4) = *((Ptr)srcPtr+4);
-					case	4:
-							*((Ptr)destPtr+3) = *((Ptr)srcPtr+3);
-					case	3:
-							*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
-					case	2:
-							*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
-					case	1:
-							*((Ptr)destPtr) = *((Ptr)srcPtr);
+					case	7:		*((Ptr)destPtr+6) = *((Ptr)srcPtr+6);
+					case	6:		*((Ptr)destPtr+5) = *((Ptr)srcPtr+5);
+					case	5:		*((Ptr)destPtr+4) = *((Ptr)srcPtr+4);
+					case	4:		*((Ptr)destPtr+3) = *((Ptr)srcPtr+3);
+					case	3:		*((Ptr)destPtr+2) = *((Ptr)srcPtr+2);
+					case	2:		*((Ptr)destPtr+1) = *((Ptr)srcPtr+1);
+					case	1:		*((Ptr)destPtr) = *((Ptr)srcPtr);
 				}
 
 				srcStartPtr += srcAdd;									// next line
