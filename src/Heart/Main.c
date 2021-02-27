@@ -676,6 +676,8 @@ FSSpec		mySpec;
 
 	if (!minimal)
 	{
+		DoAlert("TODO: Check that RESET ALL OBJECTS' POINTERS works?");
+
 				/*******************************/
 				/* RESET ALL OBJECTS' POINTERS */
 				/*******************************/
@@ -696,7 +698,7 @@ FSSpec		mySpec;
 				tempPtr = gSHAPE_HEADER_Ptrs[theNode->SpriteGroupNum][theNode->Type];	// get shape header ptr
 				diff = (long)StripAddress(tempPtr)-(long)StripAddress(theNode->SHAPE_HEADER_Ptr);	// calc how far it moved
 				theNode->SHAPE_HEADER_Ptr = tempPtr;									// reset to new location
-				theNode->AnimsList = (Ptr)((long)theNode->AnimsList + diff);			// adjust anim ptr by the distance
+				theNode->AnimsList = (Ptr)(theNode->AnimsList + diff);					// adjust anim ptr by the distance
 			}
 
 					/* ADJUST ALL ITEM INDEX PTRS */
