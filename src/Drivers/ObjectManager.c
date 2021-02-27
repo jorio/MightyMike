@@ -611,7 +611,9 @@ register	ObjNode 	*nodePtr,*nextNode;
 				nextNode->PrevNode = nodePtr->PrevNode;
 				nodePtr->PrevNode->NextNode	= nextNode;	// current's prev's next pts to next
 				nodePtr->NextNode = nextNode->NextNode;
-				nextNode->NextNode->PrevNode = nodePtr;	// next's next's prev now pts to current
+				if (nextNode->NextNode)
+					nextNode->NextNode->PrevNode = nodePtr;	// next's next's prev now pts to current
+
 				nodePtr->PrevNode = nextNode;
 				nextNode->NextNode = nodePtr;
 			}
