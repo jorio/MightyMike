@@ -108,7 +108,7 @@ struct ObjNode
 	long			BaseX;
 	long			BaseY;
 	long			Health;				// health
-	Ptr			SHAPE_HEADER_Ptr;	// addr of this sprite's SHAPE_HEADER
+	Ptr			SHAPE_HEADER_Ptr;	// addr of this sprite's SHAPE_HEADER (shape data must be completely byteswapped prior to setting in ObjNode!)
 	long			OldLeftSide;
 	long			OldRightSide;
 	long			OldTopSide;

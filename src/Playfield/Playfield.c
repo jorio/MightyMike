@@ -405,11 +405,11 @@ int16_t* tileXparentList		= nil;
 
 			/* GET OFFSETS */
 
-	int offsetToTileDefinitions			= Byteswap32Signed(tileSetPtr+6)+2;		// base + offset + 2 (skip # tiles word)
-	int offsetToXlateTable				= Byteswap32Signed(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
-	int offsetToTileAttributes			= Byteswap32Signed(tileSetPtr+14)+2;	// base + offset + 2 (skip # entries word)
-	int offsetToTileAnimList			= Byteswap32Signed(tileSetPtr+22)+2;
-	int offsetToTileXparentColorList	= Byteswap32Signed(tileSetPtr+26)+2;
+	int offsetToTileDefinitions			= Byteswap32SignedRW(tileSetPtr+6)+2;		// base + offset + 2 (skip # tiles word)
+	int offsetToXlateTable				= Byteswap32SignedRW(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
+	int offsetToTileAttributes			= Byteswap32SignedRW(tileSetPtr+14)+2;	// base + offset + 2 (skip # entries word)
+	int offsetToTileAnimList			= Byteswap32SignedRW(tileSetPtr+22)+2;
+	int offsetToTileXparentColorList	= Byteswap32SignedRW(tileSetPtr+26)+2;
 
 	GAME_ASSERT(offsetToTileDefinitions	< offsetToXlateTable);
 	GAME_ASSERT(offsetToXlateTable		< offsetToTileAttributes);
@@ -418,11 +418,11 @@ int16_t* tileXparentList		= nil;
 
 			/* GET ENTRY COUNTS */
 
-	int numTileDefinitions				= Byteswap16Signed(tileSetPtr + offsetToTileDefinitions			- 2	);
-	int numXlateEntries					= Byteswap16Signed(tileSetPtr + offsetToXlateTable				- 2	);
-	int numTileAttributeEntries			= Byteswap16Signed(tileSetPtr + offsetToTileAttributes			- 2	);
-	gNumTileAnims						= Byteswap16Signed(tileSetPtr + offsetToTileAnimList			- 2	);
-	int numTileXparentColors			= Byteswap16Signed(tileSetPtr + offsetToTileXparentColorList	- 2	);
+	int numTileDefinitions				= Byteswap16SignedRW(tileSetPtr + offsetToTileDefinitions			- 2	);
+	int numXlateEntries					= Byteswap16SignedRW(tileSetPtr + offsetToXlateTable				- 2	);
+	int numTileAttributeEntries			= Byteswap16SignedRW(tileSetPtr + offsetToTileAttributes			- 2	);
+	gNumTileAnims						= Byteswap16SignedRW(tileSetPtr + offsetToTileAnimList			- 2	);
+	int numTileXparentColors			= Byteswap16SignedRW(tileSetPtr + offsetToTileXparentColorList	- 2	);
 
 			/* GET POINTERS TO TABLES */
 
@@ -546,20 +546,23 @@ Ptr		bytePtr,pfPtr;
 	pfPtr = *gPlayfieldHandle;										// get fixed ptr
 
 
+	int32_t offsetToMapImage		= Byteswap32SignedRW(pfPtr + 2);
+	int32_t offsetToAltMap			= Byteswap32SignedRW(pfPtr + 10);
+
 				/* BUILD MAP ARRAY */
 
-	tempPtr = (uint16_t *)(pfPtr + Byteswap32Signed(pfPtr+2));		// point to MAP_IMAGE
-	gPlayfieldTileWidth = Byteswap16(tempPtr++);					// get dimensions
-	gPlayfieldTileHeight = Byteswap16(tempPtr++);
+	tempPtr = (uint16_t *)(pfPtr + offsetToMapImage);				// point to MAP_IMAGE
+	ByteswapInts(2, 2, tempPtr);									// byteswap width/height
+	gPlayfieldTileWidth = *(tempPtr++);								// get dimensions
+	gPlayfieldTileHeight = *(tempPtr++);
 	gPlayfieldWidth = gPlayfieldTileWidth<<TILE_SIZE_SH;
 	gPlayfieldHeight = gPlayfieldTileHeight<<TILE_SIZE_SH;
 
 	gPlayfield = (uint16_t **)AllocPtr(sizeof(uint16_t *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
-	if (gPlayfield == nil)
-		DoFatalAlert("NewPtr failed trying to get gPlayfield!");
+	GAME_ASSERT(gPlayfield);
 	for (i = 0; i < gPlayfieldTileHeight; i++)						// build 1st dimension of matrix
 	{
-		ByteswapInts(2, gPlayfieldTileWidth, tempPtr);
+		ByteswapInts(2, gPlayfieldTileWidth, tempPtr);				// byteswap row
 		gPlayfield[i]= (unsigned short *)tempPtr;					// set pointer to row
 		tempPtr += gPlayfieldTileWidth;								// next row
 	}
@@ -567,7 +570,7 @@ Ptr		bytePtr,pfPtr;
 
 			/* GET ALTERNATE MAP */
 
-	bytePtr = (Ptr)(pfPtr + Byteswap32Signed(pfPtr+10));						// point to ALTERNATE_MAP
+	bytePtr = (Ptr)(pfPtr + offsetToAltMap);						// point to ALTERNATE_MAP
 	if (bytePtr == nil)
 	{
 		gAlternateMap = nil;										// no alt map to load
@@ -700,8 +703,8 @@ ObjectEntryType *lastPtr;
 
 					/* GET BASIC INFO */
 
-	offset = Byteswap32Signed(*gPlayfieldHandle+6);						// get offset to OBJECT_LIST
-	gNumItems = Byteswap16Signed(*gPlayfieldHandle+offset);				// get # items in file
+	offset = Byteswap32Signed(*gPlayfieldHandle + 6);						// get offset to OBJECT_LIST
+	gNumItems = Byteswap16Signed(*gPlayfieldHandle + offset);				// get # items in file
 	if (gNumItems == 0)
 		return;
 	gMasterItemList = (ObjectEntryType *)(*gPlayfieldHandle+offset+2);	// point to items in file

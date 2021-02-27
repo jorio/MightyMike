@@ -206,7 +206,7 @@ int32_t	offset;
 
 						/* INIT PTR TO ANIM_LIST */
 
-	offset = Byteswap32(tempPtr+SHAPE_HEADER_ANIM_LIST);	// get offset to ANIM_LIST
+	offset = *(int32_t*) (tempPtr+SHAPE_HEADER_ANIM_LIST);	// get offset to ANIM_LIST
 
 	newSpritePtr->AnimsList = tempPtr+offset+2;				// set ptr to ANIM_LIST
 															// but skip 1st word: #anims!!!!
@@ -234,32 +234,73 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 		BuildShapePalette(groupNum);							// get shape table's pal going
 
 
-	CreateShapeHeaderPointers(groupNum);
-}
+	/***************** CREATE SHAPE HEADER POINTERS ********************/
+	//
+	// This is called whenever a shape table is moved in memory or loaded
+	//
 
-
-/***************** CREATE SHAPE HEADER POINTERS ********************/
-//
-// This is called whenever a shape table is moved in memory or loaded
-//
-
-static void CreateShapeHeaderPointers(long groupNum)
-{
 	Ptr shapeTablePtr = *gShapeTableHandle[groupNum];				// get ptr to shape table
 
-	int32_t offsetToShapeList = Byteswap32(shapeTablePtr + SF_HEADER__SHAPE_LIST);		// get ptr to offset to SHAPE_LIST
+	int32_t offsetToShapeList = Byteswap32SignedRW(shapeTablePtr + SF_HEADER__SHAPE_LIST);		// get ptr to offset to SHAPE_LIST
 
 	Ptr shapeList = shapeTablePtr + offsetToShapeList;				// get ptr to SHAPE_LIST
 
-	gNumShapesInFile[groupNum] = Byteswap16(shapeList);				// get # shapes in the file
+	gNumShapesInFile[groupNum] = Byteswap16SignedRW(shapeList);		// get # shapes in the file
 	shapeList += 2;
+
+	int32_t* offsetsToShapeHeaders = shapeList;						// get offset to SHAPE_HEADER_n
+	ByteswapInts(4, gNumShapesInFile[groupNum], offsetsToShapeHeaders);
 
 	for (int i = 0; i < gNumShapesInFile[groupNum]; i++)
 	{
-		uint32_t offset = Byteswap32(shapeList);					// get offset to SHAPE_HEADER_n
-		shapeList += 4;
+		Ptr shapeBase = shapeTablePtr + offsetsToShapeHeaders[i];
 
-		gSHAPE_HEADER_Ptrs[groupNum][i] = shapeTablePtr + offset;	// save ptr to SHAPE_HEADER
+		gSHAPE_HEADER_Ptrs[groupNum][i] = shapeBase;	// save ptr to SHAPE_HEADER
+
+		int32_t offsetToFrameList	= Byteswap32SignedRW(shapeBase + 2);
+		int16_t numFrames			= Byteswap16SignedRW(shapeBase + offsetToFrameList);
+		int32_t* offsetsToFrameData	= (int32_t*) (shapeBase + offsetToFrameList + 2);
+		ByteswapInts(4, numFrames, offsetsToFrameData);
+
+		for (int f = 0; f < numFrames; f++)
+		{
+			Ptr frameBase = shapeBase + offsetsToFrameData[f];
+
+			ByteswapStructs("hhhhll", 16, 1, frameBase);
+			/*
+			int16_t widthBytes			= Byteswap16Signed(frameBase + 0);
+			int16_t height				= Byteswap16Signed(frameBase + 2);
+			int16_t x					= Byteswap16Signed(frameBase + 4);
+			int16_t y					= Byteswap16Signed(frameBase + 6);
+			int32_t offsetToPixelData	= Byteswap32Signed(frameBase + 8);
+			int32_t offsetToMaskData	= Byteswap32Signed(frameBase + 12);
+			*/
+		}
+
+		int32_t offsetToAnimList	= Byteswap32SignedRW(shapeBase + 6);  // base+SHAPE_HEADER_ANIM_LIST
+		int16_t numAnims			= Byteswap16SignedRW(shapeBase + offsetToAnimList);
+		int32_t* offsetsToAnimData	= (int32_t*) (shapeBase + offsetToAnimList + 2);
+		ByteswapInts(4, numAnims, offsetsToAnimData);
+
+		for (int a = 0; a < numAnims; a++)
+		{
+			Ptr animBase = shapeBase + offsetsToAnimData[a];
+
+			uint8_t numCommands = animBase[0];		// aka "AnimLine"
+
+			ByteswapInts(2, numCommands*2, animBase+1);
+			/*
+			for (int cmd = 0; cmd < numCommands; cmd++)
+			{
+				Ptr commandBase = animBase + 1 + 4*cmd;
+				int16_t opcode	= Byteswap16Signed(commandBase + 0);
+				int16_t operand	= Byteswap16Signed(commandBase + 2);
+			}
+			*/
+		}
+
+
+		printf("Num Anims: %d    Num Frames: %d\n", numAnims, numFrames);
 	}
 }
 
@@ -271,6 +312,8 @@ static void CreateShapeHeaderPointers(long groupNum)
 
 void OptimizeShapeTables(void)
 {
+	printf("Source port: Removed OptimizeShapeTables\n");
+#if 0
 long	i;
 long	growBytes;
 
@@ -299,6 +342,7 @@ long	growBytes;
 			CreateShapeHeaderPointers(i);			// reset it
 		}
 	}
+#endif
 }
 
 
@@ -487,17 +531,17 @@ int32_t 	offset;
 
 	shapePtr = 	gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
 
-	offset = Byteswap32Signed(shapePtr+2);			// get offset to FRAME_LIST
+	offset = *(int32_t*) (shapePtr+2);				// get offset to FRAME_LIST
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
 
-	offset = Byteswap32Signed(tempPtr+(frameNum<<2)+2);	// get offset to frame's FRAME_HEADER
+	offset = *(int32_t*) (tempPtr+(frameNum<<2)+2);	// get offset to frame's FRAME_HEADER
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_HEADER
 
 
-	int width = Byteswap16Signed(tempPtr)>>2;		// word width
-	int height = Byteswap16Signed(tempPtr+2);
-	x += Byteswap16Signed(tempPtr+4);				// use position offsets
-	y += Byteswap16Signed(tempPtr+6);
+	int width = *(int16_t*) (tempPtr)>>2;		// word width
+	int height = *(int16_t*) (tempPtr+2);
+	x += *(int16_t*) (tempPtr+4);				// use position offsets
+	y += *(int16_t*) (tempPtr+6);
 
 	if ((x < 0) ||									// see if out of bounds
 		(x >= VISIBLE_WIDTH) ||
@@ -507,8 +551,8 @@ int32_t 	offset;
 
 	tempPtr += 8;
 
-	uint32_t*	srcPtr			= shapePtr + Byteswap32Signed(tempPtr);
-	uint32_t*	maskPtr			= shapePtr + Byteswap32Signed(tempPtr + 4);
+	uint32_t*	srcPtr			= shapePtr + *(int32_t*) (tempPtr);
+	uint32_t*	maskPtr			= shapePtr + *(int32_t*) (tempPtr + 4);
 	uint32_t*	destStartPtr	= gScreenLookUpTable[y] + x;
 
 
@@ -543,28 +587,27 @@ int32_t 	offset;
 
 void DrawFrameToScreen_NoMask(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
-	DoAlert("Implement me! DrawFrameToScreen_NoMask");
-register	long	col,height;
-register	long	*destPtr,*srcPtr;
-register	long	*destStartPtr;
+long	col,height;
+int32_t	*destPtr,*srcPtr;
+int32_t	*destStartPtr;
 long	width;
 Ptr		tempPtr,shapePtr;
-long	*longPtr,offset;
-short		*intPtr;
+int32_t	*longPtr,offset;
+int16_t		*intPtr;
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
 	shapePtr = 	gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
 
-	offset = *((long *)(shapePtr+2));				// get offset to FRAME_LIST
+	offset = *((int32_t *)(shapePtr+2));				// get offset to FRAME_LIST
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
 
-	longPtr = (long *)(tempPtr+(frameNum<<2)+2);	// point to correct frame offset
+	longPtr = (int32_t *)(tempPtr+(frameNum<<2)+2);	// point to correct frame offset
 	offset = *longPtr;								// get offset to FRAME_HEADER
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_HEADER
 
 
-	intPtr = (short *)tempPtr;						// get height & width of frame
+	intPtr = (int16_t *)tempPtr;					// get height & width of frame
 	width = (*intPtr++)>>2;							// word width
 	height = *intPtr++;
 	x += *intPtr++;									// use position offsets
@@ -576,12 +619,9 @@ short		*intPtr;
 		(y >= VISIBLE_HEIGHT))
 			return;
 
-	longPtr = (long *)intPtr;
-	srcPtr = (long *)((*longPtr++)+shapePtr);		// point to pixel data
-	destStartPtr = (long *)(gScreenLookUpTable[y]+x);		// point to screen
-
-//	gMMUMode = true32b;									// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
+	longPtr = (int32_t *)intPtr;
+	srcPtr = (int32_t *)((*longPtr++)+shapePtr);		// point to pixel data
+	destStartPtr = (int32_t *)(gScreenLookUpTable[y]+x);		// point to screen
 
 
 						/* DO THE DRAW */
@@ -599,8 +639,6 @@ short		*intPtr;
 		destStartPtr += gScreenRowOffsetLW;			// next row
 	}
 	while (--height > 0);
-
-//	SwapMMUMode(&gMMUMode);						// Restore addressing mode
 }
 
 
@@ -843,20 +881,20 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
 
-	offset = Byteswap32(SHAPE_HEADER_Ptr+2);		// get offset to FRAME_LIST
+	offset = *(SHAPE_HEADER_Ptr+2);						// get offset to FRAME_LIST
 	ptr16 = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
-	if (frameNum >= Byteswap16(ptr16++))			// see if error
+	if (frameNum >= *(ptr16++))							// see if error
 		DoFatalAlert("Illegal Frame #");
 
 	ptr32 = (int32_t *)ptr16;
-	offset = Byteswap32(ptr32+frameNum);				// get offset to FRAME_HEADER_n
+	offset = *(ptr32+frameNum);							// get offset to FRAME_HEADER_n
 
 	ptr16 = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_HEADER
 
-	width = Byteswap16(ptr16++)>>2;					// get word width
-	height = Byteswap16(ptr16++);					// get height
-	x += Byteswap16Signed(ptr16++);					// use position offsets
-	y += Byteswap16Signed(ptr16++);
+	width = *(ptr16++)>>2;								// get word width
+	height = *(ptr16++);								// get height
+	x += *(ptr16++);									// use position offsets
+	y += *(ptr16++);
 
 	oldBox = theNodePtr->drawBox;						// remember old box
 
@@ -870,9 +908,9 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 		height -= (y+height)-gRegionClipBottom[theNodePtr->ClipNum];
 
 	ptr32 = (int32_t *)ptr16;
-	offset = Byteswap32(ptr32++);							// get offset to PIXEL_DATA
+	offset = *(ptr32++);									// get offset to PIXEL_DATA
 	srcPtr32 = (int32_t *)(SHAPE_HEADER_Base + offset);		// get ptr to PIXEL_DATA
-	offset = Byteswap32(ptr32++);							// get offset to MASK_DATA
+	offset = *(ptr32++);									// get offset to MASK_DATA
 	maskPtr32 = (int32_t *)(SHAPE_HEADER_Base + offset);	// get ptr to MASK_DATA
 
 	if (y < gRegionClipTop[theNodePtr->ClipNum])			// see if need to clip TOP

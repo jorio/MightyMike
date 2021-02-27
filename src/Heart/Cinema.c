@@ -25,7 +25,6 @@
 #include "input.h"
 
 extern	Handle		gOffScreenHandle;
-extern	Handle		gShapeTableHandle;
 extern	Handle		gBackgroundHandle;
 extern	long		gDX,gDY,gDifficultySetting;
 extern	ObjNode		*gThisNodePtr;

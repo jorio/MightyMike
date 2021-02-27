@@ -67,6 +67,7 @@ long 	*cOffPtr;
 short		i,*intPtr;
 RGBColor	rgbColor,*colorEntryPtr;
 
+DoAlert("TODO: BuildShapePalette: can't have long*; BYTESWAP???");
 	cOffPtr = (long *)(*gShapeTableHandle[groupNum]);				// get ptr to Color Table offset
 
 	intPtr = (short *)((*cOffPtr)+(*gShapeTableHandle[groupNum]));	// get ptr to color header
