@@ -40,7 +40,8 @@ extern	Boolean		gGameIsDemoFlag,gMusicOnFlag,gLoadOldGameFlag;
 extern	long		gRegionClipTop[],gRegionClipBottom[],gRegionClipLeft[],gRegionClipRight[];
 extern	Byte		gBunnyCounts[5][3];
 extern	long		gNumCoins;
-
+extern	short		gPrefsFolderVRefNum;
+extern	long		gPrefsFolderDirID;
 
 static void DoDifficultyScreen(void);
 static void DoWhimpyWinScreen(void);
@@ -98,7 +99,7 @@ static	short		gCursorSelection,gCursorMode;
 
 static	Boolean	gDownButtonPressedFlag,gUpButtonPressedFlag;
 
-static	long		HighScoreList[MAX_HIGH_SCORES];							// note: keep arrays together for saving and loading
+static	int32_t		HighScoreList[MAX_HIGH_SCORES];							// note: keep arrays together for saving and loading
 static	char		HighScoreNames[MAX_HIGH_SCORES][MAX_NAME_LENGTH+1];
 
 static	long		gDemoTimeout;
@@ -473,6 +474,7 @@ void ShowHighScores(void)
 	FadeOutGameCLUT();
 loop:
 	DisplayScores();									// show them
+	PresentIndexedFramebuffer();
 
 	while (!CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag))	// wait for button
 	{
@@ -665,6 +667,7 @@ ObjNode		*nameObj;
 				theChar -= 0x20;					// convert to upper case
 
 			HighScoreNames[n][i] = theChar;			// put char into string
+			HighScoreNames[n][i+1] = '\0';
 			i++;
 			gHtab = NAME_HTAB;						// set coords of name
 			gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
@@ -695,38 +698,32 @@ exit:;
 
 void SaveHighScores(void)
 {
-long		fileSize;
-Handle		resHandle;
 OSErr		iErr;
+FSSpec		spec;
+short		refNum;
+long		count;
 
-					/* SAVE NUMERICAL IN REZ */
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, ":MightyMike:HighScores", &spec);
+	FSpDelete(&spec);															// delete any existing file
 
-	fileSize = (sizeof(long)*MAX_HIGH_SCORES);
-	resHandle = GetResource('sKor',1000);					// get it
-	BlockMove(&HighScoreList,*resHandle,fileSize);			// copy from array to resource
-	ChangedResource(resHandle);
-	WriteResource( resHandle );								// update it
-	if (iErr = ResError() )
-	{
-		DoAlert("Couldnt Update Score Resource!");
-		ShowSystemErr(iErr);
-	}
-	ReleaseResource(resHandle);								// nuke resource
+	iErr = FSpCreate(&spec, 'MMik', 'sKor', smSystemScript);					// create blank file
+	GAME_ASSERT(iErr == noErr);
 
-					/* SAVE NAMES IN REZ */
+	iErr = FSpOpenDF(&spec, fsWrPerm, &refNum);
+	GAME_ASSERT(iErr == noErr);
 
+	count = sizeof(int32_t) * MAX_HIGH_SCORES;
+	iErr = FSWrite(refNum, &count, (Ptr) HighScoreList);
+	GAME_ASSERT(iErr == noErr);
+	GAME_ASSERT(count == sizeof(HighScoreList));
 
-	fileSize = MAX_HIGH_SCORES*(MAX_NAME_LENGTH+1);
-	resHandle = GetResource('sKor',1001);					// get it
-	BlockMove(&HighScoreNames,*resHandle,fileSize);			// copy from array to resource
-	ChangedResource(resHandle);
-	WriteResource( resHandle );								// update it
-	if (iErr = ResError() )
-	{
-		DoAlert("Couldnt Update Score Resource!");
-		ShowSystemErr(iErr);
-	}
-	ReleaseResource(resHandle);								// nuke resource
+	count = MAX_HIGH_SCORES*(MAX_NAME_LENGTH+1);
+	iErr = FSWrite(refNum, &count, (Ptr) HighScoreNames);
+	GAME_ASSERT(iErr == noErr);
+	GAME_ASSERT(count == sizeof(HighScoreNames));
+
+	iErr = FSClose(refNum);
+	GAME_ASSERT(iErr == noErr);
 }
 
 
@@ -734,29 +731,41 @@ OSErr		iErr;
 
 void LoadHighScores(void)
 {
-Handle	hRsrc;
-long	size;
+OSErr				iErr;
+short				refNum;
+FSSpec				file;
+long				count;
+bool				needClose = false;
 
-				/* READ NUMERICAL PART */
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, ":MightyMike:HighScores", &file);
+	iErr = FSpOpenDF(&file, fsRdPerm, &refNum);
 
-	hRsrc = GetResource('sKor',1000);				// read the resource
-	if (ResError() || (hRsrc == nil))
-		DoFatalAlert("Error reading Scores Resource!");
+	if (iErr == fnfErr)
+		goto corrupt;
+	else if (iErr)
+		DoFatalAlert("LoadHighScores: Error opening High Scores file!");
+	else
+	{
+		needClose = true;
 
-	size = (sizeof(long)*MAX_HIGH_SCORES);			// get its size
-	BlockMove(*hRsrc,&HighScoreList,size);			// copy into data array
-	ReleaseResource(hRsrc);							// nuke resource
+		count = sizeof(int32_t) * MAX_HIGH_SCORES;
+		iErr = FSRead(refNum, &count, (Ptr) HighScoreList);
+		if (iErr != noErr || count != sizeof(HighScoreList))
+			goto corrupt;
 
+		count = MAX_HIGH_SCORES*(MAX_NAME_LENGTH+1);
+		iErr = FSRead(refNum, &count, (Ptr) HighScoreNames);
+		if (iErr != noErr || count != sizeof(HighScoreNames))
+			goto corrupt;
 
-				/* READ NAMES PART */
+		FSClose(refNum);
+		return;
+	}
 
-	hRsrc = GetResource('sKor',1001);				// read the resource
-	if (ResError())
-		DoFatalAlert("Error reading Scores Resource!");
-
-	size = MAX_HIGH_SCORES*(MAX_NAME_LENGTH+1);		// get its size
-	BlockMove(*hRsrc,&HighScoreNames,size);			// copy into data array
-	ReleaseResource(hRsrc);							// nuke resource
+corrupt:
+	ClearHighScores();
+	if (needClose)
+		FSClose(refNum);
 }
 
 
