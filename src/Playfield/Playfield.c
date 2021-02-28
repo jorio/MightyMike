@@ -288,7 +288,8 @@ int16_t* tileXparentList		= nil;
 
 		char name[16];
 		uint8_t nameLength = *currentTileAnimData;
-		GAME_ASSERT(nameLength <= 15);
+		if (nameLength > 15)	// the name is always truncated to max 15 characters, whatever the file says
+			nameLength = 15;
 		BlockMove(currentTileAnimData+1, name, nameLength);
 		name[nameLength] = '\0';
 
