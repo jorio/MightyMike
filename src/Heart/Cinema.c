@@ -1812,6 +1812,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 		DrawFrameToScreen((i*37)+htab,vtab,GROUP_BONUS,0,1);	// draw bunny
 		bonus += 600;
 		PrintBonusNum(bonus, 5, 540, vtab);						// draw bonus #
+		PresentIndexedFramebuffer();
 		Wait4(15);
 	}
 	GetPoints(bonus);											// add bonus to score
@@ -1832,6 +1833,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 		DrawFrameToScreen(htab,vtab,GROUP_BONUS,0,12);			// draw jawbreaker
 		bonus += 25;
 		PrintBonusNum(bonus, 5, 540, 180);						// draw bonus #
+		PresentIndexedFramebuffer();
 
 		if (GetKeyState2(KEY_SPACE))								// see how long to wait
 			Wait4(2);
@@ -1852,6 +1854,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 				gMyMaxHealth++;
 				DrawFrameToScreen(520,210,GROUP_BONUS,0,13);	// draw heart
 				PlaySound(SOUND_HEALTHDING);
+				PresentIndexedFramebuffer();
 			}
 		}
 	}
@@ -1882,6 +1885,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 
 				/* DO SAVE SELECTION */
 
+	PresentIndexedFramebuffer();
 	Wait4(60*1);
 	while(GetKeyState2(KEY_RETURN) || GetKeyState2(KEY_SPACE) || Button());					// wait for button & key up
 
@@ -1898,6 +1902,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 			DrawFrameToScreen(320,390,GROUP_BONUS,0,14);
 		if (i > 20)
 			i = 0;
+		PresentIndexedFramebuffer();
 
 		ReadKeyboard();
 
@@ -1958,6 +1963,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 			TryToSaveBothPlayers(selection);
 	}
 bye:
+	PresentIndexedFramebuffer();
 	Wait(60*1);
 
 	ZapShapeTable(GROUP_BONUS);

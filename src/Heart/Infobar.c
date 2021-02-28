@@ -584,6 +584,8 @@ short	selection;
 		else
 			DrawFrameToScreen_NoMask(QUIT_X,QUIT_Y,GroupNum_Quit,ObjType_Quit,2);
 
+		PresentIndexedFramebuffer();
+
 		if (++tick > 10)
 		{
 			tick = 0;
