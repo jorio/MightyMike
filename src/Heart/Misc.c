@@ -53,6 +53,11 @@ extern	Boolean			gMusicOnFlag,gAbortDemoFlag,gISPInitialized;
 
 #define		MAX_PACK_SEG_SIZE	0x7fff
 
+// Source port note: the game's Wait functions were pure spinlocks.
+// I threw in a simple SDL_Delay in Wait's loop so the game consumes less power
+// until I get around to implementing a better solution for speed regulation.
+#define		SPINLOCK_DELAY		2
+
 enum {
 	MTemp = 0x828,
     RawMouse = 0x82C,               /*[GLOBAL VAR]  un-jerked mouse coordinates [long]*/
@@ -230,7 +235,8 @@ long	old;
 	while (time > 0)
 	{
 		old = TickCount();							// wait for 1 tick to pass
-		while(TickCount() == old);
+		while(TickCount() == old)
+			SDL_Delay(SPINLOCK_DELAY);
 		--time;
 		if (GetKeyState2(KEY_SPACE) || (GetKeyState2(KEY_RETURN)))	// see if keyboard break out
 			return(true);
@@ -297,7 +303,8 @@ void Wait4(long time)
 long	start;
 
 	start = TickCount();
-	while (TickCount() < (start+time));
+	while (TickCount() < (start+time))
+		SDL_Delay(SPINLOCK_DELAY);
 }
 
 
@@ -647,6 +654,8 @@ static	UnsignedWide oldTick = {0,0};
         if ((tick.lo - oldTick.lo) >= speed)    // see if enough time has passed
             break;
 
+		SDL_Delay(SPINLOCK_DELAY);
+
 	} while(true);
 
 	oldTick = tick;
@@ -662,7 +671,8 @@ static	UnsignedWide oldTick = {0,0};
 
 void RegulateSpeed2(short speed)
 {
-	while ((TickCount() - gTick) < speed);				// wait for 1 tick
+	while ((TickCount() - gTick) < speed)				// wait for 1 tick
+		SDL_Delay(SPINLOCK_DELAY);
 	gTick = TickCount();							// remember current time
 	gFrames++;
 }
