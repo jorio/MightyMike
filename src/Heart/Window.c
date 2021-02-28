@@ -15,6 +15,7 @@
 #include "playfield.h"
 #include "object.h"
 #include "misc.h"
+#include "io.h"
 //#include 	<DrawSprocket.h>
 
 #include <SDL.h>
@@ -43,6 +44,7 @@ extern SDL_Texture*			gSDLTexture;
 /****************************/
 
 static void PrepDrawSprockets(void);
+static void FilterDithering_Row(const uint8_t* indexedRow);
 
 
 /****************************/
@@ -57,6 +59,8 @@ static void PrepDrawSprockets(void);
 
 uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
+
+uint8_t			gRowDitherStrides[VISIBLE_WIDTH];		// for dithering filter
 
 										// GAME STUFF
 Handle			gOffScreenHandle = nil;
@@ -1028,7 +1032,7 @@ OSStatus 		theError;
 
 /****************** PRESENT FRAMEBUFFER *************************/
 
-void PresentIndexedFramebuffer(void)
+static void ConvertIndexedFramebufferToRGBA_NoFilter(void)
 {
 	uint32_t* rgba = (uint32_t*) gRGBAFramebuffer;
 	const uint8_t* indexed = &gIndexedFramebuffer[0];
@@ -1037,12 +1041,186 @@ void PresentIndexedFramebuffer(void)
 	{
 		for (int x = 0; x < VISIBLE_WIDTH; x++)
 		{
-			*rgba = gGamePalette[*indexed];
-			rgba++;
-			indexed++;
+			*(rgba++) = gGamePalette[*(indexed++)];
 		}
 	}
+}
 
+static void ConvertIndexedFramebufferToRGBA_FilterDithering(void)
+{
+	uint32_t* rgba = (uint32_t*) gRGBAFramebuffer;
+	const uint8_t* indexed = &gIndexedFramebuffer[0];
+
+	// initialize row bleed: no dithering by default
+	memset(gRowDitherStrides, 0, VISIBLE_WIDTH);
+
+	for (int y = 0; y < VISIBLE_HEIGHT; y++)
+	{
+		uint8_t* smearFlag = gRowDitherStrides;
+		FilterDithering_Row(indexed);
+
+		for (int x = 0; x < VISIBLE_WIDTH-1; x++)
+		{
+			if (*smearFlag)
+			{
+				uint8_t* me		= (uint8_t*) &gGamePalette[*indexed];
+				uint8_t* next	= (uint8_t*) &gGamePalette[*(indexed+1)];
+				uint8_t* out	= (uint8_t*) rgba;
+				out[1] = (me[1] + next[1]) >> 1;
+				out[2] = (me[2] + next[2]) >> 1;
+				out[3] = (me[3] + next[3]) >> 1;
+			}
+			else
+				*rgba = gGamePalette[*indexed];
+
+			rgba++;
+			indexed++;
+
+			*smearFlag = 0;	// clear for next row
+			smearFlag++;
+		}
+
+		*rgba = gGamePalette[*indexed];		// last
+		rgba++;
+		indexed++;
+	}
+}
+
+static inline void FilterDithering_Row(const uint8_t* indexedRow)
+{
+	static const int THRESH = 2;
+	static const int BLEED = 1;
+
+	int prev	= -1;
+	int me		= indexedRow[0];
+	int next	= indexedRow[1];
+
+	int ditherStart		= 0;
+	int ditherEnd		= -1;
+
+
+#define COMMIT_STRIDE do { \
+	int ditherLength = ditherEnd - ditherStart;								\
+	if (ditherLength > THRESH)												\
+		memset(gRowDitherStrides+ditherStart, 1, ditherLength+BLEED);		\
+	} while(0)
+
+	for (int x = 0; x < VISIBLE_WIDTH-1; x++)
+	{
+		next = indexedRow[x+1];
+
+		if (me==next || me==prev)	// contiguous solid color
+		{
+			COMMIT_STRIDE;			// 			commit current dither stride if any
+			ditherEnd = -1;			// 			break dither stride
+		}
+		else if (prev==next)		// middle of dithered stride
+		{
+			if (ditherEnd < 0)		// 			no current dither stride yet
+				ditherStart = x-1;	// 			start stride on left dither pixel
+			ditherEnd = x+1;		// 			extend stride to right dither pixel
+		}
+		else if (x == ditherEnd)	// pixel was used to dither previous column
+		{
+			;						// 			let it be -- perhaps next pixel will detect we're still in dither stride
+		}
+		else						// lone non-dithered pixel
+		{
+			COMMIT_STRIDE;			// 			commit current dither stride if any
+			ditherEnd = -1;			// 			break dither stride
+		}
+
+		prev = me;
+		me = next;
+	}
+
+	// commit last
+	COMMIT_STRIDE;
+
+#undef COMMIT_STRIDE
+}
+
+static void SaveIndexedScreenshot(void)
+{
+	FILE* tga = fopen("/tmp/MikeIndexedScreenshot.tga", "wb");
+	if (!tga)
+	{
+		DoAlert("Couldn't open screenshot file");
+		return;
+	}
+
+	uint8_t tgaHeader[] = {
+			0,
+			1,
+			1,		// image type: raw cmap
+			0,0,	// pal origin
+			0,1,	// pal size lo-hi (=256)
+			24,		// pal bits per color
+			0,0,0,0,	// origin
+			VISIBLE_WIDTH&0xFF,VISIBLE_WIDTH>>8,
+			VISIBLE_HEIGHT&0xFF,VISIBLE_HEIGHT>>8,
+			8,		// bits per pixel
+			1<<5,	// image descriptor (set flag for top-left origin)
+	};
+
+	// write header
+	fwrite(tgaHeader, sizeof(tgaHeader), 1, tga);
+
+	// write palette
+	for (int i = 0; i < 256; i++)
+	{
+		fputc((gGamePalette[i]>>8)&0xFF, tga);
+		fputc((gGamePalette[i]>>16)&0xFF, tga);
+		fputc((gGamePalette[i]>>24)&0xFF, tga);
+	}
+
+	// write framebuffer
+	fwrite(gIndexedFramebuffer, VISIBLE_WIDTH, VISIBLE_HEIGHT, tga);
+
+	// done
+	fclose(tga);
+}
+
+void PresentIndexedFramebuffer(void)
+{
+	// Check dithering key
+	static Boolean filterDithering = true;
+	static Boolean kdDithering = false;
+	if (CheckNewKeyDown2(kVK_F10, &kdDithering))
+	{
+		filterDithering = !filterDithering;
+	}
+
+	// Check fullscreen key
+	static Boolean fullscreen = false;
+	static Boolean kdFullscreen = false;
+	if (CheckNewKeyDown2(kVK_F11, &kdFullscreen))
+	{
+		fullscreen = !fullscreen;
+		SDL_SetWindowFullscreen(gSDLWindow, fullscreen? SDL_WINDOW_FULLSCREEN_DESKTOP: 0);
+	}
+
+	// Check screenshot key
+	static Boolean kdScreenshot = false;
+	if (CheckNewKeyDown2(kVK_F12, &kdScreenshot))
+	{
+		SaveIndexedScreenshot();
+	}
+
+	//-------------------------------------------------------------------------
+	// Convert indexed to RGBA, with optional post-processing
+
+	if (!filterDithering)
+	{
+		ConvertIndexedFramebufferToRGBA_NoFilter();
+	}
+	else
+	{
+		ConvertIndexedFramebufferToRGBA_FilterDithering();
+	}
+
+	//-------------------------------------------------------------------------
+	// Update SDL texture and swap buffers
 	SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
 	SDL_RenderClear(gSDLRenderer);
 	SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
