@@ -442,7 +442,8 @@ void SwitchPlayer(void)
 
 void SaveCurrentPlayer(void)
 {
-Str255		saveName;
+	DoAlert("TODO: SaveCurrentPlayer: we'll probably have to review this");
+const char*	saveName;
 OSErr		iErr;
 short		fRefNum;
 long		numBytes;
@@ -472,7 +473,7 @@ FSSpec		mySpec;
 
 				/*  OPEN THE FILE */
 
-	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
+	iErr = FSpOpenDF(&mySpec,fsWrPerm,&fRefNum);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Open Player Save File.");
 
@@ -595,7 +596,7 @@ FSSpec		mySpec;
 
 				/*  OPEN THE FILE */
 
-	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
+	iErr = FSpOpenDF(&mySpec,fsRdPerm,&fRefNum);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Open Player Save File.");
 
@@ -745,8 +746,8 @@ FSSpec		mySpec;
 	if (gPlayerSaveData[gCurrentPlayer^1].donePlayingFlag)
 	{
 delete:
-		gSaveName2x[gSaveName2x[0]-1] = '0'+(gCurrentPlayer^1);		// tag player # to end of filename
-		gSaveName2x[gSaveName2x[0]] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName2x[strlen(gSaveName2x)-2] = '0'+(gCurrentPlayer^1);		// tag player # to end of filename
+		gSaveName2x[strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
 		FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName2x,&mySpec);
 		FSpDelete(&mySpec);
 		return;
@@ -844,13 +845,13 @@ Byte		scene,area;
 
 	if (gPlayerMode == ONE_PLAYER)
 	{
-		gSaveName[gSaveName[0]] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName[strlen(gSaveName)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName,&mySpec);
 	}
 	else
 	{
-		gSaveName2x[gSaveName2x[0]-1] = '0'+gCurrentPlayer;			// tag player # to end of filename
-		gSaveName2x[gSaveName2x[0]] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName2x[strlen(gSaveName2x)-2] = '0'+gCurrentPlayer;			// tag player # to end of filename
+		gSaveName2x[strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName2x,&mySpec);
 	}
 	if(iErr != fnfErr)
@@ -868,7 +869,7 @@ Byte		scene,area;
 
 				/*  OPEN THE FILE */
 
-	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
+	iErr = FSpOpenDF(&mySpec,fsWrPerm,&fRefNum);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Open Player Save File.");
 
@@ -957,19 +958,19 @@ Str255		errStr	= "Cannot Read Player Save File.";
 
 	if (gPlayerMode == ONE_PLAYER)
 	{
-		gSaveName[gSaveName[0]] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName[strlen(gSaveName)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName,&mySpec);
 	}
 	else
 	{
-		gSaveName2x[gSaveName2x[0]-1] = '0'+gCurrentPlayer;			// tag player # to end of filename
-		gSaveName2x[gSaveName2x[0]] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName2x[strlen(gSaveName2x)-2] = '0'+gCurrentPlayer;			// tag player # to end of filename
+		gSaveName2x[strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName2x,&mySpec);
 	}
 
 				/*  OPEN THE FILE */
 
-	iErr = FSpOpenDF(&mySpec,fsCurPerm,&fRefNum);
+	iErr = FSpOpenDF(&mySpec,fsRdPerm,&fRefNum);
 	if (iErr != noErr)										// if error, then no saved game yet
 	{
 		gStartingScene = gStartingArea = 0;
