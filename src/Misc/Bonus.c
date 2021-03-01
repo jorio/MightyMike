@@ -332,12 +332,9 @@ void DecBunnyCount(void)
 
 void DisplayBunnyRadar(void)
 {
-	DoAlert("TODO: DisplayBunnyRadar: types");
-short			width,height;
-register short	i,k;
+int16_t		width,height;
 long		numToRead;
 short		fRefNum,vRefNum;
-register long	*linePtr,*destPtr;
 short		xDist,yDist;
 
 						/***********************/
@@ -355,19 +352,22 @@ short		xDist,yDist;
 	numToRead = 2;
 	FSRead(fRefNum,&numToRead,&height);						// read height
 
-	linePtr = (long *)AllocPtr((long)width*4);				// alloc memory to hold 4 lines of data
+	Byteswap16SignedRW(&width);
+	Byteswap16SignedRW(&height);
+
+	Ptr linePtr = AllocPtr(width*4);					// alloc memory to hold 4 lines of data
 
 				/* WRITE TO BUFFER */
 
-	destPtr = (long *)(gPFLookUpTable[0]);
+	Ptr destPtr = gPFLookUpTable[0];
 
-	for (i = 0; i < (height/4); i++)
+	for (int i = 0; i < (height/4); i++)
 	{
 		numToRead = width*4;								// read 4 lines of data
 		FSRead(fRefNum,&numToRead,linePtr);
 
-		for (k = 0; k < width; k++)							// read width # of LONGs
-			*destPtr++ = linePtr[k];
+		BlockMove(linePtr, destPtr, width*4);				// copy
+		destPtr += width*4;
 	}
 
 	FSClose(fRefNum);
@@ -378,8 +378,9 @@ short		xDist,yDist;
 						/************************************/
 
 	DisplayStoreBuffer();
+	PresentIndexedFramebuffer();
 
-	for (i=0; i < gNumItems; i++)
+	for (int i=0; i < gNumItems; i++)
 	{
 		if ((gMasterItemList[i].type & (ITEM_MEMORY|ITEM_NUM)) == BUNNY_MAP_ID)		// if memory bits set, then was deleted
 		{
@@ -397,7 +398,12 @@ short		xDist,yDist;
 			}
 		}
 	}
-	while(!CheckNewKeyDown(KEY_SPACE,kKey_Radar,&gRadarKeyFlag));		// wait for spacebar
+
+	while(!CheckNewKeyDown(KEY_SPACE,kKey_Radar,&gRadarKeyFlag))		// wait for spacebar
+	{
+		PresentIndexedFramebuffer();
+		Wait4(10);														// don't cook CPU too much
+	}
 
 	EraseStore();
 
