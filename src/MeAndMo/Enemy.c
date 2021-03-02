@@ -176,6 +176,7 @@ register	unsigned short	bits;
 						/* CHECK TOP */
 
 	tileAttribs = GetFullMapTileAttribs(gX.Int,gY.Int-16);		// get attribs of center tile
+	GAME_ASSERT(tileAttribs);
 	bits = tileAttribs->bits;
 
 	if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
@@ -188,6 +189,7 @@ register	unsigned short	bits;
 							/* CHECK BOTTOM */
 
 		tileAttribs = GetFullMapTileAttribs(gX.Int,gY.Int+16);		// get attribs of center tile
+		GAME_ASSERT(tileAttribs);
 		bits = tileAttribs->bits;
 
 		if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
@@ -200,6 +202,7 @@ register	unsigned short	bits;
 								/* CHECK LEFT */
 
 			tileAttribs = GetFullMapTileAttribs(gX.Int-16,gY.Int);		// get attribs of center tile
+			GAME_ASSERT(tileAttribs);
 			bits = tileAttribs->bits;
 
 			if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
@@ -212,6 +215,7 @@ register	unsigned short	bits;
 									/* CHECK RIGHT */
 
 				tileAttribs = GetFullMapTileAttribs(gX.Int+16,gY.Int);		// get attribs of center tile
+				GAME_ASSERT(tileAttribs);
 				bits = tileAttribs->bits;
 
 				if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
