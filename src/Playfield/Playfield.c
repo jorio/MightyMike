@@ -286,17 +286,23 @@ int16_t* tileXparentList		= nil;
 	{
 		GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, currentTileAnimData));
 
+		// Get name (fixed-size pascal string, max length: 1 length byte + 15 chars)
+#if _DEBUG
 		char name[16];
 		uint8_t nameLength = *currentTileAnimData;
 		if (nameLength > 15)	// the name is always truncated to max 15 characters, whatever the file says
 			nameLength = 15;
 		BlockMove(currentTileAnimData+1, name, nameLength);
 		name[nameLength] = '\0';
+#endif
 
 		TileAnimDefType* tileAnimDef = (TileAnimDefType*) (currentTileAnimData + 16);
-		ByteswapInts(2, 3, currentTileAnimData+16);
+		ByteswapInts(2, 3, tileAnimDef);										// byteswap speed, baseTile, numFrames
+		ByteswapInts(2, tileAnimDef->numFrames, tileAnimDef->tileNums);			// byteswap tileNums array
 
+#if _DEBUG
 		printf("PrepareTileAnims #%d: \"%s\", %d frames\n", i, name, tileAnimDef->numFrames);
+#endif
 
 		// Set tile anim
 		gTileAnims[i].count = 0;
@@ -1399,55 +1405,6 @@ Ptr			destPtrB,srcPtrB;
 #endif
 
 
-#if 0
-/************************ DRAW A TILE : SIMPLE ***********************/
-//
-// This simple version doesnt worry about masks at all.
-// Assumes that tileNum has ALREADY BEEN FILTERED!
-//
-
-void DrawATile_Simple(unsigned short tileNum, short row, short col)
-{
-double		*destPtr,*srcPtr,*destCopyPtr;
-long		height;
-Ptr			destStartPtr,destCopyStartPtr;
-unsigned long	rowS,colS;								// shifted version of row & col
-double		t1,t2,t3,t4;
-
-					/* CALC DEST POINTERS */
-
-	destStartPtr = (Ptr)(gPFLookUpTable[rowS = row<<TILE_SIZE_SH]+(colS = col<<TILE_SIZE_SH));
-	destCopyStartPtr = (Ptr)(gPFCopyLookUpTable[rowS]+colS);
-
-					/* CALC TILE DEFINITION ADDR */
-
-	srcPtr = (double *)(gTilesPtr+((long)(gTileXlatePtr[tileNum])<<(TILE_SIZE_SH*2)));
-	destPtr = (double *)destStartPtr;
-	destCopyPtr = (double *)destCopyStartPtr;
-
-						/* DRAW THE TILE */
-
-
-	height = TILE_SIZE;
-	do
-	{
-		t1 = srcPtr[0];
-		t2 = srcPtr[1];
-		t3 = srcPtr[2];
-		t4 = srcPtr[3];
-
-		destCopyPtr[0] = destPtr[0] = t1;
-		destCopyPtr[1] = destPtr[1] = t2;
-		destCopyPtr[2] = destPtr[2] = t3;
-		destCopyPtr[3] = destPtr[3] = t4;
-
-		srcPtr += 4;
-		destPtr += (PF_BUFFER_WIDTH-TILE_SIZE)/8+4;			// next line
-		destCopyPtr += (PF_BUFFER_WIDTH-TILE_SIZE)/8+4;
-	}while(--height);
-}
-
-#else
 
 /************************ DRAW A TILE : SIMPLE ***********************/
 //
@@ -1457,9 +1414,7 @@ double		t1,t2,t3,t4;
 
 void DrawATile_Simple(unsigned short tileNum, short row, short col)
 {
-unsigned char		*destPtr,*srcPtr,*destCopyPtr;
-long		height;
-short		i;
+uint8_t		*destPtr,*srcPtr,*destCopyPtr;
 Ptr			destStartPtr,destCopyStartPtr;
 unsigned long	rowS,colS;								// shifted version of row & col
 
@@ -1470,25 +1425,27 @@ unsigned long	rowS,colS;								// shifted version of row & col
 
 					/* CALC TILE DEFINITION ADDR */
 
-	srcPtr = (unsigned char *)(gTilesPtr+((long)(gTileXlatePtr[tileNum])<<(TILE_SIZE_SH*2)));
-	destPtr = (unsigned char *)destStartPtr;
-	destCopyPtr = (unsigned char *)destCopyStartPtr;
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, gTileXlatePtr));
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, &gTileXlatePtr[tileNum]));
+
+	srcPtr = (uint8_t *)( gTilesPtr + ((long)(gTileXlatePtr[tileNum]) << (TILE_SIZE_SH*2)) );
+	destPtr = (uint8_t *)destStartPtr;
+	destCopyPtr = (uint8_t *)destCopyStartPtr;
+
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, srcPtr));
 
 						/* DRAW THE TILE */
 
-
-	height = TILE_SIZE;
-	do
+	for (int y = 0; y < TILE_SIZE; y++)
 	{
-		for (i = 0; i < TILE_SIZE; i++)
-			destCopyPtr[i] = destPtr[i] = *srcPtr++;
-
-		destPtr += PF_BUFFER_WIDTH;			// next line
-		destCopyPtr += PF_BUFFER_WIDTH;
-	}while(--height);
+		memcpy(destPtr,		srcPtr,	TILE_SIZE);
+		memcpy(destCopyPtr,	srcPtr,	TILE_SIZE);
+		destPtr		+= PF_BUFFER_WIDTH;			// next line
+		destCopyPtr	+= PF_BUFFER_WIDTH;
+		srcPtr		+= TILE_SIZE;
+	}
 }
 
-#endif
 
 
 /********************* DISPLAY PLAYFIELD ***************/
@@ -1690,7 +1647,7 @@ void UpdateTileAnimation(void)
 {
 unsigned long	row;
 unsigned short	newTile;
-register unsigned short	targetTile,*intPtr,*basePtr;
+uint16_t	targetTile,*intPtr,*basePtr;
 register long	col;
 register long	x,y,animNum;
 unsigned long 	origRow,origCol;
