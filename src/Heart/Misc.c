@@ -886,9 +886,6 @@ void	OpenMikeFile(Str255 filename,short *fRefNumPtr, Str255 errString)
 {
 short		vRefNum;
 OSErr		iErr;
-Byte		i,j;
-Str255		newString;
-
 
 				/* FIRST SEE IF WE CAN GET IT OFF OF DEFAULT VOLUME */
 
@@ -897,20 +894,7 @@ Str255		newString;
 	if (iErr == noErr)
 		return;
 
-					/* NEW WE NEED TO SCAN OFF OF CD-ROM DRIVE */
-
-	BlockMove(gBasePathName,newString,gBasePathName[0]+1);		// re-init base path string
-	i = newString[0];											// get size of cd-rom name
-	j = filename[0];
-	BlockMove(&filename[1],&newString[i+1],j);
-	newString[0] = i+j;
-
-
-	iErr = FSOpen(newString,0,fRefNumPtr);						// try to open
-	if (iErr == noErr)
-		return;
-
-	DoFatalAlert("Cannot find file.  Re-insert the Power Pete CD-ROM and run the application again.");
+	DoFatalAlert(errString);
 }
 
 
