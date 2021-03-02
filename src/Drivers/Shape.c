@@ -33,6 +33,7 @@ extern	unsigned		short	**gPlayfield;
 extern	Ptr				*gPFMaskLookUpTable;
 extern	unsigned char	gInterlaceMode;
 extern	short			gPlayfieldWidth,gPlayfieldHeight;
+extern	GamePalette		gGamePalette;
 
 #if __USE_PF_VARS
 extern	long PF_TILE_HEIGHT;
@@ -174,16 +175,50 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 
 	gShapeTableHandle[groupNum] = LoadPackedFile(fileName);
 
-	if (usePalFlag)
-		BuildShapePalette(groupNum);							// get shape table's pal going
+	Ptr shapeTablePtr = *gShapeTableHandle[groupNum];						// get ptr to shape table
 
+	int32_t offsetToColorTable = Byteswap32SignedRW(shapeTablePtr);			// get Color Table offset
 
-	/***************** CREATE SHAPE HEADER POINTERS ********************/
+	int16_t colorListSize = Byteswap16SignedRW(shapeTablePtr + offsetToColorTable);	// # entries in color list
+	GAME_ASSERT(colorListSize >= 0 && colorListSize <= 256);
+
+	/****************************** BUILD SHAPE PALETTE ********************/
+	//
+	// This must be the 1st thing done to the new game palette.  Assumes all clear.
+	//
+
+	if (usePalFlag)															// get shape table's pal going
+	{
+		// Source port note: I left this code in, even though it's used for just one shape table in the entire game
+		// (see ShowLastScore), and even then, shape files never seem to define more than one color. They apparently
+		// rely on the standard game palette.
+
+				/* BYTESWAP COLORS IN PALETTE */
+
+		RGBColor* colorEntryPtr = (RGBColor *)(shapeTablePtr + offsetToColorTable + 2);	// point to color list
+		ByteswapStructs("3H", sizeof(RGBColor), colorListSize, colorEntryPtr);
+
+				/* BUILD THE PALETTE */
+
+		for (int i = 0; i < colorListSize; i++)
+		{
+			RGBColor rgbColor = *colorEntryPtr++;					// get color
+			gGamePalette[i] = RGBColorToU32(&rgbColor);				// set color
+		}
+
+				/* IF <256, THEN FORCE LAST COLOR TO BLACK */
+
+		if (colorListSize < 256)
+		{
+			RGBColor black = {0,0,0};
+			gGamePalette[255] = RGBColorToU32(&black);				// set color
+		}
+	}
+
+ 	/***************** CREATE SHAPE HEADER POINTERS ********************/
 	//
 	// This is called whenever a shape table is moved in memory or loaded
 	//
-
-	Ptr shapeTablePtr = *gShapeTableHandle[groupNum];				// get ptr to shape table
 
 	int32_t offsetToShapeList = Byteswap32SignedRW(shapeTablePtr + SF_HEADER__SHAPE_LIST);		// get ptr to offset to SHAPE_LIST
 

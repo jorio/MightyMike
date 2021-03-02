@@ -13,8 +13,6 @@
 #include "window.h"
 #include <string.h>
 
-extern	Handle		gShapeTableHandle[];
-
 /****************************/
 /*    CONSTANTS             */
 /****************************/
@@ -54,42 +52,6 @@ static void MakeBackUpPalette(void)
 static void RestoreBackUpPalette(void)
 {
 	memcpy(gGamePalette, gBackUpPalette, sizeof(GamePalette));
-}
-
-/****************************** BUILD SHAPE PALETTE ********************/
-//
-// This must be the 1st thing done to the new game palette.  Assumes all clear.
-//
-
-void BuildShapePalette(Byte	groupNum)
-{
-long 	*cOffPtr;
-short		i,*intPtr;
-RGBColor	rgbColor,*colorEntryPtr;
-
-DoAlert("TODO: BuildShapePalette: can't have long*; BYTESWAP???");
-	cOffPtr = (long *)(*gShapeTableHandle[groupNum]);				// get ptr to Color Table offset
-
-	intPtr = (short *)((*cOffPtr)+(*gShapeTableHandle[groupNum]));	// get ptr to color header
-	short colorListSize = *intPtr++;							// # entries in color list
-	colorEntryPtr = (RGBColor *)intPtr;					// point to color list
-
-
-					/* BUILD THE PALETTE */
-
-	for (i=0; i<colorListSize; i++)
-	{
-		rgbColor = *colorEntryPtr++;					// get color
-		gGamePalette[i] = RGBColorToU32(&rgbColor);		// set color
-	}
-
-				/* IF <256, THEN FORCE LAST COLOR TO BLACK */
-
-	if (colorListSize<256)
-	{
-		rgbColor.red = rgbColor.blue = rgbColor.green = 0x0000;
-		gGamePalette[255] = RGBColorToU32(&rgbColor);	// set color
-	}
 }
 
 

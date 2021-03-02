@@ -54,7 +54,6 @@ static inline RGBColor U32ToRGBColor(const uint32_t color)
 			/* PALETTE */
 
 extern void	InitPaletteStuff(void);
-extern void	BuildShapePalette(Byte);
 extern void	ActivateCLUT(void);
 extern void	FadeInGameCLUT(void);
 extern void	EraseCLUT(void);
