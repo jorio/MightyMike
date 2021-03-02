@@ -613,6 +613,12 @@ short		i=0;
 Rect		eraseRect;
 ObjNode		*nameObj;
 
+
+						/* LOAD LETTERS FOR WRITELN */
+
+	LoadShapeTable(":data:shapes:highscore.shapes",GROUP_WIN,GET_PALETTE);
+
+
 						/* MAKE CURSOR SPRITE */
 
 	InitObjectManager();
@@ -663,7 +669,7 @@ ObjNode		*nameObj;
 		else
 		if (i < MAX_NAME_LENGTH)					// see if can enter another char
 		{
-			if (theChar >= 'a')
+			if (theChar >= 'a' && theChar <= 'z')
 				theChar -= 0x20;					// convert to upper case
 
 			HighScoreNames[n][i] = theChar;			// put char into string
@@ -691,6 +697,8 @@ nokey:
 	} while (true);
 
 exit:;
+
+	ZapShapeTable(GROUP_WIN);
 }
 
 

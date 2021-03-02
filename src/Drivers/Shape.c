@@ -171,7 +171,10 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 					/* THE REAL WORK */
 
 	if (gShapeTableHandle[groupNum] != nil)						// see if zap existing shapetable
+	{
 		DisposeHandle(gShapeTableHandle[groupNum]);
+		memset(gSHAPE_HEADER_Ptrs[groupNum], 0, sizeof(gSHAPE_HEADER_Ptrs[groupNum]));
+	}
 
 	gShapeTableHandle[groupNum] = LoadPackedFile(fileName);
 
@@ -509,6 +512,7 @@ int32_t 	offset;
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
 	shapePtr = 	gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
+	GAME_ASSERT(shapePtr);
 
 	offset = *(int32_t*) (shapePtr+2);				// get offset to FRAME_LIST
 	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
@@ -534,6 +538,9 @@ int32_t 	offset;
 	uint32_t*	maskPtr			= shapePtr + *(int32_t*) (tempPtr + 4);
 	uint32_t*	destStartPtr	= gScreenLookUpTable[y] + x;
 
+
+	GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], srcPtr));
+	GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], maskPtr));
 
 						/* DO THE DRAW */
 
@@ -647,6 +654,9 @@ long	i,i2;
 		{
 			DisposeHandle(gShapeTableHandle[i]);
 			gShapeTableHandle[i] = nil;
+
+			// Clear pointers to shapes so the game will segfault if inadvertantly reusing zombie shapes
+			memset(gSHAPE_HEADER_Ptrs[i], 0, sizeof(gSHAPE_HEADER_Ptrs[i]));
 		}
 	}
 }

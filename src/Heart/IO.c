@@ -224,6 +224,7 @@ KeyMap tempKeys;
 
 	if (gDemoMode == DEMO_MODE_PLAYBACK)				// see if read from demo file
 	{
+		DoFatalAlert("wat");
 		if (gDemoKeyIterations == 0)					// see if need to get next keymap
 		{
 			intPtr = (short *)gDemoDataPtr;				// get new iteration count
@@ -257,7 +258,7 @@ KeyMap tempKeys;
 
 	if (gDemoMode == DEMO_MODE_RECORD)					// see if record keyboard
 	{
-
+		DoFatalAlert("wat2");
 		if ((gKeyMap[0] == gOldKeyMap[0]) &&					// see if same as last occurrence
 			(gKeyMap[1] == gOldKeyMap[1]) &&
 			(gKeyMap[2] == gOldKeyMap[2]) &&
@@ -311,6 +312,7 @@ Boolean GetKeyState(unsigned short key)
 unsigned char *keyMap;
 
 	keyMap = (unsigned char *)&gKeyMap;
+	GAME_ASSERT((key>>3) < 16);
 	return ( ( keyMap[key>>3] >> (key & 7) ) & 1);
 }
 
