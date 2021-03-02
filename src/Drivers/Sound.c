@@ -34,9 +34,9 @@ extern	Byte		gSceneNum;
 /*     VARIABLES      */
 /**********************/
 
-static	Handle			EffectHandles[MAX_EFFECTS];							// handles to ALL sounds, default AND added
-static	Handle			AddedHandles[MAX_EFFECTS-NUM_DEFAULT_EFFECTS];		// handle to only sound which were added / not default
-static	Handle			SoundHand_Music = nil;
+static	SndListHandle	EffectHandles[MAX_EFFECTS];							// handles to ALL sounds, default AND added
+static	SndListHandle	AddedHandles[MAX_EFFECTS-NUM_DEFAULT_EFFECTS];		// handle to only sound which were added / not default
+static	SndListHandle	SoundHand_Music = nil;
 
 static	SndChannelPtr	gSndChannel[MAX_CHANNELS];
 
@@ -127,16 +127,22 @@ short			srcFile1,srcFile2;
 
 	for (i=0; i<NUM_DEFAULT_EFFECTS; i++)
 	{
+		EffectHandles[i] = (SndListResource **) GetResource('snd ',BASE_EFFECT_RESOURCE+i);
+		GAME_ASSERT(EffectHandles[i]);
 
-		EffectHandles[i] = GetResource('snd ',BASE_EFFECT_RESOURCE+i);
-		if (EffectHandles[i] == nil)
-			DoFatalAlert("Couldnt find sound resource.");
-		DetachResource(EffectHandles[i]);							// detach resource from rez file & make a normal Handle
+		DetachResource((Handle) EffectHandles[i]);					// detach resource from rez file & make a normal Handle
 		if ( iErr = ResError() )
 			ShowSystemErr(iErr);
-		HNoPurge(EffectHandles[i]);									// make non-purgeable
-		HLockHi (EffectHandles[i]);
+		HNoPurge((Handle) EffectHandles[i]);						// make non-purgeable
+		HLockHi((Handle) EffectHandles[i]);
+
 		gNumEffectsLoaded++;
+
+					/* PRE-DECOMPRESS IT (Source port addition) */
+
+		long offset;
+		GetSoundHeaderOffset(EffectHandles[i], &offset);
+		Pomme_DecompressSoundResource(&EffectHandles[i], &offset);
 	}
 
 	CloseResFile(srcFile1);
@@ -202,7 +208,7 @@ long		offset;
 
 	mySndCmd.cmd = soundCmd;							// install sample in the channel
 	mySndCmd.param1 = 0;
-	mySndCmd.param2 = (long)(*SoundHand_Music+offset);		// pointer to SoundHeader
+	mySndCmd.param2 = (long)((Ptr)*SoundHand_Music+offset);		// pointer to SoundHeader
 	SndDoImmediate(gSndChannel[0], &mySndCmd);
 
 	mySndCmd.cmd = freqCmd;								// call this to START sound & keep looping
@@ -286,7 +292,7 @@ static Str255	errStr = "Couldnt Open Music Resource File.";
 	srcFile = OpenMikeRezFile(":data:audio:music",errStr);
 	UseResFile( srcFile );
 
-	SoundHand_Music = GetResource('snd ',songNum);		// load the song
+	SoundHand_Music = (SndListResource**) GetResource('snd ',songNum);		// load the song
 	if (SoundHand_Music == nil)
 		return;						// (if err, just don't play anything)
 //		DoFatalAlert("Couldnt find Music Resource.");
@@ -298,6 +304,14 @@ static Str255	errStr = "Couldnt Open Music Resource File.";
 
 	CloseResFile(srcFile);
 	UseResFile(gMainAppRezFile);
+
+			/* PRE-DECOMPRESS IT (Source port addition) */
+
+	long offset;
+	GetSoundHeaderOffset(SoundHand_Music, &offset);
+	Pomme_DecompressSoundResource(&SoundHand_Music, &offset);
+
+			/* GET IT GOING */
 
 	StartMusic();
 }
@@ -378,7 +392,7 @@ got_chan:
 
 	mySndCmd.cmd = soundCmd;								// install sample in the channel
 	mySndCmd.param1 = 0;
-	mySndCmd.param2 = (long)(*EffectHandles[soundNum]+offset);	// pointer to SoundHeader
+	mySndCmd.param2 = (long)((Ptr)*EffectHandles[soundNum]+offset);	// pointer to SoundHeader
 	myErr = SndDoImmediate(chanPtr, &mySndCmd);
 	if (myErr)
 		ShowSystemErr(myErr);
@@ -516,19 +530,31 @@ short			srcFile;
 
 					/* LOAD IT */
 
-	AddedHandles[gNumAddedSounds] = EffectHandles[gNumEffectsLoaded] = GetResource('snd ',rezNum);
-	if (AddedHandles[gNumAddedSounds] == nil)
-		DoFatalAlert("Couldnt find sound resource.");
-	DetachResource(AddedHandles[gNumAddedSounds]);
-	HNoPurge(EffectHandles[gNumEffectsLoaded]);					// make non-purgeable
-	HLockHi(EffectHandles[gNumEffectsLoaded]);
+	short addedID = gNumAddedSounds;
+	short effectID = gNumEffectsLoaded;
+
+	AddedHandles[addedID] = GetResource('snd ',rezNum);
+	GAME_ASSERT(AddedHandles[addedID]);
+	DetachResource(AddedHandles[addedID]);
+
+			/* PRE-DECOMPRESS IT (Source port addition) */
+
+	long offset;
+	GetSoundHeaderOffset(AddedHandles[addedID], &offset);
+	Pomme_DecompressSoundResource(&AddedHandles[addedID], &offset);
+
+	EffectHandles[effectID] = AddedHandles[addedID];
+
+	HNoPurge(EffectHandles[effectID]);					// make non-purgeable
+	HLockHi(EffectHandles[effectID]);
+
 	gNumEffectsLoaded++;
 	gNumAddedSounds++;
 
 	CloseResFile(srcFile);
 	UseResFile(gMainAppRezFile);
 
-	return(gNumEffectsLoaded-1);
+	return effectID;
 }
 
 
