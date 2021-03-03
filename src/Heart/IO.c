@@ -392,48 +392,6 @@ register short	i,digit;
 	}
 }
 
-/*************** PRINT NUMBER 2 ****************/
-//
-// This version prints to offscreen buffer
-//
-// INPUT: htab = coord or leftmost digit
-//
-
-void PrintNum2(long	num, short numDigits, short htab, short vtab)
-{
-register short	i,digit;
-
-	for (i=0; i<numDigits; i++)
-	{
-		digit = num-(num/10*10);
-		DrawOnBackground_NoMask(htab,vtab,GroupNum_ScoreNumbers,ObjType_ScoreNumbers,digit,true);
-		htab -= 14;
-		num = num/10;
-	}
-}
-
-
-/*************** PRINT NUMBER AT ****************/
-//
-// This version prints to offscreen buffer
-//
-// INPUT: htab = coord or leftmost digit
-//
-
-void PrintNumAt(long	num, short numDigits, short htab, short vtab, Ptr where, long wid)
-{
-register short	i,digit;
-
-	for (i=0; i<numDigits; i++)
-	{
-		digit = num-(num/10*10);
-		DrawFrameAt_NoMask(htab,vtab,GroupNum_ScoreNumbers,ObjType_ScoreNumbers,
-							digit,where,wid);
-		htab -= 14;
-		num = num/10;
-	}
-}
-
 
 /****************** PRINT BIG NUM **********************/
 

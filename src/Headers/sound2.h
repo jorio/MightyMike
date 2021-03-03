@@ -75,8 +75,6 @@ enum{
 
 extern void	InitSoundTools(void);
 extern void	LoadDefaultSounds(void);
-extern void	UnlockDefaultSounds(void);
-extern void	OptimizeDefaultSounds(void);
 extern void	StartMusic(void);
 extern void	StopMusic(void);
 extern void	StopAChannel(short);

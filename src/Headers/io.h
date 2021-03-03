@@ -27,8 +27,6 @@ extern Boolean	GetKeyState(unsigned short);
 extern Boolean	GetKeyState2(unsigned short);
 extern char	CheckKey(void);
 extern void	PrintNum(long, short, short, short);
-extern void	PrintNum2(long, short, short, short);
-extern void	PrintNumAt(long, short, short, short, Ptr, long);
 extern void	PrintBigNum(long, short);
 extern void	WriteLn(char *);
 extern void	PrintBigChar(char);

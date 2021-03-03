@@ -151,46 +151,6 @@ short			srcFile1,srcFile2;
 }
 
 
-/*************** UNLOCK DEFAULT SOUNDS ********************/
-//
-// This is used as part of the memory optimization algorithm.
-// First then sounds are unlocked, then other things are zapped and optimized,
-// then the sounds are optimized and relocked.
-//
-
-void UnlockDefaultSounds(void)
-{
-short	i;
-
-	StopAllSound();
-
-	for (i=0; i<NUM_DEFAULT_EFFECTS; i++)
-		HUnlock(EffectHandles[i]);
-}
-
-
-/**************** OPTIMIZE DEFAULT SOUNDS ***************/
-//
-// Assumes that UnlockDef.. has been previously called.
-//
-
-void OptimizeDefaultSounds(void)
-{
-short	i;
-long	growBytes;
-
-				/* COMPACT */
-
-	MaxMem(&growBytes);								// compact all
-	CompactMem(maxSize);
-
-			/* RELOCK ALL */
-
-	for (i = 0; i < NUM_DEFAULT_EFFECTS; i++)
-		HLockHi(EffectHandles[i]);					// relock it
-}
-
-
 /********************* START MUSIC **********************/
 //
 // NOTE: freqCmd must be used for the sample to use the loop points.

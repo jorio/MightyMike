@@ -1317,14 +1317,12 @@ void CleanMemory(void)
 void OptimizeMemory(void)
 {
 	DisposeCurrentMapData();									// attempt to clean up memory
+	StopAllSound();
 	ZapAllAddedSounds();
-	UnlockDefaultSounds();										// unlock sounds for future optimize
 	KillSong();
 	ZapShapeTable(GROUP_AREA_SPECIFIC);							// zap before loading new song
 	ZapShapeTable(GROUP_AREA_SPECIFIC2);
 	ZapShapeTable(GROUP_OVERHEAD);
-	OptimizeShapeTables();										// optimize remaining shape data
-	OptimizeDefaultSounds();									// finally, optimize sounds
 }
 
 
