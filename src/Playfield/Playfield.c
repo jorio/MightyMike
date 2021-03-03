@@ -10,9 +10,6 @@
 /***************/
 
 #include "myglobals.h"
-//#include <pictutils.h>
-//#include <palettes.h>
-//#include <gestalt.h>
 #include "window.h"
 #include "playfield.h"
 #include "object.h"

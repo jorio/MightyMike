@@ -9,7 +9,6 @@
 /*    EXTERNALS             */
 /****************************/
 #include "myglobals.h"
-//#include <fixmath.h>
 #include "window.h"
 #include "enemy.h"
 #include "object.h"
@@ -22,7 +21,6 @@
 #include "myguy2.h"
 #include "objecttypes.h"
 #include "infobar.h"
-#include "store.h"
 #include "io.h"
 #include "weapon.h"
 #include "sound2.h"

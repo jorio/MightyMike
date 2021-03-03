@@ -15,7 +15,6 @@
 #include "playfield.h"
 #include "object.h"
 #include "infobar.h"
-#include "store.h"
 #include "miscanims.h"
 #include "sound2.h"
 #include "misc.h"

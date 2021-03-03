@@ -19,7 +19,6 @@
 #include "infobar.h"
 #include "triggers.h"
 #include "miscanims.h"
-#include "store.h"
 #include "misc.h"
 #include "sound2.h"
 #include "weapon.h"

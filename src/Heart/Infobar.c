@@ -12,7 +12,6 @@
 #include "objecttypes.h"
 #include "window.h"
 #include "infobar.h"
-#include "store.h"
 #include "weapon.h"
 #include "shape.h"
 #include "io.h"

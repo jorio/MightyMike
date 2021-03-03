@@ -28,7 +28,6 @@ extern void	WaitWhileMusic(void);
 extern Handle	LoadPackedFile(Str255);
 extern void	DecompressRLBFile(short, Ptr, long);
 extern void	RLW_Expand(short, unsigned short *, long);
-extern void	StartSystemTiming(void);
 extern void	RegulateSpeed(long);
 extern void	RegulateSpeed(long);
 extern void	RegulateSpeed2(short);

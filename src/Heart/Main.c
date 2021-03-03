@@ -9,8 +9,6 @@
 /*    EXTERNALS             */
 /****************************/
 #include "myglobals.h"
-//#include <sound.h>
-//#include <files.h>
 #include "objecttypes.h"
 #include "window.h"
 #include "picture.h"
@@ -19,7 +17,6 @@
 #include "object.h"
 #include "enemy.h"
 #include "infobar.h"
-#include "store.h"
 #include "cinema.h"
 #include "misc.h"
 #include "bonus.h"

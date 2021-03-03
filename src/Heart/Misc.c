@@ -10,21 +10,10 @@
 
 #include <SDL.h>
 #include "myglobals.h"
-//#include <folders.h>
-//#include <pictutils.h>
-//#include <palettes.h>
-//#include <osutils.h>
-//#include <timer.h>
-//#include <inputsprocket.h>
-//#include <textutils.h>
 #include "window.h"
 #include "io.h"
 #include "object.h"
-#include "bitio.h"
-#include "arith-n.h"
-#include "lzw.h"
 #include "misc.h"
-//#include "sound.h"
 #include "sound2.h"
 #include "picture.h"
 #include "input.h"

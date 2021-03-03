@@ -17,7 +17,6 @@ extern void	MakeCoins(short, short, short, short);
 extern void	MoveCoin(void);
 extern Boolean	AddBunny(ObjectEntryType *);
 extern void	MoveBunny(void);
-extern void	KillBunny(ObjNode *);
 extern void	DeleteBunny(ObjNode *);
 extern void	CountBunnies(void);
 extern void	DecBunnyCount(void);
