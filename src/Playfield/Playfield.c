@@ -43,7 +43,6 @@ extern	MikeFixed		gX;
 extern	MikeFixed		gY;
 extern	short			gMyDirection;
 extern	ObjNode			*gThisNodePtr,*gMyNodePtr;
-extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	unsigned char	gInterlaceMode;
 extern	long			gDX,gDY,gSumDX,gSumDY;

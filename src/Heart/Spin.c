@@ -20,7 +20,6 @@
 
 extern	GamePalette		gGamePalette;
 extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
-extern	char  			gMMUMode;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 
 /****************************/

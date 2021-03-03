@@ -22,7 +22,6 @@
 #include "main.h"
 #include "input.h"
 
-extern	char  			gMMUMode;
 extern	Boolean			ImDeadFlag;
 extern	Byte			gCurrentWeaponType,gSceneNum;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];

@@ -69,7 +69,6 @@ Handle			gPFBufferCopyHandle = nil;
 Handle			gPFMaskBufferHandle = nil;
 
 uint8_t*		gScreenAddr	= gIndexedFramebuffer;	// SCREEN ACCESS
-char  			gMMUMode;
 long			gScreenRowOffset = VISIBLE_WIDTH;		// offset for bytes
 long			gScreenRowOffsetLW = VISIBLE_WIDTH/4;	// offset for Long Words
 long			gScreenXOffset,gScreenYOffset;

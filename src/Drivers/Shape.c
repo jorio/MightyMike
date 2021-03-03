@@ -19,7 +19,6 @@
 extern	Handle		gOffScreenHandle;
 extern	Handle		gBackgroundHandle;
 extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	char  			gMMUMode;
 extern	long			gScreenRowOffsetLW,gScreenRowOffset;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
@@ -712,9 +711,6 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 						/* DO THE DRAW */
 
-//	gMMUMode = true32b;										// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
 	do
 	{
 		destPtr = destStartPtr;								// get line start ptr
@@ -724,9 +720,6 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 		destStartPtr += (rowBytes>>2);						// next row
 	} while(--height);
-
-//	SwapMMUMode(&gMMUMode);									// Restore addressing mode
-
 }
 
 
@@ -770,9 +763,6 @@ short		*intPtr;
 	srcPtr = (long *)((*longPtr++)+shapePtr);		// point to pixel data
 	destStartPtr = (long *)((long)destBufferBaseAddr+(y*rowBytes)+x);
 
-//	gMMUMode = true32b;									// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
 						/* DO THE DRAW */
 
 	do
@@ -788,8 +778,6 @@ short		*intPtr;
 		destStartPtr += (rowBytes>>2);			// next row
 	}
 	while (--height > 0);
-
-//	SwapMMUMode(&gMMUMode);						// Restore addressing mode
 }
 
 

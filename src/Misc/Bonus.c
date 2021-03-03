@@ -46,7 +46,6 @@ extern	short				gNumItems;
 extern	ObjNode			*gMyNodePtr;
 extern	long			gScrollX,gScrollY;
 extern	Byte			gCurrentWeaponType,gSceneNum;
-extern	char  			gMMUMode;
 extern	Ptr				*gPFLookUpTable;
 extern	short			gEnemyFreezeTimer,gSpeedyTimer;
 extern	ObjNode			*gMyNodePtr;
