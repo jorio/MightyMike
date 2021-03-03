@@ -52,7 +52,6 @@ static inline Boolean HandleBoundsCheck(Handle h, Ptr p)
 	return p >= *h && p < *h + GetHandleSize(h);
 }
 
-#define TODO_REWRITE_ASM()		DoFatalAlert2("REWRITE 68K ASM HERE!", __func__)
 #define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)
 #define TODO_REWRITE_THIS_MINOR()		printf("TODO: rewrite this! %s\n", __func__)
 
