@@ -1402,8 +1402,13 @@ void GameMain(void)
  	if (gALLOCATED_MEMORY > (6500000L))
 #endif
  	{
- 		PF_TILE_HEIGHT	=	14;					// dimensions of scrolling Playfield
+#if WIDESCREEN
+ 		PF_TILE_HEIGHT	=	15;					// dimensions of scrolling Playfield
+		PF_TILE_WIDTH	=	27;
+#else
+		PF_TILE_HEIGHT	=	14;					// dimensions of scrolling Playfield
 		PF_TILE_WIDTH	=	21;
+#endif
 		PF_WINDOW_TOP	=	0;
 		PF_WINDOW_LEFT	=	0;						// left MUST be on 4 pixel boundary!!!!!
 		gPPCFullScreenFlag = true;

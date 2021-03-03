@@ -573,10 +573,8 @@ int32_t 	offset;
 
 void DrawFrameToScreen_NoMask(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
-long	col,height;
-int32_t	*destPtr,*srcPtr;
-int32_t	*destStartPtr;
-long	width;
+int		width,height;
+Ptr		destPtr,srcPtr;
 Ptr		tempPtr,shapePtr;
 int32_t	*longPtr,offset;
 int16_t		*intPtr;
@@ -594,7 +592,7 @@ int16_t		*intPtr;
 
 
 	intPtr = (int16_t *)tempPtr;					// get height & width of frame
-	width = (*intPtr++)>>2;							// word width
+	width = (*intPtr++);							// word width
 	height = *intPtr++;
 	x += *intPtr++;									// use position offsets
 	y += *intPtr++;
@@ -606,23 +604,18 @@ int16_t		*intPtr;
 			return;
 
 	longPtr = (int32_t *)intPtr;
-	srcPtr = (int32_t *)((*longPtr++)+shapePtr);		// point to pixel data
-	destStartPtr = (int32_t *)(gScreenLookUpTable[y]+x);		// point to screen
+	srcPtr = (*longPtr++)+shapePtr;		// point to pixel data
+	destPtr = (gScreenLookUpTable[y]+x);		// point to screen
 
 
 						/* DO THE DRAW */
 
 	do
 	{
-		destPtr = destStartPtr;							// get line start ptr
+		memcpy(destPtr, srcPtr, width);
 
-		col = width;
-		do
-		{
-			*destPtr++ = *srcPtr++;
-		}while (--col > 0);
-
-		destStartPtr += gScreenRowOffsetLW;			// next row
+		destPtr += gScreenRowOffset;			// next row
+		srcPtr += width;
 	}
 	while (--height > 0);
 }

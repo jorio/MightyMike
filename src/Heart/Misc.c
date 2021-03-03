@@ -850,7 +850,7 @@ ColorSpec 	aTable[2];
 //	TextFont(monaco);
 //	DrawString("Charging Batteries:");
 
-	LoadIMAGE(":data:images:charging.image",SHOW_IMAGE_MODE_QUICK);
+	LoadIMAGE(":data:images:charging.image", 0);
 
 														// draw thermometer box
 

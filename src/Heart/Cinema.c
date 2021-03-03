@@ -428,23 +428,23 @@ void DoSceneScreen(void)
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
-			LoadIMAGE(":data:images:dinoscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:dinoscene.image",SHOW_IMAGE_FLAG_FADEIN);
 			break;
 
 		case	SCENE_CANDY:
-			LoadIMAGE(":data:images:candyscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:candyscene.image",SHOW_IMAGE_FLAG_FADEIN);
 			break;
 
 		case	SCENE_CLOWN:
-			LoadIMAGE(":data:images:clownscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:clownscene.image",SHOW_IMAGE_FLAG_FADEIN);
 			break;
 
 		case	SCENE_FAIRY:
-			LoadIMAGE(":data:images:fairyscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:fairyscene.image",SHOW_IMAGE_FLAG_FADEIN);
 			break;
 
 		case	SCENE_BARGAIN:
-			LoadIMAGE(":data:images:bargainscene.image",SHOW_IMAGE_MODE_FADEIN);
+			LoadIMAGE(":data:images:bargainscene.image",SHOW_IMAGE_FLAG_FADEIN);
 			break;
 
 	}
@@ -795,7 +795,7 @@ void DoPangeaLogo(void)
 void DoLegal(void)
 {
 	EraseCLUT();
-	LoadIMAGE(":data:images:legal.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:legal.image",SHOW_IMAGE_FLAG_FADEIN);
 	Wait2(60*6);
 	FadeOutGameCLUT();
 }
@@ -1352,7 +1352,7 @@ void DoLoseScreen(void)
 					/* INITIAL LOADING */
 
 	PlaySong(SONG_ID_LOSEGAME);
-	LoadIMAGE(":data:images:lose.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:lose.image",SHOW_IMAGE_FLAG_FADEIN);
 	WaitWhileMusic();
 	StopMusic();
 }
@@ -1801,7 +1801,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 	EraseCLUT();
 
 	BlankEntireScreenArea();
-	LoadIMAGE(":data:images:bonus.image",SHOW_IMAGE_MODE_FADEIN);
+	LoadIMAGE(":data:images:bonus.image",SHOW_IMAGE_FLAG_FADEIN);
 
 	if (gMusicOnFlag)
 	{

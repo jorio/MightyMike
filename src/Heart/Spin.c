@@ -22,7 +22,6 @@ extern	GamePalette		gGamePalette;
 extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 extern	char  			gMMUMode;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long		gFrames,gScreenRowOffsetLW,gScreenRowOffset;
 
 /****************************/
 /*    CONSTANTS             */
@@ -260,13 +259,13 @@ void GetSpinHeader(void)
 
 	if (gDoublePix)
 	{
-		gSpinX = (640-(gSpinHeader.width*2))/2;		// calc coords to center on screen
-		gSpinY = (480-(gSpinHeader.height*2))/2;
+		gSpinX = (VISIBLE_WIDTH-(gSpinHeader.width*2))/2;		// calc coords to center on screen
+		gSpinY = (VISIBLE_HEIGHT-(gSpinHeader.height*2))/2;
 	}
 	else
 	{
-		gSpinX = (640-gSpinHeader.width)/2;
-		gSpinY = (480-gSpinHeader.height)/2;
+		gSpinX = (VISIBLE_WIDTH-gSpinHeader.width)/2;
+		gSpinY = (VISIBLE_HEIGHT-gSpinHeader.height)/2;
 	}
 }
 

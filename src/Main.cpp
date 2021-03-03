@@ -3,6 +3,8 @@
 #include "PommeFiles.h"
 #include "PommeGraphics.h"
 
+#include "window.h"
+
 #include <SDL.h>
 
 #include <iostream>
@@ -77,8 +79,8 @@ int CommonMain(int argc, const char** argv)
 			"Mighty Mike",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			640,
-			480,
+			VISIBLE_WIDTH,
+			VISIBLE_HEIGHT,
 			SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
 	if (!gSDLWindow)
 		throw std::runtime_error("Couldn't create SDL window.");
@@ -87,11 +89,11 @@ int CommonMain(int argc, const char** argv)
 	if (!gSDLRenderer)
 		throw std::runtime_error("Couldn't create SDL renderer.");
 
-	gSDLTexture = SDL_CreateTexture(gSDLRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, 640, 480);
+	gSDLTexture = SDL_CreateTexture(gSDLRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, VISIBLE_WIDTH, VISIBLE_HEIGHT);
 	if (!gSDLTexture)
 		throw std::runtime_error("Couldn't create SDL texture.");
 
-	SDL_RenderSetLogicalSize(gSDLRenderer, 640, 480);
+	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
 	SDL_RenderSetIntegerScale(gSDLRenderer, SDL_TRUE);
 
 	// Set up globals that the game expects

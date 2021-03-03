@@ -70,8 +70,8 @@ Handle			gPFMaskBufferHandle = nil;
 
 uint8_t*		gScreenAddr	= gIndexedFramebuffer;	// SCREEN ACCESS
 char  			gMMUMode;
-long			gScreenRowOffset = 640;		// offset for bytes
-long			gScreenRowOffsetLW = 640/4;		// offset for Long Words
+long			gScreenRowOffset = VISIBLE_WIDTH;		// offset for bytes
+long			gScreenRowOffsetLW = VISIBLE_WIDTH/4;	// offset for Long Words
 long			gScreenXOffset,gScreenYOffset;
 
 
@@ -92,30 +92,14 @@ Boolean			gLoadedDrawSprocket = false;
 
 void EraseOffscreenBuffer(void)
 {
-	long		i;
-	Ptr 	tempPtr;
-
-	tempPtr = *gOffScreenHandle;
-
-	for (i=0; i<(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT); i++)
-			*tempPtr++ = 0xff;											// clear to black
-
+	memset(*gOffScreenHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// clear to black
 }
 
 /********************** ERASE BACKGROUND BUFFER ********************/
 
 void EraseBackgroundBuffer(void)
 {
-long		i;
-Ptr 	tempPtr;
-
-	if (gBackgroundHandle != nil)
-	{
-		tempPtr = *gBackgroundHandle;
-
-		for (i=0; i<(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT); i++)
-				*tempPtr++ = 0xff;											// clear to black
-	}
+	memset(*gBackgroundHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// clear to black
 }
 
 
@@ -123,51 +107,6 @@ Ptr 	tempPtr;
 
 void MakeGameWindow(void)
 {
-WindowPtr		gGameWindow = nil;
-GDHandle		gMainScreen;			// SCREEN ACCESS
-PixMapHandle	gMainScreenPixMap;
-Rect		screenRect;
-short		width,height;
-
-#if 0
-	PrepDrawSprockets();			// use DSp just to resize screen
-
-
-				/* GET SCREEN DRAWING VARIABLES */
-
-//#ifdef __MWERKS__
-//	screenRect = qd.screenBits.bounds;
-//#else
-//	screenRect = screenBits.bounds;
-//#endif
-
-	gMainScreen = GetMainDevice();
-	screenRect = (**gMainScreen).gdRect;
-	gMainScreenPixMap = (**gMainScreen).gdPMap;
-	gScreenAddr = StripAddress(GetPixBaseAddr(gMainScreenPixMap));
-	gScreenRowOffset = (long)(0x3fff&(**gMainScreenPixMap).rowBytes);	// High bit of pixMap rowBytes must be cleared.
-	gScreenRowOffsetLW = gScreenRowOffset>>2;
-
-
-	width = screenRect.right-screenRect.left;				// center for large monitors
-	height = screenRect.bottom-screenRect.top;
-	gScreenXOffset = ((width-640)/2)&0xfffffff8;			// 8pix align
-	gScreenYOffset = (height-480)/2;
-	if ((gScreenXOffset<0)||(gScreenYOffset<0))
-		DoFatalAlert("640*480 Minimum Screen Required!");
-
-	gScreenAddr += (gScreenYOffset*gScreenRowOffset)+gScreenXOffset;	// calc new addr
-
-
-				/* CLEAR SCREEN & MAKE WINDOW */
-
-									/* cover up the part of the screen we are writing on */
-									/* with a window, so other apps will not mess with our */
-									/* animation via update events in the background */
-
-	gGameWindow = NewCWindow(nil, &screenRect, "", true, plainDBox,	// make new window to cover screen
-								 MOVE_TO_FRONT, false, nil);
-#endif
 	gScreenXOffset = 0;
 	gScreenYOffset = 0;
 
@@ -229,18 +168,17 @@ void DumpGameWindow(void)
 {
 				/* GET SCREEN PIXMAP INFO */
 
-	uint32_t* destPtr	= (uint32_t *)gScreenAddr;
-	uint32_t* srcPtr	= (uint32_t *)(gOffScreenLookUpTable[0]+WINDOW_OFFSET);
-
+	uint8_t* destPtr	= (uint8_t *)gScreenAddr;
+	uint8_t* srcPtr		= (uint8_t *)(gOffScreenLookUpTable[0]+WINDOW_OFFSET);
 
 						/* DO THE QUICK COPY */
 
-	for (int row = 0; row < VISIBLE_HEIGHT; row++)
+	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
 		memcpy(destPtr, srcPtr, VISIBLE_WIDTH);
 
-		destPtr += gScreenRowOffsetLW;				// Bump to start of next row.
-		srcPtr += (OFFSCREEN_WIDTH/4);
+		destPtr += gScreenRowOffset;				// Bump to start of next row
+		srcPtr += OFFSCREEN_WIDTH;
 	}
 }
 

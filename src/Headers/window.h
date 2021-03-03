@@ -5,8 +5,15 @@
 
 					/* OFFSCREEN DEFINES */
 
+#define WIDESCREEN 0
+
+#if WIDESCREEN
+#define	VISIBLE_WIDTH		(26*32L)	// dimensions of visible area (MULTIPLE OF 4!!!)
+#define	VISIBLE_HEIGHT		(16*32L)
+#else
 #define	VISIBLE_WIDTH		640L	// dimensions of visible area
 #define	VISIBLE_HEIGHT		480L
+#endif
 
 #define OFFSCREEN_BORDER_WIDTHX	4L					// border on each side (MULTIPLE OF 4!!!)
 #define OFFSCREEN_BORDER_WIDTHY	4L					// border on each side

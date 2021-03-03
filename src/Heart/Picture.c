@@ -19,8 +19,7 @@
 extern	GamePalette		gGamePalette;
 extern	Handle			gOffScreenHandle;
 extern	uint8_t*		gScreenAddr;
-extern	char  			gMMUMode;
-extern	long			gScreenRowOffsetLW,gScreenRowOffset;
+extern	long			gScreenRowOffset;
 extern	Boolean			gPPCFullScreenFlag;
 extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 
@@ -78,63 +77,6 @@ void LoadBackground(Str255 fileName,Boolean getPalFlag)
 	DisposeHandle(theImageHand);								// zap image data
 }
 
-/************************ LOAD BACKGROUND: DIRECT *****************/
-//
-// Loads directly to main screen.  Does not store to any offscreen buffers.
-//
-
-void LoadBackground_Direct(Str255 fileName,Boolean getPalFlag)
-{
-	TODO_REWRITE_THIS();
-register	long	*source,*dest;
-long		*destStart;
-Handle		theImageHand;
-register 	short		i,x,y,width,height,*intPtr;
-RGBColor		*rgbPtr,rgb;
-
-	theImageHand = LoadPackedFile(fileName);				// load & unpack image file
-
-
-					/* GET COLOR INFO FOR IMAGE */
-	if (getPalFlag)
-	{
-//		gColorListSize = 256;								// assume its a full palette
-		rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
-		for (i=0; i<256; i++)
-		{
-			rgb = *rgbPtr++;								// get a color
-			SetEntryColor(gGamePalette,i,&rgb);				// set
-		}
-	}
-
-
-						/* DRAW THE IMAGE */
-
-	intPtr = (short *)(*theImageHand + (sizeof(RGBColor)*256));	// get width & height
-	width = (*intPtr++)>>2;
-	height = *intPtr++;
-
-	destStart = (long *)gScreenAddr;				// init pointers
-	source = (long *)StripAddress((Ptr)intPtr);
-
-//	gMMUMode = true32b;								// we must do this in 32bit addressing mode
-//	SwapMMUMode(&gMMUMode);
-
-	for (y=0; y<height; y++)
-	{
-		dest = destStart;
-		for (x=0; x<width; x++)
-		{
-			*dest++ = *source++;					// get a pixel
-		}
-		destStart += gScreenRowOffsetLW;			// next row
-	}
-
-	DisposeHandle(theImageHand);					// zap image data
-
-//	SwapMMUMode(&gMMUMode);							// Restore addressing mode
-}
-
 
 /************************ LOAD IMAGE *****************/
 //
@@ -145,16 +87,11 @@ RGBColor		*rgbPtr,rgb;
 
 void LoadIMAGE(Str255 fileName,short showMode)
 {
-Handle		theImageHand;
-
-	EraseCLUT();
-
-	theImageHand = LoadPackedFile(fileName);			// load & unpack image file
-
+	Handle imageHandle = LoadPackedFile(fileName);			// load & unpack image file
 
 					/* GET COLOR INFO FOR PICTURE */
 
-	RGBColor* rgbPtr = (RGBColor *)(*theImageHand);				// get ptr to palette data
+	RGBColor* rgbPtr = (RGBColor *)(*imageHandle);				// get ptr to palette data
 	ByteswapInts(2, 256*3, rgbPtr);						// byteswap colors (each component is 16-bit)
 	for (int i = 0; i < 256; i++)
 	{
@@ -163,32 +100,43 @@ Handle		theImageHand;
 
 				/* DUMP PIXEL IMAGE INTO BUFFER */
 
-	int16_t* ptr16	= (int16_t *)(*theImageHand + (256*2*3));	// get width & height
+	int16_t* ptr16	= (int16_t *)(*imageHandle + (256*2*3));	// get width & height
 	int16_t width	= Byteswap16(ptr16++);
 	int16_t height	= Byteswap16(ptr16++);
 
-	GAME_ASSERT(width * height == sizeof(gIndexedFramebuffer));
-	memcpy(gIndexedFramebuffer, ptr16, width*height);
+	GAME_ASSERT(width * height <= sizeof(gIndexedFramebuffer));
+
+	const uint8_t* srcPtr = (const uint8_t*) ptr16;
+	uint8_t* destPtr = gIndexedFramebuffer;
+
+	// offset X
+	destPtr += (VISIBLE_WIDTH - width) / 2;
+
+	// offset Y
+	if (showMode & SHOW_IMAGE_FLAG_ALIGNBOTTOM)
+		destPtr += gScreenRowOffset * (VISIBLE_HEIGHT - height);
+	else
+		destPtr += gScreenRowOffset * (VISIBLE_HEIGHT - height) / 2;
+
+	for (int y = 0; y < height; y++)
+	{
+		memcpy(destPtr, srcPtr, width);
+		destPtr += gScreenRowOffset;
+		srcPtr += width;
+	}
 
 	PresentIndexedFramebuffer();
 
-	DisposeHandle(theImageHand);					// nuke image data
+	DisposeHandle(imageHandle);					// nuke image data
 
 						/* LETS SEE IT */
 
 //	gColorListSize = 255;							// force the CLUT size
 
-	switch(showMode)
-	{
-		case SHOW_IMAGE_MODE_FADEIN:
-			FadeInGameCLUT();
-			break;
-		case SHOW_IMAGE_MODE_QUICK:
-			ActivateCLUT();
-			break;
-		case SHOW_IMAGE_MODE_NOSHOW:
-			break;
-	}
+	if (showMode & SHOW_IMAGE_FLAG_FADEIN)
+		FadeInGameCLUT();
+	else
+		ActivateCLUT();
 }
 
 
@@ -203,68 +151,20 @@ Handle		theImageHand;
 
 void LoadBorderImage(void)
 {
-short			width,height;
-long			numToRead;
-short			fRefNum,vRefNum;
-Ptr				linePtr,destPtr,srcPtr;
-RGBColor		*rgbPtr = nil;
-
-
 					/* OPEN THE FILE */
 
-	GetVol(nil,&vRefNum);									// get default volume
+	const char* path;
+	short flags = 0;
 
 	if (gPPCFullScreenFlag)
-		OpenMikeFile(":data:images:border2.image",&fRefNum,"Cant open Border Image!");
+		path = ":data:images:border2.image";
 	else
-		OpenMikeFile(":data:images:border.image",&fRefNum,"Cant open Border Image!");
+		path = ":data:images:border.image";
 
-					/* READ & SET THE PALETTE */
+#if WIDESCREEN
+	flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
+#endif
 
-	SetFPos(fRefNum,fsFromStart,8);							// skip pack header
-	numToRead = 256*sizeof(RGBColor);
-	rgbPtr = (RGBColor *)AllocPtr(numToRead);				// alloc memory to hold colors
-	FSRead(fRefNum, &numToRead, (Ptr)rgbPtr);				// read color data
-	GAME_ASSERT(numToRead == 256*sizeof(RGBColor));
-	ByteswapInts(2, 256*3, rgbPtr);							// convert colors from big endian
-	for (int i = 0; i < 256; i++)
-	{
-		gGamePalette[i] = RGBColorToU32(&rgbPtr[i]);		// set colors in palette
-	}
-	DisposePtr((Ptr)rgbPtr);
-	rgbPtr = nil;
-
-	SetFPos(fRefNum,fsFromStart,256*sizeof(RGBColor)+8);	// skip palette & pack header
-
-					/* READ & DRAW IMAGE */
-
-	numToRead = 2;
-	FSRead(fRefNum,&numToRead,&width);						// read width
-	numToRead = 2;
-	FSRead(fRefNum,&numToRead,&height);						// read height
-
-	width	= Byteswap16Signed(&width);						// convert from big endian
-	height	= Byteswap16Signed(&height);
-
-	linePtr = AllocPtr(width*4);							// alloc memory to hold 4 lines of data
-
-	destPtr = gScreenAddr;
-	height = height/4;
-	for (int i = 0; i < height; i++)
-	{
-		numToRead = width*4;								// read 4 lines of data
-		FSRead(fRefNum,&numToRead,linePtr);
-
-		srcPtr = linePtr;
-		for (int k = 0; k < 4; k++)
-		{
-			BlockMove(srcPtr,destPtr,width);				// plot line
-			destPtr += gScreenRowOffset;					// next row
-			srcPtr += width;
-		}
-	}
-
-	FSClose(fRefNum);
-	DisposePtr(linePtr);
+	LoadIMAGE(path, flags);
 }
 

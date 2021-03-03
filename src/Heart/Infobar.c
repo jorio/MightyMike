@@ -117,6 +117,9 @@ long		gNumCoins;
 
 short		gMyHealth,gMyMaxHealth;
 
+static	int			gInfobarXAdjust = (VISIBLE_WIDTH - 640) / 2;
+static	int			gInfobarYAdjust = (VISIBLE_HEIGHT - 480);
+
 
 /**************** INIT HEALTH ********************/
 
@@ -146,13 +149,13 @@ long	i,x,y;
 
 	if (gPPCFullScreenFlag)
 	{
-		x = HEALTH_Xf;
-		y = HEALTH_Yf;
+		x = HEALTH_Xf + gInfobarXAdjust;
+		y = HEALTH_Yf + gInfobarYAdjust;
 	}
 	else
 	{
-		x = HEALTH_X;
-		y = HEALTH_Y;
+		x = HEALTH_X + gInfobarXAdjust;
+		y = HEALTH_Y + gInfobarYAdjust;
 	}
 
 	for (i=0; i < gMyMaxHealth; i++)
@@ -190,7 +193,6 @@ void GiveMeHealth(void)
 
 void UpdateInfoBar(void)
 {
-
 	if (gUpdateScore)
 		ShowScore();
 	if (gUpdateCoins)
@@ -218,13 +220,13 @@ long	num,x,y;
 
 	if (gPPCFullScreenFlag)
 	{
-		x = SCORE_Xf;
-		y = SCORE_Yf;
+		x = SCORE_Xf + gInfobarXAdjust;
+		y = SCORE_Yf + gInfobarYAdjust;
 	}
 	else
 	{
-		x = SCORE_X;
-		y = SCORE_Y;
+		x = SCORE_X+ gInfobarXAdjust;
+		y = SCORE_Y+ gInfobarYAdjust;
 	}
 
 	num = gScore;
@@ -285,9 +287,9 @@ void InitFreeLives(void)
 void ShowLives(void)
 {
 	if (gPPCFullScreenFlag)
-		PrintNum(gNumLives-1,2,LIVES_Xf,LIVES_Yf);
+		PrintNum(gNumLives-1,2,LIVES_Xf+ gInfobarXAdjust,LIVES_Yf+ gInfobarYAdjust);
 	else
-		PrintNum(gNumLives-1,2,LIVES_X,LIVES_Y);
+		PrintNum(gNumLives-1,2,LIVES_X+ gInfobarXAdjust,LIVES_Y+ gInfobarYAdjust);
 
 	gUpdateLives = false;
 }
@@ -304,11 +306,15 @@ void ShowWeaponIcon(void)
 	else
 	{
 		if (gPPCFullScreenFlag)
-			DrawFrameToScreen_NoMask(WEAPON_ICON_Xf,WEAPON_ICON_Yf,GroupNum_WeaponIcon,
-								ObjType_WeaponIcon,gCurrentWeaponType);
+			DrawFrameToScreen_NoMask(
+					WEAPON_ICON_Xf + gInfobarXAdjust,
+					WEAPON_ICON_Yf + gInfobarYAdjust,
+					GroupNum_WeaponIcon, ObjType_WeaponIcon, gCurrentWeaponType);
 		else
-			DrawFrameToScreen_NoMask(WEAPON_ICON_X,WEAPON_ICON_Y,GroupNum_WeaponIcon,
-								ObjType_WeaponIcon,gCurrentWeaponType);
+			DrawFrameToScreen_NoMask(
+					WEAPON_ICON_X + gInfobarXAdjust,
+					WEAPON_ICON_Y + gInfobarYAdjust,
+					GroupNum_WeaponIcon, ObjType_WeaponIcon, gCurrentWeaponType);
 
 		ShowWeaponLife();
 	}
@@ -320,15 +326,15 @@ void EraseWeaponIcon(void)
 {
 Rect	r;
 
-	r.top = WEAPON_ICON_Y;							// erase icon
+	r.top = WEAPON_ICON_Y + gInfobarYAdjust;							// erase icon
 	r.bottom = r.top + WEAPON_ICON_SIZE;
-	r.left = WEAPON_ICON_X;
+	r.left = WEAPON_ICON_X + gInfobarXAdjust;
 	r.right = r.left + WEAPON_ICON_SIZE;
 	BlankScreenArea(r);
 
-	r.top = WEAPON_LIFE_Y-19;							// erase counter
+	r.top = WEAPON_LIFE_Y-19 + gInfobarYAdjust;							// erase counter
 	r.bottom = r.top + 22;
-	r.left = WEAPON_LIFE_X-33;
+	r.left = WEAPON_LIFE_X-33 + gInfobarXAdjust;
 	r.right = r.left + 42;
 	BlankScreenArea(r);
 }
@@ -343,10 +349,10 @@ void ShowWeaponLife(void)
 {
 	if (gPPCFullScreenFlag)
 		PrintNum(gMyWeapons[gCurrentWeaponIndex].life,
-				 3,WEAPON_LIFE_Xf,WEAPON_LIFE_Yf);
+				 3,WEAPON_LIFE_Xf+gInfobarXAdjust,WEAPON_LIFE_Yf+gInfobarYAdjust);
 	else
 		PrintNum(gMyWeapons[gCurrentWeaponIndex].life,
-				 3,WEAPON_LIFE_X,WEAPON_LIFE_Y);
+				 3,WEAPON_LIFE_X+gInfobarXAdjust,WEAPON_LIFE_Y+gInfobarYAdjust);
 }
 
 
@@ -367,13 +373,13 @@ long	num,x,y;
 
 	if (gPPCFullScreenFlag)
 	{
-		 x = COINS_Xf;
-		 y = COINS_Yf;
+		 x = COINS_Xf + gInfobarXAdjust;
+		 y = COINS_Yf + gInfobarYAdjust;
 	}
 	else
 	{
-		 x = COINS_X;
-		 y = COINS_Y;
+		 x = COINS_X + gInfobarXAdjust;
+		 y = COINS_Y + gInfobarYAdjust;
 	}
 
 
@@ -419,13 +425,13 @@ long	num,x,y;
 
 	if (gPPCFullScreenFlag)
 	{
-		 x = BUNNIES_Xf;
-		 y = BUNNIES_Yf;
+		 x = BUNNIES_Xf + gInfobarXAdjust;
+		 y = BUNNIES_Yf + gInfobarYAdjust;
 	}
 	else
 	{
-		 x = BUNNIES_X;
-		 y = BUNNIES_Y;
+		 x = BUNNIES_X + gInfobarXAdjust;
+		 y = BUNNIES_Y + gInfobarYAdjust;
 	}
 
 
@@ -502,13 +508,13 @@ long	spacing;
 
 	if (gPPCFullScreenFlag)
 	{
-		x = KEYS_Xf;
-		y = KEYS_Yf;
+		x = KEYS_Xf + gInfobarXAdjust;
+		y = KEYS_Yf + gInfobarYAdjust;
 	}
 	else
 	{
-		x = KEYS_X;
-		y = KEYS_Y;
+		x = KEYS_X + gInfobarXAdjust;
+		y = KEYS_Y + gInfobarYAdjust;
 	}
 
 	for (i=0; i < MAX_KEYS; i++)
