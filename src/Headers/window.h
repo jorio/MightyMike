@@ -43,3 +43,4 @@ extern void	DisplayStoreBuffer(void);
 extern void	BlankEntireScreenArea(void);
 
 void PresentIndexedFramebuffer(void);
+void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data);

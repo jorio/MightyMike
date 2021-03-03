@@ -1142,7 +1142,12 @@ static inline void FilterDithering_Row(const uint8_t* indexedRow)
 
 static void SaveIndexedScreenshot(void)
 {
-	FILE* tga = fopen("/tmp/MikeIndexedScreenshot.tga", "wb");
+	DumpIndexedTGA("/tmp/MikeIndexedScreenshot.tga", VISIBLE_WIDTH, VISIBLE_HEIGHT, gIndexedFramebuffer);
+}
+
+void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data)
+{
+	FILE* tga = fopen(hostPath, "wb");
 	if (!tga)
 	{
 		DoAlert("Couldn't open screenshot file");
@@ -1157,8 +1162,8 @@ static void SaveIndexedScreenshot(void)
 			0,1,	// pal size lo-hi (=256)
 			24,		// pal bits per color
 			0,0,0,0,	// origin
-			VISIBLE_WIDTH&0xFF,VISIBLE_WIDTH>>8,
-			VISIBLE_HEIGHT&0xFF,VISIBLE_HEIGHT>>8,
+			width&0xFF,width>>8,
+			height&0xFF,height>>8,
 			8,		// bits per pixel
 			1<<5,	// image descriptor (set flag for top-left origin)
 	};
@@ -1175,10 +1180,12 @@ static void SaveIndexedScreenshot(void)
 	}
 
 	// write framebuffer
-	fwrite(gIndexedFramebuffer, VISIBLE_WIDTH, VISIBLE_HEIGHT, tga);
+	fwrite(data, width, height, tga);
 
 	// done
 	fclose(tga);
+
+	printf("wrote %s\n", hostPath);
 }
 
 void PresentIndexedFramebuffer(void)
