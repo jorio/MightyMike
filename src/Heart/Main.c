@@ -29,6 +29,8 @@
 #include "racecar.h"
 #include "main.h"
 #include "input.h"
+#include <SDL.h>
+
 extern	ObjNode			*gThisNodePtr,*gMyNodePtr,*ObjectList,*FirstNodePtr;
 extern	Boolean			gFinishedArea,gPPCFullScreenFlag;
 extern	Boolean			gColorMaskArray[256];
@@ -57,6 +59,8 @@ extern	long	PF_WINDOW_TOP;
 extern	long	PF_WINDOW_LEFT;
 #endif
 extern	Boolean	gPPCFullScreenFlag;
+extern	SDL_Window	*gSDLWindow;
+
 
 
 
@@ -388,6 +392,12 @@ again:
 		EraseObjects();
 
 		PresentIndexedFramebuffer();
+
+#if _DEBUG
+		static char debugTitleBuffer[256];
+		snprintf(debugTitleBuffer, sizeof(debugTitleBuffer), "Mike - x:%d y:%d", gMyX, gMyY);
+		SDL_SetWindowTitle(gSDLWindow, debugTitleBuffer);
+#endif
 
 //		if (GetKeyState(kKey_Pause))			    // see if pause
 //			ShowPaused();
@@ -1418,6 +1428,24 @@ void GameMain(void)
 	GetDateTime ((unsigned long *)(&someLong));		// init random seed
 	SetMyRandomSeed(someLong);
 	LoadHighScores();
+
+#if _DEBUG											// Source port TEMP: in debug mode, boot straight to game
+	printf("WARNING: DEBUG MODE: Jumping straight to game\n");
+	gSceneNum = 0;	// 0...4
+	gAreaNum = 0;	// 0...2
+	InitGame();
+
+	for (int i = 0; i < MAX_WEAPONS; i++)
+	{
+		gMyWeapons[i].type = i;
+		gMyWeapons[i].life = 999;
+	}
+	gNumWeaponsIHave = MAX_WEAPONS-1;
+
+	//Do1PlayerGame();
+	InitArea();
+	PlayArea();
+#endif
 
 	DoLegal();
 	DoPangeaLogo();

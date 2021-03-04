@@ -297,7 +297,7 @@ int16_t* tileXparentList		= nil;
 		ByteswapInts(2, tileAnimDef->numFrames, tileAnimDef->tileNums);			// byteswap tileNums array
 
 #if _DEBUG
-		printf("PrepareTileAnims #%d: \"%s\", %d frames\n", i, name, tileAnimDef->numFrames);
+//		printf("PrepareTileAnims #%d: \"%s\", %d frames\n", i, name, tileAnimDef->numFrames);
 #endif
 
 		// Set tile anim

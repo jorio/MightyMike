@@ -255,7 +255,7 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 		}
 
 
-		printf("Num Anims: %d    Num Frames: %d\n", numAnims, numFrames);
+//		printf("Num Anims: %d    Num Frames: %d\n", numAnims, numFrames);
 	}
 }
 

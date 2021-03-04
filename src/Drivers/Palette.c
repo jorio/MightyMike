@@ -17,7 +17,11 @@
 /*    CONSTANTS             */
 /****************************/
 
+#if _DEBUG
+static const int kFadeFrameDelayTicks = 0;		// faster fade in/out in debug mode
+#else
 static const int kFadeFrameDelayTicks = 2;
+#endif
 
 /**********************/
 /*     VARIABLES      */
