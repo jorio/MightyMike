@@ -223,7 +223,10 @@ long	old;
 	{
 		old = TickCount();							// wait for 1 tick to pass
 		while(TickCount() == old)
+		{
+			PresentIndexedFramebuffer();
 			SDL_Delay(SPINLOCK_DELAY);
+		}
 		--time;
 		if (GetKeyState2(KEY_SPACE) || (GetKeyState2(KEY_RETURN)))	// see if keyboard break out
 			return(true);
