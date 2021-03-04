@@ -38,8 +38,6 @@ extern	ObjNode			*gMyNodePtr;
 extern	long			gFrames;
 extern	unsigned char	gInterlaceMode;
 extern	Byte			gMyShootWalkAnims[8];
-extern	Boolean			gMyGunDrawnFlag;
-extern	short				gMyGunDrawnTimer;
 extern	long			gLastRocketTime,gLastPixieTime;
 
 /****************************/

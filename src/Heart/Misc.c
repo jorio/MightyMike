@@ -110,8 +110,6 @@ static	Str255		gMemoryErr = "Try increasing the applications memory size by sele
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
-unsigned long       gDemoVersionTimer = 0;
-
 /**************** CLEAR GLOBAL FLAGS ****************/
 
 void ClearGlobalFlags(void)

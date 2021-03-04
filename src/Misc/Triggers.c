@@ -36,7 +36,6 @@ extern	ObjectEntryType *gMasterItemList;
 extern	Boolean			gMyKeys[6];
 extern	Byte			gSceneNum;
 extern	long			gDifficultySetting;
-extern	short			gMyBlinkieTimer;
 
 /****************************/
 /*    CONSTANTS             */

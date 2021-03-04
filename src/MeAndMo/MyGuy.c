@@ -97,7 +97,6 @@ long		gMyMaxSpeedX,gMyMaxSpeedY;				// current speed after friction
 long		gMyAcceleration;						// current acceleration value
 Boolean		gMeOnIceFlag;							// set if Im on slippery
 
-long		gMyAccX,gMyAccY;						// current acceleration value
 long		gMyWindDX,gMyWindDY;					// force of wind
 short		gMyGunDrawnTimer;
 Boolean		gMyKeys[6] = {false,false,false,false,false,false};

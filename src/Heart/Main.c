@@ -29,8 +29,6 @@
 #include "racecar.h"
 #include "main.h"
 #include "input.h"
-
-extern  unsigned long   gDemoVersionTimer;
 extern	ObjNode			*gThisNodePtr,*gMyNodePtr,*ObjectList,*FirstNodePtr;
 extern	Boolean			gFinishedArea,gPPCFullScreenFlag;
 extern	Boolean			gColorMaskArray[256];
@@ -377,8 +375,6 @@ again:
 
 	do
 	{
-	    gDemoVersionTimer++;
-
 		RegulateSpeed(GAME_SPEED);
 
 		ReadKeyboard();
