@@ -9,9 +9,9 @@
 
 #define		ONE_MINUTE_DELAY	(60L*1000L*1000L)					// delay in microseconds
 
-
-
-
+#if _MSC_VER
+	#define _Static_assert static_assert
+#endif
 
 extern void	ClearGlobalFlags(void);
 extern void	ShowSystemErr(OSErr);

@@ -425,7 +425,7 @@ int32_t		decompType;
 
 					/*  DUMP UNPACKED DATA TO FILE (FOR DEBUGGING ONLY) */
 
-#if _DEBUG
+#if !_WIN32 && _DEBUG
 	char debugPathBuffer[256];
 	snprintf(debugPathBuffer, sizeof(debugPathBuffer), "/tmp/MikeUnpack_%s",fileName);
 

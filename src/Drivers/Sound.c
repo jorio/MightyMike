@@ -164,11 +164,11 @@ long		offset;
 	if (!gMusicOnFlag)									// see if music activated
 		return;
 
-	GetSoundHeaderOffset((SndListHandle)SoundHand_Music,&offset);		// get offset to header
+	GetSoundHeaderOffset(SoundHand_Music, &offset);		// get offset to header
 
 	mySndCmd.cmd = soundCmd;							// install sample in the channel
 	mySndCmd.param1 = 0;
-	mySndCmd.param2 = (long)((Ptr)*SoundHand_Music+offset);		// pointer to SoundHeader
+	mySndCmd.ptr = (Ptr)*SoundHand_Music+offset;		// pointer to SoundHeader
 	SndDoImmediate(gSndChannel[0], &mySndCmd);
 
 	mySndCmd.cmd = freqCmd;								// call this to START sound & keep looping
@@ -352,7 +352,7 @@ got_chan:
 
 	mySndCmd.cmd = soundCmd;								// install sample in the channel
 	mySndCmd.param1 = 0;
-	mySndCmd.param2 = (long)((Ptr)*EffectHandles[soundNum]+offset);	// pointer to SoundHeader
+	mySndCmd.ptr = (Ptr)*EffectHandles[soundNum]+offset;	// pointer to SoundHeader
 	myErr = SndDoImmediate(chanPtr, &mySndCmd);
 	if (myErr)
 		ShowSystemErr(myErr);
