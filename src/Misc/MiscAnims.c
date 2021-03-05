@@ -74,8 +74,14 @@ ObjNode *o;
 
 	o = (ObjNode *)gThisNodePtr->ShadowIndex;
 
-	gThisNodePtr->X.Int = o->X.Int;
+	GAME_ASSERT_MESSAGE(o, "Shadow node lost its owner!");
+
+	gThisNodePtr->X.Int = o->X.Int;		// follow owner
 	gThisNodePtr->Y.Int = o->Y.Int;
+	
+	gThisNodePtr->DX = o->DX;			// for movement extrapolation
+	gThisNodePtr->DY = o->DY;
+
 }
 
 //============================================================================================
@@ -144,6 +150,7 @@ static	short	messageSounds[] = {
 
 void MoveMessage(void)
 {
+	GAME_ASSERT_MESSAGE(gThisNodePtr->MessageToOwnerNode, "Message node lost its owner!");
 
 	if (--gThisNodePtr->MessageTimer <= 0)							// see if delete
 	{
@@ -155,6 +162,8 @@ void MoveMessage(void)
 	gThisNodePtr->X.Int = gThisNodePtr->MessageToOwnerNode->X.Int;	// align with owner
 	gThisNodePtr->Y.Int = gThisNodePtr->MessageToOwnerNode->Y.Int;
 
+	gThisNodePtr->DX = gThisNodePtr->MessageToOwnerNode->DX;		// for movement extrapolation
+	gThisNodePtr->DY = gThisNodePtr->MessageToOwnerNode->DY;
 }
 
 

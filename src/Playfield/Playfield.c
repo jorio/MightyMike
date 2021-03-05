@@ -28,7 +28,6 @@
 #include "racecar.h"
 #include <string.h>
 
-extern	Handle			gOffScreenHandle;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	Ptr				*gPFMaskLookUpTable;
 extern	Ptr				*gPFLookUpTable;
@@ -45,6 +44,8 @@ extern	unsigned char	gInterlaceMode;
 extern	long			gDX,gDY,gSumDX,gSumDY;
 extern	Boolean			gTeleportingFlag;
 extern	long			gMySumDX,gMySumDY,gMyDX,gMyDY;
+extern	Boolean			gScreenScrollFlag;
+extern	MikeFixed		gExtrapolateFrameFactor;
 
 
 /****************************/
@@ -104,6 +105,7 @@ static	Byte	**gAlternateMap = nil;
 
 long			gScrollX,gScrollY;
 long			gScrollRow,gScrollCol,gOldScrollRow,gOldScrollCol;
+static long		scrollDX, scrollDY;
 
 short			gNumItems = -1;
 static	ObjectEntryType	**gItemLookupTableX = nil;
@@ -119,7 +121,7 @@ static	Boolean			gColorMaskArray[256];							// array of xparent tile colors, fa
 
 static	Boolean			gAltMapFlag = false;
 
-static	short			gShakeyScreenCount;
+long					gShakeyScreenCount;
 
 static	Ptr				gMaxItemAddress;								// addr of last item in current item list
 
@@ -829,14 +831,16 @@ Boolean		flag;
 void DoMyScreenScroll(void)
 {
 long	screenX,screenY;
-long	scrollDX,scrollDY;
 
 	UpdateViewWindow();
 
+	scrollDX = scrollDY = 0;								// assume no scroll
+
+	if (!gScreenScrollFlag)
+		return;
+
 	screenX = gMyNodePtr->X.Int-gScrollX;					// calc screen coords
 	screenY = gMyNodePtr->Y.Int-gScrollY;
-
-	scrollDX = scrollDY = 0;								// assume no scroll
 
 	if (screenX < gViewWindow.left)							// see if scroll to left
 	{
@@ -1462,23 +1466,28 @@ long		method;
 	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
 	left = (gScrollX % PF_BUFFER_WIDTH);
 
+	int32_t scrollOffsetX = Fix32_Int(Fix32_Mul(scrollDX << 16, gExtrapolateFrameFactor.L));
+	int32_t scrollOffsetY = Fix32_Int(Fix32_Mul(scrollDY << 16, gExtrapolateFrameFactor.L));
+
 	if (gShakeyScreenCount)									// see if do shakey screen
 	{
-		short		shakeyScreenX,shakeyScreenY;
-
-		gShakeyScreenCount--;
-		shakeyScreenX = MyRandomLong()&b1111 - 8;
-		shakeyScreenY = MyRandomLong()&b1111 - 8;
-		if ((top += shakeyScreenY) < 0)
-			top = 0;
-		if ((left += shakeyScreenX) < 0)
-			left = 0;
-		if ((top >= PF_BUFFER_HEIGHT))
-			top = PF_BUFFER_HEIGHT-1;
-		if ((left >= PF_BUFFER_WIDTH))
-			left = PF_BUFFER_WIDTH-1;
+		scrollOffsetX += MyRandomLong() & b1111 - 8;
+		scrollOffsetY += MyRandomLong() & b1111 - 8;
 	}
 
+	// Apply scroll offset
+	{
+		left += scrollOffsetX;
+		top += scrollOffsetY;
+		if (top < 0)
+			top = 0;
+		if (left < 0)
+			left = 0;
+		if (top >= PF_BUFFER_HEIGHT)
+			top = PF_BUFFER_HEIGHT - 1;
+		if (left >= PF_BUFFER_WIDTH)
+			left = PF_BUFFER_WIDTH - 1;
+	}
 
 	if ((left+(PF_WINDOW_WIDTH-1)) > PF_BUFFER_WIDTH)		// see if 2 horiz segments
 	{

@@ -65,9 +65,9 @@ struct ObjNode
 	long		OldY;			// old y coord
 	Rect		drawBox;		// box obj was last drawn to
 
-	long		DX;				// DX value (low word is fraction)
-	long		DY;				// DY value
-	long		DZ;				// DZ value
+	int32_t		DX;				// DX value (actually a fixed-point number)
+	int32_t		DY;				// DY value
+	int32_t		DZ;				// DZ value
 	void		(*MoveCall)(void);	// pointer to object's move routine
 	Ptr			AnimsList;		// ptr to object's animations list. nil = none
 	long			AnimLine;		// line # in current anim

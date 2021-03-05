@@ -29,7 +29,6 @@ extern Handle	LoadPackedFile(Str255);
 extern void	DecompressRLBFile(short, Ptr, long);
 extern void	RLW_Expand(short, unsigned short *, long);
 extern void	RegulateSpeed(long);
-extern void	RegulateSpeed(long);
 extern void	RegulateSpeed2(short);
 extern unsigned short	RandomRange(unsigned short, unsigned short);
 extern void	Decay(long *, unsigned long);
@@ -50,6 +49,17 @@ static inline Boolean HandleBoundsCheck(Handle h, Ptr p)
 {
 	return p >= *h && p < *h + GetHandleSize(h);
 }
+
+static inline int32_t Fix32_Int(int32_t a)
+{
+	return a >> 16;
+}
+
+static inline int32_t Fix32_Mul(int32_t a, int32_t b)
+{
+	return (int32_t)(((int64_t)a * (int64_t)b) >> 16);
+}
+
 
 #define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)
 #define TODO_REWRITE_THIS_MINOR()		printf("TODO: rewrite this! %s\n", __func__)

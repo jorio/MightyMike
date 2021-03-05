@@ -33,6 +33,7 @@ extern	Ptr				*gPFMaskLookUpTable;
 extern	unsigned char	gInterlaceMode;
 extern	short			gPlayfieldWidth,gPlayfieldHeight;
 extern	GamePalette		gGamePalette;
+extern	MikeFixed		gExtrapolateFrameFactor;
 
 #if __USE_PF_VARS
 extern	long PF_TILE_HEIGHT;
@@ -643,9 +644,24 @@ Ptr		tmP;
 	groupNum = theNodePtr->SpriteGroupNum;				// get shape group #
 	shapeNum = theNodePtr->Type;						// get shape type
 	frameNum = theNodePtr->CurrentFrame;				// get frame #
-	x = theNodePtr->X.Int;								// get short x coord (world)
-	footY = y = theNodePtr->Y.Int;						// get short y coord & add any y adjustment offset
-	y += theNodePtr->YOffset.Int;						// add any y adjustment offset
+
+	if (gExtrapolateFrameFactor.L == 0)
+	{
+		x		= theNodePtr->X.Int;						// get short x coord (world)
+		footY	= theNodePtr->Y.Int;						// get short y coord & add any y adjustment offset
+		y		= footY + theNodePtr->YOffset.Int;			// add any y adjustment offset
+	}
+	else
+	{
+		// Extrapolate position
+		int32_t xFixed			= theNodePtr->X.L		+ Fix32_Mul(gExtrapolateFrameFactor.L, theNodePtr->DX);
+		int32_t footYFixed		= theNodePtr->Y.L		+ Fix32_Mul(gExtrapolateFrameFactor.L, theNodePtr->DY);
+		int32_t yOffsetFixed	= theNodePtr->YOffset.L	+ Fix32_Mul(gExtrapolateFrameFactor.L, theNodePtr->DZ);
+
+		x						= Fix32_Int(xFixed);
+		footY					= Fix32_Int(footYFixed);
+		y						= Fix32_Int(footYFixed + yOffsetFixed);
+	}
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 

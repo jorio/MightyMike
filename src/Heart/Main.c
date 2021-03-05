@@ -29,6 +29,7 @@
 #include "racecar.h"
 #include "main.h"
 #include "input.h"
+#include "version.h"
 #include <SDL.h>
 
 extern	ObjNode			*gThisNodePtr,*gMyNodePtr,*ObjectList,*FirstNodePtr;
@@ -58,6 +59,7 @@ extern	long	PF_TILE_WIDTH;
 extern	long	PF_WINDOW_TOP;
 extern	long	PF_WINDOW_LEFT;
 #endif
+extern	long		gShakeyScreenCount;
 extern	Boolean	gPPCFullScreenFlag;
 extern	SDL_Window	*gSDLWindow;
 
@@ -102,6 +104,15 @@ long		gDifficultySetting = DIFFICULTY_NORMAL;
 Boolean		gIsASavedGame[2];
 
 short		gMainAppRezFile;
+
+Boolean		gScreenScrollFlag = true;
+
+MikeFixed	gExtrapolateFrameFactor = { .L = 0 };
+
+static const uint32_t	kDebugTextUpdateInterval = 50;
+static uint32_t			gDebugTextFrameAccumulator = 0;
+static uint32_t			gDebugTextLastUpdatedAt = 0;
+static char				gDebugTextBuffer[1024];
 
 /*****************/
 /* TOOLBOX INIT  */
@@ -377,27 +388,75 @@ again:
 
     TurnOnISp();                                // lets use ISp
 
+	uint32_t timeSinceSim = GAME_SPEED_SDL;							// force simulation to run once when we enter this function
+
 	do
 	{
-		RegulateSpeed(GAME_SPEED);
+		gExtrapolateFrameFactor.L = 0;										// reset subtic
 
-		ReadKeyboard();
-		MoveObjects();
-		SortObjectsByY();							// sort 'em
-		ScrollPlayfield();							// do playfield updating
-		UpdateTileAnimation();
-		DrawObjects();
-		DisplayPlayfield();
-		UpdateInfoBar();
-		EraseObjects();
+		
+					/* SIMULATION FRAMES */
+		
+		while (timeSinceSim >= GAME_SPEED_SDL)						// we need to run some simulation frames
+		{
+			gFrames++;												// one more simulation frame
 
-		PresentIndexedFramebuffer();
+			if (gShakeyScreenCount)
+				gShakeyScreenCount--;
 
-#if _DEBUG
-		static char debugTitleBuffer[256];
-		snprintf(debugTitleBuffer, sizeof(debugTitleBuffer), "Mike - x:%d y:%d", gMyX, gMyY);
-		SDL_SetWindowTitle(gSDLWindow, debugTitleBuffer);
-#endif
+			ReadKeyboard();
+			MoveObjects();
+			SortObjectsByY();										// sort 'em
+
+			gExtrapolateFrameFactor.L = 0;
+			timeSinceSim -= GAME_SPEED_SDL;							// catch up
+		}
+
+		const uint32_t timeAtEndOfSim = SDL_GetTicks();
+
+
+					/* GRAPHICS FRAMES */
+
+		while (timeSinceSim < GAME_SPEED_SDL)						// render as many graphics frames as we can until it's time to run the simulation again
+		{
+			gExtrapolateFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
+			
+			ScrollPlayfield();										// do playfield updating
+			UpdateTileAnimation();
+			DrawObjects();
+			DisplayPlayfield();
+			UpdateInfoBar();
+			EraseObjects();
+			PresentIndexedFramebuffer();
+
+			gDebugTextFrameAccumulator++;
+
+			timeSinceSim = SDL_GetTicks() - timeAtEndOfSim;
+		}
+
+
+					/* DEBUG INFO */
+
+		//if (gGamePrefs.debugInfoInTitleBar)
+		{
+			uint32_t ticksNow = SDL_GetTicks();
+			uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
+			if (ticksElapsed >= kDebugTextUpdateInterval)
+			{
+				float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
+				snprintf(
+					gDebugTextBuffer, sizeof(gDebugTextBuffer),
+					"Mighty Mike %s - fps:%d - x:%d y:%d",
+					PROJECT_VERSION,
+					(int)round(fps),
+					gMyX,
+					gMyY
+				);
+				SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
+				gDebugTextFrameAccumulator = 0;
+				gDebugTextLastUpdatedAt = ticksNow;
+			}
+		}
 
 //		if (GetKeyState(kKey_Pause))			    // see if pause
 //			ShowPaused();
@@ -418,6 +477,10 @@ again:
 
 		if (gNumBunnies <= 0)					// special hack to fix reported bug!?!?
 			DecBunnyCount();
+
+		static Boolean kdScreenScroll = false;
+		if (CheckNewKeyDown2(KEY_F9, &kdScreenScroll))
+			gScreenScrollFlag = !gScreenScrollFlag;
 
 	} while((!gGlobFlag_MeDoneDead) && (!gAbortGameFlag) &&
 			(!gFinishedArea) && (!gAbortDemoFlag));
