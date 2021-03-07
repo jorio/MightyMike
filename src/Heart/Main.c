@@ -1516,12 +1516,13 @@ void GameMain(void)
 	gAreaNum = 0;	// 0...2
 	InitGame();
 
-	for (int i = 0; i < MAX_WEAPONS; i++)
+	gNumWeaponsIHave = 0;
+	for (int i = 0; i <= WEAPON_TYPE_ROCKETGUN; i++)
 	{
 		gMyWeapons[i].type = i;
 		gMyWeapons[i].life = 999;
+		gNumWeaponsIHave++;
 	}
-	gNumWeaponsIHave = MAX_WEAPONS-1;
 
 	//Do1PlayerGame();
 	InitArea();
