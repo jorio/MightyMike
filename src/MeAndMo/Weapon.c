@@ -66,8 +66,6 @@ Byte		gNumWeaponsIHave,gCurrentWeaponIndex;
 
 Byte		gCurrentWeaponType;
 Byte		gNumBullets;
-Boolean		gShootButtonDownFlag = false;
-Boolean		gWeaponSelectButtonDownFlag = false;
 long		gOozieTick = 0;
 
 
@@ -158,7 +156,6 @@ void InitWeaponsList(void)
 void InitBullets(void)
 {
 	gNumBullets = 0;
-	gWeaponSelectButtonDownFlag = true;
 	gLastRocketTime = gLastPixieTime = 0;
 }
 
@@ -260,16 +257,8 @@ Boolean		shotFlag;
 
 				/* CHECK WEAPON SELECTION */
 
-	if (GetNeedState(kNeed_NextWeapon))
-	{
-		if (!gWeaponSelectButtonDownFlag)				// see if button already down
-		{
-			gWeaponSelectButtonDownFlag = true;
-			SelectNextWeapon();
-		}
-	}
-	else
-		gWeaponSelectButtonDownFlag = false;
+	if (GetNewNeedState(kNeed_NextWeapon))
+		SelectNextWeapon();
 
 
 	if (gCurrentWeaponType != NO_WEAPON)
@@ -644,15 +633,8 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
 
 			/* SEE WHICH WAY TO MAKE IT GO */
 
@@ -715,15 +697,8 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
 
 
 			/* SEE WHICH WAY TO MAKE IT GO */
@@ -909,16 +884,10 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
 
+	
 			/* SEE WHICH WAY TO MAKE IT GO */
 
 	dx = gRBandDeltasX[gMyDirection];

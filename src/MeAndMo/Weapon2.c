@@ -35,7 +35,6 @@ extern	short			gMyDirection;
 extern	long				gMyX,gMyY;
 extern	ObjNode			*gMyNodePtr;
 extern	long			gFrames;
-extern	Boolean			gShootButtonDownFlag;
 extern	Byte			gNumBullets;
 
 
@@ -105,15 +104,8 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
 
 
 			/* SEE WHICH WAY TO MAKE IT GO */
@@ -413,15 +405,9 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
+
 
 			/* SEE WHICH WAY TO MAKE IT GO */
 
@@ -486,15 +472,8 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
 
 
 			/* SEE WHICH WAY TO MAKE IT GO */
@@ -609,15 +588,8 @@ Byte 	sub;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-			return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
 
 			/* SEE WHICH WAY TO MAKE IT GO */
 
@@ -805,7 +777,6 @@ short		z,y,x;
 
 	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
-		gShootButtonDownFlag = false;
 		return(false);
 	}
 
@@ -923,15 +894,9 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
-		return(false);
-	}
-	else
-	if (gShootButtonDownFlag)							// see if was already down
-		return(false);
-	gShootButtonDownFlag = true;
+	if (!GetNewNeedState(kNeed_Attack))					// see if fire button pressed
+		return false;
+
 
 			/* SEE WHICH WAY TO MAKE IT GO */
 
@@ -1110,10 +1075,7 @@ short		z,y,x;
 				/* SEE IF READY TO SHOOT */
 
 	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
-	{
-		gShootButtonDownFlag = false;
 		return(false);
-	}
 
 	if ((gFrames - gLastPixieTime) < PIXIE_REFIRE_TIME)	// see if can shoot now
 		return(false);
