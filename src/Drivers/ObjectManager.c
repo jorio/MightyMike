@@ -164,6 +164,8 @@ register ObjNode	*newNodePtr,*scanNodePtr,*reNodePtr;
 		newNodePtr->Flag1 =
 		newNodePtr->Flag2 =
 		newNodePtr->Flag3 =
+		newNodePtr->Misc1 =
+		newNodePtr->Ptr1 =
 		newNodePtr->CType =						// must init ctype to something ( INVALID_NODE_FLAG might be set from last delete)
 		newNodePtr->CBits =
 		newNodePtr->DX =

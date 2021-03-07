@@ -82,7 +82,7 @@ extern	Byte			gNumBullets;
 long	gLastRocketTime	= 0;
 long	gLastPixieTime	= 0;
 
-#define	HeatSeekTarget	Special1
+#define	HeatSeekTarget	Ptr1
 
 /*=========================== Rock ===============================================*/
 
@@ -977,7 +977,8 @@ short		z,y,x;
 
 void FindHeatSeekTarget(ObjNode *theNode)
 {
-register	ObjNode		*thisNodePtr,*targetNode;
+ObjNode		*thisNodePtr;
+ObjNode		*targetNode = nil;
 short		dist,bestDist;
 short		x,y;
 
@@ -1009,7 +1010,7 @@ short		x,y;
 
 	if (bestDist != 0x7fff)
 	{
-		theNode->HeatSeekTarget = (long)targetNode;
+		theNode->HeatSeekTarget = targetNode;
 	}
 	else
 	{
@@ -1061,7 +1062,7 @@ short	targetX,targetY;
 	}
 	else
 	{
-		if (!(((ObjNode *)gThisNodePtr->HeatSeekTarget)->CType & CTYPE_ENEMYA))	// see if target is no longer an enemy
+		if (!(gThisNodePtr->HeatSeekTarget->CType & CTYPE_ENEMYA))		// see if target is no longer an enemy
 		{
 			FindHeatSeekTarget(gThisNodePtr);
 			if (gThisNodePtr->HeatSeekTarget == 0)

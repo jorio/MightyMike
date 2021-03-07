@@ -84,7 +84,7 @@ struct ObjNode
 	long		Special2;
 	long		Special3;
 	long		Misc1;
-	long		Misc2;
+	struct ObjNode		*Ptr1;
 	unsigned long		CType;		// collision type bits
 	unsigned long		CBits;		// collision attribute bits
 	long			LeftSide;			// collision side coords
