@@ -81,11 +81,11 @@ int CommonMain(int argc, const char** argv)
 			SDL_WINDOWPOS_UNDEFINED,
 			VISIBLE_WIDTH,
 			VISIBLE_HEIGHT,
-			SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN);
+			SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
 	if (!gSDLWindow)
 		throw std::runtime_error("Couldn't create SDL window.");
 
-	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, -1, SDL_RENDERER_PRESENTVSYNC);
+	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (!gSDLRenderer)
 		throw std::runtime_error("Couldn't create SDL renderer.");
 

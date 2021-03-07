@@ -147,6 +147,7 @@ if(WIN32)
 	add_executable(${GAME_TARGET} WIN32
         ${GAME_ALL_SOURCES}
         "${CMAKE_CURRENT_SOURCE_DIR}/cmake/WindowsResources.rc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${GAME_TARGET}.exe.manifest"
     )
 elseif(APPLE)
 	add_executable(${GAME_TARGET} MACOSX_BUNDLE
