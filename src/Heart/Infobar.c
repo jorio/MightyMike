@@ -20,6 +20,7 @@
 #include "misc.h"
 #include "main.h"
 #include "input.h"
+#include "structures.h"
 
 extern	Boolean			ImDeadFlag;
 extern	Byte			gCurrentWeaponType,gSceneNum;
@@ -28,7 +29,7 @@ extern	long			NumObjects,gDifficultySetting;
 extern	short		gNumEnemies,gNumBunnies,gDemoMode;
 extern	WeaponType		gMyWeapons[];
 extern	Byte			gNumWeaponsIHave,gCurrentWeaponIndex;
-extern	Boolean			gMyKeys[6],gPPCFullScreenFlag,gESCDownFlag;
+extern	Boolean			gMyKeys[6],gPPCFullScreenFlag;
 
 
 /****************************/
@@ -540,8 +541,7 @@ long	spacing;
 
 void ShowPaused(void)
 {
-    TurnOffISp();
-	if (!GetKeyState2(KEY_CTRL))					// ctrl key eliminates text for screen grabs!
+	if (!GetSDLKeyState(SDL_SCANCODE_LCTRL) && !GetSDLKeyState(SDL_SCANCODE_RCTRL))			// ctrl key eliminates text for screen grabs!
 	{
 		if (gPPCFullScreenFlag)
 			DrawFrameToScreen_NoMask(320,220,GroupNum_Paused,ObjType_Paused,0);
@@ -549,11 +549,10 @@ void ShowPaused(void)
 			DrawFrameToScreen_NoMask(240,220,GroupNum_Paused,ObjType_Paused,0);
 	}
 
-	while (GetKeyState2(kKey_Pause));
-	while (!GetKeyState2(kKey_Pause));
-	while (GetKeyState2(kKey_Pause));
+	while (GetNeedState(kNeed_UIPause));
+	while (!GetNeedState(kNeed_UIPause));
+	while (GetNeedState(kNeed_UIPause));
 	EraseStore();
-    TurnOnISp();
 }
 
 
@@ -574,14 +573,16 @@ short	selection;
 	if (gDemoMode != DEMO_MODE_OFF)
 		return(true);
 
-    TurnOffISp();
-
 	tick = 0;
 	mode = true;
-	selection = 0;
+	selection = 1;		// start on "resume"
 
-	while((!GetKeyState2(KEY_SPACE)) && (!GetKeyState2(KEY_RETURN)))
+	UpdateInput();
+
+	while (!GetNewNeedState(kNeed_UIConfirm))
 	{
+		UpdateInput();
+		
 		RegulateSpeed2(1);
 		if (!mode)
 			DrawFrameToScreen_NoMask(QUIT_X,QUIT_Y,GroupNum_Quit,ObjType_Quit,selection);
@@ -598,23 +599,22 @@ short	selection;
 
 					/* SEE IF RESUME */
 
-		if (CheckNewKeyDown2(KEY_ESC,&gESCDownFlag))		// see if resume via ESC
+		if (GetNewNeedState(kNeed_UIBack) || GetNewNeedState(kNeed_UIPause))		// see if resume via ESC
 		{
 			EraseStore();
-	        TurnOnISp();
-			return(false);
+			return false;
 		}
 
 					/* SEE IF RESUME */
 
-		if ((GetKeyState(KEY_RIGHT) || GetKeyState(KEY_K6)) && (selection != 1))
+		if (GetNewNeedState(kNeed_UIRight) && (selection != 1))
 		{
 			PlaySound(SOUND_SELECTCHIME);
 			selection = 1;
 		}
 					/* SEE IF QUIT */
 		else
-		if ((GetKeyState(KEY_LEFT) || GetKeyState(KEY_K4)) && (selection != 0))
+		if (GetNewNeedState(kNeed_UILeft) && (selection != 0))
 		{
 			PlaySound(SOUND_SELECTCHIME);
 			selection = 0;
@@ -622,7 +622,6 @@ short	selection;
 	}
 	EraseStore();
 
-	TurnOnISp();
 	return(!selection);
 }
 

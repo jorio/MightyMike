@@ -35,7 +35,7 @@ extern	MikeFixed	gX;
 extern	MikeFixed	gY;
 extern	unsigned char	gInterlaceMode;
 extern	Byte		gSceneNum,gPlayerMode,gStartingScene,gAreaNum;
-extern	Boolean		gUpButtonDownFlag,gDownButtonDownFlag,gSpaceButtonDownFlag,gAbortDemoFlag;
+extern	Boolean		gAbortDemoFlag;
 extern	Boolean		gGameIsDemoFlag,gMusicOnFlag,gLoadOldGameFlag;
 extern	long		gRegionClipTop[],gRegionClipBottom[],gRegionClipLeft[],gRegionClipRight[];
 extern	Byte		gBunnyCounts[5][3];
@@ -202,7 +202,7 @@ re_enter:
 	{
 #endif
 
-		if (GetKeyState(KEY_R) && GetKeyState(KEY_E))	// see if record demo
+		if (GetSDLKeyState(SDL_SCANCODE_R) && GetSDLKeyState(SDL_SCANCODE_E))	// see if record demo
 		{
 			gPlayerMode = ONE_PLAYER;
 			ZapShapeTable(GROUP_MAIN);
@@ -212,16 +212,16 @@ re_enter:
 
 					/* CHECK FOR SCENE CHEATS */
 
-		if (GetKeyState(KEY_1))
+		if (GetSDLKeyState(SDL_SCANCODE_1))
 			gStartingScene = 1;
 		else
-		if (GetKeyState(KEY_2))
+		if (GetSDLKeyState(SDL_SCANCODE_2))
 			gStartingScene = 2;
 		else
-		if (GetKeyState(KEY_3))
+		if (GetSDLKeyState(SDL_SCANCODE_3))
 			gStartingScene = 3;
 		else
-		if (GetKeyState(KEY_4))
+		if (GetSDLKeyState(SDL_SCANCODE_4))
 			gStartingScene = 4;
 
 #if !BETA
@@ -230,7 +230,7 @@ re_enter:
 
 		if (gCursorMode != CURSOR_MODE_READY)
 			continue;
-		if (CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag))
+		if (UserWantsOut())
 			break;
 
 	} while(true);
@@ -288,7 +288,7 @@ void MoveTitleCursor(void)
 				/* SEE IF WAITING FOR USER INPUT */
 				/*********************************/
 
-	if (GetKeyState(KEY_P))											// see if go directly to PLAY
+	if (GetSDLKeyState(SDL_SCANCODE_P))											// see if go directly to PLAY
 	{
 		if (icons[gCursorSelection]->SubType >= 6)
 			SwitchAnim(icons[gCursorSelection],icons[gCursorSelection]->SubType-6);
@@ -298,7 +298,7 @@ void MoveTitleCursor(void)
 		gCursorSelection = 0;
 	}
 	else
-	if (GetKeyState(KEY_S))											// see if go directly to SCORES
+	if (GetSDLKeyState(SDL_SCANCODE_S))											// see if go directly to SCORES
 	{
 		if (icons[gCursorSelection]->SubType >= 6)
 			SwitchAnim(icons[gCursorSelection],icons[gCursorSelection]->SubType-6);
@@ -308,7 +308,7 @@ void MoveTitleCursor(void)
 		gCursorSelection = 3;
 	}
 	else
-	if (GetKeyState(KEY_D))											// see if go directly to DIFFICULTY
+	if (GetSDLKeyState(SDL_SCANCODE_D))											// see if go directly to DIFFICULTY
 	{
 		if (icons[gCursorSelection]->SubType >= 6)
 			SwitchAnim(icons[gCursorSelection],icons[gCursorSelection]->SubType-6);
@@ -318,7 +318,7 @@ void MoveTitleCursor(void)
 		gCursorSelection = 2;
 	}
 	else
-	if (GetKeyState(KEY_C))											// see if go directly to CREDITS
+	if (GetSDLKeyState(SDL_SCANCODE_C))											// see if go directly to CREDITS
 	{
 		if (icons[gCursorSelection]->SubType >= 6)
 			SwitchAnim(icons[gCursorSelection],icons[gCursorSelection]->SubType-6);
@@ -328,7 +328,7 @@ void MoveTitleCursor(void)
 		gCursorSelection = 4;
 	}
 	else
-	if (GetKeyState(KEY_V))											// see if go directly to VIEW
+	if (GetSDLKeyState(SDL_SCANCODE_V))											// see if go directly to VIEW
 	{
 		if (icons[gCursorSelection]->SubType >= 6)
 			SwitchAnim(icons[gCursorSelection],icons[gCursorSelection]->SubType-6);
@@ -338,7 +338,7 @@ void MoveTitleCursor(void)
 		gCursorSelection = 1;
 	}
 	else
-	if (GetKeyState(KEY_Q))											// see if go directly to QUIT
+	if (GetSDLKeyState(SDL_SCANCODE_Q))											// see if go directly to QUIT
 	{
 		if (icons[gCursorSelection]->SubType >= 6)
 			SwitchAnim(icons[gCursorSelection],icons[gCursorSelection]->SubType-6);
@@ -351,7 +351,7 @@ void MoveTitleCursor(void)
 
 	if (gCursorMode == CURSOR_MODE_READY)
 	{
-		if (GetKeyState(KEY_LEFT) || GetKeyState(KEY_K4))		// see if left key
+		if (GetNeedState(kNeed_UILeft))				// see if left key
 		{
 			gDemoTimeout = TIME_TILL_DEMO;
 			if (gCursorSelection > 0)
@@ -365,7 +365,7 @@ void MoveTitleCursor(void)
 			}
 		}
 
-		if (GetKeyState(KEY_RIGHT) || GetKeyState(KEY_K6))			// see if right key
+		if (GetNeedState(kNeed_UIRight))			// see if right key
 		{
 			gDemoTimeout = TIME_TILL_DEMO;
 			if (gCursorSelection < 5)
@@ -476,20 +476,19 @@ loop:
 	DisplayScores();									// show them
 	PresentIndexedFramebuffer();
 
-	while (!CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag))	// wait for button
+	UpdateInput();										// eat key press
+
+	while (!UserWantsOut())								// wait for button
 	{
 		RegulateSpeed2(1);
 		ReadKeyboard();
-		if ((GetKeyState(KEY_C)) && (GetKeyState(KEY_CTRL)))	// see if key clear
+		if (GetSDLKeyState(SDL_SCANCODE_LCTRL) && GetSDLKeyState(SDL_SCANCODE_C))	// see if key clear
 		{
 			ClearHighScores();
 			SaveHighScores();
 			goto loop;
 		}
 		DoSoundMaintenance(false);
-
-		if (GetKeyState(KEY_ESC))
-			break;
 	}
 	FadeOutGameCLUT();
 }
@@ -635,7 +634,7 @@ ObjNode		*nameObj;
 	do
 	{
 		RegulateSpeed2(1);
-		theChar = CheckKey();
+		DoFatalAlert("TODO: Implement theChar = CheckKey();");
 		EraseObjects();
 
 		if (theChar == '\xBD')							// \xBD is the null key mark
@@ -808,7 +807,6 @@ ObjNode		*batteryObj;
 ObjNode		*batteryObj2,*cursorObj;
 long		sgcursorx[] = {170,245,320,395,470};
 long		restoreMode;
-Boolean		rightButtonDownFlag,leftButtonDownFlag;
 
 					/* INITIAL LOADING */
 
@@ -852,7 +850,7 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 
 		ReadKeyboard();
 
-		if ((GetKeyState(KEY_LEFT) || GetKeyState(KEY_K4)) && (gCursorSelection))
+		if (gCursorSelection && GetNeedState(kNeed_UILeft))
 		{
 			DeactivateObjectDraw(batteryObj2);
 			batteryObj->X.Int = BATTERY_X1;
@@ -860,7 +858,7 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 			PlaySound(SOUND_SELECTCHIME);
 		}
 		else
-		if ((GetKeyState(KEY_RIGHT) || GetKeyState(KEY_K6)) && (!gCursorSelection))
+		if (!gCursorSelection && GetNeedState(kNeed_UIRight))
 		{
 			batteryObj2->DrawFlag = true;
 			batteryObj->X.Int = BATTERY_X2;
@@ -870,14 +868,13 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-		if (GetKeyState(KEY_ESC))						// see if abort (use to demo flag to trick it)
+		if (GetNewNeedState(kNeed_UIBack))					// see if abort (use to demo flag to trick it)
 		{
 			gAbortDemoFlag = true;
 			return;
 		}
 
-	}while((!CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag)) && (!Button()) && (!gAbortDemoFlag));
-	while(Button());
+	} while(!GetNewNeedState(kNeed_UIConfirm) && !gAbortDemoFlag);
 
 
 				/* HANDLE SELECTION */
@@ -917,7 +914,7 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 
 		ReadKeyboard();
 
-		if ((CheckNewKeyDown(KEY_LEFT,KEY_K4,&leftButtonDownFlag)) && (restoreMode > 0))
+		if ((GetNewNeedState(kNeed_UILeft)) && (restoreMode > 0))
 		{
 			restoreMode--;
 			cursorObj->X.Int = sgcursorx[restoreMode];
@@ -925,7 +922,7 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 			SwitchAnim(cursorObj,restoreMode+1);
 		}
 		else
-		if ((CheckNewKeyDown(KEY_RIGHT,KEY_K6,&rightButtonDownFlag)) && (restoreMode < 4))
+		if ((GetNewNeedState(kNeed_UIRight)) && (restoreMode < 4))
 		{
 			restoreMode++;
 			cursorObj->X.Int = sgcursorx[restoreMode];
@@ -935,7 +932,7 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-		if (GetKeyState(KEY_ESC))						// see if abort (use to demo flag to trick it)
+		if (GetNewNeedState(kNeed_UIBack))					// see if abort (use to demo flag to trick it)
 		{
 			gAbortDemoFlag = true;
 			return;
@@ -943,30 +940,30 @@ Boolean		rightButtonDownFlag,leftButtonDownFlag;
 
 			/* SEE IF HIT KEYS TO SELECT GAME RESTORE */
 
-		if (GetKeyState(KEY_1))
+		if (GetNewSDLKeyState(SDL_SCANCODE_1))
 		{
 			restoreMode = 1;
 			break;
 		}
-		if (GetKeyState(KEY_2))
+		if (GetNewSDLKeyState(SDL_SCANCODE_2))
 		{
 			restoreMode = 2;
 			break;
 		}
-		if (GetKeyState(KEY_3))
+		if (GetNewSDLKeyState(SDL_SCANCODE_3))
 		{
 			restoreMode = 3;
 			break;
 		}
-		if (GetKeyState(KEY_4))
+		if (GetNewSDLKeyState(SDL_SCANCODE_4))
 		{
 			restoreMode = 4;
 			break;
 		}
 
-	}while((!CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag)) && (!Button()) && (!gAbortDemoFlag));
+	} while(!GetNewNeedState(kNeed_UIConfirm) && !gAbortDemoFlag);
 
-
+	
 				/* SEE IF RESTORE GAME */
 
 	if (restoreMode > 0)
@@ -1077,7 +1074,7 @@ ObjNode	*theNode;
 		if (Button())
 			break;
 
-	}while((!GetKeyState(KEY_RETURN)) && (!GetKeyState(KEY_SPACE)) && (!GetKeyState(KEY_ESC)) && (NumObjects > 0));
+	}while (!UserWantsOut() && NumObjects > 0);
 
 	FadeOutGameCLUT();
 	DisposeHandle(textRez);							// zap the text rez
@@ -1422,7 +1419,7 @@ ObjNode	*newObj;
 		if (Button())
 			break;
 
-	}while((!GetKeyState(KEY_RETURN)) && (!GetKeyState(KEY_SPACE)) && IsMusicPlaying());
+	} while (!UserWantsOut() && IsMusicPlaying());
 
 more:
 	FadeOutGameCLUT();
@@ -1568,7 +1565,7 @@ ObjNode	*theNode;
 		if (Button())
 			break;
 
-	}while((!GetKeyState(KEY_RETURN)) && (!GetKeyState(KEY_SPACE)) && (!GetKeyState(KEY_ESC)) && (NumObjects > 0));
+	}while(!UserWantsOut() && NumObjects > 0);
 
 	DisposeHandle(textRez);								// zap the text rez
 }
@@ -1583,13 +1580,16 @@ static void DoDifficultyScreen(void)
 {
 ObjNode		*newObj,*headObj;
 short		mode,tick = 0;
-Boolean		leftButtonDownFlag,rightButtonDownFlag;
 static	short	xCoords[] = {105,319,540};
 
 					/* CHECK FOR SECRET HEAD SCREEN */
 
 	ReadKeyboard();
-	if (GetKeyState(KEY_APPLE) && (GetKeyState(KEY_OPTION)))
+#if __APPLE__
+	if (GetSDLKeyState(SDL_SCANCODE_LGUI) && GetSDLKeyState(SDL_SCANCODE_LALT))
+#else
+	if (GetSDLKeyState(SDL_SCANCODE_LCTRL) && GetSDLKeyState(SDL_SCANCODE_LALT))
+#endif
 	{
 		DoHeadScreen();
 		return;
@@ -1648,7 +1648,7 @@ static	short	xCoords[] = {105,319,540};
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-		if (CheckNewKeyDown(KEY_RIGHT,KEY_K6,&rightButtonDownFlag))	// see if go right
+		if (GetNewNeedState(kNeed_UIRight))	// see if go right
 		{
 			if (mode < 2)
 			{
@@ -1663,7 +1663,7 @@ static	short	xCoords[] = {105,319,540};
 			}
 		}
 		else
-		if (CheckNewKeyDown(KEY_LEFT,KEY_K4,&leftButtonDownFlag))	// see if left
+		if (GetNewNeedState(kNeed_UILeft))	// see if left
 		{
 			if (mode > 0)
 			{
@@ -1678,20 +1678,13 @@ static	short	xCoords[] = {105,319,540};
 			}
 		}
 
-		if (GetKeyState(KEY_ESC))									// see if abort
-			goto byebye;
-
-		if (Button())
-			break;
-
-	} while((!CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag)) || Button());
+	} while (!UserWantsOut());
 
 
 				/* HANDLE SELECTION */
 
 	gDifficultySetting = mode;
 
-byebye:
 	FadeOutGameCLUT();
 	ZapShapeTable(GROUP_MAIN);
 	SavePrefs();
@@ -1744,7 +1737,7 @@ ObjNode	*newObj;
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-	} while(!CheckNewKeyDown(KEY_SPACE,KEY_RETURN,&gSpaceButtonDownFlag));
+	} while(!UserWantsOut());
 
 	FadeOutGameCLUT();
 	ZapShapeTable(GROUP_MAIN);
@@ -1791,7 +1784,6 @@ void ShowBonusScreen(void)
 short	i,htab,vtab;
 long	bonus;
 short	selection;
-Boolean	leftButtonDownFlag,rightButtonDownFlag;
 
 	ZapShapeTable(GROUP_AREA_SPECIFIC);							// minor cleanup first
 	ZapShapeTable(GROUP_AREA_SPECIFIC2);
@@ -1843,7 +1835,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 		PrintBonusNum(bonus, 5, 540, 180);						// draw bonus #
 		PresentIndexedFramebuffer();
 
-		if (GetKeyState2(KEY_SPACE))								// see how long to wait
+		if (UserWantsOutContinuous())							// see how long to wait
 			Wait4(2);
 		else
 			Wait4(5);
@@ -1895,7 +1887,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 
 	PresentIndexedFramebuffer();
 	Wait4(60*1);
-	while(GetKeyState2(KEY_RETURN) || GetKeyState2(KEY_SPACE) || Button());					// wait for button & key up
+	while(UserWantsOutContinuous());					// wait for button & key up
 
 	ReadKeyboard();
 	i = 0;
@@ -1914,10 +1906,10 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 
 		ReadKeyboard();
 
-		if (GetKeyState(KEY_RETURN) || GetKeyState(KEY_SPACE) || Button())
+		if (GetNewNeedState(kNeed_UIConfirm))
 			break;
 
-		if (CheckNewKeyDown(KEY_LEFT,KEY_K4,&leftButtonDownFlag))	// see if go left
+		if (GetNewNeedState(kNeed_UILeft))	// see if go left
 		{
 			if (selection > 0)
 			{
@@ -1926,7 +1918,7 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 			}
 		}
 
-		if (CheckNewKeyDown(KEY_RIGHT,KEY_K6,&rightButtonDownFlag))	// see if go right
+		if (GetNewNeedState(kNeed_UIRight))	// see if go right
 		{
 			if (selection < 4)
 			{
@@ -1937,25 +1929,25 @@ Boolean	leftButtonDownFlag,rightButtonDownFlag;
 
 				/* SEE IF MANUALLY SELECT SAVE #1..4 */
 
-		if (GetKeyState(KEY_1))
+		if (GetNewSDLKeyState(SDL_SCANCODE_1))
 		{
 			selection = 1;
 			break;
 		}
 		else
-		if (GetKeyState(KEY_2))
+		if (GetNewSDLKeyState(SDL_SCANCODE_2))
 		{
 			selection = 2;
 			break;
 		}
 		else
-		if (GetKeyState(KEY_3))
+		if (GetNewSDLKeyState(SDL_SCANCODE_3))
 		{
 			selection = 3;
 			break;
 		}
 		else
-		if (GetKeyState(KEY_4))
+		if (GetNewSDLKeyState(SDL_SCANCODE_4))
 		{
 			selection = 4;
 			break;

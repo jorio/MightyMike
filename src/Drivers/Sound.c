@@ -45,9 +45,6 @@ static	short			gMaxChannels;
 Boolean			gMusicOnFlag = true;
 static	Boolean			gEffectsOnFlag = true;
 
-static	Boolean			gMKeyDownFlag	=	false;
-static	Boolean			gSKeyDownFlag	=	false;
-
 static	unsigned char	gVolume = DEFAULT_VOLUME;
 
 static	short			gNumEffectsLoaded,gNumAddedSounds;
@@ -428,19 +425,19 @@ SCStatus	theStatus;
     {
     			/* SEE IF TOGGLE MUSIC */
 
-    	if (CheckNewKeyDown2(kKey_ToggleMusic,&gMKeyDownFlag))
+    	if (GetNewNeedState(kNeed_ToggleMusic))
     		ToggleMusic();
 
 
     			/* SEE IF TOGGLE EFFECTS */
 
-    	if (CheckNewKeyDown2(kKey_ToggleEffects,&gSKeyDownFlag))
+    	if (GetNewNeedState(kNeed_ToggleEffects))
     		ToggleEffects();
 
 
     			/* SEE IF CHANGE VOLUME */
 
-    	if (GetKeyState(kKey_RaiseVolume))
+    	if (GetNewNeedState(kNeed_RaiseVolume))
     	{
     		if (gVolume < (255-4))
     		{
@@ -449,7 +446,7 @@ SCStatus	theStatus;
     		}
     	}
     	else
-    	if (GetKeyState(kKey_LowerVolume))
+    	if (GetNewNeedState(kNeed_LowerVolume))
     	{
     		if (gVolume > 4)
     		{

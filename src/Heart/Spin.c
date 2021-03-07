@@ -15,6 +15,8 @@
 #include "misc.h"
 #include "io.h"
 //#include <timer.h>
+#include <input.h>
+
 #include "sound2.h"
 #include "window.h"
 
@@ -90,8 +92,8 @@ unsigned long	time;
 
 	while (*gSpinPtr != SPIN_COMMAND_STOP)
 	{
-		ReadKeyboard();
-		if (GetKeyState(KEY_SPACE) || (GetKeyState2(KEY_RETURN)))	// see if key stop
+		UpdateInput();
+		if (UserWantsOut())									// see if key stop
 			goto bye;
 
 		DoSoundMaintenance(true);								// (must be after readkeyboard)

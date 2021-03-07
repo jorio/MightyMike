@@ -31,6 +31,7 @@
 #include "input.h"
 #include "version.h"
 #include <SDL.h>
+#include <string.h>
 
 extern	ObjNode			*gThisNodePtr,*gMyNodePtr,*ObjectList,*FirstNodePtr;
 extern	Boolean			gFinishedArea,gPPCFullScreenFlag;
@@ -63,6 +64,8 @@ extern	long		gShakeyScreenCount;
 extern	Boolean	gPPCFullScreenFlag;
 extern	SDL_Window	*gSDLWindow;
 
+extern const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS];
+
 
 
 
@@ -75,7 +78,9 @@ extern	SDL_Window	*gSDLWindow;
 /*     VARIABLES      */
 /**********************/
 
-Boolean		gAbortGameFlag,gWinFlag,gFinishedArea,gESCDownFlag,gRadarKeyFlag;
+PrefsType	gGamePrefs;
+
+Boolean		gAbortGameFlag,gWinFlag,gFinishedArea;
 
 long		gFrames=0;				// # frames tick counter
 Byte		gSceneNum,gAreaNum;
@@ -384,10 +389,6 @@ long	r;
 
 	r = MyRandomLong();
 
-again:
-
-    TurnOnISp();                                // lets use ISp
-
 	uint32_t timeSinceSim = GAME_SPEED_SDL;							// force simulation to run once when we enter this function
 
 	do
@@ -463,13 +464,13 @@ again:
 
 		DoSoundMaintenance(true);						// (must be after readkeyboard)
 
-		if (CheckNewKeyDown2(kKey_Radar,&gRadarKeyFlag))	// see if show radar
+		if (GetNewNeedState(kNeed_Radar))				// see if show radar
 			DisplayBunnyRadar();
 
-		if (CheckNewKeyDown2(kKey_Pause,&gESCDownFlag))		// see if abort game
+		if (GetNewNeedState(kNeed_UIPause))				// see if abort game
 			gAbortGameFlag = AskIfQuit();
 
-		if (GetKeyState_Real(KEY_PERIOD) && GetKeyState_Real(KEY_N))	// see if skip to next level
+		if (GetSDLKeyState(SDL_SCANCODE_PERIOD) && GetSDLKeyState(SDL_SCANCODE_N))	// see if skip to next level
 		{
 			gNumBunnies = 1;
 			DecBunnyCount();
@@ -478,14 +479,24 @@ again:
 		if (gNumBunnies <= 0)					// special hack to fix reported bug!?!?
 			DecBunnyCount();
 
-		static Boolean kdScreenScroll = false;
-		if (CheckNewKeyDown2(KEY_F9, &kdScreenScroll))
+#if _DEBUG
+		if (GetNewSDLKeyState(SDL_SCANCODE_F8))
+		{
+			extern Handle gPFBufferHandle;
+			DumpIndexedTGA(
+				"playfield.tga",
+				PF_BUFFER_WIDTH,
+				PF_BUFFER_HEIGHT,
+				*gPFBufferHandle
+			);
+		}
+#endif
+
+		if (GetNewSDLKeyState(SDL_SCANCODE_F9))
 			gScreenScrollFlag = !gScreenScrollFlag;
 
 	} while((!gGlobFlag_MeDoneDead) && (!gAbortGameFlag) &&
 			(!gFinishedArea) && (!gAbortDemoFlag));
-
-	TurnOffISp();                               // well, we dont need ISp anymore
 }
 
 
@@ -1450,11 +1461,18 @@ OSErr		iErr;
 /************************************************************/
 
 void GameMain(void)
-  {
+{
 	ToolBoxInit();
  	MaxApplZone();
  	MoreMasters();
 	VerifySystem();
+
+
+	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
+	gGamePrefs.fullscreen = false;
+	gGamePrefs.vsync = true;
+	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
+	
 
 			/* SEE IF SET FOR FULL SCREEN MODE */
 

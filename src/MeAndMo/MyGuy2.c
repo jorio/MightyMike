@@ -28,7 +28,7 @@ extern	MikeFixed		gY;
 extern	CollisionRec	gCollisionList[];
 extern	short			gNumCollisions;
 extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	Boolean			gShootButtonDownFlag,gTeleportingFlag;
+extern	Boolean			gTeleportingFlag;
 extern	unsigned char	gInterlaceMode;
 extern	ObjNode			*gMyNodePtr;
 extern	long		gMyNormalMaxSpeed;
@@ -199,25 +199,25 @@ void MoveMeFrog_Sit(void)
 
 					/* DO JUMP KEYS */
 
-	if (GetKeyState(kKey_Forward))	// see if go up
+	if (GetNeedState(kNeed_Up))	// see if go up
 	{
 		gDY = -FROG_JUMP_SPEED;
 		SwitchAnim(gThisNodePtr,4);
 	}
 	else
-	if (GetKeyState(kKey_Right)) // see if go right
+	if (GetNeedState(kNeed_Right)) // see if go right
 	{
 		gDX = FROG_JUMP_SPEED;
 		SwitchAnim(gThisNodePtr,5);
 	}
 	else
-	if (GetKeyState(kKey_Backward)) // see if go down
+	if (GetNeedState(kNeed_Down)) // see if go down
 	{
 		gDY = FROG_JUMP_SPEED;
 		SwitchAnim(gThisNodePtr,6);
 	}
 	else
-	if (GetKeyState(kKey_Left)) // see if go left
+	if (GetNeedState(kNeed_Left)) // see if go left
 	{
 		gDX = -FROG_JUMP_SPEED;
 		SwitchAnim(gThisNodePtr,7);

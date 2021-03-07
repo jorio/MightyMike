@@ -38,6 +38,8 @@ extern SDL_Window*			gSDLWindow;
 extern SDL_Renderer*		gSDLRenderer;
 extern SDL_Texture*			gSDLTexture;
 
+extern	PrefsType			gGamePrefs;
+
 
 /****************************/
 /*    PROTOTYPES            */
@@ -733,27 +735,17 @@ void PresentIndexedFramebuffer(void)
 {
 	// Check dithering key
 	static Boolean filterDithering = true;
-	static Boolean kdDithering = false;
-	if (CheckNewKeyDown2(kVK_F10, &kdDithering))
-	{
-		filterDithering = !filterDithering;
-	}
+//	if (GetNewSDLKeyState(SDL_SCANCODE_F10))
+//	{
+//		filterDithering = !filterDithering;
+//	}
 
-	// Check fullscreen key
-	static Boolean fullscreen = false;
-	static Boolean kdFullscreen = false;
-	if (CheckNewKeyDown2(kVK_F11, &kdFullscreen))
-	{
-		fullscreen = !fullscreen;
-		SDL_SetWindowFullscreen(gSDLWindow, fullscreen? SDL_WINDOW_FULLSCREEN_DESKTOP: 0);
-	}
 
 	// Check screenshot key
-	static Boolean kdScreenshot = false;
-	if (CheckNewKeyDown2(kVK_F12, &kdScreenshot))
-	{
-		SaveIndexedScreenshot();
-	}
+//	if (CheckNewKeyDown2(kVK_F12, &kdScreenshot))
+//	{
+//		SaveIndexedScreenshot();
+//	}
 
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
@@ -773,4 +765,9 @@ void PresentIndexedFramebuffer(void)
 	SDL_RenderClear(gSDLRenderer);
 	SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
 	SDL_RenderPresent(gSDLRenderer);
+}
+
+void SetFullscreenMode(void)
+{
+	SDL_SetWindowFullscreen(gSDLWindow, gGamePrefs.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }

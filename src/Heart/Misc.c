@@ -228,7 +228,7 @@ long	old;
 			SDL_Delay(SPINLOCK_DELAY);
 		}
 		--time;
-		if (GetKeyState2(KEY_SPACE) || (GetKeyState2(KEY_RETURN)))	// see if keyboard break out
+		if (UserWantsOut())							// see if keyboard break out
 			return(true);
 		DoSoundMaintenance(true);						// (must be after readkeyboard)
 	}
@@ -251,10 +251,8 @@ void Wait2(long time)
 		DrawObjects();
 		DumpUpdateRegions();
 		ReadKeyboard();
-//		if (GetKeyState(KEY_Q))						// see if key quit
-//			CleanQuit();
 
-		if (GetKeyState2(KEY_SPACE) || GetKeyState2(KEY_RETURN))	// exit if key down
+		if (UserWantsOut())								// exit if key down
 			break;
 
 		DoSoundMaintenance(true);						// (must be after readkeyboard)
@@ -321,7 +319,7 @@ void WaitWhileMusic(void)
 //			if (GetKeyState(KEY_CAPSLOCK))				// see if pause
 //				while (GetKeyState2(KEY_CAPSLOCK));
 
-			if (GetKeyState2(KEY_SPACE) ||(GetKeyState2(KEY_RETURN)))	// exit if key down
+			if (UserWantsOut())	// exit if key down
 				break;
 
 			DoSoundMaintenance(true);						// (must be after readkeyboard)

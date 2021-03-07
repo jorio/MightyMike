@@ -34,7 +34,7 @@ extern	MikeFixed		gY;
 extern	CollisionRec	gCollisionList[];
 extern	short			gNumCollisions;
 extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	Boolean			gShootButtonDownFlag,gTeleportingFlag,gFrogFlag,gSpaceShipFlag;
+extern	Boolean			gTeleportingFlag,gFrogFlag,gSpaceShipFlag;
 extern	unsigned char	gInterlaceMode;
 extern	Byte			gCurrentWeaponType;
 extern	Boolean			gGlobalFlagList[MAX_GLOBAL_FLAGS];
@@ -201,8 +201,6 @@ Boolean		gMeOnWaterFlag;
 short		gLastNonDeathX,gLastNonDeathY;
 
 short		gSpeedyTimer;					// time remaining on speedy shoes
-
-Boolean		gButtonWasDownFlag = false;
 
 
 /************************ INIT ME ********************/
@@ -634,25 +632,25 @@ Boolean	horizFlag,vertFlag;
 
 void ControlMeByKeyboard(Boolean *horizFlag, Boolean *vertFlag)
 {
-	if (GetKeyState(kKey_Forward))
+	if (GetNeedState(kNeed_Up))
 	{
 		gDY -= gMyAcceleration;
 		*vertFlag = true;
 	}
 	else
-	if (GetKeyState(kKey_Backward))
+	if (GetNeedState(kNeed_Down))
 	{
 		gDY += gMyAcceleration;
 		*vertFlag = true;
 	}
 
-	if (GetKeyState(kKey_Left))
+	if (GetNeedState(kNeed_Left))
 	{
 		gDX -= gMyAcceleration;
 		*horizFlag = true;
 	}
 	else
-	if (GetKeyState(kKey_Right))
+	if (GetNeedState(kNeed_Right))
 	{
 		gDX += gMyAcceleration;
 		*horizFlag = true;

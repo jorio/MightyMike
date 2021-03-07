@@ -47,65 +47,8 @@ short	gDemoKeyIterations;
 
 short	gHtab=0,gVtab=0;
 
-static KeyMap gKeyMap,gOldKeyMap;
+//static KeyMap gKeyMap,gOldKeyMap;
 
-struct KeyRec
-{
-	short		keyNum;						// mapped keyboard key #
-	char		ascii;						// ascii char for that key
-};
-typedef struct KeyRec KeyRec;
-
-static KeyRec	KeyList[NUM_KEYS] =
-		{
-			KEY_A,'A',
-			KEY_B,'B',
-			KEY_C,'C',
-			KEY_D,'D',
-			KEY_E,'E',
-			KEY_F,'F',
-			KEY_G,'G',
-			KEY_H,'H',
-			KEY_I,'I',
-			KEY_J,'J',
-			KEY_K,'K',
-			KEY_L,'L',
-			KEY_M,'M',
-			KEY_N,'N',
-			KEY_O,'O',
-			KEY_P,'P',
-			KEY_Q,'Q',
-			KEY_R,'R',
-			KEY_S,'S',
-			KEY_T,'T',
-			KEY_U,'U',
-			KEY_V,'V',
-			KEY_W,'W',
-			KEY_X,'X',
-			KEY_Y,'Y',
-			KEY_Z,'Z',
-			KEY_0,'0',
-			KEY_1,'1',
-			KEY_2,'2',
-			KEY_3,'3',
-			KEY_4,'4',
-			KEY_5,'5',
-			KEY_6,'6',
-			KEY_7,'7',
-			KEY_8,'8',
-			KEY_9,'9',
-			KEY_PERIOD,'.',
-			KEY_Z,'Z',
-			KEY_SPACE,' ',
-			KEY_QMARK,'?',
-			KEY_LEFT,CHAR_LEFT,
-			KEY_DELETE,CHAR_DELETE,
-			KEY_RETURN,CHAR_RETURN
-		};
-
-
-static Boolean		gUpButtonDownFlag,gDownButtonDownFlag;
-Boolean		gSpaceButtonDownFlag;
 Boolean		gAbortDemoFlag,gGameIsDemoFlag;
 
 
@@ -130,10 +73,13 @@ void StartRecordingDemo(void)
 	gDemoDataPtr = gPrevDemoDataPtr = *gDemoDataHandle;
 	gDemoSize = 0L;											// init size to 0
 
+	DoFatalAlert("TODO: Reimplement StartRecordingDemo");
+#if 0
 	gOldKeyMap[0] = 0xffffffffL;							// init old keymap
 	gOldKeyMap[1] = 0xffffffffL;
 	gOldKeyMap[2] = 0xffffffffL;
 	gOldKeyMap[3] = 0xffffffffL;
+#endif
 
 	gDemoMode = DEMO_MODE_RECORD;
 	SetMyRandomSeed(DEMO_SEED);								// always use same seed!
@@ -217,14 +163,17 @@ void InitDemoPlayback(void)
 
 void ReadKeyboard(void)
 {
+#if 0
 short	*intPtr;
 KeyMap tempKeys;
+#endif
 
 					/* DEMO PLAYBACK */
 
 	if (gDemoMode == DEMO_MODE_PLAYBACK)				// see if read from demo file
 	{
-		DoFatalAlert("wat");
+		DoFatalAlert("TODO: Reimplement demo playback");
+#if 0
 		if (gDemoKeyIterations == 0)					// see if need to get next keymap
 		{
 			intPtr = (short *)gDemoDataPtr;				// get new iteration count
@@ -247,18 +196,21 @@ KeyMap tempKeys;
 		{
 			StopDemo();
 		}
+#endif
 	}
 	else
 	{
-		MyGetKeys(&gKeyMap);										// READ THE REAL KEYBOARD
+//		MyGetKeys(&gKeyMap);										// READ THE REAL KEYBOARD
 //		GetKeys(gKeyMap);								// READ THE REAL KEYBOARD
-    }
+		UpdateInput();
+	}
 
 					/* RECORD DEMO */
 
 	if (gDemoMode == DEMO_MODE_RECORD)					// see if record keyboard
 	{
-		DoFatalAlert("wat2");
+		DoFatalAlert("TODO: Reimplement demo recording");
+#if 0
 		if ((gKeyMap[0] == gOldKeyMap[0]) &&					// see if same as last occurrence
 			(gKeyMap[1] == gOldKeyMap[1]) &&
 			(gKeyMap[2] == gOldKeyMap[2]) &&
@@ -283,12 +235,8 @@ KeyMap tempKeys;
 
 		if (gDemoSize >= (MAX_DEMO_SIZE - sizeof(KeyMap)))		// see if overflowed
 			DoFatalAlert("Demo Record Buffer Overflow!");
+#endif
 	}
-
-				/* SEE IF QUIT GAME */
-
-	if (GetKeyState_Real(KEY_Q) && GetKeyState_Real(KEY_APPLE))			// see if key quit
-		CleanQuit();
 }
 
 
@@ -300,76 +248,6 @@ void StopDemo(void)
 	gDemoMode = DEMO_MODE_OFF;			// set back to OFF
 	gAbortDemoFlag = true;
 	ReadKeyboard();						// read keyboard to reset it all
-}
-
-
-/****************** GET KEY STATE ***********/
-// NOTE: KEYS ARE NOT ASCII VALUES!!!
-//
-
-Boolean GetKeyState(unsigned short key)
-{
-unsigned char *keyMap;
-
-	keyMap = (unsigned char *)&gKeyMap;
-	GAME_ASSERT((key>>3) < 16);
-	return ( ( keyMap[key>>3] >> (key & 7) ) & 1);
-}
-
-
-/****************** GET KEY STATE 2 ***********/
-// NOTE: KEYS ARE NOT ASCII VALUES!!!
-// v2 Automatically calls ReadKeyboard
-
-Boolean GetKeyState2(unsigned short key)
-{
-unsigned char *keyMap;
-
-	ReadKeyboard();
-
-	keyMap = (unsigned char *)&gKeyMap;
-	return ( ( keyMap[key>>3] >> (key & 7) ) & 1);
-}
-
-
-/********************** CHECK KEY *********************/
-
-char CheckKey(void)
-{
-static		oldKey = 0;
-short		i;
-char		theChar;
-
-again:
-	ReadKeyboard();
-	for (i=0; i<NUM_KEYS; i++)
-	{
-
-		if (GetKeyState(KeyList[i].keyNum))
-		{
-			theChar = KeyList[i].ascii;
-			goto	gotit;
-		}
-
-	}
-	oldKey = 0;											// no key found
-	return('\xBD');
-
-					/* GOT SOMETHING */
-gotit:
-	if ((theChar == '1') && GetKeyState(KEY_SHIFT))		// check for !
-		theChar = '!';
-	else
-	if ((theChar == '8') && GetKeyState(KEY_SHIFT))		// check for *
-		theChar = '*';
-
-	if (theChar == oldKey)								// see if still down
-		goto	again;
-
-	oldKey = theChar;
-
-
-	return(theChar);
 }
 
 /*************** PRINT NUMBER ****************/
@@ -457,63 +335,6 @@ void PrintBigChar(char ch)
 
 	gHtab += FONT_WIDTH;
 
-}
-
-
-/****************** WAIT KEY UP *******************/
-
-void WaitKeyUp(Byte key)
-{
-	while(GetKeyState2(key));
-}
-
-
-/*************** CHECK NEW KEY DOWN ****************/
-//
-// checks if key is down and flagPtr points to KeyAlreadyDown Flag
-//
-
-Boolean CheckNewKeyDown(Byte key1, Byte key2, Boolean *flagPtr)
-{
-	if (GetKeyState2(key1) || (GetKeyState2(key2)))
-	{
-		if (*flagPtr)
-			return(false);
-		else
-		{
-			*flagPtr = true;
-			return(true);
-		}
-	}
-	else
-	{
-		*flagPtr = false;
-		return(false);
-	}
-}
-
-/*************** CHECK NEW KEY DOWN 2 ****************/
-//
-// only 1 key
-//
-
-Boolean CheckNewKeyDown2(Byte key1, Boolean *flagPtr)
-{
-	if (GetKeyState2(key1))
-	{
-		if (*flagPtr)
-			return(false);
-		else
-		{
-			*flagPtr = true;
-			return(true);
-		}
-	}
-	else
-	{
-		*flagPtr = false;
-		return(false);
-	}
 }
 
 

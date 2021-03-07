@@ -9,37 +9,92 @@
 /* EXTERNALS   */
 /***************/
 
-#include <stdlib.h>
-#if 0
-#include <DrawSprocket.h>
-#include <InputSprocket.h>
-#include <CursorDevices.h>
-#include <Traps.h>
-#include <TextUtils.h>
-#include <FixMath.h>
-#endif
-#include "myglobals.h"
+#include <SDL.h>
+#include <string.h>
 #include "misc.h"
 #include "input.h"
-#include "window.h"
 
-extern	unsigned long 		gOriginalSystemVolume;
-extern	short				gMainAppRezFile;
-extern	Byte				gDemoMode;
-extern	Boolean				gAbortedFlag,gGameOverFlag,gAbortDemoFlag;
+#include <window.h>
+
+#include "structures.h"
+
+extern	SDL_Window* gSDLWindow;
+extern	PrefsType	gGamePrefs;
 
 /**********************/
 /*     PROTOTYPES     */
 /**********************/
 
-static void InitMouseDevice(void);
+SDL_GameController* gSDLController = NULL;
+SDL_JoystickID		gSDLJoystickInstanceID = -1;		// ID of the joystick bound to gSDLController
 
+Byte				gRawKeyboardState[SDL_NUM_SCANCODES];
+bool				gAnyNewKeysPressed = false;
+char				gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
+
+Byte				gNeedStates[NUM_CONTROL_NEEDS];
+
+static SDL_GameController* TryOpenController(bool showMessage);
+static void OnJoystickRemoved(SDL_JoystickID which);
 
 /****************************/
 /*    CONSTANTS             */
 /****************************/
 
-#define	USE_ISP		0
+enum
+{
+	KEYSTATE_OFF		= 0b00,
+	KEYSTATE_UP			= 0b01,
+
+	KEYSTATE_PRESSED	= 0b10,
+	KEYSTATE_HELD		= 0b11,
+
+	KEYSTATE_ACTIVE_BIT	= 0b10,
+};
+
+#define JOYSTICK_DEAD_ZONE_RAW (32767/10)
+#define JOYSTICK_DEAD_ZONE_RAW_SQUARED (JOYSTICK_DEAD_ZONE_RAW*JOYSTICK_DEAD_ZONE_RAW)
+
+#define JOYSTICK_FAKEDIGITAL_DEAD_ZONE .66f
+
+/*
+#if __APPLE__
+#define DEFAULTKB1_JUMP		SDL_SCANCODE_LGUI
+#define DEFAULTKB2_JUMP		SDL_SCANCODE_RGUI
+#define DEFAULTKB1_PICKUP	SDL_SCANCODE_LALT
+#define DEFAULTKB2_PICKUP	SDL_SCANCODE_RALT
+#else
+#define DEFAULTKB1_JUMP		SDL_SCANCODE_LALT
+#define DEFAULTKB2_JUMP		SDL_SCANCODE_RALT
+#define DEFAULTKB1_PICKUP	SDL_SCANCODE_LCTRL
+#define DEFAULTKB2_PICKUP	SDL_SCANCODE_RCTRL
+#endif
+*/
+
+const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS] =
+{
+	//Need------------------    Keys--------------------------------------------- MouseBtn-------  MWheel-  GamepadButtons----------------------------------------------------------  GamepadAxis--------------  GamepadAxisSign
+	[kNeed_Up				] = {{SDL_SCANCODE_UP,		SDL_SCANCODE_W,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_UP,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		-1,		},
+	[kNeed_Down				] = {{SDL_SCANCODE_DOWN,	SDL_SCANCODE_S,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_DOWN,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		+1,		},
+	[kNeed_Left				] = {{SDL_SCANCODE_LEFT,	SDL_SCANCODE_A,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_LEFT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		-1,		},
+	[kNeed_Right			] = {{SDL_SCANCODE_RIGHT,	SDL_SCANCODE_D,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_RIGHT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		+1,		},
+	//[kNeed_PrevWeapon		] = {{0,					0,						}, 0,					+1,	{SDL_CONTROLLER_BUTTON_LEFTSHOULDER,SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_NextWeapon		] = {{SDL_SCANCODE_LSHIFT,	SDL_SCANCODE_RSHIFT,	}, 0,					-1,	{SDL_CONTROLLER_BUTTON_Y, 			SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_Attack			] = {{SDL_SCANCODE_SPACE,	0,						}, SDL_BUTTON_LEFT,		0,	{SDL_CONTROLLER_BUTTON_X,			SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_Radar			] = {{SDL_SCANCODE_R,		SDL_SCANCODE_TAB,		}, SDL_BUTTON_MIDDLE,	0,	{SDL_CONTROLLER_BUTTON_B,			SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_UIUp				] = {{SDL_SCANCODE_UP,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_UP,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		-1,		},
+	[kNeed_UIDown			] = {{SDL_SCANCODE_DOWN,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_DOWN,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		+1,		},
+	[kNeed_UILeft			] = {{SDL_SCANCODE_LEFT,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_LEFT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		-1,		},
+	[kNeed_UIRight			] = {{SDL_SCANCODE_RIGHT,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_RIGHT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		+1,		},
+	[kNeed_UIConfirm		] = {{SDL_SCANCODE_RETURN,	SDL_SCANCODE_SPACE,		}, 0,					0,	{SDL_CONTROLLER_BUTTON_START,		SDL_CONTROLLER_BUTTON_A,			}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_UIBack			] = {{SDL_SCANCODE_ESCAPE,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_BACK,		SDL_CONTROLLER_BUTTON_B,			}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_UIPause			] = {{SDL_SCANCODE_ESCAPE,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_START,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_ToggleMusic		] = {{SDL_SCANCODE_F9,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+//	[kNeed_ToggleAmbient	] = {{SDL_SCANCODE_F10,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_ToggleFullscreen	] = {{SDL_SCANCODE_F11,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_RaiseVolume		] = {{SDL_SCANCODE_EQUALS,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_LowerVolume		] = {{SDL_SCANCODE_MINUS,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+};
 
 
 /**********************/
@@ -47,583 +102,323 @@ static void InitMouseDevice(void);
 /**********************/
 
 
-KeyMap gKeyMap,gNewKeys,gOldKeys,gKeyMap_Real,gNewKeys_Real,gOldKeys_Real;
+/**********************/
+/* STATIC FUNCTIONS   */
+/**********************/
 
-Boolean	gReadFromInputSprockets = false;
-Boolean	gISpActive 				= false;
-Boolean	gPlayerUsingKeyControl 	= false;
-Boolean	gISPInitialized			= false;
-
-
-		/* CONTORL NEEDS */
-
-#define	NEED_NUM_MOUSEMOTION	4
-#define	NUM_CONTROL_NEEDS		10
-
-#if USE_ISP
-static ISpNeed	gControlNeeds[NUM_CONTROL_NEEDS] =
+static inline void UpdateKeyState(Byte* state, bool downNow)
 {
-	{													// 0
-		"Fire Weapon",
-		131,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_Btn_Fire,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 1
-		"Select Weapon",
-		136,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_Btn_Select,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 2
-		"Movement",
-		146,
-		0,
-		0,
-		kISpElementKind_DPad,
-		kISpElementLabel_Pad_Move_Horiz,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 3
-		"Bunny Radar",
-		147,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_Btn_Look,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 4
-		"Pause",
-		137,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_Btn_StartPause,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 5
-		"Toggle Music",
-		129,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_None,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 6
-		"Toggle Sound Effects",
-		129,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_None,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 7
-		"Raise Volume",
-		145,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_None,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 8
-		"Lower Volume",
-		139,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_None,
-		0,
-		0,
-		0,
-		0
-	},
-
-	{													// 9
-		"Quit Application",
-		202,
-		0,
-		0,
-		kISpElementKind_Button,
-		kISpElementLabel_Btn_Quit,
-		0,
-		0,
-		0,
-		0
+	switch (*state)	// look at prev state
+	{
+	case KEYSTATE_HELD:
+	case KEYSTATE_PRESSED:
+		*state = downNow ? KEYSTATE_HELD : KEYSTATE_UP;
+		break;
+	case KEYSTATE_OFF:
+	case KEYSTATE_UP:
+	default:
+		*state = downNow ? KEYSTATE_PRESSED : KEYSTATE_OFF;
+		break;
 	}
-};
-
-
-ISpElementReference	gVirtualElements[NUM_CONTROL_NEEDS];
-#endif
-
-short	gNeedToKey[NUM_CONTROL_NEEDS] =				// table to convert need # into key equate value
-{
-	kKey_Attack,
-	kKey_SelectWeapon,
-
-	0,							// dpad movement
-
-	kKey_Radar,
-
-	kKey_Pause,
-
-	kKey_ToggleMusic,
-	kKey_ToggleEffects,
-	kKey_RaiseVolume,
-	kKey_LowerVolume,
-
-	kKey_Quit
-};
-
-
-
-
+}
 
 /************************* INIT INPUT *********************************/
 
 void InitInput(void)
 {
-#if USE_ISP
-OSErr				iErr;
-ISpDeviceReference	dev[10];
-UInt32				count = 0;
+}
 
-        /* SEE IF ISP EXISTS */
 
-    if ((void *)ISpStartup == (void *)kUnresolvedCFragSymbolAddress)
-		DoFatalAlert("You do not have Input Sprocket installed.  This game requires Input Sprocket to function.  To install Apple's Game Sprockets, go to www.pangeasoft.net/downloads.html");
+void UpdateInput(void)
+{
 
-	ISpStartup();
-	gISPInitialized = true;
+	gTextInput[0] = '\0';
 
-				/* CREATE NEW NEEDS */
 
-	iErr = ISpElement_NewVirtualFromNeeds(NUM_CONTROL_NEEDS, gControlNeeds, gVirtualElements, 0);
-	if (iErr)
+	/**********************/
+	/* DO SDL MAINTENANCE */
+	/**********************/
+
+//	MouseSmoothing_StartFrame();
+
+	int mouseWheelDelta = 0;
+
+	SDL_PumpEvents();
+	SDL_Event event;
+	while (SDL_PollEvent(&event))
 	{
-		DoAlert("InitInput: ISpElement_NewVirtualFromNeeds failed!");
-		ShowSystemErr(iErr);
-	}
-
-	iErr = ISpInit(NUM_CONTROL_NEEDS, gControlNeeds, gVirtualElements, 'MMik','Mik6', 0, 1000, 0);
-	if (iErr)
-	{
-		DoAlert("InitInput: ISpInit failed!");
-		ShowSystemErr(iErr);
-	}
-
-
-			/* ACTIVATE ALL DEVICES */
-
-	if (ISpDevices_Extract(10,&count,dev) != noErr)
-		DoFatalAlert("InitInput: ISpDevices_Extract failed!");
-
-	if (ISpDevices_Activate(count, dev) != noErr)
-		DoFatalAlert("InitInput: ISpDevices_Activate failed!");
-
-	gISpActive = true;
-
-	TurnOffISp();
-
-#else
-	gISpActive = false;
-	gReadFromInputSprockets = false;
-#endif
-}
-
-
-
-/**************** READ KEYBOARD_REAL *************/
-//
-// This just does a simple read of the REAL keyboard (regardless of Input Sprockets)
-//
-
-void ReadKeyboard_Real(void)
-{
-
-
-	GetKeys(gKeyMap_Real);
-
-			/* CALC WHICH KEYS ARE NEW THIS TIME */
-
-	gNewKeys_Real[0] = (gOldKeys_Real[0] ^ gKeyMap_Real[0]) & gKeyMap_Real[0];
-	gNewKeys_Real[1] = (gOldKeys_Real[1] ^ gKeyMap_Real[1]) & gKeyMap_Real[1];
-	gNewKeys_Real[2] = (gOldKeys_Real[2] ^ gKeyMap_Real[2]) & gKeyMap_Real[2];
-	gNewKeys_Real[3] = (gOldKeys_Real[3] ^ gKeyMap_Real[3]) & gKeyMap_Real[3];
-
-
-			/* REMEMBER AS OLD MAP */
-
-	gOldKeys_Real[0] = gKeyMap_Real[0];
-	gOldKeys_Real[1] = gKeyMap_Real[1];
-	gOldKeys_Real[2] = gKeyMap_Real[2];
-	gOldKeys_Real[3] = gKeyMap_Real[3];
-}
-
-
-/****************** GET KEY STATE: REAL ***********/
-//
-// for data from ReadKeyboard_Real
-//
-
-Boolean GetKeyState_Real(unsigned short key)
-{
-unsigned char *keyMap;
-
-	keyMap = (unsigned char *)&gKeyMap_Real;
-	return ( ( keyMap[key>>3] >> (key & 7) ) & 1);
-}
-
-/****************** GET NEW KEY STATE: REAL ***********/
-//
-// for data from ReadKeyboard_Real
-//
-
-Boolean GetNewKeyState_Real(unsigned short key)
-{
-unsigned char *keyMap;
-
-	keyMap = (unsigned char *)&gNewKeys_Real;
-	return ( ( keyMap[key>>3] >> (key & 7) ) & 1);
-}
-
-
-
-
-/****************** GET NEW KEY STATE ***********/
-//
-// NOTE: Assumes that ReadKeyboard has already been called!!
-//
-
-Boolean GetNewKeyState(unsigned short key)
-{
-unsigned char *keyMap;
-
-	keyMap = (unsigned char *)&gNewKeys;
-	return ( ( keyMap[key>>3] >> (key & 7) ) & 1);
-}
-
-/********************** MY GET KEYS ******************************/
-//
-// Depending on mode, will either read key map from GetKeys or
-// will "fake" a keymap using Input Sprockets.
-//
-
-void MyGetKeys(KeyMap *keyMap)
-{
-short	i,key,j,q;
-UInt32	keyState;
-unsigned char *keyBytes;
-
-	ReadKeyboard_Real();												// always read real keyboard anyway
-
-	if (!gReadFromInputSprockets)
-	{
-		GetKeys(*keyMap);
-	}
-	else
-	{
-#if USE_ISP
-
-		keyBytes = (unsigned char *)keyMap;
-		(*keyMap)[0] = (*keyMap)[1] = (*keyMap)[2] = (*keyMap)[3] = 0;		// clear out keymap
-
-			/***********************************/
-			/* POLL NEEDS FROM INPUT SPROCKETS */
-			/***********************************/
-
-		for (i = 0; i < NUM_CONTROL_NEEDS; i++)
+		switch (event.type)
 		{
-			switch(gControlNeeds[i].theKind)
+		case SDL_QUIT:
+			ExitToShell();			// throws Pomme::QuitRequest
+			return;
+
+		case SDL_WINDOWEVENT:
+			switch (event.window.event)
 			{
-					/* SIMPLE KEY BUTTON */
+			case SDL_WINDOWEVENT_CLOSE:
+				ExitToShell();	// throws Pomme::QuitRequest
+				return;
 
-				case	kISpElementKind_Button:
-						ISpElement_GetSimpleState(gVirtualElements[i],&keyState);		// get state of this one
-						if (keyState == kISpButtonDown)
-						{
-							key = gNeedToKey[i];										// get keymap value for this "need"
-							j = key>>3;
-							q = (1<<(key&7));
-							keyBytes[j] |= q;											// set correct bit in keymap
-						}
-						break;
+//			case SDL_WINDOWEVENT_RESIZED:
+//				QD3D_OnWindowResized(event.window.data1, event.window.data2);
+//				break;
 
-					/* DIRECTIONAL PAD */
+				/*
+									case SDL_WINDOWEVENT_FOCUS_LOST:
+				#if __APPLE__
+										// On Mac, always restore system mouse accel if cmd-tabbing away from the game
+										RestoreMacMouseAcceleration();
+				#endif
+										break;
 
-				case	kISpElementKind_DPad:
-						ISpElement_GetSimpleState(gVirtualElements[i],&keyState);		// get state of this need
+									case SDL_WINDOWEVENT_FOCUS_GAINED:
+				#if __APPLE__
+										// On Mac, kill mouse accel when focus is regained only if the game has captured the mouse
+										if (SDL_GetRelativeMouseMode())
+											KillMacMouseAcceleration();
+				#endif
+										break;
+				*/
+			}
+			break;
 
-						gPlayerUsingKeyControl = true;									// assume player using key control
+		case SDL_TEXTINPUT:
+			memcpy(gTextInput, event.text.text, sizeof(gTextInput));
+			_Static_assert(sizeof(gTextInput) == sizeof(event.text.text), "size mismatch: gTextInput / event.text.text");
+			break;
 
-						switch(keyState)
-						{
-							case	kISpPadLeft:
-									j = kKey_Left>>3;
-									q = (1<<(kKey_Left&7));
-									keyBytes[j] |= q;
-									break;
+			/*
+						case SDL_MOUSEMOTION:
+							if (!gEatMouse)
+							{
+								MouseSmoothing_OnMouseMotion(&event.motion);
+							}
+							break;
+			*/
 
-							case	kISpPadUpLeft:
-									j = kKey_Left>>3;
-									q = (1<<(kKey_Left&7));
-									keyBytes[j] |= q;
-									j = kKey_Forward>>3;
-									q = (1<<(kKey_Forward&7));
-									keyBytes[j] |= q;
-									break;
+		case SDL_JOYDEVICEADDED:	 // event.jdevice.which is the joy's INDEX (not an instance id!)
+			TryOpenController(false);
+			break;
 
-							case	kISpPadUp:
-									j = kKey_Forward>>3;
-									q = (1<<(kKey_Forward&7));
-									keyBytes[j] |= q;
-									break;
+		case SDL_JOYDEVICEREMOVED:	// event.jdevice.which is the joy's UNIQUE INSTANCE ID (not an index!)
+			OnJoystickRemoved(event.jdevice.which);
+			break;
 
-							case	kISpPadUpRight:
-									j = kKey_Right>>3;
-									q = (1<<(kKey_Right&7));
-									keyBytes[j] |= q;
-									j = kKey_Forward>>3;
-									q = (1<<(kKey_Forward&7));
-									keyBytes[j] |= q;
-									break;
-
-							case	kISpPadRight:
-									j = kKey_Right>>3;
-									q = (1<<(kKey_Right&7));
-									keyBytes[j] |= q;
-									break;
-
-							case	kISpPadDownRight:
-									j = kKey_Right>>3;
-									q = (1<<(kKey_Right&7));
-									keyBytes[j] |= q;
-									j = kKey_Backward>>3;
-									q = (1<<(kKey_Backward&7));
-									keyBytes[j] |= q;
-									break;
-
-							case	kISpPadDown:
-									j = kKey_Backward>>3;
-									q = (1<<(kKey_Backward&7));
-									keyBytes[j] |= q;
-									break;
-
-							case	kISpPadDownLeft:
-									j = kKey_Left>>3;
-									q = (1<<(kKey_Left&7));
-									keyBytes[j] |= q;
-									j = kKey_Backward>>3;
-									q = (1<<(kKey_Backward&7));
-									keyBytes[j] |= q;
-									break;
-
-							default:
-									gPlayerUsingKeyControl = false;
-						}
-						break;
-					}
+		case SDL_MOUSEWHEEL:
+			mouseWheelDelta += event.wheel.y;
+			mouseWheelDelta += event.wheel.x;
+			break;
 		}
-#endif
+	}
+
+	int numkeys = 0;
+	const UInt8* keystate = SDL_GetKeyboardState(&numkeys);
+	uint32_t mouseButtons = SDL_GetMouseState(NULL, NULL);
+
+	gAnyNewKeysPressed = false;
+
+	{
+		int minNumKeys = numkeys < SDL_NUM_SCANCODES ? numkeys : SDL_NUM_SCANCODES;
+
+		for (int i = 0; i < minNumKeys; i++)
+		{
+			UpdateKeyState(&gRawKeyboardState[i], keystate[i]);
+			if (gRawKeyboardState[i] == KEYSTATE_PRESSED)
+				gAnyNewKeysPressed = true;
+		}
+
+		// fill out the rest
+		for (int i = minNumKeys; i < SDL_NUM_SCANCODES; i++)
+			UpdateKeyState(&gRawKeyboardState[i], false);
+	}
+
+	// --------------------------------------------
+
+
+	for (int i = 0; i < NUM_CONTROL_NEEDS; i++)
+	{
+		const KeyBinding* kb = &gGamePrefs.keys[i];
+
+		bool downNow = false;
+
+		for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
+			if (kb->key[j] && kb->key[j] < numkeys)
+				downNow |= 0 != keystate[kb->key[j]];
+
+		if (kb->mouseButton)
+			downNow |= 0 != (mouseButtons & SDL_BUTTON(kb->mouseButton));
+
+		if ((kb->mouseWheelDelta > 0 && mouseWheelDelta > 0) || (kb->mouseWheelDelta < 0 && mouseWheelDelta < 0))
+			downNow |= true;
+
+		if (gSDLController)
+		{
+			for (int j = 0; j < KEYBINDING_MAX_GAMEPAD_BUTTONS; j++)
+				if (kb->gamepadButton[j] != SDL_CONTROLLER_BUTTON_INVALID)
+					downNow |= 0 != SDL_GameControllerGetButton(gSDLController, kb->gamepadButton[j]);
+
+			if (kb->gamepadAxis != SDL_CONTROLLER_AXIS_INVALID)
+			{
+				int16_t rawValue = SDL_GameControllerGetAxis(gSDLController, kb->gamepadAxis);
+				downNow |= (kb->gamepadAxisSign > 0 && rawValue > (int16_t)(JOYSTICK_FAKEDIGITAL_DEAD_ZONE * 32767.0f))
+					|| (kb->gamepadAxisSign < 0 && rawValue < (int16_t)(JOYSTICK_FAKEDIGITAL_DEAD_ZONE * -32768.0f));
+			}
+		}
+
+		UpdateKeyState(&gNeedStates[i], downNow);
+	}
+
+
+	if (GetNewNeedState(kNeed_ToggleFullscreen))
+	{
+		gGamePrefs.fullscreen = gGamePrefs.fullscreen ? 0 : 1;
+		SetFullscreenMode();
 	}
 }
 
-
-
-
-/***************** GET MOUSE DELTA *****************/
-
-void GetMouseDelta(float *dx, float *dy)
+void ClearInput(void)
 {
-#if USE_ISP
-ISpDeltaData	deltaX,deltaY;
-OSStatus		err;
+	memset(gRawKeyboardState, KEYSTATE_HELD, sizeof(gRawKeyboardState));
+	memset(gNeedStates, KEYSTATE_HELD, sizeof(gNeedStates));
+//	ClearMouseState();
+//	EatMouseEvents();
+}
 
-	if (!gISpActive)				// make sure DSp active
-	{
-		*dy = *dx = 0;
-		return;
-	}
+/************************ GET SKIP KEY STATE ***************************/
 
-		/* SEE IF OVERRIDE MOUSE WITH DPAD MOVEMENT */
+bool UserWantsOut(void)
+{
+	return GetNewNeedState(kNeed_UIConfirm) || GetNewNeedState(kNeed_UIBack);
+}
 
-	if (gPlayerUsingKeyControl)
-	{
-		if (GetKeyState(kKey_Left))
-			*dx = -75;
-		else
-		if (GetKeyState(kKey_Right))
-			*dx = 75;
-		else
-			*dx = 0;
+bool UserWantsOutContinuous(void)
+{
+	return GetNeedState(kNeed_UIConfirm) || GetNeedState(kNeed_UIBack);
+}
 
-		if (GetKeyState(kKey_Forward))
-			*dy = -75;
-		else
-		if (GetKeyState(kKey_Backward))
-			*dy = 75;
-		else
-			*dy = 0;
+#pragma mark -
 
-		return;
-	}
 
-				/******************************/
-				/* READ MOUSE DELTAS FROM ISP */
-				/******************************/
+bool GetNewSDLKeyState(unsigned short sdlScanCode)
+{
+	return gRawKeyboardState[sdlScanCode] == KEYSTATE_PRESSED;
+}
 
-					/* DX */
+bool GetSDLKeyState(unsigned short sdlScanCode)
+{
+	return gRawKeyboardState[sdlScanCode] == KEYSTATE_PRESSED || gRawKeyboardState[sdlScanCode] == KEYSTATE_HELD;
+}
 
-	err = ISpElement_GetComplexState(gVirtualElements[NEED_NUM_MOUSEMOTION],
-									sizeof(ISpDeltaData),
-									&deltaX);
+bool AreAnyNewKeysPressed(void)
+{
+	return gAnyNewKeysPressed;
+}
 
-	if (err)
-	{
-		DoAlert("GetMouseDelta: ISpElement_GetComplexState failed!");
-		ShowSystemErr(err);
-	}
+bool GetNeedState(int needID)
+{
+	GAME_ASSERT(needID < NUM_CONTROL_NEEDS);
+	return 0 != (gNeedStates[needID] & KEYSTATE_ACTIVE_BIT);
+}
 
-					/* DY */
-
-	err = ISpElement_GetComplexState(gVirtualElements[NEED_NUM_MOUSEMOTION+1],
-									sizeof(ISpDeltaData),
-									&deltaY);
-
-	if (err)
-	{
-		DoAlert("GetMouseDelta: ISpElement_GetComplexState failed!");
-		ShowSystemErr(err);
-	}
-
-	*dx = (float)deltaX * (1.0f/120.0f); 			// convert to a number that works for us
-	*dy = -(float)deltaY * (1.0f/120.0f);
-#else
-		*dy = *dx = 0;
-#endif
+bool GetNewNeedState(int needID)
+{
+	GAME_ASSERT(needID < NUM_CONTROL_NEEDS);
+	return gNeedStates[needID] == KEYSTATE_PRESSED;
 }
 
 
 #pragma mark -
 
-/******************** TURN ON ISP *********************/
+/****************************** SDL JOYSTICK FUNCTIONS ********************************/
 
-void TurnOnISp(void)
+static SDL_GameController* TryOpenController(bool showMessage)
 {
-#if USE_ISP
-ISpDeviceReference	dev[10];
-UInt32		count = 0;
-OSErr		iErr;
-
-	if (!gISpActive)
+	if (gSDLController)
 	{
-		gReadFromInputSprockets = true;								// player control uses input sprockets
-		ISpResume();
-		gISpActive = true;
-
-				/* ACTIVATE ALL DEVICES */
-
-		iErr = ISpDevices_Extract(10,&count,dev);
-		if (iErr)
-			DoFatalAlert("TurnOnISp: ISpDevices_Extract failed!");
-		iErr = ISpDevices_Activate(count, dev);
-		if (iErr)
-			DoFatalAlert("TurnOnISp: ISpDevices_Activate failed!");
-
-			/* DEACTIVATE JUST THE MOUSE SINCE WE DONT NEED THAT */
-
-//		ISpDevices_ExtractByClass(kISpDeviceClass_Mouse,10,&count,dev);
-//		ISpDevices_Deactivate(count, dev);
+		printf("Already have a valid controller.\n");
+		return gSDLController;
 	}
-#endif
-}
 
-/******************** TURN OFF ISP *********************/
-
-void TurnOffISp(void)
-{
-#if USE_ISP
-ISpDeviceReference	dev[10];
-UInt32		count = 0;
-
-	if (gISpActive)
+	if (SDL_NumJoysticks() == 0)
 	{
-				/* DEACTIVATE ALL DEVICES */
-
-		ISpDevices_Extract(10,&count,dev);
-		ISpDevices_Deactivate(count, dev);
-		ISpSuspend();
-
-		gISpActive = false;
-		gReadFromInputSprockets = false;
+		return NULL;
 	}
-#endif
+
+	for (int i = 0; gSDLController == NULL && i < SDL_NumJoysticks(); ++i)
+	{
+		if (SDL_IsGameController(i))
+		{
+			gSDLController = SDL_GameControllerOpen(i);
+			gSDLJoystickInstanceID = SDL_JoystickGetDeviceInstanceID(i);
+		}
+	}
+
+	if (!gSDLController)
+	{
+		printf("Joystick(s) found, but none is suitable as an SDL_GameController.\n");
+		if (showMessage)
+		{
+			char messageBuf[1024];
+			snprintf(messageBuf, sizeof(messageBuf),
+				"The game does not support your controller yet (\"%s\").\n\n"
+				"You can play with the keyboard and mouse instead. Sorry!",
+				SDL_JoystickNameForIndex(0));
+			SDL_ShowSimpleMessageBox(
+				SDL_MESSAGEBOX_WARNING,
+				"Controller not supported",
+				messageBuf,
+				gSDLWindow);
+		}
+		return NULL;
+	}
+
+	printf("Opened joystick %d as controller: %s\n", gSDLJoystickInstanceID, SDL_GameControllerName(gSDLController));
+
+	/*
+	gSDLHaptic = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(gSDLController));
+	if (!gSDLHaptic)
+		printf("This joystick can't do haptic.\n");
+	else
+		printf("This joystick can do haptic!\n");
+	*/
+
+	return gSDLController;
 }
 
-
-
-/************************ DO KEY CONFIG DIALOG ***************************/
-
-void DoKeyConfigDialog(void)
+static void OnJoystickRemoved(SDL_JoystickID which)
 {
-	TODO_REWRITE_THIS();
-#if 0
-	FlushEvents (everyEvent, REMOVE_ALL_EVENTS);
+	if (NULL == gSDLController)		// don't care, I didn't open any controller
+		return;
 
-				/* DO ISP CONFIG DIALOG */
+	if (which != gSDLJoystickInstanceID)	// don't care, this isn't the joystick I'm using
+		return;
 
-	InitCursor;
-	TurnOnISp();
-	ISpConfigure(nil);
-	TurnOffISp();
-	HideCursor();
-#endif
+	printf("Current joystick was removed: %d\n", which);
+
+	// Nuke reference to this controller+joystick
+	SDL_GameControllerClose(gSDLController);
+	gSDLController = NULL;
+	gSDLJoystickInstanceID = -1;
+
+	// Try to open another joystick if any is connected.
+	TryOpenController(false);
 }
 
+static void GetThumbStickVector(bool rightStick, int16_t* dx, int16_t* dy)
+{
+	Sint16 dxRaw = SDL_GameControllerGetAxis(gSDLController, rightStick ? SDL_CONTROLLER_AXIS_RIGHTX : SDL_CONTROLLER_AXIS_LEFTX);
+	Sint16 dyRaw = SDL_GameControllerGetAxis(gSDLController, rightStick ? SDL_CONTROLLER_AXIS_RIGHTY : SDL_CONTROLLER_AXIS_LEFTY);
 
-
-
-
-
+	float magnitudeSquared = dxRaw * dxRaw + dyRaw * dyRaw;
+	if (magnitudeSquared < JOYSTICK_DEAD_ZONE_RAW_SQUARED)
+	{
+		*dx = dxRaw;
+		*dy = dyRaw;
+	}
+	else
+	{
+		*dx = 0;
+		*dy = 0;
+	}
+}

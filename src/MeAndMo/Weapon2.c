@@ -105,7 +105,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);
@@ -220,7 +220,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 		return(false);
 
 	if (gFrames & b11)									// see if good interval
@@ -290,7 +290,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 		return(false);
 
 			/* SEE WHICH WAY TO MAKE IT GO */
@@ -413,7 +413,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);
@@ -486,7 +486,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);
@@ -609,7 +609,7 @@ Byte 	sub;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);
@@ -709,7 +709,7 @@ static	unsigned long lastShotFrame = 0;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 		return(false);
 
 	if ((gFrames - lastShotFrame) < 4)					// see if good interval
@@ -803,7 +803,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);
@@ -923,7 +923,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);
@@ -1108,7 +1108,7 @@ short		z,y,x;
 
 				/* SEE IF READY TO SHOOT */
 
-	if (!GetKeyState(kKey_Attack))						// see if fire button pressed
+	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 	{
 		gShootButtonDownFlag = false;
 		return(false);

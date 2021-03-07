@@ -396,11 +396,17 @@ short		xDist,yDist;
 		}
 	}
 
-	while(!CheckNewKeyDown(KEY_SPACE,kKey_Radar,&gRadarKeyFlag))		// wait for spacebar
+
+	UpdateInput();														// eat keypress
+	
+	while (!UserWantsOut() && !GetNewNeedState(kNeed_Radar))			// wait for spacebar
 	{
 		PresentIndexedFramebuffer();
-		Wait4(10);														// don't cook CPU too much
+		SDL_Delay(33);													// don't cook CPU too much
+		UpdateInput();
 	}
+
+	UpdateInput();														// eat keypress
 
 	EraseStore();
 

@@ -166,7 +166,62 @@ struct LongPoint
 typedef struct LongPoint LongPoint;
 
 
+			/* INPUT NEEDS */
 
+#define KEYBINDING_MAX_KEYS					2
+#define KEYBINDING_MAX_GAMEPAD_BUTTONS		2
+
+enum
+{
+	kNeed_Up,
+	kNeed_Down,
+	kNeed_Left,
+	kNeed_Right,
+	kNeed_Attack,
+	kNeed_NextWeapon,
+	kNeed_Radar,
+	NUM_REMAPPABLE_NEEDS,
+
+	// ^^^ REMAPPABLE
+	// --------------------------------------------------------
+	//              NON-REMAPPABLE vvv
+
+	kNeed_UIUp = NUM_REMAPPABLE_NEEDS,
+	kNeed_UIDown,
+	kNeed_UILeft,
+	kNeed_UIRight,
+	kNeed_UIConfirm,
+	kNeed_UIBack,
+	kNeed_UIPause,
+	kNeed_ToggleFullscreen,
+	kNeed_ToggleMusic,
+	kNeed_ToggleEffects,
+	kNeed_RaiseVolume,
+	kNeed_LowerVolume,
+	NUM_CONTROL_NEEDS
+};
+
+typedef struct KeyBinding
+{
+	int16_t		key[KEYBINDING_MAX_KEYS];
+	int16_t		mouseButton;
+	int16_t		mouseWheelDelta;
+	int16_t		gamepadButton[KEYBINDING_MAX_GAMEPAD_BUTTONS];
+	int16_t		gamepadAxis;
+	int16_t		gamepadAxisSign;
+} KeyBinding;
+
+
+
+		/* SETTINGS */
+
+struct PrefsType
+{
+	Boolean		fullscreen;
+	Boolean		vsync;
+	KeyBinding	keys[NUM_CONTROL_NEEDS];
+};
+typedef struct PrefsType PrefsType;
 
 #endif
 
