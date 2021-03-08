@@ -526,6 +526,24 @@ void MoveObject(void)
 }
 
 
+/************************** STOP OBJECT MOVEMENT ***********************/
+//
+// This stops movement extrapolation (preventing jitter on static objects)
+// until a new non-0 speed is set on the object.
+//
+
+void StopObjectMovement(ObjNode* objNode)
+{
+	objNode->DX = 0;
+	objNode->DY = 0;
+	objNode->DZ = 0;
+
+	if (objNode == gThisNodePtr)
+	{
+		gDX = 0;
+		gDY = 0;
+	}
+}
 
 /******************* DEACTIVATE OBJECT DRAW *****************/
 //

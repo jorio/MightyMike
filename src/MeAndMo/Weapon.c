@@ -782,6 +782,7 @@ void MoveCake(void)
 		gNumBullets--;										// dec count (auto deletes itself later)
 		SwitchAnim(gThisNodePtr,1);								// BLOW IT UP!
 		gThisNodePtr->CType = CTYPE_MYBULLET;					// activate collision
+		StopObjectMovement(gThisNodePtr);						// prevent movement extrapolation
 	}
 
 	CalcObjectBox();
@@ -1026,6 +1027,7 @@ void MoveToothpaste(void)
 		gThisNodePtr->MoveCall = nil;
 		gThisNodePtr->CType = 0;
 		gThisNodePtr->AnimSpeed = (MyRandomLong()&b1111111111)+0x80;
+		StopObjectMovement(gThisNodePtr);			// prevent movement extrapolation
 		return;
 	}
 

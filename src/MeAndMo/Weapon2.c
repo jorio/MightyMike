@@ -558,6 +558,7 @@ void ExplodePie(ObjNode *theNode)
 	SwitchAnim(theNode,8);								// BLOW IT UP!
 	theNode->MoveCall = nil;							// stop from moving
 	theNode->CType = 0;									// no longer harmful
+	StopObjectMovement(theNode);						// prevent movement extrapolation
 
 	PlaySound(SOUND_PIESQUISH);
 }

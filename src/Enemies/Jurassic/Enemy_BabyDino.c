@@ -226,6 +226,10 @@ void MoveBaby_Land(void)
 	if (DoEnemyCollisionDetect(FULL_ENEMY_COLLISION))	// returns true if died
 		return;
 
+					/* PREVENT MOVEMENT EXTRAPOLATION */
+
+	StopObjectMovement(gThisNodePtr);
+
 					/* UPDATE */
 
 	UpdateEnemy();

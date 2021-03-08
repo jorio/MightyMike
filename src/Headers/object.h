@@ -26,6 +26,7 @@ extern void	CalcObjectBox2(ObjNode *);
 extern void	DeleteAllObjects(void);
 extern void	DeleteObject(ObjNode *);
 extern void	MoveObject(void);
+extern void	StopObjectMovement(ObjNode *);
 extern void	DeactivateObjectDraw(ObjNode *);
 extern void	SortObjectsByY(void);
 extern void	SimpleObjectMove(void);

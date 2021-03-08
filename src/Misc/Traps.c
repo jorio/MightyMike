@@ -670,6 +670,7 @@ void MoveHydrantWater(void)
 			(TestCoordinateRange()))
 		{
 			SwitchAnim(gThisNodePtr,1);
+			StopObjectMovement(gThisNodePtr);			// prevent movement extrapolation
 		}
 
 		CalcObjectBox();
