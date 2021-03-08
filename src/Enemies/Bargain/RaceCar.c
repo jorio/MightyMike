@@ -501,6 +501,8 @@ no_reverse:
 
 				/* CALC NEW COORDS */
 
+	GetObjectInfo();
+
 	oldX = gX.Int;
 	oldY = gY.Int;
 
