@@ -80,8 +80,6 @@ extern	ObjectEntryType	*gMasterItemList;
 /*     VARIABLES      */
 /**********************/
 
-#define		MeOnMPlatformFlag	Flag0
-
 short		gMyInitX,gMyInitY;						// my init coords in map
 
 long		gMyX,gMyY;
@@ -237,7 +235,7 @@ void InitMe(void)
 	gMyNodePtr->LeftOff = -14;
 	gMyNodePtr->RightOff = 15;
 
-	gMyNodePtr->MeOnMPlatformFlag = false;		// not on mplatform
+	gMyNodePtr->MPlatform = nil;				// not on mplatform
 
 	gMyNormalMaxSpeed = MY_WALK_SPEED;
 	gMyAcceleration = MY_NORMAL_ACCELERATION;
@@ -898,7 +896,7 @@ ignore_solid:
 
 				/* CHECK SPECIAL TILE ATTRIBUTES FOR HURT/DEATH */
 
-	if (!gMyNodePtr->MeOnMPlatformFlag)						// dont check if on mplatform
+	if (!gMyNodePtr->MPlatform)								// dont check if on mplatform
 	{
 		attrib = GetMapTileAttribs(gX.Int,gY.Int);			// get tile attrib
 
@@ -941,7 +939,7 @@ void HandleMyCenter(void)
 register TileAttribType *tileAttribs;
 register unsigned short	bits;
 
-	if (gMyNodePtr->MeOnMPlatformFlag)					// ignore center info if on mplatform
+	if (gMyNodePtr->MPlatform)								// ignore center info if on mplatform
 	{
 		gMeOnIceFlag = false;
 		gMeOnWaterFlag = false;
@@ -1456,7 +1454,7 @@ void CheckIfMeOnMPlatform(void)
 {
 register	ObjNode		*thisNodePtr;
 
-	gMyNodePtr->MeOnMPlatformFlag = false;				// assume not on mplatform
+	gMyNodePtr->MPlatform = nil;						// assume not on mplatform
 
 					/* SCAN FOR MPLATFORMS */
 
@@ -1470,7 +1468,7 @@ register	ObjNode		*thisNodePtr;
 			{
 				gSumDX += thisNodePtr->DX;
 				gSumDY += thisNodePtr->DY;
-				gMyNodePtr->MeOnMPlatformFlag = true;
+				gMyNodePtr->MPlatform = thisNodePtr;
 				break;
 			}
 		}

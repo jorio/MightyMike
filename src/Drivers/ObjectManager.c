@@ -31,8 +31,6 @@ extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
 
 #define	MAX_CLIP_REGIONS	5					// see reserved clip regions
 
-#define INVALID_NODE_FLAG	0xffffffffL			// put into CType when node is deleted
-
 /**********************/
 /*     VARIABLES      */
 /**********************/
@@ -151,35 +149,23 @@ register ObjNode	*newNodePtr,*scanNodePtr,*reNodePtr;
 	newNodePtr = FreeNodeStack[NodeStackFront];	// get new node from stack
 	NodeStackFront++;
 
+	long nodeNumBackup = newNodePtr->NodeNum;	// back up node number before zeroing out record
+
+	memset(newNodePtr, 0, sizeof(ObjNode));		// set all fields to 0
+
+	newNodePtr->NodeNum = nodeNumBackup;		// restore node number
+
 		newNodePtr->MoveCall = moveCall;		// save move routine
 		newNodePtr->Genre = genre;
-		newNodePtr->Z = z;
 		newNodePtr->X.Int = (long)x;
 		newNodePtr->Y.Int = (long)y;
+		newNodePtr->Z = z;
 		newNodePtr->DrawFlag = false;
 		newNodePtr->EraseFlag = false;
 		newNodePtr->MoveFlag = true;
-		newNodePtr->AnimFlag =
-		newNodePtr->Flag0 =
-		newNodePtr->Flag1 =
-		newNodePtr->Flag2 =
-		newNodePtr->Flag3 =
-		newNodePtr->Misc1 =
-		newNodePtr->Ptr1 =
-		newNodePtr->CType =						// must init ctype to something ( INVALID_NODE_FLAG might be set from last delete)
-		newNodePtr->CBits =
-		newNodePtr->DX =
-		newNodePtr->DY = 0;
-		newNodePtr->ShadowIndex =
-		newNodePtr->OwnerToMessageNode =
-		newNodePtr->MessageToOwnerNode = nil;
-
-		newNodePtr->TopSide = newNodePtr->OldTopSide =
-		newNodePtr->BottomSide = newNodePtr->OldBottomSide =
-		newNodePtr->LeftSide = newNodePtr->OldLeftSide =
-		newNodePtr->RightSide = newNodePtr->OldRightSide = 0;
-
-		newNodePtr->ItemIndex = nil;					// assume it didnt come from ItemList
+		newNodePtr->CType = 0;					// must init ctype to something ( INVALID_NODE_FLAG might be set from last delete)
+		newNodePtr->CBits = 0;
+		newNodePtr->ItemIndex = nil;			// assume it didnt come from ItemList
 
 					/* FIND INSERTION PLACE FOR NODE */
 

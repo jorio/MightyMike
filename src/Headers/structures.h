@@ -85,6 +85,7 @@ struct ObjNode
 	long		Special3;
 	long		Misc1;
 	struct ObjNode		*Ptr1;
+	struct ObjNode		*MPlatform;
 	unsigned long		CType;		// collision type bits
 	unsigned long		CBits;		// collision attribute bits
 	long			LeftSide;			// collision side coords

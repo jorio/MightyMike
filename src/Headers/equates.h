@@ -95,6 +95,8 @@ enum
 	CTYPE_HURTENEMY = 	(1L<<14)		// &0100000000000000	Misc hurt Enemy item
 };
 
+#define INVALID_NODE_FLAG 0xffffffffL	// put into CType when node is deleted
+
 							// KEYBOARD DEFINES
 							//=================================
 
