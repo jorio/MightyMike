@@ -624,7 +624,7 @@ void EraseASprite(ObjNode *theNodePtr)
 static void DrawPFSprite(ObjNode *theNodePtr)
 {
 long	width,height,i;
-long	drawHeight,y;
+long	drawHeight;
 Ptr		destPtrB,srcPtrB,maskPtrB;
 int32_t	*destPtr,*srcPtr,*maskPtr;
 Ptr		tileMaskStartPtr;
@@ -633,35 +633,22 @@ int32_t	*longPtr;
 Ptr		destStartPtr,srcStartPtr,originalSrcStartPtr;
 Ptr		originalMaskStartPtr,maskStartPtr;
 int16_t	*intPtr;
-long	frameNum,x;
+long	frameNum;
 long	offset;
 long	realWidth,originalY,topToClip,leftToClip;
-long	drawWidth,footY,shapeNum,groupNum,numHSegs;
+long	drawWidth,shapeNum,groupNum,numHSegs;
 Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 Boolean	priorityFlag;
 Ptr		tmP;
+int32_t	x, y;
 
 	groupNum = theNodePtr->SpriteGroupNum;				// get shape group #
 	shapeNum = theNodePtr->Type;						// get shape type
 	frameNum = theNodePtr->CurrentFrame;				// get frame #
 
-	if (gExtrapolateFrameFactor.L == 0)
-	{
-		x		= theNodePtr->X.Int;						// get short x coord (world)
-		footY	= theNodePtr->Y.Int;						// get short y coord & add any y adjustment offset
-		y		= footY + theNodePtr->YOffset.Int;			// add any y adjustment offset
-	}
-	else
-	{
-		// Extrapolate position
-		int32_t xFixed			= theNodePtr->X.L		+ Fix32_Mul(gExtrapolateFrameFactor.L, theNodePtr->DX);
-		int32_t footYFixed		= theNodePtr->Y.L		+ Fix32_Mul(gExtrapolateFrameFactor.L, theNodePtr->DY);
-		int32_t yOffsetFixed	= theNodePtr->YOffset.L	+ Fix32_Mul(gExtrapolateFrameFactor.L, theNodePtr->DZ);
+					/* GET OBJECT POSITION (EXTRAPOLATED IN FRAMERATE-INDEPENDENT MODE)  */
 
-		x						= Fix32_Int(xFixed);
-		footY					= Fix32_Int(footYFixed);
-		y						= Fix32_Int(footYFixed + yOffsetFixed);
-	}
+	PredictObjectPosition(theNodePtr, gExtrapolateFrameFactor.L, &x, &y);
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
@@ -738,7 +725,11 @@ Ptr		tmP;
 
 
 	if (theNodePtr->TileMaskFlag)
-		priorityFlag = CheckFootPriority(x,footY,drawWidth);	// see if use priority masking
+	{
+		// see if use priority masking
+		// Source port note: pass in non-extrapolated foot Y to avoid blinking when an object is walking south towards a wall
+		priorityFlag = CheckFootPriority(x, theNodePtr->Y.Int, drawWidth);
+	}
 	else
 		priorityFlag = false;
 

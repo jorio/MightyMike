@@ -679,3 +679,55 @@ void DumpUpdateRegions(void)
 
 	PresentIndexedFramebuffer();
 }
+
+/********************* PREDICT OBJECT POSITION ***************/
+//
+// If the current graphics frame falls on a simulation tick, the returned position is exact;
+// otherwise it is extrapolated from the object's last position and speed.
+//
+
+void PredictObjectPosition(ObjNode* theNodePtr, int32_t factor, int32_t* x, int32_t* y)
+{
+	if (factor == 0)										// No extrapolation necessary
+	{
+		*x = theNodePtr->X.Int;								// get short x coord (world)
+		*y = theNodePtr->Y.Int + theNodePtr->YOffset.Int;	// get foot y and add any y adjustment offset
+		return;
+	}
+
+	// Get object speed
+	int32_t dx = theNodePtr->DX;
+	int32_t dy = theNodePtr->DY;
+	int32_t dz = theNodePtr->DZ;
+
+	// Factor in platform speed
+	if (theNodePtr->MPlatform && theNodePtr->MPlatform->CType != INVALID_NODE_FLAG)
+	{
+		dx += theNodePtr->MPlatform->DX;
+		dy += theNodePtr->MPlatform->DY;
+	}
+
+	// Compute X
+	if (theNodePtr->OldX == theNodePtr->X.Int)		// If object appears static on X, don't extrapolate X (avoid jitter)
+	{
+		*x = theNodePtr->X.Int;
+	}
+	else											// Extrapolate X
+	{
+		*x = Fix32_Int(theNodePtr->X.L + Fix32_Mul(factor, dx));
+	}
+
+	// Compute extrapolated Y offset
+	int32_t yOffsetFixed = theNodePtr->YOffset.L + Fix32_Mul(factor, dz);
+
+	// Compute Y
+	if (theNodePtr->OldY == theNodePtr->Y.Int)		// If object appears static on Y, don't extrapolate Y (avoid jitter)
+	{
+		*y = Fix32_Int((theNodePtr->Y.Int<<16) + yOffsetFixed);		// Add extrapolated Y offset even if object is static on Y (hopping bunnies)
+	}
+	else											// Extrapolate Y
+	{
+		int32_t footYFixed = theNodePtr->Y.L + Fix32_Mul(factor, dy);
+		*y = Fix32_Int(footYFixed + yOffsetFixed);
+	}
+}

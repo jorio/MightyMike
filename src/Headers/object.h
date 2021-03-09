@@ -30,3 +30,4 @@ extern void	StopObjectMovement(ObjNode *);
 extern void	DeactivateObjectDraw(ObjNode *);
 extern void	SortObjectsByY(void);
 extern void	SimpleObjectMove(void);
+extern void	PredictObjectPosition(ObjNode* theNodePtr, int32_t factor, int32_t* x, int32_t* y);

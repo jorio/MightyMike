@@ -1542,6 +1542,8 @@ void StartMyLiftoff(void)
 {
 	if (gMyNodePtr->SubType != MY_ANIMBASE_LIFTOFF)
 	{
+		StopScrollingPlayfield();
+
 		SwitchAnim(gMyNodePtr,MY_ANIMBASE_LIFTOFF);			// make Me do liftoff
 		gMyNodePtr->Flag0 = false;
 

@@ -107,6 +107,7 @@ extern void	DrawATile_Simple(unsigned short, short, short);
 extern void	InitPlayfield(void);
 extern void	BuildItemList(void);
 extern void	ScrollPlayfield(void);
+void StopScrollingPlayfield(void);
 extern void	SetItemDeleteWindow(void);
 extern void	ScrollPlayfield_Down(void);
 extern void	ScrollPlayfield_Up(void);

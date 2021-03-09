@@ -618,6 +618,17 @@ void ScrollPlayfield(void)
 	SetItemDeleteWindow();
 }
 
+/************************** STOP SCROLLING PLAYFIELD ****************************/
+//
+// Call this when the camera goes static.
+// This will stop movement extrapolation on the camera and prevent the playfield from jittering.
+//
+
+void StopScrollingPlayfield(void)
+{
+	scrollDX = 0;
+	scrollDY = 0;
+}
 
 /****************** SET ITEM DELETE WINDOW ****************/
 //
@@ -1466,6 +1477,7 @@ long		method;
 	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
 	left = (gScrollX % PF_BUFFER_WIDTH);
 
+	// Extrapolate camera position
 	int32_t scrollOffsetX = Fix32_Int(Fix32_Mul(scrollDX << 16, gExtrapolateFrameFactor.L));
 	int32_t scrollOffsetY = Fix32_Int(Fix32_Mul(scrollDY << 16, gExtrapolateFrameFactor.L));
 
