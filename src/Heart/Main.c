@@ -559,25 +559,25 @@ FSSpec		mySpec;
 				/******************/
 														// WRITE INVENTORY LIST
 	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
-	iErr = FSWrite(fRefNum,&numBytes,gMyWeapons);
+	iErr = FSWrite(fRefNum, &numBytes, (Ptr) gMyWeapons);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 														// WRITE OBJECT LIST
 	numBytes = sizeof(ObjNode)*MAX_OBJECTS;
-	iErr = FSWrite(fRefNum,&numBytes,ObjectList);
+	iErr = FSWrite(fRefNum, &numBytes, (Ptr) ObjectList);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 														// WRITE FREE NODE STACK
 	numBytes = sizeof(ObjNode *)*MAX_OBJECTS;
-	iErr = FSWrite(fRefNum,&numBytes,&FreeNodeStack[0]);
+	iErr = FSWrite(fRefNum, &numBytes, (Ptr) &FreeNodeStack[0]);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
 														// WRITE MASTER ITEM LIST
 	numBytes = sizeof(ObjectEntryType)*gNumItems;
-	iErr = FSWrite(fRefNum,&numBytes,gMasterItemList);
+	iErr = FSWrite(fRefNum, &numBytes, (Ptr) gMasterItemList);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Write to Player Save File.  Disk may be locked or full.");
 
@@ -683,7 +683,7 @@ FSSpec		mySpec;
 
 															// READ INVENTORY LIST
 	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
-	iErr = FSRead(fRefNum,&numBytes,gMyWeapons);
+	iErr = FSRead(fRefNum, &numBytes, (Ptr) gMyWeapons);
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Read Player Save File.");
 
@@ -694,19 +694,19 @@ FSSpec		mySpec;
 
 																// READ OBJECT LIST
 			numBytes = sizeof(ObjNode)*MAX_OBJECTS;
-			iErr = FSRead(fRefNum,&numBytes,ObjectList);
+			iErr = FSRead(fRefNum, &numBytes, (Ptr) ObjectList);
 			if (iErr != noErr)
 				DoFatalAlert("Error Reading from Player Save File.");
 
 																// READ FREE NODE STACK
 			numBytes = sizeof(ObjNode *)*MAX_OBJECTS;
-			iErr = FSRead(fRefNum,&numBytes,FreeNodeStack);
+			iErr = FSRead(fRefNum, &numBytes, (Ptr) FreeNodeStack);
 			if (iErr != noErr)
 				DoFatalAlert("Error Reading from Player Save File.");
 
 																// READ MASTER ITEM LIST
 			numBytes = sizeof(ObjectEntryType)*gNumItems;
-			iErr = FSRead(fRefNum,&numBytes,gMasterItemList);
+			iErr = FSRead(fRefNum, &numBytes, (Ptr) gMasterItemList);
 			if (iErr != noErr)
 				DoFatalAlert("Error Reading from Player Save File.");
 
@@ -958,7 +958,7 @@ Byte		scene,area;
 			/* WRITE INVENTORY LIST */
 
 	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
-	iErr = FSWrite(fRefNum,&numBytes,gMyWeapons);
+	iErr = FSWrite(fRefNum, &numBytes, (Ptr) gMyWeapons);
 	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
 
 			/* WRITE MISC STUFF */
@@ -1061,7 +1061,7 @@ Str255		errStr	= "Cannot Read Player Save File.";
 
 															// READ INVENTORY LIST
 	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
-	iErr = FSRead(fRefNum,&numBytes,gMyWeapons);
+	iErr = FSRead(fRefNum, &numBytes, (Ptr) gMyWeapons);
 	if (iErr != noErr)
 		DoAlert(errStr);
 

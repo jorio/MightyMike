@@ -19,12 +19,12 @@
 //#include 	<DrawSprocket.h>
 
 #include <SDL.h>
+#include <string.h>
 
 extern	Boolean		gPPCFullScreenFlag;
 extern	Handle		gBackgroundHandle;
 extern	Ptr			gSHAPE_HEADER_Ptrs[];
 extern	ObjNode		*gMyNodePtr;
-extern	short		gLevelNum;
 extern	unsigned char	gInterlaceMode;
 #if __USE_PF_VARS
 extern long	PF_TILE_HEIGHT;
@@ -685,7 +685,7 @@ static inline void FilterDithering_Row(const uint8_t* indexedRow)
 
 static void SaveIndexedScreenshot(void)
 {
-	DumpIndexedTGA("/tmp/MikeIndexedScreenshot.tga", VISIBLE_WIDTH, VISIBLE_HEIGHT, gIndexedFramebuffer);
+	DumpIndexedTGA("/tmp/MikeIndexedScreenshot.tga", VISIBLE_WIDTH, VISIBLE_HEIGHT, (const char*) gIndexedFramebuffer);
 }
 
 void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data)

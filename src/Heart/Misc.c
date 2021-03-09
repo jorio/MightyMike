@@ -527,11 +527,11 @@ Ptr		packetStart,srcPtr;
 
 void RLW_Expand(short fRefNum, unsigned short *output, long sourceSize)
 {
-register unsigned short	*srcOriginalPtr,*sourcePtr;
-register unsigned char	*lengthPtr;
-register unsigned short	runCount,seed;
-register long	buffSize;
-long	numToRead;
+uint16_t	*srcOriginalPtr,*sourcePtr;
+uint8_t		*lengthPtr;
+uint16_t	runCount,seed;
+long		buffSize;
+long		numToRead;
 
 				/* GET MEMORY FOR SOURCE DATA */
 
@@ -544,7 +544,7 @@ long	numToRead;
 				/* READ FIRST SOURCE PACKET */
 
 	numToRead = DECOMP_PACKET_SIZE;
-	FSRead(fRefNum,&numToRead,srcOriginalPtr);
+	FSRead(fRefNum, &numToRead, (Ptr) srcOriginalPtr);
 	sourcePtr = srcOriginalPtr;
 	buffSize = DECOMP_PACKET_SIZE;
 
@@ -557,7 +557,7 @@ long	numToRead;
 		if (--buffSize == 0)								// see if need to refill buffer
 		{
 			numToRead = DECOMP_PACKET_SIZE;
-			FSRead(fRefNum,&numToRead,srcOriginalPtr);
+			FSRead(fRefNum, &numToRead, (Ptr) srcOriginalPtr);
 			sourcePtr = srcOriginalPtr;
 			buffSize = DECOMP_PACKET_SIZE;
 		}
@@ -569,7 +569,7 @@ long	numToRead;
 			{
 				SetFPos(fRefNum,fsFromMark,-1);
 				numToRead = DECOMP_PACKET_SIZE;
-				FSRead(fRefNum,&numToRead,srcOriginalPtr);
+				FSRead(fRefNum, &numToRead, (Ptr) srcOriginalPtr);
 				sourcePtr = srcOriginalPtr;
 				buffSize = DECOMP_PACKET_SIZE;
 			}
@@ -578,7 +578,7 @@ long	numToRead;
 			if ((buffSize -= 2) == 0)						// see if need to refill buffer
 			{
 				numToRead = DECOMP_PACKET_SIZE;
-				FSRead(fRefNum,&numToRead,srcOriginalPtr);
+				FSRead(fRefNum, &numToRead, (Ptr) srcOriginalPtr);
 				sourcePtr = srcOriginalPtr;
 				buffSize = DECOMP_PACKET_SIZE;
 			}
@@ -600,7 +600,7 @@ long	numToRead;
 				{
 					SetFPos(fRefNum,fsFromMark,-1);
 					numToRead = DECOMP_PACKET_SIZE;
-					FSRead(fRefNum,&numToRead,srcOriginalPtr);
+					FSRead(fRefNum, &numToRead, (Ptr) srcOriginalPtr);
 					sourcePtr = srcOriginalPtr;
 					buffSize = DECOMP_PACKET_SIZE;
 				}
@@ -609,7 +609,7 @@ long	numToRead;
 				if ((buffSize -= 2) == 0)						// see if need to refill buffer
 				{
 					numToRead = DECOMP_PACKET_SIZE;
-					FSRead(fRefNum,&numToRead,srcOriginalPtr);
+					FSRead(fRefNum, &numToRead, (Ptr) srcOriginalPtr);
 					sourcePtr = srcOriginalPtr;
 					buffSize = DECOMP_PACKET_SIZE;
 				}
@@ -890,8 +890,6 @@ OSErr		iErr;
 
 short	OpenMikeRezFile(Str255 filename,Str255 errString)
 {
-Str255		newString;
-Byte		i,j;
 short		srcFile;
 
 				/* FIRST SEE IF WE CAN GET IT OFF OF DEFAULT VOLUME */

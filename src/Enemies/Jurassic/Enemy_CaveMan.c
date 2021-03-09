@@ -409,7 +409,7 @@ long		dx;
 	if (newObj == nil)
 		return;
 
-	newObj->DX = dx+(RandomRange(0,10000)<<3-40000L);
+	newObj->DX = dx + ((RandomRange(0,10000) << 3) - 40000L);
 
 	newObj->CType = CTYPE_ENEMYC;				// set collision info
 	newObj->CBits = CBITS_TOUCHABLE;

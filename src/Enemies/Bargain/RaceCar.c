@@ -419,10 +419,10 @@ void MoveRaceCar(void)
 {
 short	trackIndex,currentTrack,oldAim,newAim;
 short	xOff,yOff,oldX,oldY;
-static	nextOffsetsY[8] = {-TILE_SIZE,-TILE_SIZE,0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE};
-static	nextOffsetsX[8] = {0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE,-TILE_SIZE,-TILE_SIZE};
+static	int nextOffsetsY[8] = {-TILE_SIZE,-TILE_SIZE,0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE};
+static	int nextOffsetsX[8] = {0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE,-TILE_SIZE,-TILE_SIZE};
 TileAttribType	*newTile;
-static	aimXlate[16] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
+static	int aimXlate[16] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
 
 
 

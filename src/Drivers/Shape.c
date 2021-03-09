@@ -70,7 +70,7 @@ ObjNode	*gMostRecentShape = nil;
 // MAKE NEW SHAPE OBJECT & RETURN PTR TO IT
 //
 
-ObjNode *MakeNewShape(long groupNum,long type,long subType,short x, short y, short z,void *moveCall,Boolean pfRelativeFlag)
+ObjNode *MakeNewShape(long groupNum, long type, long subType, short x, short y, short z, void (*moveCall)(void), Boolean pfRelativeFlag)
 {
 ObjNode	*newSpritePtr;
 Ptr		tempPtr;

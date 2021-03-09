@@ -133,8 +133,8 @@ short		i;
 		newObj->RightOff = 8;
 		CalcObjectBox2(newObj);
 
-		newObj->DX = MyRandomShort()<<1-0x10000L;					// random vector
-		newObj->DY = MyRandomShort()<<1-0x10000L;
+		newObj->DX = (MyRandomShort() << 1) - 0x10000L;					// random vector
+		newObj->DY = (MyRandomShort() << 1) - 0x10000L;
 
 				/* MAKE COIN'S SHADOW */
 
@@ -345,9 +345,9 @@ short		xDist,yDist;
 	PlaySound(SOUND_RADAR);
 
 	numToRead = 2;
-	FSRead(fRefNum,&numToRead,&width);						// read width
+	FSRead(fRefNum, &numToRead, (Ptr) &width);				// read width
 	numToRead = 2;
-	FSRead(fRefNum,&numToRead,&height);						// read height
+	FSRead(fRefNum, &numToRead, (Ptr) &height);				// read height
 
 	Byteswap16SignedRW(&width);
 	Byteswap16SignedRW(&height);

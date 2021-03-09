@@ -138,7 +138,7 @@ Handle	ObjHandle;
 // The linked list is sorted from LARGEST z to smallest!
 //
 
-ObjNode	*MakeNewObject(Byte genre,short x,short y,unsigned short z,void *moveCall)
+ObjNode	*MakeNewObject(Byte genre, short x, short y, unsigned short z, void (*moveCall)(void))
 {
 register ObjNode	*newNodePtr,*scanNodePtr,*reNodePtr;
 

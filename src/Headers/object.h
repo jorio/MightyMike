@@ -12,7 +12,7 @@
 #define NEAREST_Z				0x000f		// $0000-$000f are Z's which will NOT sort
 
 extern void	InitObjectManager(void);
-extern ObjNode	*MakeNewObject(Byte, short, short, unsigned short, void *);
+ObjNode	*MakeNewObject(Byte genre, short x, short y, unsigned short z, void (*moveCall)(void));
 extern void	MoveObjects(void);
 extern void	EraseObjects(void);
 extern void	DrawObjects(void);

@@ -1320,7 +1320,7 @@ Ptr			destPtrB,srcPtrB;
 
 					/* CALC TILE DEFINITION ADDR */
 
-	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, &gTileXlatePtr[tileNum & TILENUM_MASK]));
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, (Ptr) &gTileXlatePtr[tileNum & TILENUM_MASK]));
 
 	int xlate = gTileXlatePtr[tileNum&TILENUM_MASK];
 
@@ -1422,14 +1422,14 @@ unsigned long	rowS,colS;								// shifted version of row & col
 
 					/* CALC TILE DEFINITION ADDR */
 
-	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, gTileXlatePtr));
-	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, &gTileXlatePtr[tileNum]));
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, (Ptr) gTileXlatePtr));
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, (Ptr) &gTileXlatePtr[tileNum]));
 
 	srcPtr = (uint8_t *)( gTilesPtr + ((long)(gTileXlatePtr[tileNum]) << (TILE_SIZE_SH*2)) );
 	destPtr = (uint8_t *)destStartPtr;
 	destCopyPtr = (uint8_t *)destCopyStartPtr;
 
-	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, srcPtr));
+	GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, (Ptr) srcPtr));
 
 						/* DRAW THE TILE */
 

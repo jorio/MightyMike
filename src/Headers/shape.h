@@ -6,7 +6,7 @@
 #define	SCREEN_RELATIVE		false
 
 
-extern ObjNode	*MakeNewShape(long, long, long, short, short, short, void *, Boolean);
+ObjNode	*MakeNewShape(long groupNum, long type, long subType, short x, short y, short z, void (*moveCall)(void), Boolean pfRelativeFlag);
 extern void	LoadShapeTable(Str255, long, Boolean);
 extern void	DrawFrameToScreen(long, long, long, long, long);
 extern void	DrawFrameToScreen_NoMask(long, long, long, long, long);
