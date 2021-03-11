@@ -19,7 +19,7 @@
 extern	Handle		gOffScreenHandle;
 extern	Handle		gBackgroundHandle;
 extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long			gScreenRowOffsetLW,gScreenRowOffset;
+extern	uint8_t*		gScreenAddr;
 extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
 extern	uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
@@ -222,15 +222,7 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 		{
 			Ptr frameBase = shapeBase + offsetsToFrameData[f];
 
-			ByteswapStructs("hhhhll", 16, 1, frameBase);
-			/*
-			int16_t widthBytes			= Byteswap16Signed(frameBase + 0);
-			int16_t height				= Byteswap16Signed(frameBase + 2);
-			int16_t x					= Byteswap16Signed(frameBase + 4);
-			int16_t y					= Byteswap16Signed(frameBase + 6);
-			int32_t offsetToPixelData	= Byteswap32Signed(frameBase + 8);
-			int32_t offsetToMaskData	= Byteswap32Signed(frameBase + 12);
-			*/
+			ByteswapStructs("hhhhll", 16, 1, frameBase);		// See struct FrameHeader
 		}
 
 		int32_t offsetToAnimList	= Byteswap32SignedRW(shapeBase + 6);  // base+SHAPE_HEADER_ANIM_LIST
@@ -260,6 +252,125 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 	}
 }
 
+/************************ GET FRAME HEADER ********************/
+
+const FrameHeader* GetFrameHeader(
+		long groupNum,
+		long shapeNum,
+		long frameNum,
+		const uint8_t** outPixelPtr,
+		const uint8_t** outMaskPtr)
+{
+	const uint8_t*		shapePtr;
+	const FrameList*	fl;
+	const FrameHeader*	fh;
+
+	GAME_ASSERT_MESSAGE(groupNum < MAX_SHAPE_GROUPS, "Illegal Group #");
+	GAME_ASSERT_MESSAGE(shapeNum < gNumShapesInFile[groupNum], "Illegal Shape #");
+
+			/* GET FRAME HEADER */
+
+	shapePtr = (const uint8_t*) gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
+	GAME_ASSERT(shapePtr);
+
+	int32_t offsetToFrameList = *(int32_t*) (shapePtr+2);					// get ptr to FRAME_LIST
+	fl = (const FrameList*) (shapePtr + offsetToFrameList);
+
+	GAME_ASSERT_MESSAGE(frameNum < fl->numFrames, "Illegal Frame #");		// get ptr to FRAME_HEADER
+	fh = (const FrameHeader*) (shapePtr + fl->frameHeaderOffsets[frameNum]);
+
+	GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], (Ptr) fh));
+
+			/* STORE PTR TO PIXEL DATA */
+
+	if (outPixelPtr)
+	{
+		*outPixelPtr = shapePtr + fh->pixelOffset;
+		GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], (Ptr) *outPixelPtr));
+	}
+
+			/* STORE PTR TO MASK DATA */
+
+	if (outMaskPtr)
+	{
+		*outMaskPtr = shapePtr + fh->maskOffset;
+		GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], (Ptr) *outMaskPtr));
+	}
+
+			/* RETURN PTR TO FRAME HEADER */
+
+	return fh;
+}
+
+/************************ DRAW FRAME TO GENERIC BUFFER ********************/
+
+static void DrawFrameToBuffer(
+		long x,
+		long y,
+		long groupNum,
+		long shapeNum,
+		long frameNum,
+		bool mask,
+		Ptr destBuffer,
+		int destBufferWidth,
+		int destBufferHeight
+		)
+{
+					/* CALC ADDRESS OF FRAME TO DRAW */
+
+	const uint8_t*	pixelData	= nil;
+	const uint8_t*	maskData	= nil;
+
+	const FrameHeader* fh = GetFrameHeader(
+			groupNum,
+			shapeNum,
+			frameNum,
+			&pixelData,
+			mask? &maskData: nil
+	);
+
+	x += fh->x;										// use position offsets
+	y += fh->y;
+
+	if (x < 0 || x >= destBufferWidth ||			// see if out of bounds
+		y < 0 || y >= destBufferHeight)
+		return;
+
+	Ptr destPtr = destBuffer + y*destBufferWidth + x;
+
+						/* DO THE DRAW */
+
+	if (!mask)
+	{
+		for (int row = fh->height; row; row--)
+		{
+			memcpy(destPtr, pixelData, fh->width);
+
+			destPtr += destBufferWidth;				// next row
+			pixelData += fh->width;
+		}
+	}
+	else
+	{
+		const uint32_t* srcPtr32	= (const uint32_t*) pixelData;
+		const uint32_t* maskPtr32	= (const uint32_t*) maskData;
+
+		for (int row = fh->height; row; row--)
+		{
+			uint32_t* destPtr32 = (uint32_t*) destPtr;		// get line start ptr
+
+			for (int col = fh->width >> 2; col; col--)
+			{
+				*destPtr32 = (*destPtr32 & *maskPtr32) | (*srcPtr32);
+				destPtr32++;
+				maskPtr32++;
+				srcPtr32++;
+			}
+
+			destPtr += destBufferWidth;			// next row
+		}
+	}
+}
 
 /************************ DRAW FRAME TO SCREEN ********************/
 //
@@ -270,63 +381,18 @@ void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
 
 void DrawFrameToScreen(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
-Ptr			tempPtr,shapePtr;
-int32_t 	offset;
-
-					/* CALC ADDRESS OF FRAME TO DRAW */
-
-	shapePtr = 	gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
-	GAME_ASSERT(shapePtr);
-
-	offset = *(int32_t*) (shapePtr+2);				// get offset to FRAME_LIST
-	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
-
-	offset = *(int32_t*) (tempPtr+(frameNum<<2)+2);	// get offset to frame's FRAME_HEADER
-	tempPtr = shapePtr+offset;						// get ptr to FRAME_HEADER
-
-
-	int width = *(int16_t*) (tempPtr)>>2;		// word width
-	int height = *(int16_t*) (tempPtr+2);
-	x += *(int16_t*) (tempPtr+4);				// use position offsets
-	y += *(int16_t*) (tempPtr+6);
-
-	if ((x < 0) ||									// see if out of bounds
-		(x >= VISIBLE_WIDTH) ||
-		(y < 0) ||
-		(y >= VISIBLE_HEIGHT))
-			return;
-
-	tempPtr += 8;
-
-	uint32_t*	srcPtr			= shapePtr + *(int32_t*) (tempPtr);
-	uint32_t*	maskPtr			= shapePtr + *(int32_t*) (tempPtr + 4);
-	uint32_t*	destStartPtr	= gScreenLookUpTable[y] + x;
-
-
-	GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], srcPtr));
-	GAME_ASSERT(HandleBoundsCheck(gShapeTableHandle[groupNum], maskPtr));
-
-						/* DO THE DRAW */
-
-	do
-	{
-		uint32_t* destPtr = destStartPtr;							// get line start ptr
-
-		int col = width;
-		do
-		{
-			*destPtr = (*destPtr & *maskPtr) | (*srcPtr);
-			destPtr++;
-			maskPtr++;
-			srcPtr++;
-		} while (--col > 0);
-
-		destStartPtr += gScreenRowOffsetLW;			// next row
-	}
-	while (--height > 0);
+	DrawFrameToBuffer(
+			x,
+			y,
+			groupNum,
+			shapeNum,
+			frameNum,
+			true,
+			gScreenAddr,
+			VISIBLE_WIDTH,
+			VISIBLE_HEIGHT
+	);
 }
-
-
 
 /************************ DRAW FRAME TO SCREEN: NO MASK  ********************/
 //
@@ -337,53 +403,35 @@ int32_t 	offset;
 
 void DrawFrameToScreen_NoMask(long x,long y,long groupNum,long shapeNum,long frameNum)
 {
-int		width,height;
-Ptr		destPtr,srcPtr;
-Ptr		tempPtr,shapePtr;
-int32_t	*longPtr,offset;
-int16_t		*intPtr;
-
-					/* CALC ADDRESS OF FRAME TO DRAW */
-
-	shapePtr = 	gSHAPE_HEADER_Ptrs[groupNum][shapeNum];		// get ptr to SHAPE_HEADER
-
-	offset = *((int32_t *)(shapePtr+2));				// get offset to FRAME_LIST
-	tempPtr = shapePtr+offset;						// get ptr to FRAME_LIST
-
-	longPtr = (int32_t *)(tempPtr+(frameNum<<2)+2);	// point to correct frame offset
-	offset = *longPtr;								// get offset to FRAME_HEADER
-	tempPtr = shapePtr+offset;						// get ptr to FRAME_HEADER
-
-
-	intPtr = (int16_t *)tempPtr;					// get height & width of frame
-	width = (*intPtr++);							// word width
-	height = *intPtr++;
-	x += *intPtr++;									// use position offsets
-	y += *intPtr++;
-
-	if ((x < 0) ||									// see if out of bounds
-		(x >= VISIBLE_WIDTH) ||
-		(y < 0) ||
-		(y >= VISIBLE_HEIGHT))
-			return;
-
-	longPtr = (int32_t *)intPtr;
-	srcPtr = (*longPtr++)+shapePtr;		// point to pixel data
-	destPtr = (gScreenLookUpTable[y]+x);		// point to screen
-
-
-						/* DO THE DRAW */
-
-	do
-	{
-		memcpy(destPtr, srcPtr, width);
-
-		destPtr += gScreenRowOffset;			// next row
-		srcPtr += width;
-	}
-	while (--height > 0);
+	DrawFrameToBuffer(
+			x,
+			y,
+			groupNum,
+			shapeNum,
+			frameNum,
+			false,
+			gScreenAddr,
+			VISIBLE_WIDTH,
+			VISIBLE_HEIGHT
+	);
 }
 
+/************************ DRAW FRAME TO BACKGROUND BUFFER ********************/
+
+void DrawFrameToBackground(long x,long y,long groupNum,long shapeNum,long frameNum)
+{
+	DrawFrameToBuffer(
+			x,
+			y,
+			groupNum,
+			shapeNum,
+			frameNum,
+			true,
+			*gBackgroundHandle,
+			OFFSCREEN_WIDTH,
+			OFFSCREEN_HEIGHT
+	);
+}
 
 /************************* ZAP SHAPE TABLE ***************************/
 //
@@ -452,19 +500,16 @@ register	long	x2;
 
 void DrawASprite(ObjNode *theNodePtr)
 {
-int32_t	width,i;
+int32_t	width;
 int32_t	*destPtr32;
 const int32_t*			maskPtr32;
 const int32_t*			srcPtr32;
 int32_t	height;
 int32_t	*destStartPtr32;
-const int32_t*			ptr32;
-const int16_t*			ptr16;
 int32_t	frameNum;
 int32_t	x,y,offset;
 Rect	oldBox;
 int32_t	shapeNum,groupNum;
-Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	if (theNodePtr->PFCoordsFlag)					// see if do special PF Draw code
 	{
@@ -480,25 +525,18 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
-	if (shapeNum >= gNumShapesInFile[groupNum])		// see if error
-		DoFatalAlert("Illegal Shape #");
+	const FrameHeader* fh = GetFrameHeader(
+			groupNum,
+			shapeNum,
+			frameNum,
+			&srcPtr32,
+			&maskPtr32
+	);
 
-	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
-
-	offset = *(SHAPE_HEADER_Ptr+2);						// get offset to FRAME_LIST
-	ptr16 = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
-	if (frameNum >= *(ptr16++))							// see if error
-		DoFatalAlert("Illegal Frame #");
-
-	ptr32 = (int32_t *)ptr16;
-	offset = *(ptr32+frameNum);							// get offset to FRAME_HEADER_n
-
-	ptr16 = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_HEADER
-
-	width = *(ptr16++)>>2;								// get word width
-	height = *(ptr16++);								// get height
-	x += *(ptr16++);									// use position offsets
-	y += *(ptr16++);
+	width = fh->width >> 2;							// get word width
+	height = fh->height;							// get height
+	x += fh->x;										// use position offsets
+	y += fh->y;
 
 	oldBox = theNodePtr->drawBox;						// remember old box
 
@@ -510,12 +548,6 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 
 	if	((y+height) > gRegionClipBottom[theNodePtr->ClipNum])	// see if need to clip height
 		height -= (y+height)-gRegionClipBottom[theNodePtr->ClipNum];
-
-	ptr32 = (int32_t *)ptr16;
-	offset = *(ptr32++);									// get offset to PIXEL_DATA
-	srcPtr32 = (int32_t *)(SHAPE_HEADER_Base + offset);		// get ptr to PIXEL_DATA
-	offset = *(ptr32++);									// get offset to MASK_DATA
-	maskPtr32 = (int32_t *)(SHAPE_HEADER_Base + offset);	// get ptr to MASK_DATA
 
 	if (y < gRegionClipTop[theNodePtr->ClipNum])			// see if need to clip TOP
 	{
@@ -544,7 +576,7 @@ Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 	{
 		destPtr32 = destStartPtr32;								// get line start ptr
 
-		for (i=width; i; i--)
+		for (int i = width; i; i--)
 		{
 			*destPtr32 = (*destPtr32 & *maskPtr32) | (*srcPtr32);
 			destPtr32++;
@@ -629,15 +661,11 @@ Ptr		destPtrB,srcPtrB,maskPtrB;
 int32_t	*destPtr,*srcPtr,*maskPtr;
 Ptr		tileMaskStartPtr;
 int32_t	*tileMaskPtr;
-int32_t	*longPtr;
 Ptr		destStartPtr,srcStartPtr,originalSrcStartPtr;
 Ptr		originalMaskStartPtr,maskStartPtr;
-int16_t	*intPtr;
 long	frameNum;
-long	offset;
 long	realWidth,originalY,topToClip,leftToClip;
 long	drawWidth,shapeNum,groupNum,numHSegs;
-Ptr		SHAPE_HEADER_Ptr,SHAPE_HEADER_Base;
 Boolean	priorityFlag;
 Ptr		tmP;
 int32_t	x, y;
@@ -652,29 +680,18 @@ int32_t	x, y;
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
-	if (shapeNum >= gNumShapesInFile[groupNum])			// see if error
-	{
-		DoAlert("Illegal Shape #");
-		ShowSystemErr(shapeNum);
-	}
+	const FrameHeader* fh = GetFrameHeader(
+			groupNum,
+			shapeNum,
+			frameNum,
+			&srcStartPtr,
+			&maskStartPtr
+	);
 
-	SHAPE_HEADER_Ptr = 	SHAPE_HEADER_Base =	theNodePtr->SHAPE_HEADER_Ptr;	// get ptr to SHAPE_HEADER
-
-	offset = *((int32_t *)(SHAPE_HEADER_Ptr+2));		// get offset to FRAME_LIST
-	intPtr = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_LIST
-	if (frameNum >= *intPtr++)							// see if error
-		DoFatalAlert("Illegal Frame #");
-
-	longPtr = (int32_t *)intPtr;
-	offset = *(longPtr+frameNum);						// get offset to FRAME_HEADER_n
-
-	intPtr = (int16_t *)(SHAPE_HEADER_Base + offset);	// get ptr to FRAME_HEADER
-
-	drawWidth = realWidth = width = *intPtr++;			// get pixel width
-	height = *intPtr++;									// get height
-	x += *intPtr++;										// use position offsets (still global coords)
-	y += *intPtr++;
-
+	drawWidth = realWidth = width = fh->width;		// get pixel width
+	height = fh->height;							// get height
+	x += fh->x;										// use position offsets (still global coords)
+	y += fh->y;
 
 				/************************/
 				/*  CHECK IF VISIBLE    */
@@ -747,13 +764,10 @@ int32_t	x, y;
 		numHSegs = 1;
 
 	leftToClip += (topToClip*realWidth);
-	longPtr = (int32_t *)intPtr;
-	offset = (*longPtr++)+leftToClip;							// get offset to PIXEL_DATA
-	originalSrcStartPtr = srcStartPtr = 						// get ptr to PIXEL_DATA
-			(Ptr)(SHAPE_HEADER_Base + offset);
-	offset = (*longPtr++)+leftToClip;							// get offset to MASK_DATA
-	originalMaskStartPtr = maskStartPtr = 						// get ptr to MASK_DATA
-			(Ptr)(SHAPE_HEADER_Base + offset);
+	srcStartPtr += leftToClip;
+	maskStartPtr += leftToClip;
+	originalSrcStartPtr = srcStartPtr;	 						// get ptr to PIXEL_DATA
+	originalMaskStartPtr = maskStartPtr; 						// get ptr to MASK_DATA
 
 	destStartPtr = (Ptr)(gPFLookUpTable[y]+x);					// calc draw addr
 
