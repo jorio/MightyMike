@@ -1469,8 +1469,13 @@ void GameMain(void)
 
 
 	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
-	gGamePrefs.fullscreen = false;
-	gGamePrefs.vsync = true;
+	gGamePrefs.fullscreen			= false;
+	gGamePrefs.vsync				= true;
+	gGamePrefs.integerScaling		= true;
+	gGamePrefs.uncappedFramerate	= true;
+	gGamePrefs.filterDithering		= true;
+	gGamePrefs.interpolateAudio		= true;
+	gGamePrefs.gameTitlePowerPete	= false;
 	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
 	
 

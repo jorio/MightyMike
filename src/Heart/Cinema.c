@@ -244,9 +244,8 @@ re_enter:
 		case	0:									// PLAY
 				break;
 
-		case	1:									// VIEW
-//				DoViewScreen();
-                DoKeyConfigDialog();    //------ ISp Config
+		case	1:									// SETTINGS
+                DoSettingsScreen();
 				goto re_enter;
 				break;
 

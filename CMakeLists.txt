@@ -62,6 +62,7 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Heart/Spin.c
 	${GAME_SRCDIR}/Heart/Window.c
 	${GAME_SRCDIR}/Heart/Main.c
+	${GAME_SRCDIR}/Heart/SettingsScreen.c
 	${GAME_SRCDIR}/Drivers/Animation.c
 	${GAME_SRCDIR}/Drivers/ObjectManager.c
 	${GAME_SRCDIR}/Drivers/Palette.c

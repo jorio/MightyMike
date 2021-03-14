@@ -220,6 +220,12 @@ struct PrefsType
 {
 	Boolean		fullscreen;
 	Boolean		vsync;
+	Boolean		widescreen;
+	Boolean		integerScaling;
+	Boolean		uncappedFramerate;
+	Boolean		filterDithering;
+	Boolean		interpolateAudio;
+	Boolean		gameTitlePowerPete;
 	KeyBinding	keys[NUM_CONTROL_NEEDS];
 };
 typedef struct PrefsType PrefsType;
