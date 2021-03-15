@@ -12,6 +12,11 @@
 #define	MAX_SHAPES_IN_FILE		100
 
 
+
+typedef uint32_t GamePalette[256];
+
+
+
 			/* PLAYFIELD ITEM RECORD */
 
 #pragma pack(push, 1)	// This struct must be tightly packed to match the on-disk representation.

@@ -12,12 +12,7 @@
 #include "object.h"
 #include "misc.h"
 #include "sound2.h"
-
-
-extern	ObjNode	*gThisNodePtr;
-extern	Ptr		gSHAPE_HEADER_Ptrs[MAX_SHAPES_IN_FILE];
-extern	Boolean	gGlobalFlagList[MAX_GLOBAL_FLAGS];
-extern	short	gEnemyFreezeTimer;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

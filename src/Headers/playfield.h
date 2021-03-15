@@ -2,11 +2,7 @@
 // Playfield.h
 //
 
-#ifdef	__powerc
-#define	__USE_PF_VARS	1
-#else
-#define	__USE_PF_VARS	0
-#endif
+#pragma once
 
 #define TILENUM_MASK		0x07ff			// b0000011111111111 = mask to filter out tile num from map coords
 #define	TILE_PRIORITY_MASK	0x8000			// b1000000000000000 = mask to filter out tile's priority bit (for total tile quick mask)
@@ -15,20 +11,10 @@
 #define	TILE_SIZE			32
 #define	TILE_SIZE_SH		5								// for <<32
 
-#if !__USE_PF_VARS
-#define	PF_TILE_HEIGHT		13L								// dimensions of scrolling Playfield
-#define	PF_TILE_WIDTH		14L
-#endif
-
 #define	PF_BUFFER_HEIGHT	(PF_TILE_HEIGHT*TILE_SIZE)
 #define	PF_BUFFER_WIDTH		(PF_TILE_WIDTH*TILE_SIZE)
 #define	PF_WINDOW_HEIGHT	(PF_BUFFER_HEIGHT-TILE_SIZE)	// dimensions of visible playfield area IN OFFSCREEN BUFFER
 #define	PF_WINDOW_WIDTH		(PF_BUFFER_WIDTH-TILE_SIZE)
-
-#if !__USE_PF_VARS
-#define	PF_WINDOW_TOP		(45L)
-#define	PF_WINDOW_LEFT		(24L)				// left MUST be on 4 pixel boundary!!!!!
-#endif
 
 #define	ITEM_IN_USE			0x8000			// bit 15 = in use flag
 #define	ITEM_MEMORY			0x6000			// bits 14..13 = special memory bits

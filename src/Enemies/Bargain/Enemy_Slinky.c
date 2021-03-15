@@ -18,17 +18,7 @@
 #include "misc.h"
 #include "objecttypes.h"
 #include "collision.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long			gMyX,gMyY;
-extern	short			gNumEnemies;
-extern	short			gEnemyFreezeTimer;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

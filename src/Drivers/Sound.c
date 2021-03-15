@@ -9,16 +9,11 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-//#include <sound.h>
 #include "misc.h"
 #include "sound2.h"
 #include "io.h"
 #include "input.h"
-
-extern	short		gMainAppRezFile;
-extern	long		gTick,someLong,gFrames,gOriginalSystemVolumeFudge;
-extern	Byte		gSceneNum;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */
@@ -54,7 +49,7 @@ static	short			gNumEffectsLoaded,gNumAddedSounds;
 short			gSoundNum_UngaBunga,gSoundNum_DinoBoom,gSoundNum_DoorOpen,
 				gSoundNum_BarneyJump,gSoundNum_DogRoar;
 short			gSoundNum_ChocoBunny,gSoundNum_Carmel,gSoundNum_GummyHaha;
-short			gSoundNum_JackInTheBox,gSoundNum_CarrotThrow;
+short			gSoundNum_JackInTheBox;
 short			gSoundNum_WitchHaha,gSoundNum_Skid,gSoundNum_Shriek;
 short			gSoundNum_Ship,gSoundNum_ExitShip,gSoundNum_Frog,gSoundNum_RobotDanger;
 short			gSoundNum_ClownLaugh;

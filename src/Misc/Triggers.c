@@ -21,21 +21,7 @@
 #include "collision.h"
 #include "sound2.h"
 #include "bonus.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long			gMyX,gMyY;
-extern	short			gNumEnemies;
-extern	ObjNode			*gMostRecentlyAddedNode;
-extern	short			gNumItems,gSoundNum_DoorOpen;
-extern	ObjectEntryType *gMasterItemList;
-extern	Boolean			gMyKeys[6];
-extern	Byte			gSceneNum;
-extern	long			gDifficultySetting;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

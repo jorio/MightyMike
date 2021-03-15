@@ -21,16 +21,7 @@
 #include "main.h"
 #include "input.h"
 #include "structures.h"
-
-extern	Boolean			ImDeadFlag;
-extern	Byte			gCurrentWeaponType,gSceneNum;
-extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	long			NumObjects,gDifficultySetting;
-extern	short		gNumEnemies,gNumBunnies,gDemoMode;
-extern	WeaponType		gMyWeapons[];
-extern	Byte			gNumWeaponsIHave,gCurrentWeaponIndex;
-extern	Boolean			gMyKeys[6],gPPCFullScreenFlag;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

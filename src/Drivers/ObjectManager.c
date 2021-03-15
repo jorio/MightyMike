@@ -15,21 +15,11 @@
 #include "misc.h"
 #include "shape.h"
 #include <string.h>
-
-extern	Handle		gOffScreenHandle;
-extern	Handle		gBackgroundHandle;
-extern	long			gScreenRowOffsetLW,gScreenRowOffset;
-extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */
 /****************************/
-
-#define	MAX_REGIONS			(MAX_OBJECTS*2)
-
-#define	MAX_CLIP_REGIONS	5					// see reserved clip regions
 
 /**********************/
 /*     VARIABLES      */

@@ -9,19 +9,11 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-//#include <pictutils.h>
-//#include <palettes.h>
 #include "window.h"
 #include "picture.h"
 #include "misc.h"
+#include "externs.h"
 #include <string.h>
-
-extern	GamePalette		gGamePalette;
-extern	Handle			gOffScreenHandle;
-extern	uint8_t*		gScreenAddr;
-extern	long			gScreenRowOffset;
-extern	Boolean			gPPCFullScreenFlag;
-extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 
 /****************************/
 /*    CONSTANTS             */

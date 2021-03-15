@@ -4,7 +4,6 @@
 
 #include <stdio.h>
 
-#define MAX_GLOBAL_FLAGS		10
 #define gGlobFlag_MeDoneDead	gGlobalFlagList[0]		// flag set when I'm done with death anim
 
 #define		ONE_MINUTE_DELAY	(60L*1000L*1000L)					// delay in microseconds

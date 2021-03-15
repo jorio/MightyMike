@@ -13,25 +13,11 @@
 #include "playfield.h"
 #include "object.h"
 #include "collision.h"
-
-extern	unsigned	short	**gPlayfield;
-extern	short				*gTileXlatePtr;
-extern	TileAttribType	*gTileAttributes;
-extern	long			gSumDX,gSumDY;
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	short			gPlayfieldWidth,gPlayfieldHeight;
-extern	ObjNode		*FirstNodePtr;
-extern	ObjNode		*gThisNodePtr;
-extern	MikeFixed	gX;
-extern	MikeFixed	gY;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */
 /****************************/
-
-#define	MAX_COLLISIONS		40
-
-
 
 /****************************/
 /*    VARIABLES             */

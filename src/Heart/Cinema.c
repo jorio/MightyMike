@@ -23,25 +23,7 @@
 #include "main.h"
 #include "infobar.h"
 #include "input.h"
-
-extern	Handle		gOffScreenHandle;
-extern	Handle		gBackgroundHandle;
-extern	long		gDX,gDY,gDifficultySetting;
-extern	ObjNode		*gThisNodePtr;
-extern	long		gScore;
-extern	short		gHtab,gVtab,gDemoMode,gLoadOldGameNum,gMyMaxHealth;
-extern	long		NumObjects;
-extern	MikeFixed	gX;
-extern	MikeFixed	gY;
-extern	unsigned char	gInterlaceMode;
-extern	Byte		gSceneNum,gPlayerMode,gStartingScene,gAreaNum;
-extern	Boolean		gAbortDemoFlag;
-extern	Boolean		gGameIsDemoFlag,gMusicOnFlag,gLoadOldGameFlag;
-extern	long		gRegionClipTop[],gRegionClipBottom[],gRegionClipLeft[],gRegionClipRight[];
-extern	Byte		gBunnyCounts[5][3];
-extern	long		gNumCoins;
-extern	short		gPrefsFolderVRefNum;
-extern	long		gPrefsFolderDirID;
+#include "externs.h"
 
 static void DoDifficultyScreen(void);
 static void DoWhimpyWinScreen(void);

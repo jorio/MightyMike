@@ -23,26 +23,7 @@
 #include "objecttypes.h"
 #include "miscanims.h"
 #include "sound2.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long			gMyX,gMyY,NumObjects;
-extern	short			gNumEnemies;
-extern	ObjNode			*gMostRecentlyAddedNode;
-extern	Byte			gSceneNum;
-extern	short			gEnemyFreezeTimer,gSoundNum_JackInTheBox;
-extern	long			gScrollX,gScrollY;
-extern	short			gSoundNum_Shriek;
-#if __USE_PF_VARS
-extern long	PF_TILE_HEIGHT;
-extern long	PF_TILE_WIDTH;
-extern long	PF_WINDOW_TOP;
-extern long	PF_WINDOW_LEFT;
-#endif
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

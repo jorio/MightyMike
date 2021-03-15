@@ -19,17 +19,7 @@
 #include "sound2.h"
 #include "objecttypes.h"
 #include "collision.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY,gFrames;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long				gMyX,gMyY;
-extern	short				gNumEnemies,gSoundNum_UngaBunga;
-extern	ObjNode			*gMyNodePtr;
-extern	short			gEnemyFreezeTimer;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */
@@ -587,7 +577,4 @@ register	ObjNode *newObj;
 
 	gLastUngaTime = gFrames;							// remember when it occurred
 }
-
-
-
 

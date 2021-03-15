@@ -2,6 +2,7 @@
 // ObjectTypes.h
 //
 
+#pragma once
 
 							// SHAPE TABLE MASTER GROUPS
 							//===========================

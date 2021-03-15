@@ -13,7 +13,6 @@
 						   									if match_length is greater than this */
 
 static	unsigned char	*text_buf;					/* ring buffer of size N,with extra F-1 bytes to facilitate string comparison */
-long		gInputSize,gOutputSize,gOriginalInputSize;
 
 
 #include "misc.h"

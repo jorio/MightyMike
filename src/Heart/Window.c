@@ -9,37 +9,15 @@
 /* EXTERNALS   */
 /***************/
 #include "myglobals.h"
-//#include <qdoffscreen.h>
-//#include <pictutils.h>
 #include "window.h"
 #include "playfield.h"
 #include "object.h"
 #include "misc.h"
 #include "io.h"
-//#include 	<DrawSprocket.h>
+#include "externs.h"
 
 #include <SDL.h>
 #include <string.h>
-
-extern	Boolean		gPPCFullScreenFlag;
-extern	Handle		gBackgroundHandle;
-extern	Ptr			gSHAPE_HEADER_Ptrs[];
-extern	ObjNode		*gMyNodePtr;
-extern	unsigned char	gInterlaceMode;
-#if __USE_PF_VARS
-extern long	PF_TILE_HEIGHT;
-extern long	PF_TILE_WIDTH;
-extern long	PF_WINDOW_TOP;
-extern long	PF_WINDOW_LEFT;
-#endif
-
-extern	GamePalette			gGamePalette;
-extern SDL_Window*			gSDLWindow;
-extern SDL_Renderer*		gSDLRenderer;
-extern SDL_Texture*			gSDLTexture;
-
-extern	PrefsType			gGamePrefs;
-
 
 /****************************/
 /*    PROTOTYPES            */

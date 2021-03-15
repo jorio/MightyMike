@@ -24,21 +24,7 @@
 #include "bonus.h"
 #include "collision.h"
 #include "input.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	short			gNumCollisions;
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	short			gMyDirection;
-extern	long				gMyX,gMyY;
-extern	ObjNode			*gMyNodePtr;
-extern	long			gFrames;
-extern	unsigned char	gInterlaceMode;
-extern	Byte			gMyShootWalkAnims[8];
-extern	long			gLastRocketTime,gLastPixieTime;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

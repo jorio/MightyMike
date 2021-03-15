@@ -22,20 +22,10 @@
 #include "main.h"
 #include "input.h"
 #include "version.h"
+#include "externs.h"
 #include <SDL.h>
 #include <ctype.h>
 #include <string.h>
-
-extern	ObjNode		*gThisNodePtr,*gMyNodePtr,*ObjectList,*FirstNodePtr;
-extern	short		gPrefsFolderVRefNum;
-extern	long		gPrefsFolderDirID,NodeStackFront;
-extern	Boolean		gPPCFullScreenFlag;
-extern	long		gRegionClipTop[], gRegionClipBottom[], gRegionClipLeft[], gRegionClipRight[];
-extern	SDL_Window	*gSDLWindow;
-extern	PrefsType	gGamePrefs;
-extern	MikeFixed	gX;
-extern	MikeFixed	gY;
-extern const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS];
 
 /****************************/
 /*    PROTOTYPES            */

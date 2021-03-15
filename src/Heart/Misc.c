@@ -19,11 +19,7 @@
 #include "input.h"
 #include "objecttypes.h"
 #include "cinema.h"
-
-extern	Handle			gShapeTableHandle[];
-extern	long			gScreenXOffset,gScreenYOffset;
-extern	long			gFrames,someLong;
-extern	Boolean			gMusicOnFlag,gAbortDemoFlag,gISPInitialized;
+#include "externs.h"
 
 /****************************/
 /*    PROTOTYPES             */
@@ -85,13 +81,6 @@ short	gPrefsFolderVRefNum;
 long	gPrefsFolderDirID;
 
 long	gTick;							// used for regulating speed
-static	short	gOldMouseX,gOldMouseY;			// for mouse delta calculation
-
-									// MENU BAR HIDE/SHOW STUFF
-static	short	oldMBarHeight;
-//static	RgnHandle	mBarRgn;
-
-static	short			gNumScreenResets = 0;
 
 
 						/* GLOBAL FLAGS */
@@ -104,9 +93,6 @@ static	unsigned long seed0 = 0, seed1 = 0, seed2 = 0;
 
 long		gOriginalSystemVolume = 200;
 long		gOriginalSystemVolumeFudge;
-
-static	Str255		gBasePathName = "MightyMike";
-static	Str255		gMemoryErr = "Try increasing the applications memory size by selecting Get Info from the finder.";
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
@@ -378,8 +364,7 @@ int32_t		decompType;
 	dataHand = AllocHandle(decompSize);
 	if (dataHand == nil)
 	{
-		DoAlert (fileName);		//-----------
-		DoFatalAlert2 ("No Memory for Unpacked Data!",gMemoryErr);
+		DoFatalAlert2("No Memory for Unpacked Data!", fileName);
 	}
 
 	switch(decompType)

@@ -4,9 +4,16 @@
 /* By Brian Greenstone      */
 /****************************/
 
+#pragma once
+
+#define		MAX_COLLISIONS		40
+
+#define		MAX_GLOBAL_FLAGS	10
+
 #define		MAX_SHAPE_GROUPS	10
 #define		MAX_OBJECTS			200
-#define 	MAX_INVENTORY		100		// max # items I can have (not including dulicates)
+#define		MAX_REGIONS			(MAX_OBJECTS*2)
+#define		MAX_CLIP_REGIONS	5					// see reserved clip regions
 
 #define		MAX_SCENES	5							// 5 scenes in game: jurassic, candy, etc...
 

@@ -15,32 +15,8 @@
 #include "misc.h"
 #include "shape.h"
 #include <string.h>
+#include "externs.h"
 
-extern	Handle		gOffScreenHandle;
-extern	Handle		gBackgroundHandle;
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	uint8_t*		gScreenAddr;
-extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-extern	uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
-extern	long			gScrollX,gScrollY;
-extern	long			gRegionClipTop[],gRegionClipBottom[],
-						gRegionClipLeft[],gRegionClipRight[];
-extern	Ptr				*gPFLookUpTable;
-extern	Ptr				*gPFCopyLookUpTable;
-extern	unsigned		short	**gPlayfield;
-extern	Ptr				*gPFMaskLookUpTable;
-extern	unsigned char	gInterlaceMode;
-extern	short			gPlayfieldWidth,gPlayfieldHeight;
-extern	GamePalette		gGamePalette;
-extern	MikeFixed		gExtrapolateFrameFactor;
-
-#if __USE_PF_VARS
-extern	long PF_TILE_HEIGHT;
-extern	long PF_TILE_WIDTH;
-extern	long PF_WINDOW_TOP;
-extern	long PF_WINDOW_LEFT;
-#endif
 /****************************/
 /*    PROTOTYPES            */
 /****************************/

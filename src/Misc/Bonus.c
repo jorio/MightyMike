@@ -26,33 +26,7 @@
 #include "sound2.h"
 #include "collision.h"
 #include "input.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	short			gNumCollisions;
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long			gMyNormalMaxSpeed,NumObjects;
-extern	long			gMyX,gMyY;
-extern	short			gNumEnemies;
-extern	ObjNode			*gMostRecentlyAddedNode;
-extern	unsigned char	gInterlaceMode;
-extern	ObjectEntryType *gMasterItemList;
-extern	short				gNumItems;
-extern	ObjNode			*gMyNodePtr;
-extern	long			gScrollX,gScrollY;
-extern	Byte			gCurrentWeaponType,gSceneNum;
-extern	Ptr				*gPFLookUpTable;
-extern	short			gEnemyFreezeTimer,gSpeedyTimer;
-extern	ObjNode			*gMyNodePtr;
-extern	Byte			gNumBullets;
-extern	Byte			gBonusWeaponStartScenes[];
-extern	Boolean			gPPCFullScreenFlag,gRadarKeyFlag;
-extern	Byte			gAreaNum;
-extern	long			gDifficultySetting;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

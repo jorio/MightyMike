@@ -29,8 +29,6 @@
 /**************** PROTOTYPES *****************/
 
 
-typedef uint32_t GamePalette[256];
-
 static inline uint32_t RGBColorToU32(const RGBColor* color)
 {
 	return	0x000000FF

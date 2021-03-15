@@ -20,25 +20,7 @@
 #include "io.h"
 #include "playfield.h"
 #include "input.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr,*gShieldNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	short			gNumCollisions;
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	Boolean			gTeleportingFlag;
-extern	unsigned char	gInterlaceMode;
-extern	ObjNode			*gMyNodePtr;
-extern	long		gMyNormalMaxSpeed;
-extern	long		gMyMaxSpeedX,gMyMaxSpeedY,gMyAcceleration;
-extern	short			gEnemyFreezeTimer,gSoundNum_ExitShip;
-extern	long		gMyWindDX,gMyWindDY;
-extern	Byte		gMyMode;
-extern	short		gMyDirection,gSoundNum_Ship,gSoundNum_Frog;
-
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

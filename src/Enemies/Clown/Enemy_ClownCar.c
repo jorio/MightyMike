@@ -19,16 +19,7 @@
 #include "miscanims.h"
 #include "objecttypes.h"
 #include "sound2.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long				gMyX,gMyY;
-extern	short				gNumEnemies,gSoundNum_Skid;
-extern	short			gEnemyFreezeTimer;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

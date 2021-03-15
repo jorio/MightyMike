@@ -2,6 +2,10 @@
 // weapon.h
 //
 
+#pragma once
+
+#include "objecttypes.h"
+
 #define	MAX_WEAPONS		50				// max weapons allowed in weapon list
 
 struct WeaponType

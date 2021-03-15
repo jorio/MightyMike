@@ -20,18 +20,7 @@
 #include "shape.h"
 #include "enemy4.h"
 #include "weapon.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	short			gNumCollisions;
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long				gMyX,gMyY;
-extern	short				gNumEnemies;
-extern	short				gSoundNum_DinoBoom,gSoundNum_BarneyJump;
-extern	short			gEnemyFreezeTimer;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

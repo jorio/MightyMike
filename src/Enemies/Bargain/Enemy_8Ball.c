@@ -10,7 +10,6 @@
 /****************************/
 #include "myglobals.h"
 #include "window.h"
-//#include "playfield.h"
 #include "enemy.h"
 #include "object.h"
 #include "misc.h"
@@ -18,19 +17,7 @@
 #include "miscanims.h"
 #include "enemy5.h"
 #include "objecttypes.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long			gMyX,gMyY;
-extern	short			gNumEnemies;
-extern	ObjNode			*gMyNodePtr;
-extern	Byte			gTotalSides;
-extern	short			gEnemyFreezeTimer;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

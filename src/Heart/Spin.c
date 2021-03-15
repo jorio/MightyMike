@@ -10,19 +10,13 @@
 /***************/
 #include <string.h>
 #include "myglobals.h"
-//#include <pictutils.h>
 #include "spin.h"
 #include "misc.h"
 #include "io.h"
-//#include <timer.h>
-#include <input.h>
-
+#include "input.h"
 #include "sound2.h"
 #include "window.h"
-
-extern	GamePalette		gGamePalette;
-extern	uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
-extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

@@ -30,44 +30,9 @@
 #include "main.h"
 #include "input.h"
 #include "version.h"
+#include "externs.h"
 #include <SDL.h>
 #include <string.h>
-
-extern	ObjNode			*gThisNodePtr,*gMyNodePtr,*ObjectList,*FirstNodePtr;
-extern	Boolean			gFinishedArea,gPPCFullScreenFlag;
-extern	Boolean			gColorMaskArray[256];
-extern	Boolean			gGlobalFlagList[MAX_GLOBAL_FLAGS];
-extern	short			gNumLives;
-extern	long			gMyX,gMyY,NumObjects;
-extern	short			gNumEnemies,gNumBunnies;
-extern	long			gScore,gNumCoins,gMyNormalMaxSpeed,gMyAcceleration;
-extern	Byte			gCurrentWeaponType;
-extern	ObjNode			*FreeNodeStack[MAX_OBJECTS];
-extern	short		gMyBlinkieTimer,gNumItems;
-extern	Ptr			gSHAPE_HEADER_Ptrs[MAX_SHAPE_GROUPS][MAX_SHAPES_IN_FILE];
-extern	ObjectEntryType	**gItemLookupTableX;
-extern	ObjectEntryType *gMasterItemList;
-extern	short		gMyHealth,gMyMaxHealth;
-extern	WeaponType	gMyWeapons[];
-extern	Byte		gNumWeaponsIHave,gCurrentWeaponIndex;
-extern	short		gLastNonDeathX,gLastNonDeathY;
-extern	Boolean		gMyKeys[6],gAbortDemoFlag,gGameIsDemoFlag;
-extern	short		gPrefsFolderVRefNum,gDemoMode,gNumBunnies;
-extern	long		gPrefsFolderDirID,NodeStackFront;
-#if __USE_PF_VARS
-extern	long	PF_TILE_HEIGHT;
-extern	long	PF_TILE_WIDTH;
-extern	long	PF_WINDOW_TOP;
-extern	long	PF_WINDOW_LEFT;
-#endif
-extern	long		gShakeyScreenCount;
-extern	Boolean	gPPCFullScreenFlag;
-extern	SDL_Window	*gSDLWindow;
-
-extern const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS];
-
-
-
 
 /****************************/
 /*    CONSTANTS             */
@@ -100,7 +65,7 @@ short		gLoadOldGameNum;
 Boolean		gLoadOldGameFlag;
 
 
-long		someLong,gALLOCATED_MEMORY;
+long		someLong;
 
 Byte		gStartingScene = 0, gStartingArea = 0;
 
@@ -482,7 +447,6 @@ long	r;
 #if _DEBUG
 		if (GetNewSDLKeyState(SDL_SCANCODE_F8))
 		{
-			extern Handle gPFBufferHandle;
 			DumpIndexedTGA(
 				"playfield.tga",
 				PF_BUFFER_WIDTH,
@@ -1483,11 +1447,6 @@ void GameMain(void)
 
 	gPPCFullScreenFlag = false;					// assume no
 
-#if __USE_PF_VARS
-#if 0	// SRCPORT RM
-	gALLOCATED_MEMORY = FreeMem();				// see how much allocated for application
- 	if (gALLOCATED_MEMORY > (6500000L))
-#endif
  	{
 #if WIDESCREEN
  		PF_TILE_HEIGHT	=	15;					// dimensions of scrolling Playfield
@@ -1500,7 +1459,6 @@ void GameMain(void)
 		PF_WINDOW_LEFT	=	0;						// left MUST be on 4 pixel boundary!!!!!
 		gPPCFullScreenFlag = true;
   	}
-#endif
 
 	LoadPrefs();
 	MakeGameWindow();

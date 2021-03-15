@@ -26,28 +26,7 @@
 #include "io.h"
 #include "collision.h"
 #include "input.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr,*gShieldNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	short			gNumCollisions;
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	Boolean			gTeleportingFlag,gFrogFlag,gSpaceShipFlag;
-extern	unsigned char	gInterlaceMode;
-extern	Byte			gCurrentWeaponType;
-extern	Boolean			gGlobalFlagList[MAX_GLOBAL_FLAGS];
-extern	Byte			gDepartment,gSceneNum;
-extern	Handle			gPlayfieldHandle;
-extern	short			gMyHealth,gMyMaxHealth;
-extern	short			gEnemyFreezeTimer;
-extern	short			gShieldTimer;
-extern	Boolean			gFinishedArea;
-
-extern	short			gNumItems;
-extern	ObjectEntryType	*gMasterItemList;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

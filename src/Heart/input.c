@@ -13,13 +13,9 @@
 #include <string.h>
 #include "misc.h"
 #include "input.h"
-
-#include <window.h>
-
+#include "window.h"
 #include "structures.h"
-
-extern	SDL_Window* gSDLWindow;
-extern	PrefsType	gGamePrefs;
+#include "externs.h"
 
 /**********************/
 /*     PROTOTYPES     */

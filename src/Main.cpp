@@ -20,8 +20,6 @@ extern "C"
 	SDL_Window*			gSDLWindow		= nullptr;
 	SDL_Renderer*		gSDLRenderer	= nullptr;
 	SDL_Texture*		gSDLTexture		= nullptr;
-//	WindowPtr gCoverWindow = nullptr;
-//	UInt32* gCoverWindowPixPtr = nullptr;
 
 	// Lets the game know where to find its asset files
 	FSSpec gDataSpec;

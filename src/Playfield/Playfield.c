@@ -26,39 +26,18 @@
 #include "enemy4.h"
 #include "enemy5.h"
 #include "racecar.h"
+#include "externs.h"
 #include <string.h>
-
-extern	uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	Ptr				*gPFMaskLookUpTable;
-extern	Ptr				*gPFLookUpTable;
-extern	Ptr				*gPFCopyLookUpTable;
-extern	Boolean	(*gItemAddPtrs[])(ObjectEntryType *);
-extern	long				gMyX,gMyY;
-extern	long				gRegionClipTop[],gRegionClipBottom[],gRegionClipLeft[],gRegionClipRight[];
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	short			gMyDirection;
-extern	ObjNode			*gThisNodePtr,*gMyNodePtr;
-extern	long			gScreenRowOffsetLW,gScreenRowOffset;
-extern	unsigned char	gInterlaceMode;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	Boolean			gTeleportingFlag;
-extern	long			gMySumDX,gMySumDY,gMyDX,gMyDY;
-extern	Boolean			gScreenScrollFlag;
-extern	MikeFixed		gExtrapolateFrameFactor;
-
 
 /****************************/
 /*    CONSTANTS             */
 /****************************/
 
 											// FOR PPC, THESE ARE VARS SO WE CAN CHANGE THEM!
-#if __USE_PF_VARS
 long	PF_TILE_HEIGHT	=	13;				// dimensions of scrolling Playfield
 long	PF_TILE_WIDTH	=	14;
 long	PF_WINDOW_TOP	=	45;
 long	PF_WINDOW_LEFT	=	24;				// left MUST be on 4 pixel boundary!!!!!
-#endif
 
 Boolean	gPPCFullScreenFlag = false;
 
@@ -87,7 +66,6 @@ Boolean	gPPCFullScreenFlag = false;
 
 
 
-
 /**********************/
 /*     VARIABLES      */
 /**********************/
@@ -97,7 +75,7 @@ static	Ptr				gTilesPtr;
 static	short			*gTileXlatePtr;
 
 Handle			gPlayfieldHandle = nil;
-unsigned short	**gPlayfield = nil;
+uint16_t		**gPlayfield = nil;
 short			gPlayfieldTileWidth,gPlayfieldTileHeight;
 short			gPlayfieldWidth,gPlayfieldHeight;
 
@@ -135,7 +113,8 @@ static	TileAnimEntryType	gTileAnims[MAX_TILE_ANIMS];
 /**********************/
 
 #define	MAX_ITEM_NUM	55							// for error checking!
-Boolean	(*gItemAddPtrs[])(ObjectEntryType *) = {
+
+static	Boolean	(*gItemAddPtrs[])(ObjectEntryType *) = {
 					AddEnemy_Caveman,
 					AddAppearZone,
 					NilAdd,						//store

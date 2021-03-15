@@ -16,11 +16,7 @@
 #include "misc.h"
 #include "infobar.h"
 #include "input.h"
-
-
-extern	long		gScore;
-extern	Byte	gStartingScene;
-extern	Boolean	gPPCFullScreenFlag;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

@@ -23,19 +23,7 @@
 #include "collision.h"
 #include "misc.h"
 #include "io.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY,gFrames;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	short			gNumCollisions;
-extern	long			gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	short			gItemDeleteWindow_Bottom,gItemDeleteWindow_Top,gItemDeleteWindow_Left,gItemDeleteWindow_Right;
-extern	ObjNode			*gMyNodePtr;
-extern	long			gLastUngaTime,gLastGummyHahaTime,gLastWitchHahaTime,gLastDogRoarTime,gLastRobotDangerTime;
-extern	long			gLastClownLaughTime;
-extern	long			gDifficultySetting;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

@@ -19,17 +19,7 @@
 #include "objecttypes.h"
 #include "shape.h"
 #include "enemy3.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long				gMyX,gMyY;
-extern	short				gNumEnemies,gSoundNum_ChocoBunny;
-extern	short			gEnemyFreezeTimer;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */
@@ -233,8 +223,4 @@ void MoveChoc_Land(void)
 
 	UpdateEnemy();
 }
-
-
-
-
 

@@ -19,17 +19,7 @@
 #include "objecttypes.h"
 #include "enemy4.h"
 #include "sound2.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	ObjNode			*gMyNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY,gFrames;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long				gMyX,gMyY;
-extern	short				gNumEnemies;
-extern	short			gEnemyFreezeTimer,gSoundNum_WitchHaha;
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

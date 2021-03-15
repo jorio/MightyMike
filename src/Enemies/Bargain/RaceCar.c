@@ -20,27 +20,7 @@
 #include "weapon.h"
 #include "io.h"
 #include "infobar.h"
-
-extern	MikeFixed	gX;
-extern	MikeFixed	gY;
-extern	long		gMyX,gMyY;
-extern	short		gMyInitX,gMyInitY;
-extern	ObjNode		*gMyNodePtr;
-extern	Byte		gMyMode;
-extern	short		gNumCollisions;
-extern	long		gMySpeed,gFrames;
-extern	Boolean		gFinishedArea,gTeleportingFlag;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gMySumDX,gMySumDY,gMyDX,gMyDY;
-extern	long				gScrollX,gScrollY;
-extern	short		gMyDirection;
-#if __USE_PF_VARS
-extern long	PF_TILE_HEIGHT;
-extern long	PF_TILE_WIDTH;
-extern long	PF_WINDOW_TOP;
-extern long	PF_WINDOW_LEFT;
-#endif
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */

@@ -17,22 +17,7 @@
 #include "sound2.h"
 #include "objecttypes.h"
 #include "cinema.h"
-
-extern	ObjNode			*gThisNodePtr,*FirstNodePtr;
-extern	long			gDX,gDY,gSumDX,gSumDY;
-extern	MikeFixed		gX;
-extern	MikeFixed		gY;
-extern	CollisionRec	gCollisionList[];
-extern	Byte			gPlayerMode,gCurrentPlayer;
-extern	long				gRightSide,gLeftSide,gTopSide,gBottomSide;
-extern	long				gMyX,gMyY;
-extern	short				gNumEnemies;
-extern	ObjNode			*gMostRecentlyAddedNode;
-extern	ObjNode			*gMyNodePtr;
-extern	long				gScrollX,gScrollY;
-extern	long			gFrames;
-extern	long		gDifficultySetting;
-
+#include "externs.h"
 
 /****************************/
 /*    CONSTANTS             */
