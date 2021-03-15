@@ -215,8 +215,16 @@ if(NOT MSVC)
 		-Werror=return-type
 	)
 else()
+	# By default, MSVC may add /EHsc to CMAKE_CXX_FLAGS, which we don't want (we use /EHs below)
+	string(REPLACE "/EHsc" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+
+	# By default, MSVC may add /W3 to CMAKE_CXX_FLAGS, which we don't want (we use /W4 below)
+	# Note that this is not required with "cmake_minimum_required(VERSION 3.15)" or later
+	string(REPLACE "/W3" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+	string(REPLACE "/W3" "" CMAKE_C_FLAGS ${CMAKE_C_FLAGS})
+
 	target_compile_options(${GAME_TARGET} PRIVATE
-		/EHa    # C++ may throw exceptions from extern "C" functions
+		/EHs	# synchronous exceptions; also, extern "C" functions may throw exceptions
 		/W4
 		/wd4068 # ignore unrecognized pragmas
 		/wd4100 # unreferenced formal parameters
