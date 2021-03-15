@@ -41,13 +41,6 @@
 #define	BUNNY_HINT_DELAY	(GAME_FPS*20)
 #define	BUNNY_HINT_MARGIN	50
 
-
-struct HealthPOWType
-{
-	Byte			group,type,anim;
-};
-typedef struct HealthPOWType HealthPOWType;
-
 #define	RADAR_CENTER_X		234
 #define	RADAR_CENTER_Y		240
 #define	RADAR_RANGE			20
@@ -65,14 +58,6 @@ Byte	gBunnyMessageNum = 0;
 short		gNumBunnies;
 
 short	gShieldTimer;
-
-static	HealthPOWType	gHealthPOW[] = {
-							GroupNum_JurassicHealth,ObjType_JurassicHealth,0,		// meat
-							GroupNum_JurassicHealth,ObjType_JurassicHealth,1,		// berries
-							GroupNum_ClownHealth,ObjType_ClownHealth,0,				// burger
-							GroupNum_ClownHealth,ObjType_ClownHealth,1				// hotdog
-							};
-
 
 #define	NukeTimer		Special1
 #define	NukeDoneFlag	Flag0
