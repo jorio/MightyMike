@@ -115,7 +115,7 @@ static	int			gInfobarYAdjust = (VISIBLE_HEIGHT - 480);
 
 void InitHealth(void)
 {
-	if (gDifficultySetting == DIFFICULTY_EASY)		// more health in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)		// more health in easy mode
 	{
 		gMyHealth = DEFAULT_HEALTH+1;
 		gMyMaxHealth = DEFAULT_HEALTH+1;

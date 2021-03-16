@@ -223,6 +223,9 @@ typedef struct KeyBinding
 
 struct PrefsType
 {
+	char		magic[32];
+	Boolean		interlaceMode;
+	Byte		difficulty;
 	Boolean		fullscreen;
 	Boolean		vsync;
 	Boolean		widescreen;
@@ -234,6 +237,8 @@ struct PrefsType
 	KeyBinding	keys[NUM_CONTROL_NEEDS];
 };
 typedef struct PrefsType PrefsType;
+
+#define PREFS_MAGIC "Mighty Mike Prefs v0"
 
 #endif
 

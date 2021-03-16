@@ -18,6 +18,6 @@ extern void	Do1PlayerGame(void);
 extern void	Do2PlayerGame(void);
 extern void	CleanMemory(void);
 extern void	OptimizeMemory(void);
-extern void	LoadPrefs(void);
+OSErr LoadPrefs(void);
 extern void	SavePrefs(void);
 extern void	main(void);

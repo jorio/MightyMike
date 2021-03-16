@@ -249,7 +249,7 @@ register	long	destAdd,size;
 
 				/* ERASE INTERLACING ZONE FROM MAIN SCREEN */
 
-	if (gInterlaceMode)
+	if (gGamePrefs.interlaceMode)
 	{
 		destPtr = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP+1]+PF_WINDOW_LEFT);
 		destAdd = gScreenRowOffsetLW*2-(PF_WINDOW_WIDTH>>2);

@@ -217,7 +217,7 @@ Boolean AddClowndoor(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
 
-	if (gDifficultySetting == DIFFICULTY_EASY)				// no doors in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors in easy mode
 		return(false);
 
 	if (itemPtr->type & ITEM_MEMORY)						// see if door is already OPEN
@@ -257,7 +257,7 @@ Boolean AddCandyDoor(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
 
-	if (gDifficultySetting == DIFFICULTY_EASY)				// no doors in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors in easy mode
 		return(false);
 
 	if (itemPtr->type & ITEM_MEMORY)						// see if door is already OPEN
@@ -297,7 +297,7 @@ Boolean AddJurassicDoor(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
 
-	if (gDifficultySetting == DIFFICULTY_EASY)				// no doors in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors in easy mode
 		return(false);
 
 	if (itemPtr->type & ITEM_MEMORY)						// see if door is already OPEN
@@ -336,7 +336,7 @@ Boolean AddBargainDoor(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
 
-	if (gDifficultySetting == DIFFICULTY_EASY)				// no doors in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors in easy mode
 		return(false);
 
 	if (itemPtr->type & ITEM_MEMORY)						// see if door is already OPEN
@@ -414,7 +414,7 @@ Boolean AddFairyDoor(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
 
-	if (gDifficultySetting == DIFFICULTY_EASY)				// no doors in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors in easy mode
 		return(false);
 
 	if (itemPtr->type & ITEM_MEMORY)						// see if door is already OPEN

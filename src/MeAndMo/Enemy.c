@@ -248,7 +248,7 @@ void CalcEnemyScatterOffset(ObjNode *node)
 Boolean EnemyLoseHealth(ObjNode *theEnemy, short amount)
 {
 
-	if (gDifficultySetting != DIFFICULTY_EASY)			// no damage thresholds in easy mode
+	if (gGamePrefs.difficulty != DIFFICULTY_EASY)		// no damage thresholds in easy mode
 	{
 		if (amount < theEnemy->InjuryThreshold)			// see if damage is at minimum threshold to do anything
 		{
@@ -259,7 +259,7 @@ Boolean EnemyLoseHealth(ObjNode *theEnemy, short amount)
 	else
 		amount *= 2;									// double the damage in EASY mode
 
-	if (gDifficultySetting == DIFFICULTY_HARD)			// half the damage in HARD mode
+	if (gGamePrefs.difficulty == DIFFICULTY_HARD)		// half the damage in HARD mode
 		if (amount > 1)
 			amount /= 2;
 

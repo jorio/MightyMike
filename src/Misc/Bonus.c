@@ -442,7 +442,7 @@ Boolean AddKey(ObjectEntryType *itemPtr)
 ObjNode		*newObj;
 short	group,type;
 
-	if (gDifficultySetting == DIFFICULTY_EASY)				// no doors/keys in easy mode
+	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors/keys in easy mode
 		return(false);
 
 	switch(gSceneNum)

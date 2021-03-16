@@ -50,7 +50,6 @@ Boolean		gAbortGameFlag,gWinFlag,gFinishedArea;
 long		gFrames=0;				// # frames tick counter
 Byte		gSceneNum,gAreaNum;
 
-unsigned char	gInterlaceMode = false;
 Byte		gPlayerMode = ONE_PLAYER;
 Byte		gCurrentPlayer;
 
@@ -68,8 +67,6 @@ Boolean		gLoadOldGameFlag;
 long		someLong;
 
 Byte		gStartingScene = 0, gStartingArea = 0;
-
-long		gDifficultySetting = DIFFICULTY_NORMAL;
 
 Boolean		gIsASavedGame[2];
 
@@ -806,7 +803,7 @@ delete:
 	currentWeaponIndex = gCurrentWeaponIndex;
 	myHealth = gMyHealth;
 	myMaxHealth = gMyMaxHealth;
-	difficultySetting = gDifficultySetting;
+	difficultySetting = gGamePrefs.difficulty;
 	BlockMove((Ptr)&gMyWeapons[0],(Ptr)weaponList,sizeof(WeaponType)*MAX_WEAPONS);
 
 
@@ -835,7 +832,7 @@ delete:
 	gCurrentWeaponIndex = currentWeaponIndex;
 	gMyHealth = myHealth;
 	gMyMaxHealth = myMaxHealth;
-	gDifficultySetting = difficultySetting;
+	gGamePrefs.difficulty = difficultySetting;
 	BlockMove((Ptr)weaponList,(Ptr)&gMyWeapons[0],sizeof(WeaponType)*MAX_WEAPONS);
 }
 
@@ -968,7 +965,7 @@ Byte		scene,area;
 	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
 
 	numBytes = 4;											// write DIFFICULTY SETTING
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gDifficultySetting);
+	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gGamePrefs.difficulty);
 	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
 
 
@@ -1072,7 +1069,7 @@ Str255		errStr	= "Cannot Read Player Save File.";
 	if (iErr != noErr) {DoFatalAlert(errStr); return;}
 
 	numBytes = 4;											// read DIFFICULTY SETTING
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gDifficultySetting);
+	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gGamePrefs.difficulty);
 	if (iErr != noErr) {DoFatalAlert(errStr); return;}
 
 
@@ -1103,7 +1100,7 @@ short	maxScenes;
 
 				/* SEE HOW MANY LEVELS TO PLAY */
 
-	switch(gDifficultySetting)
+	switch(gGamePrefs.difficulty)
 	{
 //		case	DIFFICULTY_NORMAL:
 //				maxScenes = 4;
@@ -1372,23 +1369,50 @@ void OptimizeMemory(void)
 // Load in standard preferences
 //
 
-void LoadPrefs(void)
+OSErr LoadPrefs(void)
 {
-Handle	hRsrc;
-int32_t	*longPtr;
+OSErr		iErr;
+short		refNum;
+FSSpec		file;
+long		count;
+PrefsType	prefs;
+				
+				/*************/
+				/* READ FILE */
+				/*************/
+					
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, ":MightyMike:Prefs", &file);
+	iErr = FSpOpenDF(&file, fsRdPerm, &refNum);	
+	if (iErr)
+		return iErr;
 
+	iErr = GetEOF(refNum, &count);
+	if (iErr)
+	{
+		FSClose(refNum);
+		return iErr;
+	}
 
-	hRsrc = GetResource('Pref',1000);					// read the resource
-	if (ResError())
-		DoFatalAlert("Error reading Pref rez!");
+	if (count != sizeof(PrefsType))
+	{
+		// size of file doesn't match size of struct
+		FSClose(refNum);
+		return badFileFormat;
+	}
 
-	HLock(hRsrc);
-	longPtr = (int32_t *)*hRsrc;
-
-	gInterlaceMode		= Byteswap32Signed(longPtr++);
-	gDifficultySetting	= Byteswap32Signed(longPtr++);
-
-	ReleaseResource(hRsrc);							// nuke resource
+	count = sizeof(PrefsType);
+	iErr = FSRead(refNum, &count,  (Ptr)&prefs);		// read data from file
+	FSClose(refNum);
+	if (iErr
+		|| count < (long)sizeof(PrefsType)
+		|| 0 != strncmp(PREFS_MAGIC, prefs.magic, sizeof(prefs.magic)))
+	{
+		return iErr;
+	}
+	
+	gGamePrefs = prefs;
+	
+	return noErr;
 }
 
 
@@ -1396,27 +1420,33 @@ int32_t	*longPtr;
 
 void SavePrefs(void)
 {
-long		*longPtr;
-Handle		resHandle;
-OSErr		iErr;
+FSSpec				file;
+OSErr				iErr;
+short				refNum;
+long				count;
 
-	resHandle = GetResource('Pref',1000);					// get it
-	if (resHandle == nil)
-		DoFatalAlert("Error reading Pref rez!");
+				/* CREATE BLANK FILE */
 
-	HLock(resHandle);
-	longPtr = (long *)*resHandle;
-	*longPtr++ = gInterlaceMode;			// update it
-	*longPtr++ = gDifficultySetting;
+	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, ":MightyMike:Prefs", &file);
+	FSpDelete(&file);															// delete any existing file
+	iErr = FSpCreate(&file, 'MMik', 'Pref', smSystemScript);					// create blank file
+	if (iErr)
+		return;
 
-	ChangedResource(resHandle);
-	WriteResource( resHandle );								// update it
-	if (iErr = ResError())
+				/* OPEN FILE */
+					
+	iErr = FSpOpenDF(&file, fsRdWrPerm, &refNum);
+	if (iErr)
 	{
-		DoAlert("Couldnt Update Preferences Resource!  Do not run application off of CD-ROM!");
-		ShowSystemErr(iErr);
+		FSpDelete(&file);
+		return;
 	}
-	ReleaseResource(resHandle);								// nuke resource
+
+				/* WRITE DATA */
+
+	count = sizeof(PrefsType);
+	FSWrite(refNum, &count, (Ptr)&gGamePrefs);
+	FSClose(refNum);
 }
 
 
@@ -1433,6 +1463,9 @@ void GameMain(void)
 
 
 	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
+	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
+	gGamePrefs.interlaceMode		= false;
+	gGamePrefs.difficulty			= DIFFICULTY_NORMAL;
 	gGamePrefs.fullscreen			= false;
 	gGamePrefs.vsync				= true;
 	gGamePrefs.integerScaling		= true;
