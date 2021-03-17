@@ -139,7 +139,7 @@ short		distX,distY;
 		distY = Absolute(gY.Int - gMyY);
 		if (distY < POP_MAX_DIST)
 		{
-			if (!(MyRandomLong()&b11111))
+			if (!(MyRandomLong()&0b11111))
 			{
 				if (gThisNodePtr->SubType == SUB_WALK_RIGHT)
 					SwitchAnim(gThisNodePtr,SUB_POP_RIGHT);
@@ -185,7 +185,7 @@ void MoveGBread_Pop(void)
 
 void UpdateGBread(void)
 {
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	if (gDX < 0)										// check aim anim

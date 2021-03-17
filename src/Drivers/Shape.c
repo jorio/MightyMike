@@ -766,7 +766,7 @@ int32_t	x, y;
 				destPtrB = (Ptr)destPtr;
 				maskPtrB = (Ptr)maskPtr;
 				srcPtrB = (Ptr)srcPtr;
-				for (i=(width&b11); i; i--)						// draw remaining pixels
+				for (i=(width&0b11); i; i--)						// draw remaining pixels
 					*destPtrB++ = (*destPtrB & (*maskPtrB++)) | (*srcPtrB++);
 
 				srcStartPtr += realWidth;						// next sprite line
@@ -821,7 +821,7 @@ int32_t	x, y;
 				destPtrB = (Ptr)destPtr;
 				maskPtrB = (Ptr)maskPtr;
 				srcPtrB = (Ptr)srcPtr;
-				for (i=(width&b11); i; i--)						// draw remaining pixels
+				for (i=(width&0b11); i; i--)						// draw remaining pixels
 				{
 					*destPtrB++ = (*destPtrB & (*maskPtrB | *tmP)) |
 								 (*srcPtrB & (*tmP ^ 0xff));
@@ -911,7 +911,7 @@ long	drawHeight,originalY;
 			srcPtrB = (Ptr)srcPtr;
 
 
-			for (i = (width&b111-1); i >= 0; i--)				// do remaining pixels
+			for (i = (width&0b111-1); i >= 0; i--)				// do remaining pixels
 				destPtrB[i] = srcPtrB[i];
 
 			if (++y >=  PF_BUFFER_HEIGHT)					// see if wrap buffer vertically

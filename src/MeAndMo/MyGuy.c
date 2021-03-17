@@ -993,7 +993,7 @@ void UpdateMe(void)
 {
 	if (gMyBlinkieTimer > 0)							// check blinkie
 	{
-		if (--gMyBlinkieTimer & b1)
+		if (--gMyBlinkieTimer & 0b1)
 			gMyNodePtr->DrawFlag = false;
 		else
 			gMyNodePtr->DrawFlag = true;

@@ -1040,7 +1040,7 @@ ObjNode	*theNode;
 							theNode = MakeNewShape(GroupNum_BigFont,ObjType_BigFont,ASCIIToBigFont(lineBuff[i]),
 										x,470,100,MoveCreditLetter,SCREEN_RELATIVE);
 							theNode->ClipNum = 3;
-							theNode->Special1 = MyRandomLong()&b111111111+0x500;
+							theNode->Special1 = MyRandomLong()&0b111111111+0x500;
 							theNode->DY = -0x10000L;
 						}
 						x += FONT_WIDTH;
@@ -1531,7 +1531,7 @@ ObjNode	*theNode;
 							theNode = MakeNewShape(GroupNum_BigFont,ObjType_BigFont,ASCIIToBigFont(lineBuff[i]),
 										x,470,100,MoveCreditLetter2,SCREEN_RELATIVE);
 							theNode->ClipNum = 3;
-							theNode->Special1 = MyRandomLong()&b111111111+0x500;
+							theNode->Special1 = MyRandomLong()&0b111111111+0x500;
 							theNode->DY = -0x10000L;
 						}
 						x += FONT_WIDTH;
@@ -1813,7 +1813,7 @@ short	selection;
 		gNumCoins = 300;
 	for (i=0; i < gNumCoins; i++)
 	{
-		if (!(i&b1))
+		if (!(i&0b1))
 			PlaySound(SOUND_SELECTCHIME);
 		DrawFrameToScreen(htab,vtab,GROUP_BONUS,0,12);			// draw jawbreaker
 		bonus += 25;

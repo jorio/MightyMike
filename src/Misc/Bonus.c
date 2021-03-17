@@ -84,7 +84,7 @@ short		i;
 
 		newObj->CType = CTYPE_BONUS;
 		newObj->CBits = CBITS_TOUCHABLE;
-		newObj->CoinTimer = COIN_TIME+(MyRandomLong()&b11111);		// set life of coin
+		newObj->CoinTimer = COIN_TIME+(MyRandomLong()&0b11111);		// set life of coin
 
 		newObj->TopOff = -16;									// set box
 		newObj->BottomOff = 0;
@@ -228,7 +228,7 @@ register ObjNode	*theNode;
 	{
 		if ((Absolute(gX.Int - gMyX) < 300) && (Absolute(gY.Int - gMyY) < 250))	// see if in range
 		{
-			if (!(MyRandomLong()&(b1111111)))
+			if (!(MyRandomLong()&(0b1111111)))
 			{
 				MakeMikeMessage(gBunnyMessageNum);
 				if (++gBunnyMessageNum > 1)					// cycle thru messages
@@ -519,7 +519,7 @@ void PutBonusPOW(short x, short y)
 {
 static ObjectEntryType	item;
 
-	if (!(MyRandomLong()&b1))
+	if (!(MyRandomLong()&0b1))
 	{
 		if (MyRandomLong()&1)
 		{
@@ -816,7 +816,7 @@ ObjNode	*newNode;
 
 	gNumBullets++;
 
-	if (!(gThisNodePtr->NukeTimer & b11))		// see if continue nuke
+	if (!(gThisNodePtr->NukeTimer & 0b11))		// see if continue nuke
 		PlaySound(SOUND_NUKE);
 
 update:

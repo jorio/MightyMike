@@ -109,7 +109,7 @@ void MoveRex(void)
 
 void UpdateRex(void)
 {
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	gThisNodePtr->AnimSpeed = (Absolute(gDX)+Absolute(gDY))>>8;

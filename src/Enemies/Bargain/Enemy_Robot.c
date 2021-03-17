@@ -197,7 +197,7 @@ register	ObjNode *newObj;
 		return;
 	if (gMyNodePtr->OwnerToMessageNode != nil)			// not if Mike is talking
 		return;
-	if (MyRandomLong()&b11111111)						// random
+	if (MyRandomLong()&0b11111111)						// random
 		return;
 
 				/* MAKE MESSAGE SPRITE */

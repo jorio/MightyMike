@@ -124,7 +124,7 @@ void UpdateGBear(void)
 	if (gThisNodePtr->Health != GBEAR_HEALTH)			// see if hit
 		goto update;
 
-	if (!(MyRandomLong() & b1111111))					// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))					// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	if (gDX < 0)										// check aim anim
@@ -256,7 +256,7 @@ void MoveTinyGummy(void)
 void UpdateTinyGummy(void)
 {
 
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	if (gDX < 0)										// check aim anim
@@ -294,7 +294,7 @@ register	ObjNode *newObj;
 		return;
 	if (gMyNodePtr->OwnerToMessageNode != nil)			// not if Mike is talking
 		return;
-	if (MyRandomLong()&b111111111)							// random
+	if (MyRandomLong()&0b111111111)							// random
 		return;
 
 				/* MAKE MESSAGE SPRITE */

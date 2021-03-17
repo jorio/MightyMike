@@ -379,8 +379,8 @@ TileAttribType	*newTile;
 	newObj->DirectionFlag = 0;								// go forward
 	newObj->CarSpeed = gCarSpeeds[itemPtr->parm[0]];		// set car speed
 
-	newObj->BaseX = newObj->X.Int&b1111111111100000;		// round down to nearest tile
-	newObj->BaseY = newObj->Y.Int&b1111111111100000;
+	newObj->BaseX = newObj->X.Int&0b1111111111100000;		// round down to nearest tile
+	newObj->BaseY = newObj->Y.Int&0b1111111111100000;
 
 	newTile = GetFullMapTileAttribs(newObj->BaseX,newObj->BaseY);	// use attribs to determine start
 	if (!newTile->bits&TILE_ATTRIB_TRACK)

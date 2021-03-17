@@ -31,28 +31,6 @@ enum
 //================================================================================
 
 
-							// BINARY EQUATES
-							//===================================
-
-#define	b1					0x1L
-#define	b11					0x3L
-#define	b111				0x7L
-#define	b1111				0xfL
-#define	b11111				0x1fL
-#define	b111111				0x3fL
-#define	b1111111			0x7fL
-#define	b11111111			0xffL
-#define	b111111111			0x1ffL
-#define	b1111111111			0x3ffL
-#define	b11111111111		0x7ffL
-#define	b111111111111		0xfffL
-#define	b1111111111111		0x1fffL
-#define	b1111111111100000	0xffe0L
-
-#define	b1100				0xcL
-#define	b1110				0xeL
-#define	b110				0x6L
-
 							// COLLISION SIDE INFO
 							//=================================
 

@@ -35,7 +35,7 @@ enum{
 #define CHOCBUNNY_WORTH				2
 #define	CHOCBUNNY_DAMAGE_THRESHOLD	3					// min weapon power needed to do damage
 
-#define STAND_TIME		(MyRandomLong()&b11111+20)
+#define STAND_TIME		(MyRandomLong()&0b11111+20)
 
 #define	JUMP_FACTOR		0x130000L
 

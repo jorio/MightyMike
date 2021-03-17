@@ -150,8 +150,8 @@ register	ObjNode		*newObj;
 	newObj->RightOff = 6;
 	CalcObjectBox2(newObj);
 
-	newObj->DX = gHatchlingDXY[MyRandomLong()&b1111];
-	newObj->DY = gHatchlingDXY[MyRandomLong()&b1111];
+	newObj->DX = gHatchlingDXY[MyRandomLong()&0b1111];
+	newObj->DY = gHatchlingDXY[MyRandomLong()&0b1111];
 
 	newObj->YOffset.Int = -25;
 	newObj->DZ = -0xf0000;						// start bouncing up

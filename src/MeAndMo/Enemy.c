@@ -235,8 +235,8 @@ void UpdateEnemy(void)
 
 void CalcEnemyScatterOffset(ObjNode *node)
 {
-	node->EnemyTargetXOff = (MyRandomLong()&b1111111)-64;	// set coordinate jitter
-	node->EnemyTargetYOff = (MyRandomLong()&b1111111)-64;
+	node->EnemyTargetXOff = (MyRandomLong()&0b1111111)-64;	// set coordinate jitter
+	node->EnemyTargetYOff = (MyRandomLong()&0b1111111)-64;
 }
 
 
@@ -309,7 +309,7 @@ register	short		x,y,z;
 		if (newObj == nil)
 			return;
 
-		newObj->SplatTimer = MyRandomLong()&b11111+SPLAT_TIME;		// set life of splat
+		newObj->SplatTimer = MyRandomLong()&0b11111+SPLAT_TIME;		// set life of splat
 
 		newObj->YOffset.Int = -15;
 		newObj->DZ = -0x80000L-MyRandomShort();						// start bouncing up
@@ -321,7 +321,7 @@ register	short		x,y,z;
 
 	if (gMyNodePtr->OwnerToMessageNode == nil)
 	{
-		if (!(MyRandomLong()&b1100))
+		if (!(MyRandomLong()&0b1100))
 			MakeMikeMessage(MESSAGE_NUM_TAKETHAT+(gFrames&1));
 	}
 }

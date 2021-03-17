@@ -98,7 +98,7 @@ void MoveMagicHat(void)
 	{
 				/* WAITING */
 
-		if ((!(MyRandomLong()&b1111111)) && (gNumEnemies < MAX_ENEMIES))
+		if ((!(MyRandomLong()&0b1111111)) && (gNumEnemies < MAX_ENEMIES))
 		{
 			SwitchAnim(gThisNodePtr,SUB_HAT_SPIT);		// start to spit
 		}
@@ -205,7 +205,7 @@ register ObjNode	*theNode;
 
 void UpdateHatBunny(void)
 {
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	if (gDX < 0)										// check aim anim

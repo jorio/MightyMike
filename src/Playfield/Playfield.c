@@ -1489,8 +1489,8 @@ long		method;
 
 	if (gShakeyScreenCount)									// see if do shakey screen
 	{
-		scrollOffsetX += MyRandomLong() & b1111 - 8;
-		scrollOffsetY += MyRandomLong() & b1111 - 8;
+		scrollOffsetX += MyRandomLong() & 0b1111 - 8;
+		scrollOffsetY += MyRandomLong() & 0b1111 - 8;
 	}
 
 	// Apply scroll offset

@@ -183,7 +183,7 @@ short		distX,distY;
 		distY = Absolute(gY.Int - gMyY);
 		if (distY < PIE_MAX_DIST)
 		{
-			if (!(MyRandomLong()&b1111111))
+			if (!(MyRandomLong()&0b1111111))
 			{
 				if (gThisNodePtr->SubType == SUB_WALK_RIGHT)
 					SwitchAnim(gThisNodePtr,SUB_THROW_RIGHT);
@@ -241,7 +241,7 @@ void MoveClown_PieThrower2(void)
 
 void UpdateClown(void)
 {
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	if (gDX < 0)										// check aim anim
@@ -400,7 +400,7 @@ register	ObjNode *newObj;
 		return;
 	if (gMyNodePtr->OwnerToMessageNode != nil)			// not if Mike is talking
 		return;
-	if (MyRandomLong()&b11111111)						// random
+	if (MyRandomLong()&0b11111111)						// random
 		return;
 
 				/* MAKE MESSAGE SPRITE */

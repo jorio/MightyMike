@@ -173,7 +173,7 @@ Boolean	wall;
 		if (!wall)								// see if legal
 			break;
 		else
-			toAnim = (toAnim+1)&b11;			// nope, try next direction
+			toAnim = (toAnim+1)&0b11;			// nope, try next direction
 	}
 
 

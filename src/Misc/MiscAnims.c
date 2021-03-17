@@ -200,7 +200,7 @@ void MovePlayerSignal(void)
 	gThisNodePtr->X.Int = gScrollX+PLAYER_SIGNAL_X;		// keep aligned with screen
 	gThisNodePtr->Y.Int = gScrollY+PLAYER_SIGNAL_Y;
 
-	if ((gFrames&b11) == 0)									// make flash
+	if ((gFrames&0b11) == 0)									// make flash
 		gThisNodePtr->DrawFlag = !gThisNodePtr->DrawFlag;
 
 	if (gThisNodePtr->Special1-- < 0)						// see if done
@@ -215,7 +215,7 @@ void MovePlayerSignal(void)
 
 void MovePlayerSignalOHM(void)
 {
-	if ((gFrames&b111) == 0)									// make flash
+	if ((gFrames&0b111) == 0)									// make flash
 	{
 		if (gThisNodePtr->DrawFlag)
 			DeactivateObjectDraw(gThisNodePtr);

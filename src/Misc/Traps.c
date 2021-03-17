@@ -89,7 +89,7 @@ ObjectEntryType	item;
 		return;
 
 
-	if (!(MyRandomLong()&(b11111)))								// see if create enemy
+	if (!(MyRandomLong()&(0b11111)))								// see if create enemy
 	{
 
 		item.x = gThisNodePtr->X.Int;
@@ -321,7 +321,7 @@ void MoveJackInTheBox(void)
 	}
 	else												// else SEE IF READY TO SPROING
 	{
-		if (!(MyRandomLong()&b111111))
+		if (!(MyRandomLong()&0b111111))
 		{
 			gThisNodePtr->CType = CTYPE_ENEMYC;			// make harmful
 			gThisNodePtr->DrawFlag = true;
@@ -512,7 +512,7 @@ short	i;
 	if (gThisNodePtr->Y.Int > (gScrollY+PF_WINDOW_HEIGHT))
 		return;
 
-	if ((MyRandomLong()&b1111111) == 0)					// see if spider add
+	if ((MyRandomLong()&0b1111111) == 0)					// see if spider add
 	{
 		for (i = 0; i < MAX_MUFFIT_SPIDERS; i++)
 		{
@@ -605,7 +605,7 @@ static	long hydrantDX[2] = {-0x90000L,0x90000L};
 			/* SEE WHICH WAY TO MAKE IT GO */
 
 	dx = hydrantDX[gThisNodePtr->HydrantDirection];
-	x = gThisNodePtr->X.Int + (MyRandomLong()&b11);
+	x = gThisNodePtr->X.Int + (MyRandomLong()&0b11);
 	y = gThisNodePtr->Y.Int + 38;
 
 					/* MAKE NEW OBJECT */

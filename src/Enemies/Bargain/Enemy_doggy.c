@@ -136,7 +136,7 @@ void MoveDoggy_Walk(void)
 
 					/* SEE IF DO FUNKY MOVE */
 
-	if (!(MyRandomLong()&b1111111))
+	if (!(MyRandomLong()&0b1111111))
 	{
 		if (MyRandomLong()&1)							// see if wag or flip
 		{
@@ -144,7 +144,7 @@ void MoveDoggy_Walk(void)
 
 			SwitchAnim(gThisNodePtr,SUB_WAG_RIGHT+gThisNodePtr->SubType);
 			gDX = gDY = 0;
-			gThisNodePtr->WagTimer = WAG_TIME+(MyRandomLong()&b111111);
+			gThisNodePtr->WagTimer = WAG_TIME+(MyRandomLong()&0b111111);
 		}
 		else
 		{
@@ -206,7 +206,7 @@ void MoveDoggy_Jump(void)
 
 void UpdateDoggy(void)
 {
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	UpdateEnemy();
@@ -289,7 +289,7 @@ register	ObjNode *newObj;
 		return;
 	if (gMyNodePtr->OwnerToMessageNode != nil)			// not if Mike is talking
 		return;
-	if (MyRandomLong()&b11111111)						// random
+	if (MyRandomLong()&0b11111111)						// random
 		return;
 
 				/* MAKE MESSAGE SPRITE */

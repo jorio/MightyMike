@@ -145,7 +145,7 @@ short	dist,anim;
 	if (DoEnemyCollisionDetect(FULL_ENEMY_COLLISION))		// returns true if died
 		return;
 
-	if (!(MyRandomLong() & b111111))						// see if recalc scatter
+	if (!(MyRandomLong() & 0b111111))						// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	UpdateEnemy();

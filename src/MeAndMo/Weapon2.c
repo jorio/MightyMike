@@ -202,7 +202,7 @@ short		z,y,x;
 	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 		return(false);
 
-	if (gFrames & b11)									// see if good interval
+	if (gFrames & 0b11)									// see if good interval
 		return(false);
 
 			/* SEE WHICH WAY TO MAKE IT GO */
@@ -285,8 +285,8 @@ short		z,y,x;
 	if (gMyDirection == AIM_DOWN)						// special tweak if down
 		y += 30;
 
-	y += MyRandomLong()&b11-2;								// scatter a bit
-	x += MyRandomLong()&b11-2;
+	y += MyRandomLong()&0b11-2;								// scatter a bit
+	x += MyRandomLong()&0b11-2;
 
 					/* MAKE NEW OBJECT */
 
@@ -335,7 +335,7 @@ void MoveFlamethrower(void)
 		DeleteObject(gThisNodePtr);	//------
 //		gThisNodePtr->MoveCall = nil;
 //		gThisNodePtr->CType = 0;
-//		gThisNodePtr->AnimSpeed = (MyRandomLong()&b1111111111)+0x80;
+//		gThisNodePtr->AnimSpeed = (MyRandomLong()&0b1111111111)+0x80;
 		return;
 	}
 
@@ -673,7 +673,7 @@ static	unsigned long lastShotFrame = 0;
 		return(false);
 
 	if ((gFrames - lastShotFrame) < 4)					// see if good interval
-//	if (gFrames & b11)
+//	if (gFrames & 0b11)
 		return(false);
 
 	lastShotFrame = gFrames;							// remember when last shot was fired
@@ -847,7 +847,7 @@ register	ObjNode *newObj;
 
 				/* SEE IF PUT SMOKE TRAIL */
 
-	if (!(MyRandomLong()&b1))
+	if (!(MyRandomLong()&0b1))
 	{
 		newObj = MakeNewShape(GroupNum_RocketGun,ObjType_RocketGun,8,gX.Int,gY.Int,
 					gThisNodePtr->Z,nil,PLAYFIELD_RELATIVE);
@@ -1147,7 +1147,7 @@ register	ObjNode *newObj;
 
 				/* SEE IF PUT SMOKE TRAIL */
 
-	if (!(MyRandomLong()&b1))
+	if (!(MyRandomLong()&0b1))
 	{
 		newObj = MakeNewShape(GroupNum_PixieDust,ObjType_PixieDust,1,gX.Int,gY.Int,
 					gThisNodePtr->Z,nil,PLAYFIELD_RELATIVE);

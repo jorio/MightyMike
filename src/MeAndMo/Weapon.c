@@ -194,7 +194,7 @@ Byte	i;
 
 	PlaySound(SOUND_GETWEAPON);
 
-	if (!(MyRandomLong()&b111))
+	if (!(MyRandomLong()&0b111))
 		MakeMikeMessage(MESSAGE_NUM_NICEGUY);
 
 	if (gNumWeaponsIHave >= MAX_WEAPONS)							// see if can add anything
@@ -423,7 +423,7 @@ unsigned short	bits;
 	}
 
 	bits = GetMapTileAttribs(h,v);				// see if materialize in rock
-	if (bits & b1111)							// check if solid at all
+	if (bits & 0b1111)							// check if solid at all
 	{
 		if (bits & TILE_ATTRIB_BULLETGOESTHRU)	// see if go thru anyway
 			return(false);
@@ -803,7 +803,7 @@ short		z,y,x;
 	if (!GetNeedState(kNeed_Attack))						// see if fire button pressed
 		return(false);
 
-	if (gFrames & b1)								// see if good interval
+	if (gFrames & 0b1)								// see if good interval
 		return(false);
 
 			/* SEE WHICH WAY TO MAKE IT GO */
@@ -965,8 +965,8 @@ Byte	animNum;
 	if (gMyDirection == AIM_DOWN)						// special tweak if down
 		y += 30;
 
-	y += MyRandomLong()&b11-2;								// scatter a bit
-	x += MyRandomLong()&b11-2;
+	y += MyRandomLong()&0b11-2;								// scatter a bit
+	x += MyRandomLong()&0b11-2;
 
 					/* MAKE NEW OBJECT */
 
@@ -1012,7 +1012,7 @@ void MoveToothpaste(void)
 		SwitchAnim(gThisNodePtr,3);					// splat anim
 		gThisNodePtr->MoveCall = nil;
 		gThisNodePtr->CType = 0;
-		gThisNodePtr->AnimSpeed = (MyRandomLong()&b1111111111)+0x80;
+		gThisNodePtr->AnimSpeed = (MyRandomLong()&0b1111111111)+0x80;
 		StopObjectMovement(gThisNodePtr);			// prevent movement extrapolation
 		return;
 	}

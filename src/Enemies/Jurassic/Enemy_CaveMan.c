@@ -213,7 +213,7 @@ short		distX,distY;
 		distY = Absolute(gY.Int - gMyY);
 		if ((distY > BONE_MIN_DIST) && (distY < BONE_MAX_DIST))
 		{
-			if (!(MyRandomLong()&b111111))
+			if (!(MyRandomLong()&0b111111))
 			{
 				if (gThisNodePtr->SubType == 0)
 					SwitchAnim(gThisNodePtr,SUB_THROW_RIGHT);
@@ -306,7 +306,7 @@ void MoveCaveman_Roller(void)
 
 void UpdateCaveman(void)
 {
-	if (!(MyRandomLong() & b1111111))							// see if recalc scatter
+	if (!(MyRandomLong() & 0b1111111))							// see if recalc scatter
 		CalcEnemyScatterOffset(gThisNodePtr);
 
 	if (gDX < 0)										// check aim anim
@@ -472,7 +472,7 @@ unsigned short	bits;
 		return;
 
 	bits = GetMapTileAttribs(x,gThisNodePtr->Y.Int);
-	if (bits & b1111)												// check if solid at all
+	if (bits & 0b1111)												// check if solid at all
 		if (!(bits & TILE_ATTRIB_BULLETGOESTHRU))						// see if go thru anyway
 			return;
 
@@ -555,7 +555,7 @@ register	ObjNode *newObj;
 		return;
 	if (gMyNodePtr->OwnerToMessageNode != nil)			// not if Mike is talking
 		return;
-	if (MyRandomLong()&b1111111111)						// random
+	if (MyRandomLong()&0b1111111111)						// random
 		return;
 
 				/* MAKE MESSAGE SPRITE */
