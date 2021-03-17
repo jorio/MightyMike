@@ -59,6 +59,7 @@ static void LayOutSettingsPage(void);
 #define SpecialLetterBaseY	Special1
 #define SpecialLetterRow	Special2
 #define SpecialLetterCol	Special3
+#define FlagLetterJitter	Flag0
 
 enum
 {
@@ -73,6 +74,7 @@ enum
 	kTextFlags_AsObject			= 1 << 0,
 	kTextFlags_BounceUp			= 1 << 1,
 	kTextFlags_Condensed		= 1 << 2,
+	kTextFlags_Jitter			= 1 << 3,
 };
 
 static const int kNumKeybindingRows		= NUM_REMAPPABLE_NEEDS + 2;  // +2 extra rows for Reset to defaults & Done
@@ -175,6 +177,11 @@ static void ForceUpdateBackground(void)
 	AddUpdateRegion(r, CLIP_REGION_PLAYFIELD);
 }
 
+static int GetRowY(int row)
+{
+	return kRowY0 + row * kRowHeight;
+}
+
 /****************************/
 /*    CALLBACKS             */
 /****************************/
@@ -182,9 +189,10 @@ static void ForceUpdateBackground(void)
 
 static void OnEnterControls(void)
 {
-	ReadKeyboard();
+	ReadKeyboard();	// flush keypresses
 
 	gSettingsState = kSettingsState_ControlsPage;
+	FadeOutGameCLUT();
 	LayOutControlsPage();
 }
 
@@ -194,20 +202,24 @@ static void OnDone(void)
 
 	switch (gSettingsState)
 	{
-	case kSettingsState_MainPage:
-		gSettingsState = kSettingsState_Off;
-		break;
-
 	case kSettingsState_ControlsPage:
+		PlaySound(SOUND_SQUEEK);
+		FadeOutGameCLUT();
 		gSettingsState = kSettingsState_MainPage;
 		LayOutSettingsPage();
 		break;
 
 	case kSettingsState_ControlsPage_AwaitingPress:
+		PlaySound(SOUND_BADHIT);
+		NukeText(gControlsRow, gControlsColumn + 1);
+		LayOutText(ProcessScancodeName(gGamePrefs.keys[gControlsRow].key[gControlsColumn]), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
 		gSettingsState = kSettingsState_ControlsPage;
 		break;
 
+	case kSettingsState_MainPage:
 	default:
+		PlaySound(SOUND_SQUEEK);
+		FadeOutGameCLUT();
 		gSettingsState = kSettingsState_Off;
 		break;
 	}
@@ -231,7 +243,10 @@ static void MoveText(void)
 	if (theNode->YOffset.Int > 0)						// see if bounce
 	{
 		theNode->YOffset.Int = 0;						// rebound
-		theNode->DY = -theNode->DY / 2;
+		if (theNode->FlagLetterJitter)
+			theNode->DY = -0x10000 * RandomRange(2, 4);
+		else
+			theNode->DY = -theNode->DY / 2;
 	}
 
 	gThisNodePtr->Y.L = theNode->SpecialLetterBaseY + theNode->YOffset.L;		// move up
@@ -245,7 +260,7 @@ static void MoveCursor(void)
 	{
 		case kSettingsState_MainPage:
 			gThisNodePtr->X.Int = kColumnX[0] - 20;
-			gThisNodePtr->Y.Int = kRowY0 + gSettingsRow * kRowHeight;
+			gThisNodePtr->Y.Int = GetRowY(gSettingsRow);
 			break;
 
 		case kSettingsState_ControlsPage:
@@ -253,12 +268,12 @@ static void MoveCursor(void)
 			if (gControlsRow < NUM_REMAPPABLE_NEEDS)
 			{
 				gThisNodePtr->X.Int = kColumnX[1 + gControlsColumn] - 20;
-				gThisNodePtr->Y.Int = kRowY0 + gControlsRow * kRowHeight;
+				gThisNodePtr->Y.Int = GetRowY(gControlsRow);
 			}
 			else
 			{
 				gThisNodePtr->X.Int = kColumnX[0] - 20;
-				gThisNodePtr->Y.Int = kRowY0 + (gControlsRow + 1) * kRowHeight;
+				gThisNodePtr->Y.Int = GetRowY(gControlsRow + 1);
 			}
 			break;
 	}
@@ -368,10 +383,9 @@ static void NavigateSettingsPage(void)
 		Cycle(entry, delta);
 
 		if (entry->valuePtr == &gGamePrefs.interpolateAudio)
-		{
-			//StopAllSound();
 			PlaySound(SOUND_COMEHERERODENT);
-		}
+		else if (entry->callback == OnDone)		// let OnDone play its own sound
+			;
 		else
 			PlaySound(SOUND_GETPOW);
 
@@ -417,6 +431,7 @@ static void NavigateControlsPage(void)
 	{
 		*GetSelectedKeybindingKeyPtr() = 0;
 		PlaySound(SOUND_PIESQUISH);
+		PlaySound(SOUND_POP);
 
 		NukeText(gControlsRow, gControlsColumn + 1);
 		LayOutText(ProcessScancodeName(0), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
@@ -426,7 +441,7 @@ static void NavigateControlsPage(void)
 	{
 		gSettingsState = kSettingsState_ControlsPage_AwaitingPress;
 		NukeText(gControlsRow, gControlsColumn + 1);
-		LayOutText("press!!", gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
+		LayOutText("press a key!", gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Jitter);
 	}
 
 	if (GetNewNeedState(kNeed_UIConfirm))
@@ -478,12 +493,13 @@ static int LayOutText(const char* label, int row, int col, int flags)
 	bool asObject		= flags & kTextFlags_AsObject;
 	bool bounceUp		= flags & kTextFlags_BounceUp;
 	bool condensed		= flags & kTextFlags_Condensed;
+	bool jitter			= flags & kTextFlags_Jitter;
 
 	GAME_ASSERT(asObject || !bounceUp);
 	GAME_ASSERT(col >= 0 && col < sizeof(kColumnX)/sizeof(kColumnX[0]));
 
 	int x = kColumnX[col];
-	int y = kRowY0 + kRowHeight * row;
+	int y = GetRowY(row);
 
 	for (const char* c = label; *c; c++)
 	{
@@ -541,6 +557,7 @@ static int LayOutText(const char* label, int row, int col, int flags)
 			newObj->SpecialLetterRow	= row;
 			newObj->SpecialLetterCol	= col;
 			newObj->SpecialLetterBaseY	= (y + cancelYOff) << 16;
+			newObj->FlagLetterJitter	= jitter;
 
 			if (bounceUp)
 			{
@@ -591,7 +608,7 @@ static void LayOutSettingsPage(void)
 
 	// Draw dithering pattern
 	Ptr ditheringPatternPlot = *gBackgroundHandle;
-	ditheringPatternPlot += (kRowY0 + kRowHeight*6 - kRowHeight/3) * OFFSCREEN_WIDTH;
+	ditheringPatternPlot += (GetRowY(6) - kRowHeight/3) * OFFSCREEN_WIDTH;
 	ditheringPatternPlot += kColumnX[1];
 	for (int y = 0; y < 2*kRowHeight/3; y++)
 	{
@@ -622,7 +639,7 @@ static void LayOutSettingsPage(void)
 	DumpBackground();											// dump to playfield
 
 	// Make cursor
-	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, 200, 0, MoveCursor, 0);
+	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, GetRowY(gSettingsRow), 0, MoveCursor, 0);
 }
 
 static void LayOutControlsPage(void)
@@ -653,7 +670,7 @@ static void LayOutControlsPage(void)
 	DumpBackground();											// dump to playfield
 
 	// Make cursor
-	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, 200, 0, MoveCursor, 0);
+	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, GetRowY(gControlsRow), 0, MoveCursor, 0);
 }
 
 /****************************/
@@ -675,10 +692,6 @@ void DoSettingsScreen(void)
 
 	LayOutSettingsPage();
 
-	DumpGameWindow();
-	DrawObjects();
-	DumpUpdateRegions();
-	FadeInGameCLUT();
 
 	gSettingsState = kSettingsState_MainPage;
 
@@ -690,6 +703,9 @@ void DoSettingsScreen(void)
 
 		DrawObjects();
 		DumpUpdateRegions();
+
+		if (gScreenBlankedFlag)
+			FadeInGameCLUT();
 
 		ReadKeyboard();
 
