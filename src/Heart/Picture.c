@@ -148,14 +148,22 @@ void LoadBorderImage(void)
 	const char* path;
 	short flags = 0;
 
-	if (gPPCFullScreenFlag)
-		path = ":data:images:border2.image";
-	else
+	switch (gGamePrefs.pfSize)
+	{
+	case PFSIZE_SMALL:
 		path = ":data:images:border.image";
-
-#if WIDESCREEN
-	flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
-#endif
+		break;
+	case PFSIZE_MEDIUM:
+		path = ":data:images:border2.image";
+		break;
+	case PFSIZE_WIDE:
+		path = ":data:images:border2.image";
+		flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
+		break;
+	default:
+		GAME_ASSERT_MESSAGE(false, "Unknown pfSize!");
+		return;
+	}
 
 	LoadIMAGE(path, flags);
 }

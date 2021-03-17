@@ -86,17 +86,9 @@ int CommonMain(int argc, const char** argv)
 	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (!gSDLRenderer)
 		throw std::runtime_error("Couldn't create SDL renderer.");
-
-	gSDLTexture = SDL_CreateTexture(gSDLRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, VISIBLE_WIDTH, VISIBLE_HEIGHT);
-	if (!gSDLTexture)
-		throw std::runtime_error("Couldn't create SDL texture.");
+	// The texture bound to the renderer is created in-game after loading the prefs.
 
 	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
-	SDL_RenderSetIntegerScale(gSDLRenderer, SDL_TRUE);
-
-	// Set up globals that the game expects
-//	gCoverWindow = Pomme::Graphics::GetScreenPort();
-//	gCoverWindowPixPtr = (UInt32*) GetPixBaseAddr(GetGWorldPixMap(gCoverWindow));
 
 	fs::path dataPath = FindGameData();
 #if !(__APPLE__)

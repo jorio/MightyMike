@@ -59,6 +59,8 @@ Boolean		gAbortDemoFlag,gGameIsDemoFlag;
 
 void StartRecordingDemo(void)
 {
+	DoFatalAlert("TODO: Implement StartRecordingDemo");
+#if 0
 	gAbortDemoFlag = false;
 	gGameIsDemoFlag = false;
 
@@ -81,6 +83,7 @@ void StartRecordingDemo(void)
 	SetMyRandomSeed(DEMO_SEED);								// always use same seed!
 
 	gDemoKeyIterations = 0;
+#endif
 }
 
 /***************** SAVE DEMO DATA *************************/
@@ -90,10 +93,12 @@ void StartRecordingDemo(void)
 
 void SaveDemoData(void)
 {
-Handle		resHandle;
-
 	if (gDemoMode != DEMO_MODE_RECORD)					// be sure we were recording
 		return;
+
+	DoFatalAlert("TODO: Implement SaveDemoData");
+#if 0
+Handle		resHandle;
 
 	*(short *)gDemoDataPtr = END_DEMO_MARK;						// put end mark @ end of file
 	gDemoSize += sizeof(short);
@@ -122,6 +127,7 @@ Handle		resHandle;
 	DisposeHandle(gDemoDataHandle);								// delete demo data
 	gDemoDataHandle = nil;
 	gDemoMode = DEMO_MODE_OFF;
+#endif
 }
 
 
@@ -129,6 +135,8 @@ Handle		resHandle;
 
 void InitDemoPlayback(void)
 {
+	DoFatalAlert("TODO: Implement InitDemoPlayback");
+#if 0
 	gStartingScene = RandomRange(0,2);						// get random demo (dont do 3 & 4)
 
 	gAbortDemoFlag = false;
@@ -152,6 +160,7 @@ void InitDemoPlayback(void)
 	gDemoDataPtr = *gDemoDataHandle;
 
 	gDemoKeyIterations = 0;									// no iterations present
+#endif
 }
 
 

@@ -142,3 +142,4 @@ extern void	MoveHead(void);
 extern void	ShowBonusScreen(void);
 extern void	PrintBonusNum(long, short, short, short);
 void DoSettingsScreen(void);
+void ApplyPrefs(void);

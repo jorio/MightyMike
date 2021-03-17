@@ -22,8 +22,6 @@
 #define		DEFAULT_VOLUME			100				// default volume of channels
 #define		MAX_CHANNELS			6
 
-#define		SET_SYS_VOL		0
-
 
 /**********************/
 /*     VARIABLES      */
@@ -60,6 +58,16 @@ static	short			gStatusBits[MAX_CHANNELS];				// set in maintainsounds (for debug
 
 /********************* INIT SOUND TOOLS ********************/
 
+static long GetSoundChannelInitializationParameters(void)
+{
+	long initBits = initMono | initNoDrop;
+
+	if (!gGamePrefs.interpolateAudio)
+		initBits |= initNoInterp;
+
+	return initBits;
+}
+
 void InitSoundTools(void)
 {
 OSErr		iErr;
@@ -74,12 +82,13 @@ static Str255	errStr = "Couldnt Open Music Resource File.";
 	gNumEffectsLoaded = 0;
 	gNumAddedSounds = 0;
 
+	const long initBits = GetSoundChannelInitializationParameters();
+
 	for (gMaxChannels = 0; gMaxChannels < MAX_CHANNELS; gMaxChannels++)
 	{
 						/* ALLOC CHANNEL */
 
-		iErr = SndNewChannel(&gSndChannel[gMaxChannels],sampledSynth,
-							initMono+initNoInterp+initNoDrop,nil);
+		iErr = SndNewChannel(&gSndChannel[gMaxChannels], sampledSynth, initBits, nil);
 		if (iErr)
 			break;
 	}
@@ -87,12 +96,21 @@ static Str255	errStr = "Couldnt Open Music Resource File.";
 	LoadDefaultSounds();									// these are never deleted!
 
 	SetVolume();											// make sure all channels set to current volume
-
-#if SET_SYS_VOL
-	SetDefaultOutputVolume(0x100L);							// set system volume
-#endif
 }
 
+
+void OnChangeAudioInterpolation(void)
+{
+	SndCommand cmd;
+	cmd.cmd = reInitCmd;
+	cmd.param1 = 0;
+	cmd.param2 = GetSoundChannelInitializationParameters();
+
+	for (int i = 0; i < gMaxChannels; i++)
+	{
+		SndDoImmediate(gSndChannel[i], &cmd);
+	}
+}
 
 /************************** LOAD DEFAULT SOUNDS ************************/
 //

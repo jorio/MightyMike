@@ -44,8 +44,8 @@ typedef struct SettingEntry
 static int LayOutText(const char* label, int row, int col, int flags);
 static void NukeText(int row, int col);
 static const char* ProcessScancodeName(int scancode);
-static void Callback_EnterControls(void);
-static void Callback_Done(void);
+static void OnEnterControls(void);
+static void OnDone(void);
 static void LayOutControlsPage(void);
 static void LayOutSettingsPage(void);
 
@@ -118,17 +118,17 @@ static int gControlsColumn = 0;
 
 static SettingEntry gSettingEntries[] =
 {
-	{nil							, "configure controls"	, Callback_EnterControls,	0,	{ NULL } },
+	{nil							, "configure controls"	, OnEnterControls,			0,	{ NULL } },
 	{nil							, nil					, nil,						0,  { NULL } },
 	{&gGamePrefs.fullscreen			, "fullscreen"			, SetFullscreenMode,		2,	{ "no", "yes" }, },
-	{&gGamePrefs.widescreen			, "playfield size"		, nil,						2,  { "4:3", "wide" } },
-	{&gGamePrefs.integerScaling		, "upscaling"			, nil,						2,  { "pixel perfect", "stretch" } },
+	{&gGamePrefs.pfSize				, "playfield size"		, OnChangePlayfieldSize,	2 /* TODO: set this to 3 to enable wide */,  { "small", "medium", "wide" } },
+	{&gGamePrefs.integerScaling		, "upscaling"			, OnChangeIntegerScaling,	2,  { "stretch", "crisp" } },
 	{&gGamePrefs.uncappedFramerate	, "frame rate"			, nil,						2,  { "32 fps original", "uncapped" } },
-	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "raw", "filtered" } },
-	{&gGamePrefs.interpolateAudio	, "audio quality"		, nil,						2,  { "raw", "interpolated" } },
+	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "   raw", "   filtered" } },
+	{&gGamePrefs.interpolateAudio	, "audio quality"		,OnChangeAudioInterpolation,2,	{ "raw", "interpolated" } },
 	{&gGamePrefs.gameTitlePowerPete	, "game title"			, nil,						2,  { "mighty mike", "power pete" } },
 	{nil							, nil					, nil,						0,  { NULL } },
-	{nil							, "done"				, Callback_Done,			0,  { NULL } },
+	{nil							, "done"				, OnDone,					0,  { NULL } },
 };
 
 #define numSettingEntries (sizeof(gSettingEntries) / sizeof(SettingEntry))
@@ -180,7 +180,7 @@ static void ForceUpdateBackground(void)
 /****************************/
 #pragma mark - Callbacks
 
-static void Callback_EnterControls(void)
+static void OnEnterControls(void)
 {
 	ReadKeyboard();
 
@@ -188,7 +188,7 @@ static void Callback_EnterControls(void)
 	LayOutControlsPage();
 }
 
-static void Callback_Done(void)
+static void OnDone(void)
 {
 	ReadKeyboard();
 
@@ -351,7 +351,7 @@ static void NavigateSettingEntriesVertically(int delta)
 static void NavigateSettingsPage(void)
 {
 	if (GetNewNeedState(kNeed_UIBack))
-		Callback_Done();
+		OnDone();
 
 	if (GetNewNeedState(kNeed_UIUp))
 		NavigateSettingEntriesVertically(-1);
@@ -366,7 +366,14 @@ static void NavigateSettingsPage(void)
 
 		int delta = GetNewNeedState(kNeed_UILeft) ? -1 : 1;
 		Cycle(entry, delta);
-		PlaySound(SOUND_GETPOW);
+
+		if (entry->valuePtr == &gGamePrefs.interpolateAudio)
+		{
+			//StopAllSound();
+			PlaySound(SOUND_COMEHERERODENT);
+		}
+		else
+			PlaySound(SOUND_GETPOW);
 
 		if (entry->numChoices > 0)
 		{
@@ -380,7 +387,7 @@ static void NavigateSettingsPage(void)
 static void NavigateControlsPage(void)
 {
 	if (GetNewNeedState(kNeed_UIBack))
-		Callback_Done();
+		OnDone();
 
 	if (GetNewNeedState(kNeed_UIUp))
 	{
@@ -433,7 +440,7 @@ static void NavigateControlsPage(void)
 		}
 		else if (gControlsRow == kKeybindingRow_Done)
 		{
-			Callback_Done();
+			OnDone();
 		}
 	}
 }
@@ -442,7 +449,7 @@ static void NavigateControlsPage_AwaitingPress(void)
 {
 	if (GetNewNeedState(kNeed_UIBack))
 	{
-		Callback_Done();
+		OnDone();
 		return;
 	}
 
@@ -582,6 +589,19 @@ static void LayOutSettingsPage(void)
 
 	LayOutText("S E T T I N G S", -2, 0, 0);
 
+	// Draw dithering pattern
+	Ptr ditheringPatternPlot = *gBackgroundHandle;
+	ditheringPatternPlot += (kRowY0 + kRowHeight*6 - kRowHeight/3) * OFFSCREEN_WIDTH;
+	ditheringPatternPlot += kColumnX[1];
+	for (int y = 0; y < 2*kRowHeight/3; y++)
+	{
+		for (int x = y % 2; x < 20; x += 2)
+		{
+			ditheringPatternPlot[x] = 215;
+		}
+		ditheringPatternPlot += OFFSCREEN_WIDTH;
+	}
+
 	for (int i = 0; i < numSettingEntries; i++)
 	{
 		SettingEntry* entry = &gSettingEntries[i];
@@ -646,7 +666,6 @@ void DoSettingsScreen(void)
 					/* INITIAL LOADING */
 
 	FadeOutGameCLUT();
-	PlaySong(SONG_ID_TITLE);
 	InitObjectManager();
 	LoadShapeTable(":data:shapes:highscore.shapes", GROUP_WIN, DONT_GET_PALETTE);
 	LoadShapeTable(":data:shapes:jurassic1.shapes", GROUP_AREA_SPECIFIC, DONT_GET_PALETTE);	// cursor bone
@@ -699,7 +718,16 @@ void DoSettingsScreen(void)
 	} while (gSettingsState != kSettingsState_Off);
 
 	FadeOutGameCLUT();
+
+	SavePrefs();
+	
 	ZapShapeTable(GROUP_WIN);
 	ZapShapeTable(GROUP_AREA_SPECIFIC);
 }
 
+void ApplyPrefs(void)
+{
+	OnChangePlayfieldSize();
+	SetFullscreenMode();
+	OnChangeIntegerScaling();
+}

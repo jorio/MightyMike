@@ -74,6 +74,7 @@ enum{
 
 
 extern void	InitSoundTools(void);
+void OnChangeAudioInterpolation(void);
 extern void	LoadDefaultSounds(void);
 extern void	StartMusic(void);
 extern void	StopMusic(void);

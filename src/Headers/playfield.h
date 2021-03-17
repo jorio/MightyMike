@@ -84,6 +84,7 @@ struct TileAnimEntryType
 typedef struct TileAnimEntryType TileAnimEntryType;
 
 
+void	OnChangePlayfieldSize(void);
 extern void	ClearTileColorMasks(void);
 extern void	LoadTileSet(Str255);
 extern void	DisposeCurrentMapData(void);

@@ -154,7 +154,7 @@ void InitGame(void)
 
 				/* LOAD ART WHICH IS ALWAYS WITH US */
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 		LoadShapeTable(":data:shapes:infobar2.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
 	else
 		LoadShapeTable(":data:shapes:infobar.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
@@ -380,6 +380,23 @@ long	r;
 
 					/* GRAPHICS FRAMES */
 
+		if (!gGamePrefs.uncappedFramerate)
+		{
+			ScrollPlayfield();										// do playfield updating
+			UpdateTileAnimation();
+			DrawObjects();
+			DisplayPlayfield();
+			UpdateInfoBar();
+			EraseObjects();
+			PresentIndexedFramebuffer();
+			RegulateSpeed(GAME_SPEED_MICROSECONDS);
+
+			gDebugTextFrameAccumulator++;
+
+			timeSinceSim = GAME_SPEED_SDL;
+
+		}
+		else
 		while (timeSinceSim < GAME_SPEED_SDL)						// render as many graphics frames as we can until it's time to run the simulation again
 		{
 			gExtrapolateFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
@@ -1363,6 +1380,28 @@ void OptimizeMemory(void)
 	ZapShapeTable(GROUP_OVERHEAD);
 }
 
+/******************** INIT DEFAULT PREFS **********************/
+
+static void InitDefaultPrefs(void)
+{
+	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
+	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
+	gGamePrefs.interlaceMode = false;
+	gGamePrefs.difficulty = DIFFICULTY_NORMAL;
+#if _DEBUG
+	gGamePrefs.fullscreen = false;
+#else
+	gGamePrefs.fullscreen = true;
+#endif
+	gGamePrefs.pfSize = PFSIZE_MEDIUM;
+	gGamePrefs.vsync = true;
+	gGamePrefs.integerScaling = true;
+	gGamePrefs.uncappedFramerate = true;
+	gGamePrefs.filterDithering = true;
+	gGamePrefs.interpolateAudio = true;
+	gGamePrefs.gameTitlePowerPete = false;
+	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
+}
 
 /******************** LOAD PREFS **********************/
 //
@@ -1461,40 +1500,10 @@ void GameMain(void)
  	MoreMasters();
 	VerifySystem();
 
-
-	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
-	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
-	gGamePrefs.interlaceMode		= false;
-	gGamePrefs.difficulty			= DIFFICULTY_NORMAL;
-	gGamePrefs.fullscreen			= false;
-	gGamePrefs.vsync				= true;
-	gGamePrefs.integerScaling		= true;
-	gGamePrefs.uncappedFramerate	= true;
-	gGamePrefs.filterDithering		= true;
-	gGamePrefs.interpolateAudio		= true;
-	gGamePrefs.gameTitlePowerPete	= false;
-	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
-	
-
-			/* SEE IF SET FOR FULL SCREEN MODE */
-
-	gPPCFullScreenFlag = false;					// assume no
-
- 	{
-#if WIDESCREEN
- 		PF_TILE_HEIGHT	=	15;					// dimensions of scrolling Playfield
-		PF_TILE_WIDTH	=	27;
-#else
-		PF_TILE_HEIGHT	=	14;					// dimensions of scrolling Playfield
-		PF_TILE_WIDTH	=	21;
-#endif
-		PF_WINDOW_TOP	=	0;
-		PF_WINDOW_LEFT	=	0;						// left MUST be on 4 pixel boundary!!!!!
-		gPPCFullScreenFlag = true;
-  	}
-
+	InitDefaultPrefs();
 	LoadPrefs();
-	MakeGameWindow();
+	ApplyPrefs();
+	MakeGameWindow();	// now called by ApplyPrefs
 
 	InitInput();                                    // init ISp
 	HideCursor();

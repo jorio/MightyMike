@@ -137,7 +137,7 @@ long	i,x,y;
 	if (gMyHealth < 0)						// if negative, then I'm dead
 		return;
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 	{
 		x = HEALTH_Xf + gInfobarXAdjust;
 		y = HEALTH_Yf + gInfobarYAdjust;
@@ -208,7 +208,7 @@ void ShowScore(void)
 long	i,digit,htab;
 long	num,x,y;
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 	{
 		x = SCORE_Xf + gInfobarXAdjust;
 		y = SCORE_Yf + gInfobarYAdjust;
@@ -276,7 +276,7 @@ void InitFreeLives(void)
 
 void ShowLives(void)
 {
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 		PrintNum(gNumLives-1,2,LIVES_Xf+ gInfobarXAdjust,LIVES_Yf+ gInfobarYAdjust);
 	else
 		PrintNum(gNumLives-1,2,LIVES_X+ gInfobarXAdjust,LIVES_Y+ gInfobarYAdjust);
@@ -295,7 +295,7 @@ void ShowWeaponIcon(void)
 	}
 	else
 	{
-		if (gPPCFullScreenFlag)
+		if (gGamePrefs.pfSize != PFSIZE_SMALL)
 			DrawFrameToScreen_NoMask(
 					WEAPON_ICON_Xf + gInfobarXAdjust,
 					WEAPON_ICON_Yf + gInfobarYAdjust,
@@ -337,7 +337,7 @@ Rect	r;
 
 void ShowWeaponLife(void)
 {
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 		PrintNum(gMyWeapons[gCurrentWeaponIndex].life,
 				 3,WEAPON_LIFE_Xf+gInfobarXAdjust,WEAPON_LIFE_Yf+gInfobarYAdjust);
 	else
@@ -361,7 +361,7 @@ void ShowCoins(void)
 long	i,digit,htab;
 long	num,x,y;
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 	{
 		 x = COINS_Xf + gInfobarXAdjust;
 		 y = COINS_Yf + gInfobarYAdjust;
@@ -413,7 +413,7 @@ long	i,digit,htab;
 long	num,x,y;
 
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 	{
 		 x = BUNNIES_Xf + gInfobarXAdjust;
 		 y = BUNNIES_Yf + gInfobarYAdjust;
@@ -455,7 +455,7 @@ long	type,group,i,s,n,x,y;
 Boolean	diffSubs;
 long	spacing;
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 		spacing = KEYS_SPACINGf;
 	else
 		spacing = KEYS_SPACING;
@@ -496,7 +496,7 @@ long	spacing;
 	s = 0;															// start on anim #0
 	n = 0;															// init # done
 
-	if (gPPCFullScreenFlag)
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
 	{
 		x = KEYS_Xf + gInfobarXAdjust;
 		y = KEYS_Yf + gInfobarYAdjust;
@@ -534,7 +534,7 @@ void ShowPaused(void)
 {
 	if (!GetSDLKeyState(SDL_SCANCODE_LCTRL) && !GetSDLKeyState(SDL_SCANCODE_RCTRL))			// ctrl key eliminates text for screen grabs!
 	{
-		if (gPPCFullScreenFlag)
+		if (gGamePrefs.pfSize != PFSIZE_SMALL)
 			DrawFrameToScreen_NoMask(320,220,GroupNum_Paused,ObjType_Paused,0);
 		else
 			DrawFrameToScreen_NoMask(240,220,GroupNum_Paused,ObjType_Paused,0);

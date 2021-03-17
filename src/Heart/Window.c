@@ -13,7 +13,7 @@
 #include "playfield.h"
 #include "object.h"
 #include "misc.h"
-#include "io.h"
+#include "input.h"
 #include "externs.h"
 
 #include <SDL.h>
@@ -94,6 +94,16 @@ void MakeGameWindow(void)
 	InitScreenBuffers();
 
 
+#define CHECKED_DISPOSE(disposefunc, p) do { if (p) { disposefunc(p); (p) = nil; } } while(0)
+	CHECKED_DISPOSE(DisposePtr, gPFLookUpTable);
+	CHECKED_DISPOSE(DisposePtr, gPFCopyLookUpTable);
+	CHECKED_DISPOSE(DisposePtr, gPFMaskLookUpTable);
+	CHECKED_DISPOSE(DisposeHandle, gPFBufferHandle);
+	CHECKED_DISPOSE(DisposeHandle, gPFBufferCopyHandle);
+	CHECKED_DISPOSE(DisposeHandle, gPFMaskBufferHandle);
+#undef CHECKED_DISPOSE
+	
+
 				/* ALLOC MEM FOR PF LOOKUP TABLES */
 
 	gPFLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
@@ -103,21 +113,42 @@ void MakeGameWindow(void)
 
 					/* MAKE PLAYFIELD BUFFERS */
 
-	if ((gPFBufferHandle = AllocHandle(PF_BUFFER_HEIGHT*PF_BUFFER_WIDTH)) == nil)
-		DoFatalAlert ("No Memory for gPFBufferHandle!");
-	HLockHi(gPFBufferHandle);
+	gPFBufferHandle = AllocHandle(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFBufferCopyHandle = AllocHandle(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFMaskBufferHandle = AllocHandle(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
 
-	if ((gPFBufferCopyHandle = AllocHandle(PF_BUFFER_HEIGHT*PF_BUFFER_WIDTH)) == nil)
-		DoFatalAlert ("No Memory for gPFBufferCopyHandle!");
-	HLockHi(gPFBufferCopyHandle);
+	GAME_ASSERT(gPFLookUpTable);
+	GAME_ASSERT(gPFCopyLookUpTable);
+	GAME_ASSERT(gPFMaskLookUpTable);
+	GAME_ASSERT(gPFBufferHandle);
+	GAME_ASSERT(gPFBufferCopyHandle);
+	GAME_ASSERT(gPFMaskBufferHandle);
 
-	if ((gPFMaskBufferHandle = AllocHandle(PF_BUFFER_HEIGHT*PF_BUFFER_WIDTH)) == nil)
-		DoFatalAlert ("No Memory for gPFMaskBufferHandle!");
-	HLockHi(gPFMaskBufferHandle);
 
 
-//	SetPort(gGameWindow);
-	BuildLookUpTables();											// build all graphic lookup tbls
+
+	/******************** BUILD LOOKUP TABLES *******************/
+	//
+	// NOTE: Does NOT build the Offscreen & Background lookup tables (SEE INITSCREENBUFFERS)
+	//
+
+					/* BUILD SCREEN LOOKUP TABLE */
+
+	for (int i = 0; i < VISIBLE_HEIGHT; i++)
+		gScreenLookUpTable[i] = gScreenAddr + (gScreenRowOffset * i);
+
+		
+					/* BUILD PLAYFIELD LOOKUP TABLES */
+
+	for (int i = 0; i < PF_BUFFER_HEIGHT; i++)
+	{
+		gPFLookUpTable[i]		= (*gPFBufferHandle)		+ (i * PF_BUFFER_WIDTH);
+		gPFCopyLookUpTable[i]	= (*gPFBufferCopyHandle)	+ (i * PF_BUFFER_WIDTH);
+		gPFMaskLookUpTable[i]	= (*gPFMaskBufferHandle)	+ (i * PF_BUFFER_WIDTH);
+	}
+
+
+	
 	EraseGameWindow();												// erase buffer & screen
 }
 
@@ -171,33 +202,6 @@ void DumpGameWindow(void)
 void DumpBackground(void)
 {
 	memcpy(gOffScreenLookUpTable[0], gBackgroundLookUpTable[0], OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
-}
-
-
-/******************** BUILD LOOKUP TABLES *******************/
-//
-// NOTE: Does NOT build the Offscreen & Background lookup tables (SEE INITSCREENBUFFERS)
-//
-
-void BuildLookUpTables(void)
-{
-long	i;
-					/* BUILD SCREEN LOOKUP TABLE */
-
-	for (i=0; i<VISIBLE_HEIGHT; i++)
-		gScreenLookUpTable[i] = gScreenAddr + (gScreenRowOffset*i);
-
-
-					/* BUILD PLAYFIELD LOOKUP TABLES */
-
-	for (i=0; i<PF_BUFFER_HEIGHT; i++)
-	{
-		gPFLookUpTable[i] = (*gPFBufferHandle)+(i*PF_BUFFER_WIDTH);
-
-		gPFCopyLookUpTable[i] = (*gPFBufferCopyHandle)+(i*PF_BUFFER_WIDTH);
-
-		gPFMaskLookUpTable[i] = (*gPFMaskBufferHandle)+(i*PF_BUFFER_WIDTH);
-	}
 }
 
 
@@ -278,7 +282,7 @@ int32_t	*srcPtr,*destPtr,*destStart;
 long	x,y,width,height;
 
 	srcPtr = (int32_t *)(gPFLookUpTable[0]);
-	if (gPPCFullScreenFlag)								// special for playfield display size
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)						// special for playfield display size
 	{
 		width = 13*32/4;
 		height = 12*32;
@@ -320,8 +324,6 @@ Rect	r;
 
 void InitScreenBuffers(void)
 {
-short		i;
-
 	WipeScreenBuffers();										// clear from any previous time
 
 
@@ -329,34 +331,27 @@ short		i;
 					/* MAKE OFFSCREEN DRAW BUFFER */
 
 	gOffScreenHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
-	if	(gOffScreenHandle == nil)
-		DoFatalAlert("Not Enough Memory for OffScreen Buffer!");
-	HLock(gOffScreenHandle);
+	GAME_ASSERT(gOffScreenHandle);
 
 
 					/* MAKE BACKPLANE BUFFER */
 
-	if ((gBackgroundHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT))	// get mem for background
-			 == nil)
-		DoFatalAlert ("No Memory for Background buffer!");
-	HLock(gBackgroundHandle);
+	gBackgroundHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// get mem for background
+	GAME_ASSERT(gBackgroundHandle);
 
 
 					/* BUILD OFFSCREEN LOOKUP TABLE */
 
-	for (i=0; i<OFFSCREEN_HEIGHT; i++)
+	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
 		gOffScreenLookUpTable[i] = (*gOffScreenHandle)+(i*OFFSCREEN_WIDTH);
-
 	}
 					/* BUILD BACKGROUND LOOKUP TABLE */
 
-	for (i=0; i<OFFSCREEN_HEIGHT; i++)
+	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
 		gBackgroundLookUpTable[i] = (*gBackgroundHandle)+(i*OFFSCREEN_WIDTH);
 	}
-
-
 }
 
 
@@ -712,7 +707,6 @@ void DumpIndexedTGA(const char* hostPath, int width, int height, const char* dat
 void PresentIndexedFramebuffer(void)
 {
 	// Check dithering key
-	static Boolean filterDithering = true;
 //	if (GetNewSDLKeyState(SDL_SCANCODE_F10))
 //	{
 //		filterDithering = !filterDithering;
@@ -728,7 +722,7 @@ void PresentIndexedFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
 
-	if (!filterDithering)
+	if (!gGamePrefs.filterDithering)
 	{
 		ConvertIndexedFramebufferToRGBA_NoFilter();
 	}
@@ -749,3 +743,49 @@ void SetFullscreenMode(void)
 {
 	SDL_SetWindowFullscreen(gSDLWindow, gGamePrefs.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
 }
+
+void OnChangeIntegerScaling(void)
+{
+	bool crisp;
+
+	if (!gGamePrefs.integerScaling)
+	{
+		// Stretch: don't use nearest-neighbor
+		crisp = false;
+	}
+	else
+	{
+		int windowWidth = VISIBLE_WIDTH;
+		int windowHeight = VISIBLE_HEIGHT;
+		SDL_GetWindowSize(gSDLWindow, &windowWidth, &windowHeight);
+
+		if (windowWidth < VISIBLE_WIDTH || windowHeight < VISIBLE_HEIGHT)
+		{
+			// If the window is smaller than the logical size,
+			// SDL_RenderSetIntegerScale will cause the window to go black.
+			crisp = false;
+		}
+		else
+		{
+			crisp = true;
+		}
+	}
+
+	// Nuke old texture
+	if (gSDLTexture)
+	{
+		SDL_DestroyTexture(gSDLTexture);
+		gSDLTexture = NULL;
+	}
+
+	// Set scaling quality before creating texture
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, crisp ? "nearest" : "best");
+
+	// Recreate texture
+	gSDLTexture = SDL_CreateTexture(gSDLRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+	GAME_ASSERT(gSDLTexture);
+
+	// Set integer scaling setting
+	SDL_RenderSetIntegerScale(gSDLRenderer, crisp);
+}
+

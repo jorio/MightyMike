@@ -150,7 +150,6 @@ extern	long					PF_TILE_HEIGHT;
 extern	long					PF_TILE_WIDTH;
 extern	long					PF_WINDOW_TOP;
 extern	long					PF_WINDOW_LEFT;
-extern	Boolean					gPPCFullScreenFlag;
 extern	short					gPlayfieldWidth;
 extern	short					gPlayfieldHeight;
 extern	Handle					gPlayfieldHandle;

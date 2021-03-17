@@ -138,3 +138,11 @@ enum
 	DIFFICULTY_NORMAL	= 1,
 	DIFFICULTY_HARD		= 2,
 };
+
+
+enum
+{
+	PFSIZE_SMALL		= 0,
+	PFSIZE_MEDIUM		= 1,
+	PFSIZE_WIDE			= 2,
+};

@@ -228,7 +228,7 @@ struct PrefsType
 	Byte		difficulty;
 	Boolean		fullscreen;
 	Boolean		vsync;
-	Boolean		widescreen;
+	Byte		pfSize;
 	Boolean		integerScaling;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;

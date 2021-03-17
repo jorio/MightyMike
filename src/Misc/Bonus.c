@@ -345,7 +345,7 @@ short		xDist,yDist;
 
 			if ((Absolute(xDist) < 180) && (Absolute(yDist) < 172))				// draw if on radar screen
 			{
-				if (gPPCFullScreenFlag)
+				if (gGamePrefs.pfSize != PFSIZE_SMALL)
 					DrawFrameToScreen(RADAR_CENTER_Xf+xDist,RADAR_CENTER_Yf+yDist,
 							GroupNum_RadarBlip,ObjType_RadarBlip,0);
 				else

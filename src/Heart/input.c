@@ -156,9 +156,13 @@ void UpdateInput(void)
 				ExitToShell();	// throws Pomme::QuitRequest
 				return;
 
-//			case SDL_WINDOWEVENT_RESIZED:
-//				QD3D_OnWindowResized(event.window.data1, event.window.data2);
-//				break;
+			case SDL_WINDOWEVENT_RESIZED:
+				if (gGamePrefs.integerScaling)
+				{
+					OnChangeIntegerScaling();
+				}
+	
+				break;
 
 				/*
 									case SDL_WINDOWEVENT_FOCUS_LOST:

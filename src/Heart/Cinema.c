@@ -128,7 +128,9 @@ re_enter:
 	LoadShapeTable(":data:shapes:title.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadBackground(":data:images:titlepage.image",GET_PALETTE);
+	LoadBackground(
+		gGamePrefs.gameTitlePowerPete ? ":data:images:titlepagePP.image" : ":data:images:titlepage.image",
+		GET_PALETTE);
 	DumpBackground();
 
 

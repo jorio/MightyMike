@@ -39,8 +39,6 @@ long	PF_TILE_WIDTH	=	14;
 long	PF_WINDOW_TOP	=	45;
 long	PF_WINDOW_LEFT	=	24;				// left MUST be on 4 pixel boundary!!!!!
 
-Boolean	gPPCFullScreenFlag = false;
-
 #define	ITEM_WINDOW_RIGHT		5				// # tiles for item add window
 #define	ITEM_WINDOW_LEFT		5
 #define	ITEM_WINDOW_TOP			5
@@ -173,6 +171,35 @@ static	Boolean	(*gItemAddPtrs[])(ObjectEntryType *) = {
 					AddKeyColor
 				};
 
+void OnChangePlayfieldSize(void)
+{
+	switch (gGamePrefs.pfSize)
+	{
+	case PFSIZE_SMALL:
+		PF_TILE_WIDTH	= 14;
+		PF_TILE_HEIGHT	= 13;				// dimensions of scrolling Playfield
+		PF_WINDOW_LEFT	= 24;				// left MUST be on 4 pixel boundary!!!!!
+		PF_WINDOW_TOP	= 45;
+		break;
+	case PFSIZE_MEDIUM:
+		PF_TILE_WIDTH	= 21;
+		PF_TILE_HEIGHT	= 14;				// dimensions of scrolling Playfield
+		PF_WINDOW_LEFT	= 0;				// left MUST be on 4 pixel boundary!!!!!
+		PF_WINDOW_TOP	= 0;
+		break;
+	case PFSIZE_WIDE:
+		PF_TILE_WIDTH	= 27;
+		PF_TILE_HEIGHT	= 15;				// dimensions of scrolling Playfield
+		PF_WINDOW_LEFT	= 0;				// left MUST be on 4 pixel boundary!!!!!
+		PF_WINDOW_TOP	= 0;
+		// TODO: Change VISIBLE_WIDTH, VISIBLE_HEIGHT; resize window; call SDL_RenderSetLogicalSize
+		break;
+	default:
+		GAME_ASSERT_MESSAGE(false, "OnChangePlayfieldSize: Unsupported pfSize!");
+	}
+
+	MakeGameWindow();
+}
 
 /****************** CLEAR TILE COLOR MASKS ***************/
 //
