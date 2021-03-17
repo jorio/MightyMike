@@ -2,5 +2,5 @@
 // racecar.h
 //
 
-extern Boolean	AddRaceCar(ObjectEntryType *);
-extern void	MoveRaceCar(void);
+Boolean	AddRaceCar(ObjectEntryType *);
+void	MoveRaceCar(void);

@@ -4,21 +4,21 @@
 
 #include "structures.h"
 
-extern Boolean	AddAppearZone(ObjectEntryType *itemPtr);
-extern void	MoveAppearZone(void);
-extern Boolean	AddManEatingPlant(ObjectEntryType *);
-extern void	MoveManEatingPlant(void);
-extern void	MovePlantPod(void);
-extern Boolean	AddJackInTheBox(ObjectEntryType *);
-extern void	MoveJackInTheBox(void);
-extern Boolean	AddCandyMPlatform(ObjectEntryType *);
-extern void	MoveCandyMPlatform(void);
-extern Boolean	AddStar(ObjectEntryType *);
-extern Boolean	AddGumBall(ObjectEntryType *);
-extern void	MoveGumBall(void);
-extern Boolean	AddMuffit(ObjectEntryType *);
-extern void	MoveMuffit(void);
-extern Boolean	AddPoisonApple(ObjectEntryType *);
-extern Boolean	AddHydrant(ObjectEntryType *);
-extern void	MoveHydrantBase(void);
-extern void	MoveHydrantWater(void);
+Boolean	AddAppearZone(ObjectEntryType *itemPtr);
+void	MoveAppearZone(void);
+Boolean	AddManEatingPlant(ObjectEntryType *);
+void	MoveManEatingPlant(void);
+void	MovePlantPod(void);
+Boolean	AddJackInTheBox(ObjectEntryType *);
+void	MoveJackInTheBox(void);
+Boolean	AddCandyMPlatform(ObjectEntryType *);
+void	MoveCandyMPlatform(void);
+Boolean	AddStar(ObjectEntryType *);
+Boolean	AddGumBall(ObjectEntryType *);
+void	MoveGumBall(void);
+Boolean	AddMuffit(ObjectEntryType *);
+void	MoveMuffit(void);
+Boolean	AddPoisonApple(ObjectEntryType *);
+Boolean	AddHydrant(ObjectEntryType *);
+void	MoveHydrantBase(void);
+void	MoveHydrantWater(void);

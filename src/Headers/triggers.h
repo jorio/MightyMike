@@ -14,16 +14,16 @@ enum
 #define	TriggerSides	Kind
 #define	TriggerType		Flag3
 
-extern Boolean	HandleTrigger(ObjNode *, Byte);
-extern Boolean	AddTeleport(ObjectEntryType *);
-extern Boolean	DoTrig_Teleport(void);
-extern Boolean	AddClowndoor(ObjectEntryType *);
-extern Boolean	AddCandyDoor(ObjectEntryType *);
-extern Boolean	AddJurassicDoor(ObjectEntryType *);
-extern Boolean	AddBargainDoor(ObjectEntryType *);
-extern void	MoveBargainDoor(void);
-extern Boolean	AddFairyDoor(ObjectEntryType *);
-extern void	MoveFairyDoor(void);
-extern Boolean	DoTrig_FairyDoor(void);
-extern Boolean	DoTrig_Door(void);
-extern Boolean	DoTrig_BargainDoor(void);
+Boolean	HandleTrigger(ObjNode *, Byte);
+Boolean	AddTeleport(ObjectEntryType *);
+Boolean	DoTrig_Teleport(void);
+Boolean	AddClowndoor(ObjectEntryType *);
+Boolean	AddCandyDoor(ObjectEntryType *);
+Boolean	AddJurassicDoor(ObjectEntryType *);
+Boolean	AddBargainDoor(ObjectEntryType *);
+void	MoveBargainDoor(void);
+Boolean	AddFairyDoor(ObjectEntryType *);
+void	MoveFairyDoor(void);
+Boolean	DoTrig_FairyDoor(void);
+Boolean	DoTrig_Door(void);
+Boolean	DoTrig_BargainDoor(void);

@@ -12,36 +12,36 @@
 	#define _Static_assert static_assert
 #endif
 
-extern void	ClearGlobalFlags(void);
-extern void	ShowSystemErr(OSErr);
-extern void	DoAlert(const char*);
+void	ClearGlobalFlags(void);
+void	ShowSystemErr(OSErr);
+void	DoAlert(const char*);
 void DoAssert(const char* msg, const char* file, int line);
-extern void	DoFatalAlert(const char*);
-extern void	DoFatalAlert2(const char*, const char*);
-extern void	CleanQuit(void);
-extern Boolean	Wait(long);
-extern void	Wait2(long);
-extern void	Wait3(long);
-extern void	Wait4(long);
-extern void	WaitWhileMusic(void);
+void	DoFatalAlert(const char*);
+void	DoFatalAlert2(const char*, const char*);
+void	CleanQuit(void);
+Boolean	Wait(long);
+void	Wait2(long);
+void	Wait3(long);
+void	Wait4(long);
+void	WaitWhileMusic(void);
 Handle	LoadPackedFile(const char* file);
-extern void	DecompressRLBFile(short, Ptr, long);
-extern void	RLW_Expand(short, unsigned short *, long);
-extern void	RegulateSpeed(long);
-extern void	RegulateSpeed2(short);
-extern unsigned short	RandomRange(unsigned short, unsigned short);
-extern void	Decay(long *, unsigned long);
-extern long	Absolute(long);
-extern void	VerifySystem(void);
-extern Handle	AllocHandle(long);
-extern Ptr	AllocPtr(long);
-extern void	InitThermometer(void);
-extern void	FillThermometer(short);
+void	DecompressRLBFile(short, Ptr, long);
+void	RLW_Expand(short, unsigned short *, long);
+void	RegulateSpeed(long);
+void	RegulateSpeed2(short);
+unsigned short	RandomRange(unsigned short, unsigned short);
+void	Decay(long *, unsigned long);
+long	Absolute(long);
+void	VerifySystem(void);
+Handle	AllocHandle(long);
+Ptr	AllocPtr(long);
+void	InitThermometer(void);
+void	FillThermometer(short);
 void	OpenMikeFile(const char* filename, short* fRefNumPtr, const char* errString);
 short	OpenMikeRezFile(const char* filename, const char* errString);
-extern unsigned long	MyRandomLong(void);
-extern unsigned short	MyRandomShort(void);
-extern void	SetMyRandomSeed(unsigned long);
+unsigned long	MyRandomLong(void);
+unsigned short	MyRandomShort(void);
+void	SetMyRandomSeed(unsigned long);
 
 
 static inline Boolean HandleBoundsCheck(Handle h, Ptr p)

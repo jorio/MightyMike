@@ -12,13 +12,13 @@ enum
 };
 
 
-extern void	StartRecordingDemo(void);
-extern void	SaveDemoData(void);
-extern void	InitDemoPlayback(void);
-extern void	ReadKeyboard(void);
-extern void	StopDemo(void);
-extern void	PrintNum(long, short, short, short);
-extern void	PrintBigNum(long, short);
-extern void	WriteLn(char *);
-extern void	PrintBigChar(char);
-extern Byte	ASCIIToBigFont(char);
+void	StartRecordingDemo(void);
+void	SaveDemoData(void);
+void	InitDemoPlayback(void);
+void	ReadKeyboard(void);
+void	StopDemo(void);
+void	PrintNum(long, short, short, short);
+void	PrintBigNum(long, short);
+void	WriteLn(char *);
+void	PrintBigChar(char);
+Byte	ASCIIToBigFont(char);

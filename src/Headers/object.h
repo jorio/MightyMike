@@ -11,24 +11,24 @@
 #define	FARTHEST_Z				0xfff0		// $fff0-$ffff are Z's which will NOT sort
 #define NEAREST_Z				0x000f		// $0000-$000f are Z's which will NOT sort
 
-extern void	InitObjectManager(void);
+void	InitObjectManager(void);
 ObjNode	*MakeNewObject(Byte genre, short x, short y, unsigned short z, void (*moveCall)(void));
-extern void	MoveObjects(void);
-extern void	EraseObjects(void);
-extern void	DrawObjects(void);
-extern void	InitRegionList(void);
-extern void	AddUpdateRegion(Rect, Byte);
+void	MoveObjects(void);
+void	EraseObjects(void);
+void	DrawObjects(void);
+void	InitRegionList(void);
+void	AddUpdateRegion(Rect, Byte);
 void	DumpUpdateRegions_DontPresentFramebuffer(void);
 void	DumpUpdateRegions(void);
-extern void	GetObjectInfo(void);
-extern void	UpdateObject(void);
-extern void	CalcObjectBox(void);
-extern void	CalcObjectBox2(ObjNode *);
-extern void	DeleteAllObjects(void);
-extern void	DeleteObject(ObjNode *);
-extern void	MoveObject(void);
-extern void	StopObjectMovement(ObjNode *);
-extern void	DeactivateObjectDraw(ObjNode *);
-extern void	SortObjectsByY(void);
-extern void	SimpleObjectMove(void);
-extern void	PredictObjectPosition(ObjNode* theNodePtr, int32_t factor, int32_t* x, int32_t* y);
+void	GetObjectInfo(void);
+void	UpdateObject(void);
+void	CalcObjectBox(void);
+void	CalcObjectBox2(ObjNode *);
+void	DeleteAllObjects(void);
+void	DeleteObject(ObjNode *);
+void	MoveObject(void);
+void	StopObjectMovement(ObjNode *);
+void	DeactivateObjectDraw(ObjNode *);
+void	SortObjectsByY(void);
+void	SimpleObjectMove(void);
+void	PredictObjectPosition(ObjNode* theNodePtr, int32_t factor, int32_t* x, int32_t* y);

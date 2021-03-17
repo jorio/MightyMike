@@ -26,12 +26,12 @@ enum
 };
 
 
-extern ObjNode	*MakeShadow(ObjNode *, Byte);
-extern void	MoveShadow(void);
-extern void	MakeMikeMessage(short);
-extern void	MoveMessage(void);
-extern void	PutPlayerSignal(short);
-extern void	MovePlayerSignal(void);
-extern void	MovePlayerSignalOHM(void);
-extern void	MakeSplash(short, short, short);
-extern Boolean	AddKeyColor(ObjectEntryType *);
+ObjNode	*MakeShadow(ObjNode *, Byte);
+void	MoveShadow(void);
+void	MakeMikeMessage(short);
+void	MoveMessage(void);
+void	PutPlayerSignal(short);
+void	MovePlayerSignal(void);
+void	MovePlayerSignalOHM(void);
+void	MakeSplash(short, short, short);
+Boolean	AddKeyColor(ObjectEntryType *);

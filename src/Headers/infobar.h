@@ -28,24 +28,24 @@ enum
 
 
 
-extern void	InitHealth(void);
-extern void	ShowHealth(void);
-extern void	GiveMeHealth(void);
-extern void	UpdateInfoBar(void);
-extern void	InitScore(void);
-extern void	ShowScore(void);
-extern void	GetPoints(long);
-extern void	GetFreeDude(void);
-extern void	InitFreeLives(void);
-extern void	ShowLives(void);
-extern void	ShowWeaponIcon(void);
-extern void	EraseWeaponIcon(void);
-extern void	ShowWeaponLife(void);
-extern void	InitCoins(void);
-extern void	ShowCoins(void);
-extern void	GetCoins(short);
-extern void	ShowNumBunnies(void);
-extern void	InitKeys(void);
-extern void	ShowKeys(void);
-extern void	ShowPaused(void);
-extern Boolean	AskIfQuit(void);
+void	InitHealth(void);
+void	ShowHealth(void);
+void	GiveMeHealth(void);
+void	UpdateInfoBar(void);
+void	InitScore(void);
+void	ShowScore(void);
+void	GetPoints(long);
+void	GetFreeDude(void);
+void	InitFreeLives(void);
+void	ShowLives(void);
+void	ShowWeaponIcon(void);
+void	EraseWeaponIcon(void);
+void	ShowWeaponLife(void);
+void	InitCoins(void);
+void	ShowCoins(void);
+void	GetCoins(short);
+void	ShowNumBunnies(void);
+void	InitKeys(void);
+void	ShowKeys(void);
+void	ShowPaused(void);
+Boolean	AskIfQuit(void);

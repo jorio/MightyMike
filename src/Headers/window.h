@@ -33,20 +33,20 @@
 
 void CleanupDisplay(void);
 
-extern void	EraseOffscreenBuffer(void);
-extern void	EraseBackgroundBuffer(void);
-extern void	MakeGameWindow(void);
-extern void	EraseGameWindow(void);
-extern void	WindowToBlack(void);
-extern void	DumpGameWindow(void);
-extern void	DumpBackground(void);
-extern void	EraseScreenArea(Rect);
-extern void	BlankScreenArea(Rect);
-extern void	WipeScreenBuffers(void);
-extern void	InitScreenBuffers(void);
-extern void	EraseStore(void);
-extern void	DisplayStoreBuffer(void);
-extern void	BlankEntireScreenArea(void);
+void	EraseOffscreenBuffer(void);
+void	EraseBackgroundBuffer(void);
+void	MakeGameWindow(void);
+void	EraseGameWindow(void);
+void	WindowToBlack(void);
+void	DumpGameWindow(void);
+void	DumpBackground(void);
+void	EraseScreenArea(Rect);
+void	BlankScreenArea(Rect);
+void	WipeScreenBuffers(void);
+void	InitScreenBuffers(void);
+void	EraseStore(void);
+void	DisplayStoreBuffer(void);
+void	BlankEntireScreenArea(void);
 
 void PresentIndexedFramebuffer(void);
 void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data);

@@ -4,51 +4,51 @@
 
 		/* CHOC BUNNY */
 
-extern Boolean	AddEnemy_ChocBunny(ObjectEntryType *);
-extern void	MoveChocBunny(void);
-extern void	MoveChoc_Stand(void);
-extern void	MoveChoc_Hop(void);
-extern void	MoveChoc_Land(void);
+Boolean	AddEnemy_ChocBunny(ObjectEntryType *);
+void	MoveChocBunny(void);
+void	MoveChoc_Stand(void);
+void	MoveChoc_Hop(void);
+void	MoveChoc_Land(void);
 
 		/* GBREAD */
 
-extern Boolean	AddEnemy_GBread(ObjectEntryType *);
-extern void	MoveGBread(void);
-extern void	MoveGBread_Walk(void);
-extern void	MoveGBread_Pop(void);
-extern void	UpdateGBread(void);
-extern void	DoGBreadMove(void);
-extern void	PopAButton(void);
-extern void	MoveButton(void);
+Boolean	AddEnemy_GBread(ObjectEntryType *);
+void	MoveGBread(void);
+void	MoveGBread_Walk(void);
+void	MoveGBread_Pop(void);
+void	UpdateGBread(void);
+void	DoGBreadMove(void);
+void	PopAButton(void);
+void	MoveButton(void);
 
 			/* MINT */
 
-extern Boolean	AddEnemy_Mint(ObjectEntryType *);
-extern void	MoveMint(void);
+Boolean	AddEnemy_Mint(ObjectEntryType *);
+void	MoveMint(void);
 
 		/* GUMMY BEAR */
 
-extern Boolean	AddEnemy_GBear(ObjectEntryType *);
-extern void	MoveGBear(void);
-extern void	UpdateGBear(void);
-extern void	DoGBearMove(void);
-extern void	ExplodeGummy(void);
-extern void	MoveTinyGummy(void);
-extern void	UpdateTinyGummy(void);
-extern void	DoGummyHaha(void);
+Boolean	AddEnemy_GBear(ObjectEntryType *);
+void	MoveGBear(void);
+void	UpdateGBear(void);
+void	DoGBearMove(void);
+void	ExplodeGummy(void);
+void	MoveTinyGummy(void);
+void	UpdateTinyGummy(void);
+void	DoGummyHaha(void);
 
 			/* CARMEL */
 
-extern Boolean	AddEnemy_Carmel(ObjectEntryType *);
-extern void	MoveCarmel(void);
-extern void	MoveCarmel_Appear(void);
-extern void	MoveCarmel_Walk(void);
-extern void	MoveCarmel_Shoot(void);
-extern void	MoveCarmelDrop(void);
+Boolean	AddEnemy_Carmel(ObjectEntryType *);
+void	MoveCarmel(void);
+void	MoveCarmel_Appear(void);
+void	MoveCarmel_Walk(void);
+void	MoveCarmel_Shoot(void);
+void	MoveCarmelDrop(void);
 
 			/* LEMONDROP */
 
-extern Boolean	AddEnemy_LemonDrop(ObjectEntryType *);
-extern void	MoveLemon(void);
-extern void	SqueezeLemon(void);
-extern void	MoveLemonDrop(void);
+Boolean	AddEnemy_LemonDrop(ObjectEntryType *);
+void	MoveLemon(void);
+void	SqueezeLemon(void);
+void	MoveLemonDrop(void);

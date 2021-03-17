@@ -73,22 +73,22 @@ enum{
 //===================== PROTOTYPES ===================================
 
 
-extern void	InitSoundTools(void);
+void	InitSoundTools(void);
 void OnChangeAudioInterpolation(void);
-extern void	LoadDefaultSounds(void);
-extern void	StartMusic(void);
-extern void	StopMusic(void);
-extern void	StopAChannel(short);
-extern void	StopAllSound(void);
-extern void	PlaySong(short);
-extern void	KillSong(void);
-extern short	PlaySound(short);
-extern void	SetVolume(void);
-extern void	ToggleMusic(void);
-extern void	ToggleEffects(void);
+void	LoadDefaultSounds(void);
+void	StartMusic(void);
+void	StopMusic(void);
+void	StopAChannel(short);
+void	StopAllSound(void);
+void	PlaySong(short);
+void	KillSong(void);
+short	PlaySound(short);
+void	SetVolume(void);
+void	ToggleMusic(void);
+void	ToggleEffects(void);
 void DoSoundMaintenance(Boolean checkKeys);
 short AddEffect(const char* rezFile, short rezNum);
-extern void	ZapAllAddedSounds(void);
-extern void	PlayAreaMusic(void);
-extern void	LoadAreaSound(void);
-extern Boolean	IsMusicPlaying(void);
+void	ZapAllAddedSounds(void);
+void	PlayAreaMusic(void);
+void	LoadAreaSound(void);
+Boolean	IsMusicPlaying(void);

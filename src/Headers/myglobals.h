@@ -50,17 +50,17 @@ static inline RGBColor U32ToRGBColor(const uint32_t color)
 
 			/* PALETTE */
 
-extern void	InitPaletteStuff(void);
-extern void	FadeInGameCLUT(void);
-extern void	EraseCLUT(void);
-extern void	FadeOutGameCLUT(void);
+void	InitPaletteStuff(void);
+void	FadeInGameCLUT(void);
+void	EraseCLUT(void);
+void	FadeOutGameCLUT(void);
 
 			/* ANIMATION */
 
-extern void	AnimateASprite(ObjNode *);
-extern void	SwitchAnim(ObjNode *, short);
+void	AnimateASprite(ObjNode *);
+void	SwitchAnim(ObjNode *, short);
 
 
 		/* LZSS */
 
-extern long	LZSS_Decode(short, Ptr, long);
+long	LZSS_Decode(short, Ptr, long);

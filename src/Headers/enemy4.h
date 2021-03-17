@@ -4,47 +4,47 @@
 
 			/* GIANT */
 
-extern Boolean	AddEnemy_Giant(ObjectEntryType *);
-extern void	MoveGiant(void);
-extern void	MoveGiant_Stand(void);
-extern void	MoveGiant_Hop(void);
-extern void	MoveGiant_Land(void);
-extern void	MakeGiantDeathRing(void);
-extern void	MoveGiantDeathRing(void);
+Boolean	AddEnemy_Giant(ObjectEntryType *);
+void	MoveGiant(void);
+void	MoveGiant_Stand(void);
+void	MoveGiant_Hop(void);
+void	MoveGiant_Land(void);
+void	MakeGiantDeathRing(void);
+void	MoveGiantDeathRing(void);
 
 
 			/* DRAGON */
 
-extern Boolean	AddEnemy_Dragon(ObjectEntryType *);
-extern void	MoveDragon(void);
-extern void	UpdateDragon(void);
-extern void	DoDragonMove(void);
+Boolean	AddEnemy_Dragon(ObjectEntryType *);
+void	MoveDragon(void);
+void	UpdateDragon(void);
+void	DoDragonMove(void);
 
 			/* WITCH */
 
-extern Boolean	AddEnemy_Witch(ObjectEntryType *);
-extern void	MoveWitch(void);
-extern void	UpdateWitch(void);
-extern void	DoWitchMove(void);
-extern void	DoWitchHaha(void);
+Boolean	AddEnemy_Witch(ObjectEntryType *);
+void	MoveWitch(void);
+void	UpdateWitch(void);
+void	DoWitchMove(void);
+void	DoWitchHaha(void);
 
 
 			/* BB WOLF */
 
-extern Boolean	AddEnemy_BBWolf(ObjectEntryType *);
-extern void	MoveBBWolf(void);
-extern void	UpdateBBWolf(void);
-extern void	DoBBWolfMove(void);
+Boolean	AddEnemy_BBWolf(ObjectEntryType *);
+void	MoveBBWolf(void);
+void	UpdateBBWolf(void);
+void	DoBBWolfMove(void);
 
 
 		/* SOLDIER */
 
-extern Boolean	AddEnemy_Soldier(ObjectEntryType *);
-extern void	MoveSoldier(void);
-extern void	UpdateSoldier(void);
-extern void	DoSoldierMove(void);
+Boolean	AddEnemy_Soldier(ObjectEntryType *);
+void	MoveSoldier(void);
+void	UpdateSoldier(void);
+void	DoSoldierMove(void);
 
 			/* SPIDER */
 
-extern Boolean	AddEnemy_Spider(ObjectEntryType *);
-extern void	MoveSpider(void);
+Boolean	AddEnemy_Spider(ObjectEntryType *);
+void	MoveSpider(void);

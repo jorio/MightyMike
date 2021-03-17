@@ -15,11 +15,11 @@ enum
 #define	DEFAULT_SPIN_PRELOAD_SIZE	1000000L
 
 
-extern void	PlaySpinFile(short);
+void	PlaySpinFile(short);
 void PreLoadSpinFile(const char* filename, long preLoadSize);
-extern Boolean	ContinueSpinLoad(void);
-extern void	GetSpinHeader(void);
-extern void	GetSpinPalette(void);
-extern void	DoSpinFrame(void);
-extern void	DrawSpinFrame(Ptr);
-extern void	RegulateSpinSpeed(long);
+Boolean	ContinueSpinLoad(void);
+void	GetSpinHeader(void);
+void	GetSpinPalette(void);
+void	DoSpinFrame(void);
+void	DrawSpinFrame(Ptr);
+void	RegulateSpinSpeed(long);

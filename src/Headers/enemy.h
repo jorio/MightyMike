@@ -16,69 +16,69 @@
 // ENEMY
 
 
-extern void	InitEnemies(void);
-extern Boolean	DoEnemyCollisionDetect(unsigned long);
-extern void	UpdateEnemy(void);
-extern void	CalcEnemyScatterOffset(ObjNode *);
-extern Boolean	EnemyLoseHealth(ObjNode *, short);
-extern void	KillEnemy(ObjNode *);
-extern void	MoveEnemySplat(void);
-extern void	DeleteEnemy(ObjNode *);
-extern Boolean	TrackEnemy(void);
-extern Boolean	TrackEnemy2(void);
-extern void	MoveFrozenEnemy(void);
+void	InitEnemies(void);
+Boolean	DoEnemyCollisionDetect(unsigned long);
+void	UpdateEnemy(void);
+void	CalcEnemyScatterOffset(ObjNode *);
+Boolean	EnemyLoseHealth(ObjNode *, short);
+void	KillEnemy(ObjNode *);
+void	MoveEnemySplat(void);
+void	DeleteEnemy(ObjNode *);
+Boolean	TrackEnemy(void);
+Boolean	TrackEnemy2(void);
+void	MoveFrozenEnemy(void);
 
 
 // ENEMY: CAVEMAN
 
-extern Boolean	AddEnemy_Caveman(ObjectEntryType *);
-extern void	MoveCaveman_Walker(void);
-extern void	MoveCaveman_Thrower(void);
-extern void	MoveCaveman_Thrower2(void);
-extern void	MoveCaveman_Roller(void);
-extern void	UpdateCaveman(void);
-extern void	DoCavemanMove(void);
-extern void	RollWheel(void);
-extern void	MoveStoneWheel(void);
-extern void	ThrowABone(void);
-extern void	MoveBone(void);
-extern void	DoUngaBunga(void);
-extern void	MoveUngaBunga(void);
+Boolean	AddEnemy_Caveman(ObjectEntryType *);
+void	MoveCaveman_Walker(void);
+void	MoveCaveman_Thrower(void);
+void	MoveCaveman_Thrower2(void);
+void	MoveCaveman_Roller(void);
+void	UpdateCaveman(void);
+void	DoCavemanMove(void);
+void	RollWheel(void);
+void	MoveStoneWheel(void);
+void	ThrowABone(void);
+void	MoveBone(void);
+void	DoUngaBunga(void);
+void	MoveUngaBunga(void);
 
 
 // ENEMY: TRICERATOPS
 
-extern Boolean	AddEnemy_Triceratops(ObjectEntryType *);
-extern void	MoveTriceratops(void);
-extern void	MoveTri_Waiting(void);
-extern void	MoveTri_Charging(void);
+Boolean	AddEnemy_Triceratops(ObjectEntryType *);
+void	MoveTriceratops(void);
+void	MoveTri_Waiting(void);
+void	MoveTri_Charging(void);
 
 
 // ENEMY: DINO EGG
 
-extern Boolean	AddDinoEgg(ObjectEntryType *);
-extern void	MoveDinoEgg(void);
-extern void	MakeHatchling(short, short);
-extern void	MoveHatchling(void);
+Boolean	AddDinoEgg(ObjectEntryType *);
+void	MoveDinoEgg(void);
+void	MakeHatchling(short, short);
+void	MoveHatchling(void);
 
 
 // ENEMY: BABY DINO
 
-extern Boolean	AddEnemy_BabyDino(ObjectEntryType *);
-extern void	MoveBabyDino(void);
-extern void	MoveBaby_Stand(void);
-extern void	MoveBaby_Hop(void);
-extern void	MoveBaby_Land(void);
+Boolean	AddEnemy_BabyDino(ObjectEntryType *);
+void	MoveBabyDino(void);
+void	MoveBaby_Stand(void);
+void	MoveBaby_Hop(void);
+void	MoveBaby_Land(void);
 
 // ENEMY: REX
 
-extern Boolean	AddEnemy_Rex(ObjectEntryType *);
-extern void	MoveRex(void);
-extern void	UpdateRex(void);
-extern void	DoRexMove(void);
+Boolean	AddEnemy_Rex(ObjectEntryType *);
+void	MoveRex(void);
+void	UpdateRex(void);
+void	DoRexMove(void);
 
 // ENEMY: TURTLE
 
-extern Boolean	AddEnemy_Turtle(ObjectEntryType *);
-extern void	MoveTurtle(void);
+Boolean	AddEnemy_Turtle(ObjectEntryType *);
+void	MoveTurtle(void);
 
