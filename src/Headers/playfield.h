@@ -86,9 +86,9 @@ typedef struct TileAnimEntryType TileAnimEntryType;
 
 void	OnChangePlayfieldSize(void);
 extern void	ClearTileColorMasks(void);
-extern void	LoadTileSet(Str255);
+void LoadTileSet(const char* filename);
 extern void	DisposeCurrentMapData(void);
-extern void	LoadPlayfield(Str255);
+void LoadPlayfield(const char* filename);
 extern void	DrawATile(unsigned short, short, short, Boolean);
 extern void	DrawATile_Simple(unsigned short, short, short);
 extern void	InitPlayfield(void);

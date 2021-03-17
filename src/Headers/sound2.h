@@ -87,7 +87,7 @@ extern void	SetVolume(void);
 extern void	ToggleMusic(void);
 extern void	ToggleEffects(void);
 void DoSoundMaintenance(Boolean checkKeys);
-extern short	AddEffect(Str255, short);
+short AddEffect(const char* rezFile, short rezNum);
 extern void	ZapAllAddedSounds(void);
 extern void	PlayAreaMusic(void);
 extern void	LoadAreaSound(void);

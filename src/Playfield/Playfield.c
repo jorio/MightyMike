@@ -224,7 +224,7 @@ long		i;
 //
 
 
-void LoadTileSet(Str255 fileName)
+void LoadTileSet(const char* fileName)
 {
 Ptr	tileSetPtr					= nil;
 Ptr tileAnimList				= nil;
@@ -377,7 +377,7 @@ void DisposeCurrentMapData(void)
 // NOTE: Assumes that previous playfield data has already been deleted
 //
 
-void LoadPlayfield(Str255 fileName)
+void LoadPlayfield(const char* fileName)
 {
 uint16_t	*tempPtr;
 long	i;

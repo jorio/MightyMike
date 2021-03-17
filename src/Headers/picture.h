@@ -9,6 +9,6 @@ enum
 };
 
 
-extern void	LoadBackground(Str255, Boolean);
-extern void	LoadIMAGE(Str255, short);
-extern void	LoadBorderImage(void);
+void	LoadBackground(const char* filename, Boolean getPalFlag);
+void	LoadIMAGE(const char* filename, short showMode);
+void	LoadBorderImage(void);

@@ -116,7 +116,7 @@ int32_t	offset;
 
 /************************ LOAD SHAPE TABLE *****************/
 
-void LoadShapeTable(Str255 fileName, long groupNum, Boolean usePalFlag)
+void LoadShapeTable(const char* fileName, long groupNum, Boolean usePalFlag)
 {
 					/* THE REAL WORK */
 

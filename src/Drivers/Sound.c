@@ -72,7 +72,7 @@ void InitSoundTools(void)
 {
 OSErr		iErr;
 short	srcFile;
-static Str255	errStr = "Couldnt Open Music Resource File.";
+static const char*	errStr = "Couldnt Open Music Resource File.";
 
 
 	srcFile = OpenMikeRezFile(":data:audio:music",errStr);	// open music rez file
@@ -119,7 +119,7 @@ void OnChangeAudioInterpolation(void)
 
 void LoadDefaultSounds(void)
 {
-Str255		error = "Couldnt Open Sound Resource File.";
+static const char*		error = "Couldnt Open Sound Resource File.";
 OSErr		iErr;
 short			i;
 short			srcFile1,srcFile2;
@@ -251,7 +251,7 @@ void PlaySong(short songNum)
 {
 short	srcFile;
 OSErr 		iErr;
-static Str255	errStr = "Couldnt Open Music Resource File.";
+static const char*	errStr = "Couldnt Open Music Resource File.";
 
 	KillSong();											// see if zap existing song
 	MaxMem(&someLong);									// clean up
@@ -489,7 +489,7 @@ SCStatus	theStatus;
 // OUTPUT: sound #
 //
 
-short AddEffect(Str255 rezFile, short rezNum)
+short AddEffect(const char* rezFile, short rezNum)
 {
 short			srcFile;
 
@@ -581,11 +581,11 @@ void PlayAreaMusic(void)
 
 void LoadAreaSound(void)
 {
-static Str255	jurassic = ":data:audio:jurassic.sounds";
-static Str255	candy = ":data:audio:candy.sounds";
-static Str255	clown = ":data:audio:clown.sounds";
-static Str255	fairy = ":data:audio:fairy.sounds";
-static Str255	bargain = ":data:audio:bargain.sounds";
+static const char*	jurassic	= ":data:audio:jurassic.sounds";
+static const char*	candy		= ":data:audio:candy.sounds";
+static const char*	clown		= ":data:audio:clown.sounds";
+static const char*	fairy		= ":data:audio:fairy.sounds";
+static const char*	bargain		= ":data:audio:bargain.sounds";
 
 	switch(gSceneNum)
 	{

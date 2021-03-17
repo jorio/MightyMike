@@ -134,11 +134,10 @@ bye:
 // Open SPIN file and preload initial data
 //
 
-void PreLoadSpinFile(Str255 fileName, long preLoadSize)
+void PreLoadSpinFile(const char* fileName, long preLoadSize)
 {
 OSErr		iErr;
 short		vRefNum;
-Str255		volName;
 static		long	mem,numToRead,decompSize;
 
 			/* PREPARE SCREEN */
@@ -148,7 +147,7 @@ static		long	mem,numToRead,decompSize;
 
 					/*  OPEN THE FILE */
 
-	iErr = GetVol(volName,&vRefNum);					// get default volume
+	iErr = GetVol(nil, &vRefNum);					// get default volume
 	OpenMikeFile(fileName,&gSpinfRefNum,"Cant open SPIN file!");
 
 					/* GET SIZE OF FILE */

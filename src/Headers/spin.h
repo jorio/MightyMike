@@ -16,7 +16,7 @@ enum
 
 
 extern void	PlaySpinFile(short);
-extern void	PreLoadSpinFile(Str255, long);
+void PreLoadSpinFile(const char* filename, long preLoadSize);
 extern Boolean	ContinueSpinLoad(void);
 extern void	GetSpinHeader(void);
 extern void	GetSpinPalette(void);

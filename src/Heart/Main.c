@@ -55,8 +55,8 @@ Byte		gCurrentPlayer;
 
 static	PlayerSaveType	gPlayerSaveData[2];
 
-static	Str255		p1name = ":MightyMike:PeteP1Swap.data";
-static	Str255 		p2name = ":MightyMike:PeteP2Swap.data";
+static	const char*		p1name = ":MightyMike:PeteP1Swap.data";
+static	const char* 	p2name = ":MightyMike:PeteP2Swap.data";
 
 static	Str255		gSaveName = ":MightyMike:PowerPeteSavedGameData0";
 static	Str255		gSaveName2x = ":MightyMike:PowerPeteSavedGameData2x00";
@@ -869,7 +869,7 @@ OSErr		iErr;
 short		fRefNum;
 long		numBytes;
 FSSpec		mySpec;
-Str255		fullErr = "Cannot Write to Player Save File.  Disk may be locked or full.";
+static const char*		fullErr = "Cannot Write to Player Save File.  Disk may be locked or full.";
 Byte		scene,area;
 
 
@@ -1003,7 +1003,7 @@ OSErr		iErr;
 short		fRefNum;
 long		numBytes;
 FSSpec		mySpec;
-Str255		errStr	= "Cannot Read Player Save File.";
+static const char*		errStr	= "Cannot Read Player Save File.";
 
 	InitKeys();
 

@@ -316,18 +316,17 @@ void WaitWhileMusic(void)
 
 /******************** LOAD PACKED FILE *****************/
 
-Handle LoadPackedFile(Str255 fileName)
+Handle LoadPackedFile(const char* fileName)
 {
 OSErr		iErr;
 short		fRefNum,vRefNum;
 long		fileSize,fileSizeCopy;
-Str255		volName;
 Handle		dataHand;
 long		numToRead;
 int32_t		decompSize;
 int32_t		decompType;
 
-	iErr = GetVol(volName,&vRefNum);					// get default volume
+	iErr = GetVol(nil, &vRefNum);					// get default volume
 
 					/*  OPEN THE FILE */
 
@@ -855,7 +854,7 @@ Rect	theRect;
 
 /**************** OPEN MIKE FILE **********************/
 
-void	OpenMikeFile(Str255 filename,short *fRefNumPtr, Str255 errString)
+void OpenMikeFile(const char* filename, short* fRefNumPtr, const char* errString)
 {
 short		vRefNum;
 OSErr		iErr;
@@ -873,7 +872,7 @@ OSErr		iErr;
 
 /**************** OPEN MIKE REZ FILE **********************/
 
-short	OpenMikeRezFile(Str255 filename,Str255 errString)
+short OpenMikeRezFile(const char* filename, const char* errString)
 {
 short		srcFile;
 

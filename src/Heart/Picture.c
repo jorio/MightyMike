@@ -30,7 +30,7 @@ Handle	gBackgroundHandle = nil;
 
 /************************ LOAD BACKGROUND *****************/
 
-void LoadBackground(Str255 fileName,Boolean getPalFlag)
+void LoadBackground(const char* fileName, Boolean getPalFlag)
 {
 	EraseBackgroundBuffer();
 
@@ -77,7 +77,7 @@ void LoadBackground(Str255 fileName,Boolean getPalFlag)
 // NOTE: image is loaded directly onto the screen.
 //
 
-void LoadIMAGE(Str255 fileName,short showMode)
+void LoadIMAGE(const char* fileName, short showMode)
 {
 	Handle imageHandle = LoadPackedFile(fileName);			// load & unpack image file
 
