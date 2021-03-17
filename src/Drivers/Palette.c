@@ -13,15 +13,13 @@
 #include "window.h"
 #include <string.h>
 
+#include "io.h"
+
 /****************************/
 /*    CONSTANTS             */
 /****************************/
 
-#if _DEBUG
-static const int kFadeFrameDelayTicks = 0;		// faster fade in/out in debug mode
-#else
-static const int kFadeFrameDelayTicks = 2;
-#endif
+static const int kFadeDurationMacTicks = 15;
 
 /**********************/
 /*     VARIABLES      */
@@ -73,8 +71,15 @@ void FadeInGameCLUT(void)
 
 						/* FADE IN THE CLUT */
 
-	for (int brightness = 4; brightness <= 100; brightness += 8)
+	const UInt32 start = TickCount();
+
+	while (1)
 	{
+		int brightness = 100 * (int)(TickCount() - start) / kFadeDurationMacTicks;
+
+		if (brightness > 100)
+			break;
+		
 		for (int i = 0; i < 255; i++)
 		{
 			RGBColor rgbColor = U32ToRGBColor(gBackUpPalette[i]);	// get color from palette
@@ -85,12 +90,13 @@ void FadeInGameCLUT(void)
 		}
 
 		PresentIndexedFramebuffer();
-		Wait(kFadeFrameDelayTicks);
+		ReadKeyboard();		// flush keypresses
 	}
 
 						/* SET TO ORIGINAL PALETTE TO BE SURE */
 
 	RestoreBackUpPalette();
+	PresentIndexedFramebuffer();
 }
 
 /*********************** ERASE CLUT **********************/
@@ -127,21 +133,27 @@ void FadeOutGameCLUT(void)
 
 						/* FADE OUT THE CLUT */
 
-	for (int brightness = 96; brightness >= 0; brightness -= 8)
+	const UInt32 start = TickCount();
+
+	while (1)
 	{
+		int brightness = 100 - (int)(100 * (TickCount() - start) / kFadeDurationMacTicks);
+
+		if (brightness < 0)
+			break;
+		
 		for (int i = 0; i < 255; i++)
 		{
 			RGBColor rgbColor = U32ToRGBColor(gBackUpPalette[i]);	// get color from palette
-			rgbColor.red	= (short)((int)rgbColor.red		* brightness /100);
-			rgbColor.green	= (short)((int)rgbColor.green	* brightness /100);
-			rgbColor.blue	= (short)((int)rgbColor.blue	* brightness /100);
+			rgbColor.red	= (short)((int32_t)rgbColor.red		* brightness /100);
+			rgbColor.green	= (short)((int32_t)rgbColor.green	* brightness /100);
+			rgbColor.blue	= (short)((int32_t)rgbColor.blue	* brightness /100);
 			gGamePalette[i] = RGBColorToU32(&rgbColor);				// set it
 		}
 
 		PresentIndexedFramebuffer();
-		Wait(kFadeFrameDelayTicks);
+		ReadKeyboard();		// flush keypresses
 	}
-
 
 			/* LOCK PresentIndexedFramebuffer UNTIL NEXT FADEIN */
 
