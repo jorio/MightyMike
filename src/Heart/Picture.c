@@ -117,18 +117,14 @@ void LoadIMAGE(Str255 fileName,short showMode)
 		srcPtr += width;
 	}
 
-	PresentIndexedFramebuffer();
-
 	DisposeHandle(imageHandle);					// nuke image data
 
 						/* LETS SEE IT */
 
-//	gColorListSize = 255;							// force the CLUT size
-
 	if (showMode & SHOW_IMAGE_FLAG_FADEIN)
 		FadeInGameCLUT();
 	else
-		ActivateCLUT();
+		PresentIndexedFramebuffer();
 }
 
 

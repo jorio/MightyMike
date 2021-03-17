@@ -139,6 +139,7 @@ extern	long					gRegionClipRight[MAX_CLIP_REGIONS];
 #pragma mark - Palette
 
 extern	GamePalette				gGamePalette;
+extern	Boolean					gScreenBlankedFlag;
 
 #pragma mark - Picture
 

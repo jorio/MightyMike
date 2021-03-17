@@ -30,7 +30,7 @@ static const int kFadeFrameDelayTicks = 2;
 GamePalette				gGamePalette;
 static	GamePalette		gBackUpPalette;
 
-static	Boolean			gSceenBlankedFlag = false;
+Boolean					gScreenBlankedFlag = false;
 
 
 /********************** INIT PALETTE STUFF ****************/
@@ -59,21 +59,17 @@ static void RestoreBackUpPalette(void)
 }
 
 
-/************************ ACTIVATE CLUT ********************/
-
-void ActivateCLUT(void)
-{
-	// No-op in source port -- gGamePalette is automatically applied to the image by our renderer.
-
-	gSceenBlankedFlag = false;
-}
-
-
 /************************ FADE IN GAME CLUT ********************/
 
 void FadeInGameCLUT(void)
 {
+						/* BACK UP TARGET COLORS */
+
 	MakeBackUpPalette();
+	
+						/* UNLOCK PresentIndexedFramebuffer */
+
+	gScreenBlankedFlag = false;
 
 						/* FADE IN THE CLUT */
 
@@ -95,10 +91,6 @@ void FadeInGameCLUT(void)
 						/* SET TO ORIGINAL PALETTE TO BE SURE */
 
 	RestoreBackUpPalette();
-
-						/* RESET GAME WINDOW'S PALETTE */
-
-	gSceenBlankedFlag = false;
 }
 
 /*********************** ERASE CLUT **********************/
@@ -115,7 +107,7 @@ void EraseCLUT(void)
 		gGamePalette[0] = color;				// assign color
 	}
 
-	gSceenBlankedFlag = true;
+	gScreenBlankedFlag = true;
 }
 
 
@@ -127,7 +119,7 @@ void EraseCLUT(void)
 
 void FadeOutGameCLUT(void)
 {
-	if (gSceenBlankedFlag)									// see if already out
+	if (gScreenBlankedFlag)									// see if already out
 		return;
 
 
@@ -151,8 +143,9 @@ void FadeOutGameCLUT(void)
 	}
 
 
-						/* RESET GAME WINDOW'S PALETTE */
+			/* LOCK PresentIndexedFramebuffer UNTIL NEXT FADEIN */
 
-	gSceenBlankedFlag = true;
+	gScreenBlankedFlag = true;
 
+	RestoreBackUpPalette();
 }

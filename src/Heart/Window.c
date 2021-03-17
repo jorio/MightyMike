@@ -706,6 +706,11 @@ void DumpIndexedTGA(const char* hostPath, int width, int height, const char* dat
 
 void PresentIndexedFramebuffer(void)
 {
+	if (gScreenBlankedFlag)		// CLUT was blanked (in-between a fade-out and a fade-in), ignore
+	{
+		return;
+	}
+	
 	// Check dithering key
 //	if (GetNewSDLKeyState(SDL_SCANCODE_F10))
 //	{
