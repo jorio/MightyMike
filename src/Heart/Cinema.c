@@ -617,18 +617,18 @@ ObjNode		*nameObj;
 	do
 	{
 		RegulateSpeed2(1);
-		DoFatalAlert("TODO: Implement theChar = CheckKey();");
+
+		ReadKeyboard();
+
+		theChar = gTextInput[0];
 		EraseObjects();
 
-		if (theChar == '\xBD')							// \xBD is the null key mark
-			goto nokey;
-
-		if (theChar == CHAR_RETURN)						// see if done
+		if (GetNewSDLKeyState(SDL_SCANCODE_RETURN) || GetNewSDLKeyState(SDL_SCANCODE_KP_ENTER))			// see if done
 			goto exit;
 
 					/*  SEE IF BACK CHAR */
 
-		if ((theChar == CHAR_LEFT) || (theChar == CHAR_DELETE))
+		if (GetNewSDLKeyState(SDL_SCANCODE_LEFT) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
 		{
 			if (i>0)
 			{
@@ -639,8 +639,8 @@ ObjNode		*nameObj;
 				SetRect(&eraseRect,gHtab+OFFSCREEN_WINDOW_LEFT-30,gVtab+OFFSCREEN_WINDOW_TOP-20,
 						gHtab+OFFSCREEN_WINDOW_LEFT+350,gVtab+OFFSCREEN_WINDOW_TOP+20);
 				AddUpdateRegion(eraseRect,0);				// erase existing name
-				DumpUpdateRegions();
-				WriteLn(HighScoreNames[n]);				// print it
+				DumpUpdateRegions_DontPresentFramebuffer();	// commit erased regions; don't present framebuffer yet to avoid flashing
+				WriteLn(HighScoreNames[n]);					// print it (will present framebuffer)
 				nameObj->X.Int = (gHtab+OFFSCREEN_WINDOW_LEFT);	// set cursor
 				nameObj->Y.Int = (gVtab+OFFSCREEN_WINDOW_TOP);
 			}
@@ -649,7 +649,7 @@ ObjNode		*nameObj;
 				/* SEE IF NEW CHAR */
 
 		else
-		if (i < MAX_NAME_LENGTH)					// see if can enter another char
+		if (theChar >= ' ' && theChar <= 'z' && i < MAX_NAME_LENGTH)	// see if can enter another char
 		{
 			if (theChar >= 'a' && theChar <= 'z')
 				theChar -= 0x20;					// convert to upper case
@@ -661,9 +661,11 @@ ObjNode		*nameObj;
 			gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
 			SetRect(&eraseRect,gHtab+OFFSCREEN_WINDOW_LEFT-30,gVtab+OFFSCREEN_WINDOW_TOP-20,
 					OFFSCREEN_WINDOW_RIGHT,gVtab+OFFSCREEN_WINDOW_TOP+20);
+
 			AddUpdateRegion(eraseRect,0);				// erase area of cursor
-			DumpUpdateRegions();
-			WriteLn(HighScoreNames[n]);				// print whole word
+			DumpUpdateRegions_DontPresentFramebuffer();	// commit erased regions; don't present framebuffer yet to avoid flashing
+
+			WriteLn(HighScoreNames[n]);					// print whole word (will present framebuffer)
 			nameObj->X.Int = (gHtab+OFFSCREEN_WINDOW_LEFT);	// set cursor
 			nameObj->Y.Int = (gVtab+OFFSCREEN_WINDOW_TOP);
 			nameObj->drawBox.left = nameObj->X.Int;
@@ -671,7 +673,7 @@ ObjNode		*nameObj;
 			nameObj->drawBox.top = nameObj->Y.Int;
 			nameObj->drawBox.bottom = nameObj->Y.Int;
 		}
-nokey:
+
 		MoveObjects();
 		DrawObjects();
 		DumpUpdateRegions();

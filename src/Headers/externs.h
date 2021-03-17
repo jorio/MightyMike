@@ -3,6 +3,7 @@
 #include "equates.h"
 #include "weapon.h"
 #include "window.h"
+#include <SDL.h>
 
 #pragma mark - Bonus
 
@@ -42,6 +43,7 @@ extern	short					gNumLives;
 #pragma mark - Input
 
 extern const KeyBinding			kDefaultKeyBindings[NUM_CONTROL_NEEDS];
+extern char						gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
 #pragma mark - IO
 

@@ -104,16 +104,6 @@ enum
 
 #define INVALID_NODE_FLAG 0xffffffffL	// put into CType when node is deleted
 
-							// KEYBOARD DEFINES
-							//=================================
-
-#define	CHAR_RETURN			0x0d				// ASCII codes
-#define CHAR_UP				0x1e
-#define CHAR_DOWN			0x1f
-#define	CHAR_LEFT			0x1c
-#define	CHAR_RIGHT			0x1d
-#define	CHAR_DELETE			0x08
-
 
 			/* AIMING VALUES */
 

@@ -622,9 +622,9 @@ void SimpleObjectMove(void)
 }
 
 
-/********************* DUMP UPDATE REGIONS ***************/
+/********************* DUMP UPDATE REGIONS (DON'T PRESENT FRAMEBUFFER) ***************/
 
-void DumpUpdateRegions(void)
+void DumpUpdateRegions_DontPresentFramebuffer(void)
 {
 	if (numRegions == 0)
 		return;
@@ -666,7 +666,16 @@ void DumpUpdateRegions(void)
 	}
 
 	numRegions = 0;								// reset # regions to 0
+}
 
+/********************* DUMP UPDATE REGIONS (AND PRESENT FRAMEBUFFER) ***************/
+
+void DumpUpdateRegions(void)
+{
+	if (numRegions == 0)
+		return;
+
+	DumpUpdateRegions_DontPresentFramebuffer();
 	PresentIndexedFramebuffer();
 }
 
