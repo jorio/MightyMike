@@ -650,9 +650,9 @@ int32_t	x, y;
 	shapeNum = theNodePtr->Type;						// get shape type
 	frameNum = theNodePtr->CurrentFrame;				// get frame #
 
-					/* GET OBJECT POSITION (EXTRAPOLATED IN FRAMERATE-INDEPENDENT MODE)  */
+					/* GET OBJECT POSITION (INTERPOLATED IN FRAMERATE-INDEPENDENT MODE)  */
 
-	PredictObjectPosition(theNodePtr, gExtrapolateFrameFactor.L, &x, &y);
+	TweenObjectPosition(theNodePtr, gTweenFrameFactor.L, &x, &y);
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 

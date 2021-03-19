@@ -73,7 +73,7 @@ extern	short					gLoadOldGameNum;
 extern	Boolean					gLoadOldGameFlag;
 extern	Byte					gStartingScene;
 extern	Byte					gStartingArea;
-extern	MikeFixed				gExtrapolateFrameFactor;
+extern	MikeFixed				gTweenFrameFactor;
 extern	short					gMainAppRezFile;
 extern	long					someLong;
 extern	Boolean					gFinishedArea;

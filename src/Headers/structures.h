@@ -62,12 +62,13 @@ struct ObjNode
 	Boolean		AnimFlag;		// set if animate this object
 	Boolean		PFCoordsFlag;	// set if x/y coords are global playfield coords, not offscreen buffer coords
 	Boolean		TileMaskFlag;	// set if PF draw should use tile masks
-	MikeFixed	YOffset;		// offset for y draw position on playfield
 	short		ClipNum;		// clipping region # to use
 	MikeFixed	X;				// x coord (low word is fraction)
 	MikeFixed	Y;				// y coord (low word is fraction)
-	long		OldX;			// old x coord (no fraction)
-	long		OldY;			// old y coord
+	MikeFixed	YOffset;		// offset for y draw position on playfield
+	MikeFixed	OldX;			// old x coord (low word is fraction)
+	MikeFixed	OldY;			// old y coord (low word is fraction)
+	MikeFixed	OldYOffset;		// old offset for y draw position on playfield
 	Rect		drawBox;		// box obj was last drawn to
 
 	int32_t		DX;				// DX value (actually a fixed-point number)

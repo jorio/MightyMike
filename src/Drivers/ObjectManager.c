@@ -157,6 +157,9 @@ register ObjNode	*newNodePtr,*scanNodePtr,*reNodePtr;
 		newNodePtr->CBits = 0;
 		newNodePtr->ItemIndex = nil;			// assume it didnt come from ItemList
 
+		newNodePtr->OldX.Int = (long)x;
+		newNodePtr->OldY.Int = (long)y;
+
 					/* FIND INSERTION PLACE FOR NODE */
 
 	if (FirstNodePtr == nil)							// special case only entry
@@ -222,8 +225,9 @@ register	ObjNode		*thisNodePtr;
 		if ((thisNodePtr->MoveFlag) && (thisNodePtr->MoveCall != nil))
 		{
 			gThisNodePtr = thisNodePtr;						// set current object node
-			gThisNodePtr->OldX = gThisNodePtr->X.Int;		// set old info
-			gThisNodePtr->OldY = gThisNodePtr->Y.Int;
+			gThisNodePtr->OldX = gThisNodePtr->X;			// set old info
+			gThisNodePtr->OldY = gThisNodePtr->Y;
+			gThisNodePtr->OldYOffset = gThisNodePtr->YOffset;
 			gThisNodePtr->OldLeftSide = gThisNodePtr->LeftSide;
 			gThisNodePtr->OldRightSide = gThisNodePtr->RightSide;
 			gThisNodePtr->OldTopSide = gThisNodePtr->TopSide;
@@ -231,6 +235,12 @@ register	ObjNode		*thisNodePtr;
 
 			thisNodePtr->MoveCall();						// call object's move routine
 		}
+//		else
+//		{
+//			gThisNodePtr->OldX = gThisNodePtr->X;			// set old info
+//			gThisNodePtr->OldY = gThisNodePtr->Y;
+//			gThisNodePtr->OldYOffset = gThisNodePtr->YOffset;
+//		}
 
 		if ((thisNodePtr->AnimFlag) && (thisNodePtr->CType != INVALID_NODE_FLAG))
 			AnimateASprite(thisNodePtr);					// animate the sprite
@@ -679,54 +689,35 @@ void DumpUpdateRegions(void)
 	PresentIndexedFramebuffer();
 }
 
-/********************* PREDICT OBJECT POSITION ***************/
+/********************* INTERPOLATED OBJECT POSITION ***************/
 //
 // If the current graphics frame falls on a simulation tick, the returned position is exact;
-// otherwise it is extrapolated from the object's last position and speed.
+// otherwise it is interpolated from the object's previous position.
+// Static objects (without a MoveCall or MoveFlag) are not interpolated.
 //
 
-void PredictObjectPosition(ObjNode* theNodePtr, int32_t factor, int32_t* x, int32_t* y)
+void TweenObjectPosition(ObjNode* node, int32_t factor, int32_t* x, int32_t* y)
 {
-	if (factor == 0)										// No extrapolation necessary
+	if (	!node->MoveFlag								// the node might not have valid old coords
+		||	!node->MoveCall								// the node might not have valid old coords
+		||	factor >= 0x10000)							// or, no interpolation necessary on final position
 	{
-		*x = theNodePtr->X.Int;								// get short x coord (world)
-		*y = theNodePtr->Y.Int + theNodePtr->YOffset.Int;	// get foot y and add any y adjustment offset
-		return;
+		*x = node->X.Int;
+		*y = Fix32_Int(node->Y.L + node->YOffset.L);
 	}
-
-	// Get object speed
-	int32_t dx = theNodePtr->DX;
-	int32_t dy = theNodePtr->DY;
-	int32_t dz = theNodePtr->DZ;
-
-	// Factor in platform speed
-	if (theNodePtr->MPlatform && theNodePtr->MPlatform->CType != INVALID_NODE_FLAG)
+	else if (factor == 0)								// No extrapolation necessary on initial position
 	{
-		dx += theNodePtr->MPlatform->DX;
-		dy += theNodePtr->MPlatform->DY;
+		*x = node->OldX.Int;								// get short x coord (world)
+		*y = Fix32_Int(node->OldY.L + node->OldYOffset.L);	// get foot y and add any y adjustment offset
 	}
-
-	// Compute X
-	if (theNodePtr->OldX == theNodePtr->X.Int)		// If object appears static on X, don't extrapolate X (avoid jitter)
+	else
 	{
-		*x = theNodePtr->X.Int;
-	}
-	else											// Extrapolate X
-	{
-		*x = Fix32_Int(theNodePtr->X.L + Fix32_Mul(factor, dx));
-	}
-
-	// Compute extrapolated Y offset
-	int32_t yOffsetFixed = theNodePtr->YOffset.L + Fix32_Mul(factor, dz);
-
-	// Compute Y
-	if (theNodePtr->OldY == theNodePtr->Y.Int)		// If object appears static on Y, don't extrapolate Y (avoid jitter)
-	{
-		*y = Fix32_Int((theNodePtr->Y.Int<<16) + yOffsetFixed);		// Add extrapolated Y offset even if object is static on Y (hopping bunnies)
-	}
-	else											// Extrapolate Y
-	{
-		int32_t footYFixed = theNodePtr->Y.L + Fix32_Mul(factor, dy);
-		*y = Fix32_Int(footYFixed + yOffsetFixed);
+		int oldFactor = 0x10000 - factor;
+		int32_t newX = node->X.L;
+		int32_t oldX = node->OldX.L;
+		int32_t newY = node->Y.L	+ node->YOffset.L;
+		int32_t oldY = node->OldY.L	+ node->OldYOffset.L;
+		*x = Fix32_Int(Fix32_Mul(oldFactor, oldX) + Fix32_Mul(factor, newX));
+		*y = Fix32_Int(Fix32_Mul(oldFactor, oldY) + Fix32_Mul(factor, newY));
 	}
 }

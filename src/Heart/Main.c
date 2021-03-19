@@ -74,7 +74,7 @@ short		gMainAppRezFile;
 
 Boolean		gScreenScrollFlag = true;
 
-MikeFixed	gExtrapolateFrameFactor = { .L = 0 };
+MikeFixed	gTweenFrameFactor = { .L = 0 };
 
 static const uint32_t	kDebugTextUpdateInterval = 50;
 static uint32_t			gDebugTextFrameAccumulator = 0;
@@ -355,7 +355,7 @@ long	r;
 
 	do
 	{
-		gExtrapolateFrameFactor.L = 0;										// reset subtic
+		gTweenFrameFactor.L = 0;										// reset subtic
 
 		
 					/* SIMULATION FRAMES */
@@ -371,7 +371,6 @@ long	r;
 			MoveObjects();
 			SortObjectsByY();										// sort 'em
 
-			gExtrapolateFrameFactor.L = 0;
 			timeSinceSim -= GAME_SPEED_SDL;							// catch up
 		}
 
@@ -382,6 +381,7 @@ long	r;
 
 		if (!gGamePrefs.uncappedFramerate)
 		{
+			gTweenFrameFactor.L = 0x10000;					// full frame
 			ScrollPlayfield();										// do playfield updating
 			UpdateTileAnimation();
 			DrawObjects();
@@ -399,7 +399,8 @@ long	r;
 		else
 		while (timeSinceSim < GAME_SPEED_SDL)						// render as many graphics frames as we can until it's time to run the simulation again
 		{
-			gExtrapolateFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
+			gTweenFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
+			GAME_ASSERT(gTweenFrameFactor.L >= 0 && gTweenFrameFactor.L <= 0x10000);
 			
 			ScrollPlayfield();										// do playfield updating
 			UpdateTileAnimation();

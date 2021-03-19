@@ -61,8 +61,8 @@ ObjNode *o;
 
 	GAME_ASSERT_MESSAGE(o, "Shadow node lost its owner!");
 
-	gThisNodePtr->X.Int = o->X.Int;		// follow owner
-	gThisNodePtr->Y.Int = o->Y.Int;
+	gThisNodePtr->X = o->X;				// follow owner
+	gThisNodePtr->Y = o->Y;
 	
 	gThisNodePtr->DX = o->DX;			// for movement extrapolation
 	gThisNodePtr->DY = o->DY;
@@ -144,8 +144,8 @@ void MoveMessage(void)
 		return;
 	}
 
-	gThisNodePtr->X.Int = gThisNodePtr->MessageToOwnerNode->X.Int;	// align with owner
-	gThisNodePtr->Y.Int = gThisNodePtr->MessageToOwnerNode->Y.Int;
+	gThisNodePtr->X = gThisNodePtr->MessageToOwnerNode->X;			// align with owner
+	gThisNodePtr->Y = gThisNodePtr->MessageToOwnerNode->Y;
 
 	gThisNodePtr->DX = gThisNodePtr->MessageToOwnerNode->DX;		// for movement extrapolation
 	gThisNodePtr->DY = gThisNodePtr->MessageToOwnerNode->DY;

@@ -79,9 +79,9 @@ short			gPlayfieldWidth,gPlayfieldHeight;
 
 static	Byte	**gAlternateMap = nil;
 
+static	long	gOldScrollX,gOldScrollY;
 long			gScrollX,gScrollY;
 long			gScrollRow,gScrollCol,gOldScrollRow,gOldScrollCol;
-static long		scrollDX, scrollDY;
 
 short			gNumItems = -1;
 static	ObjectEntryType	**gItemLookupTableX = nil;
@@ -433,6 +433,8 @@ Ptr		bytePtr,pfPtr;
 
 	gScrollX = 0;													// default these
 	gScrollY = 0;
+	gOldScrollX = 0;
+	gOldScrollY = 0;
 }
 
 
@@ -480,6 +482,9 @@ long		right,left,top,bottom;
 	else
 	if (gScrollY > ((gPlayfieldHeight)-(SCROLL_BORDER+PF_WINDOW_HEIGHT)))
 		gScrollY = (gPlayfieldHeight)-(SCROLL_BORDER+PF_WINDOW_HEIGHT);
+
+	gOldScrollX = gScrollX;
+	gOldScrollY = gScrollY;
 
 //				/* BUILD ITEM LIST */
 //
@@ -627,13 +632,13 @@ void ScrollPlayfield(void)
 /************************** STOP SCROLLING PLAYFIELD ****************************/
 //
 // Call this when the camera goes static.
-// This will stop movement extrapolation on the camera and prevent the playfield from jittering.
+// This will stop movement interpolation on the camera and prevent the playfield from jittering.
 //
 
 void StopScrollingPlayfield(void)
 {
-	scrollDX = 0;
-	scrollDY = 0;
+	gOldScrollX = gScrollX;
+	gOldScrollY = gScrollY;
 }
 
 /****************** SET ITEM DELETE WINDOW ****************/
@@ -848,6 +853,10 @@ Boolean		flag;
 void DoMyScreenScroll(void)
 {
 long	screenX,screenY;
+long	scrollDX, scrollDY;
+
+	gOldScrollX = gScrollX;
+	gOldScrollY = gScrollY;
 
 	UpdateViewWindow();
 
@@ -1483,9 +1492,18 @@ long		method;
 	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
 	left = (gScrollX % PF_BUFFER_WIDTH);
 
-	// Extrapolate camera position
-	int32_t scrollOffsetX = Fix32_Int(Fix32_Mul(scrollDX << 16, gExtrapolateFrameFactor.L));
-	int32_t scrollOffsetY = Fix32_Int(Fix32_Mul(scrollDY << 16, gExtrapolateFrameFactor.L));
+	// Interpolate camera position
+	int32_t scrollOffsetX = 0;//Fix32_Int(Fix32_Mul(scrollDX << 16, gTweenFrameFactor.L));
+	int32_t scrollOffsetY = 0;//Fix32_Int(Fix32_Mul(scrollDY << 16, gTweenFrameFactor.L));
+
+	if (gTweenFrameFactor.L < 0x10000)
+	{
+		int32_t oldFactor = 0x10000 - gTweenFrameFactor.L;
+		int32_t dx = gOldScrollX - gScrollX;
+		int32_t dy = gOldScrollY - gScrollY;
+		scrollOffsetX += Fix32_Int(Fix32_Mul(dx << 16, oldFactor));
+		scrollOffsetY += Fix32_Int(Fix32_Mul(dy << 16, oldFactor));
+	}
 
 	if (gShakeyScreenCount)									// see if do shakey screen
 	{

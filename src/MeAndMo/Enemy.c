@@ -169,8 +169,8 @@ register	unsigned short	bits;
 
 	if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
 	{
-		gX.Int = gThisNodePtr->OldX;
-		gY.Int = gThisNodePtr->OldY;
+		gX = gThisNodePtr->OldX;
+		gY = gThisNodePtr->OldY;
 	}
 	else
 	{
@@ -182,8 +182,8 @@ register	unsigned short	bits;
 
 		if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
 		{
-			gX.Int = gThisNodePtr->OldX;
-			gY.Int = gThisNodePtr->OldY;
+			gX = gThisNodePtr->OldX;
+			gY = gThisNodePtr->OldY;
 		}
 		else
 		{
@@ -195,8 +195,8 @@ register	unsigned short	bits;
 
 			if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
 			{
-				gX.Int = gThisNodePtr->OldX;
-				gY.Int = gThisNodePtr->OldY;
+				gX = gThisNodePtr->OldX;
+				gY = gThisNodePtr->OldY;
 			}
 			else
 			{
@@ -208,8 +208,8 @@ register	unsigned short	bits;
 
 				if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
 				{
-					gX.Int = gThisNodePtr->OldX;
-					gY.Int = gThisNodePtr->OldY;
+					gX = gThisNodePtr->OldX;
+					gY = gThisNodePtr->OldY;
 				}
 			}
 		}
