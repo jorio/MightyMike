@@ -286,7 +286,7 @@ ObjNode	*newObj;
 				newObj->RightOff = 8;
 				CalcObjectBox2(newObj);
 
-				newObj->YOffset.Int = -70;
+				InitYOffset(newObj, -70);
 				newObj->DZ = -0xb0000L;						// start bouncing up
 
 				newObj->DX = (long)(gMyX-gThisNodePtr->X.Int)*0x1000L;		// aim at me

@@ -99,7 +99,7 @@ short		i;
 
 		newObj->ShadowIndex = MakeShadow(newObj,SHADOWSIZE_TINY);		// allocate shadow
 
-		newObj->YOffset.Int = -15;
+		InitYOffset(newObj, -15);
 		newObj->DZ = -0xA0000L+(MyRandomShort()<<2);					// start bouncing up
 	}
 }
@@ -175,7 +175,7 @@ ObjNode		*newObj;
 	newObj->RightOff = 14;
 	CalcObjectBox2(newObj);
 
-	newObj->YOffset.Int = 0;
+	InitYOffset(newObj, 0);
 	newObj->DZ = -(BUNNY_BOUNCE_FACTOR);				// start bouncing up
 
 

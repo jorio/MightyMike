@@ -720,7 +720,7 @@ short		z,y,x;
 
 	newNode->ShadowIndex = MakeShadow(newNode,SHADOWSIZE_TINY); 	// allocate shadow & remember ptr to it
 
-	newNode->YOffset.Int = -30;
+	InitYOffset(newNode, -30);
 	newNode->DZ = -0x80000L;					// start bouncing up
 
 	PlaySound(SOUND_POP);
@@ -974,7 +974,7 @@ Byte	animNum;
 	if (newNode == nil)
 		return(false);
 
-	newNode->YOffset.Int = -39;
+	InitYOffset(newNode, -39);
 
 	newNode->CType = CTYPE_MYBULLET;
 	newNode->CBits = CBITS_TOUCHABLE;

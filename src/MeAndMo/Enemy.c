@@ -311,7 +311,7 @@ register	short		x,y,z;
 
 		newObj->SplatTimer = MyRandomLong()&0b11111+SPLAT_TIME;		// set life of splat
 
-		newObj->YOffset.Int = -15;
+		InitYOffset(newObj, -15);
 		newObj->DZ = -0x80000L-MyRandomShort();						// start bouncing up
 		newObj->DX = ((long)MyRandomShort()*4)-0x10000L;				// random vector
 		newObj->DY = ((long)MyRandomShort()*4)-0x10000L;

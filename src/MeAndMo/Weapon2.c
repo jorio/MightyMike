@@ -128,7 +128,7 @@ short		z,y,x;
 
 	newNode->ShadowIndex = MakeShadow(newNode,SHADOWSIZE_SMALL); 	// allocate shadow & remember ptr to it
 
-	newNode->YOffset.Int = -30;
+	InitYOffset(newNode, -30);
 	newNode->DZ = -0x80000L;					// start bouncing up
 
 	PlaySound(SOUND_POP);
@@ -294,7 +294,7 @@ short		z,y,x;
 	if (newNode == nil)
 		return(false);
 
-	newNode->YOffset.Int = -32;
+	InitYOffset(newNode, -32);
 
 	newNode->CType = CTYPE_MYBULLET;
 	newNode->CBits = CBITS_TOUCHABLE;
@@ -426,7 +426,7 @@ short		z,y,x;
 	newNode->Health = ELEPHANTGUN_DURATION;
 	newNode->WeaponPower = ELEPHANTGUN_POWER;					// set weapon's power
 
-	newNode->YOffset.Int = -30;
+	InitYOffset(newNode, -30);
 	newNode->ShadowIndex = MakeShadow(newNode,SHADOWSIZE_TINY);	// allocate shadow & remember ptr to it
 
 	gNumBullets++;
@@ -497,7 +497,7 @@ short		z,y,x;
 
 	newNode->ShadowIndex = MakeShadow(newNode,SHADOWSIZE_SMALL); 	// allocate shadow & remember ptr to it
 
-	newNode->YOffset.Int = -38;
+	InitYOffset(newNode, -38);
 
 	PlaySound(SOUND_POP);
 	StartMyThrow();
@@ -633,7 +633,7 @@ Byte 	sub;
 	newNode->Health = DOUBLESHOT_DURATION;
 	newNode->WeaponPower = DOUBLESHOT_POWER;					// set weapon's power
 
-	newNode->YOffset.Int = -39;
+	InitYOffset(newNode, -39);
 
 	gNumBullets++;
 
@@ -730,7 +730,7 @@ static	unsigned long lastShotFrame = 0;
 	newNode->Health = TRIPLESHOT_DURATION;
 	newNode->WeaponPower = TRIPLESHOT_POWER;					// set weapon's power
 
-	newNode->YOffset.Int = -39;
+	InitYOffset(newNode, -39);
 
 	gNumBullets++;
 
@@ -1100,7 +1100,7 @@ short		z,y,x;
 	newNode->Health = PIXIEDUST_DURATION;
 	newNode->WeaponPower = PIXIEDUST_POWER;						// set weapon's power
 
-	newNode->YOffset.Int = -20;
+	InitYOffset(newNode, -20);
 
 	gNumBullets++;
 
@@ -1154,7 +1154,7 @@ register	ObjNode *newObj;
 		if (newObj != nil)
 		{
 			newObj->AnimSpeed += MyRandomLong()&0x1ff;		// random anim speed
-			newObj->YOffset.Int = gThisNodePtr->YOffset.Int;		// same dist off ground
+			InitYOffset(newObj, gThisNodePtr->YOffset.Int);	// same dist off ground
 		}
 	}
 

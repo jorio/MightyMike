@@ -1509,7 +1509,7 @@ register ObjNode	*newObj;
 		if (newObj != nil)
 		{
 			newObj->AnimSpeed += MyRandomLong()&0xff;	// random anim speed
-			newObj->YOffset.Int = 24;					// move down to feet
+			InitYOffset(newObj, 24);					// move down to feet
 		}
 	}
 }

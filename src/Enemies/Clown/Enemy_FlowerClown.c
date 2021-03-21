@@ -293,7 +293,7 @@ long		dx;
 	newObj->RightOff = 15;
 	CalcObjectBox2(newObj);
 
-	newObj->YOffset.Int = -40;
+	InitYOffset(newObj, -40);
 
 
 			/* MAKE SHADOW */

@@ -287,7 +287,7 @@ long		dx;
 	newObj->RightOff = 8;
 	CalcObjectBox2(newObj);
 
-	newObj->YOffset.Int = -40-(gThisNodePtr->ButtonCount * 9);		// see which button
+	InitYOffset(newObj, -40 - 9*gThisNodePtr->ButtonCount);	// see which button
 	if (++gThisNodePtr->ButtonCount >= 3)
 		gThisNodePtr->ButtonCount = 0;
 

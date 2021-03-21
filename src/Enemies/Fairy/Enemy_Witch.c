@@ -77,7 +77,7 @@ register	ObjNode		*newObj;
 	newObj->Worth = WITCH_WORTH;						// set worth
 	newObj->InjuryThreshold = WITCH_DAMAGE_THRESHOLD;
 
-	newObj->YOffset.Int = -20;
+	InitYOffset(newObj, -20);
 
 	newObj->ShadowIndex = MakeShadow(newObj,SHADOWSIZE_GIANT);		// allocate shadow
 

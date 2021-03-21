@@ -496,7 +496,7 @@ unsigned short	bits;
 	newObj->RightOff = 15;
 	CalcObjectBox2(newObj);
 
-	newObj->YOffset.Int = -40;
+	InitYOffset(newObj, -40);
 
 
 			/* MAKE SHADOW */
@@ -567,7 +567,7 @@ register	ObjNode *newObj;
 	if (newObj == nil)
 		return;
 
-	newObj->YOffset.Int = -65;
+	InitYOffset(newObj, -65);
 	newObj->MessageTimer = GAME_FPS*3/2;				// set message timer
 	newObj->TileMaskFlag = false;						// wont be tile masked
 	newObj->MessageToOwnerNode = gThisNodePtr;			// point to owner

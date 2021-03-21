@@ -142,7 +142,7 @@ register	ObjNode		*newObj;
 	newObj->Worth = HATBUNNY_WORTH;				// set worth
 	newObj->InjuryThreshold = HATBUNNY_DAMAGE_THRESHOLD;
 
-	newObj->YOffset.Int = -40;
+	InitYOffset(newObj, -40);
 	newObj->DZ = BOUNCE_FACTOR*2;				// start bouncing up
 
 

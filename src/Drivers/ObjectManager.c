@@ -235,12 +235,6 @@ register	ObjNode		*thisNodePtr;
 
 			thisNodePtr->MoveCall();						// call object's move routine
 		}
-//		else
-//		{
-//			gThisNodePtr->OldX = gThisNodePtr->X;			// set old info
-//			gThisNodePtr->OldY = gThisNodePtr->Y;
-//			gThisNodePtr->OldYOffset = gThisNodePtr->YOffset;
-//		}
 
 		if ((thisNodePtr->AnimFlag) && (thisNodePtr->CType != INVALID_NODE_FLAG))
 			AnimateASprite(thisNodePtr);					// animate the sprite
@@ -688,6 +682,20 @@ void DumpUpdateRegions(void)
 	DumpUpdateRegions_DontPresentFramebuffer();
 	PresentIndexedFramebuffer();
 }
+
+
+
+/********************* INITIALIZE Y OFFSET ON A NEW OBJNODE ***************/
+//
+// Call this on a fresh ObjNode (rather than setting YOffset manually)
+// to avoid a hiccup the first time the object's position is interpolated.
+//
+
+void InitYOffset(ObjNode* objNode, long yOffset)
+{
+	objNode->YOffset.L = objNode->OldYOffset.L = yOffset << 16;
+}
+
 
 /********************* INTERPOLATED OBJECT POSITION ***************/
 //

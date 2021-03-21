@@ -216,7 +216,7 @@ ObjNode	*newObj;
 			newObj->RightOff = 8;
 			CalcObjectBox2(newObj);
 
-			newObj->YOffset.Int = -42;
+			InitYOffset(newObj, -42);
 			newObj->DZ = -0x90000L;						// start bouncing up
 
 			newObj->DX = (long)(gMyX-gThisNodePtr->X.Int)*0x1000L;		// aim at me
@@ -615,7 +615,7 @@ static	long hydrantDX[2] = {-0x90000L,0x90000L};
 	if (newNode == nil)
 		return;
 
-	newNode->YOffset.Int = -39;
+	InitYOffset(newNode, -39);
 
 	newNode->CType = CTYPE_ENEMYC;
 	newNode->CBits = CBITS_TOUCHABLE;
