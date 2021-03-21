@@ -1207,126 +1207,6 @@ Handle		tempHand;
 }
 
 
-#if 0
-/************************ DRAW A TILE ***********************/
-
-static void DrawATile(unsigned short tileNum, short row, short col, Boolean maskFlag)
-{
-double		*destPtr,*srcPtr,*destCopyPtr;
-long		height,i;
-Ptr			destStartPtr,destCopyStartPtr;
-double		*copyOfSrc;
-unsigned long	rowS,colS;								// shifted version of row & col
-Byte		pixel;
-Ptr			destPtrB,srcPtrB;
-static long	fillFs[2] = {0xFFFFFFFFL,0XFFFFFFFFL};
-double		t1,t2,t3,t4;
-
-					/* CALC DEST POINTERS */
-
-	destStartPtr = (Ptr)(gPFLookUpTable[rowS = row<<TILE_SIZE_SH]+(colS = col<<TILE_SIZE_SH));
-	destCopyStartPtr = (Ptr)(gPFCopyLookUpTable[rowS]+colS);
-
-					/* CALC TILE DEFINITION ADDR */
-
-	copyOfSrc = srcPtr = (double *)(gTilesPtr+
-					((long)(gTileXlatePtr[tileNum&TILENUM_MASK])<<(TILE_SIZE_SH*2)));
-	destPtr = (double *)destStartPtr;
-	destCopyPtr = (double *)destCopyStartPtr;
-
-						/* DRAW THE TILE */
-
-	height = TILE_SIZE;
-	do
-	{
-
-		t1 = srcPtr[0];
-		t2 = srcPtr[1];
-		t3 = srcPtr[2];
-		t4 = srcPtr[3];
-
-		destPtr[0] = t1;						// copy 8 pixels at a time
-		destCopyPtr[0] = t1;
-		destPtr[1] = t2;
-		destCopyPtr[1] = t2;
-		destPtr[2] = t3;
-		destCopyPtr[2] = t3;
-		destPtr[3] = t4;
-		destCopyPtr[3] = t4;
-
-		srcPtr += 4;
-		destPtr += (PF_BUFFER_WIDTH-TILE_SIZE)/8+4;			// next line
-		destCopyPtr += (PF_BUFFER_WIDTH-TILE_SIZE)/8+4;
-	}while(--height);
-
-
-					/************************/
-					/* SEE IF DRAW THE MASK */
-					/************************/
-
-	if (maskFlag)
-	{
-		destPtr = (double *)(gPFMaskLookUpTable[rowS]+colS);
-		if (tileNum&TILE_PRIORITY_MASK)
-		{
-			if (tileNum&TILE_PRIORITY_MASK2)						// see if do pixel accurate mask or just tile mask
-			{
-
-						/* DRAW PIXEL TILE MASK */
-
-				destPtrB = (Ptr)destPtr;
-				srcPtrB = (Ptr)copyOfSrc;
-				height = TILE_SIZE;
-				do
-				{
-					for (i=0; i < TILE_SIZE; i++)
-					{
-						pixel = *srcPtrB++;							// get pixel value
-
-						if (gColorMaskArray[pixel])
-							*destPtrB++ = 0xff;						// make xparent
-						else
-							*destPtrB++ = 0x00;						// make solid
-					}
-					destPtrB += PF_BUFFER_WIDTH-TILE_SIZE;			// next line
-				} while(--height);
-
-			}
-							/* DRAW WHOLE TILE MASK */
-			else
-			{
-				height = TILE_SIZE;
-				t1 = *((double *)fillFs);
-				do
-				{
-					destPtr[0] = t1;		// 0xffffffffffffffff
-					destPtr[1] = t1;		// 0xffffffffffffffff
-					destPtr[2] = t1;		// 0xffffffffffffffff
-					destPtr[3] = t1;		// 0xffffffffffffffff
-					destPtr += ((PF_BUFFER_WIDTH-TILE_SIZE)/8)+4;			// next line
-				} while (--height);
-			}
-		}
-		else
-		{
-						/* CLEAR MASK HERE */
-
-			height = TILE_SIZE;
-			t1 = 0;
-			do
-			{
-				destPtr[0] = t1;
-				destPtr[1] = t1;
-				destPtr[2] = t1;
-				destPtr[3] = t1;
-				destPtr += ((PF_BUFFER_WIDTH-TILE_SIZE)/8)+4;			// next line
-			} while (--height);
-		}
-	}
-}
-
-#else
-
 /************************ DRAW A TILE ***********************/
 
 void DrawATile(unsigned short tileNum, short row, short col, Boolean maskFlag)
@@ -1425,7 +1305,6 @@ Ptr			destPtrB,srcPtrB;
 		}
 	}
 }
-#endif
 
 
 
@@ -1618,14 +1497,14 @@ long		method;
 						/* DO 1ST SEG */
 			do
 			{
-				BlockMove(srcPtr, destPtr, width);
+				memcpy(destPtr, srcPtr, width);
 				destPtr += width;
 				srcPtr += width;
 
 
 						/* DO 2ND SEG */
 
-				BlockMove(srcPtr2, destPtr2, width2);
+				memcpy(destPtr2, srcPtr2, width2);
 				destPtr2 += width2;
 				srcPtr2 += width2;
 
@@ -1662,10 +1541,7 @@ long		method;
 				destPtr = destStartPtr;
 				srcPtr = srcStartPtr;
 
-				BlockMove(srcPtr, destPtr, width);
-
-				destPtr += width;
-				srcPtr += width;
+				memcpy(destPtr, srcPtr, width);
 
 				srcStartPtr += srcAdd;									// next line
 				destStartPtr += destAdd;
