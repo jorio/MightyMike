@@ -1368,14 +1368,10 @@ long		widths[4];
 long		srcAdd,destAdd;
 long		method;
 
-	top = (gScrollY % PF_BUFFER_HEIGHT);					// get PF buffer pixel coords to start @
-	left = (gScrollX % PF_BUFFER_WIDTH);
+	int32_t scrollOffsetX = 0;
+	int32_t scrollOffsetY = 0;
 
-	// Interpolate camera position
-	int32_t scrollOffsetX = 0;//Fix32_Int(Fix32_Mul(scrollDX << 16, gTweenFrameFactor.L));
-	int32_t scrollOffsetY = 0;//Fix32_Int(Fix32_Mul(scrollDY << 16, gTweenFrameFactor.L));
-
-	if (gTweenFrameFactor.L < 0x10000)
+	if (gTweenFrameFactor.L < 0x10000)						// interpolate camera position
 	{
 		int32_t oldFactor = 0x10000 - gTweenFrameFactor.L;
 		int32_t dx = gOldScrollX - gScrollX;
@@ -1391,18 +1387,8 @@ long		method;
 	}
 
 	// Apply scroll offset
-	{
-		left += scrollOffsetX;
-		top += scrollOffsetY;
-		if (top < 0)
-			top = 0;
-		if (left < 0)
-			left = 0;
-		if (top >= PF_BUFFER_HEIGHT)
-			top = PF_BUFFER_HEIGHT - 1;
-		if (left >= PF_BUFFER_WIDTH)
-			left = PF_BUFFER_WIDTH - 1;
-	}
+	left	= PositiveModulo(gScrollX + scrollOffsetX, PF_BUFFER_WIDTH);					// get PF buffer pixel coords to start @
+	top		= PositiveModulo(gScrollY + scrollOffsetY, PF_BUFFER_HEIGHT);
 
 	if ((left+(PF_WINDOW_WIDTH-1)) > PF_BUFFER_WIDTH)		// see if 2 horiz segments
 	{

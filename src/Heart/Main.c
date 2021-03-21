@@ -399,7 +399,6 @@ long	r;
 		else
 		while (timeSinceSim < GAME_SPEED_SDL)						// render as many graphics frames as we can until it's time to run the simulation again
 		{
-			gTweenFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
 			GAME_ASSERT(gTweenFrameFactor.L >= 0 && gTweenFrameFactor.L <= 0x10000);
 			
 			ScrollPlayfield();										// do playfield updating
@@ -413,6 +412,10 @@ long	r;
 			gDebugTextFrameAccumulator++;
 
 			timeSinceSim = SDL_GetTicks() - timeAtEndOfSim;
+
+			// Update tween factor at end of loop
+			// (meaning tween factor at 1st iteration is 0, i.e. 1st graphics frame = end of previous simulation frame)
+			gTweenFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
 		}
 
 

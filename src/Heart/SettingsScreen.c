@@ -142,16 +142,6 @@ static SettingEntry gSettingEntries[] =
 /****************************/
 #pragma mark - Utilities
 
-static unsigned int PositiveModulo(int value, unsigned int m)
-{
-	int mod = value % (int)m;
-	if (mod < 0)
-	{
-		mod += m;
-	}
-	return mod;
-}
-
 static void Cycle(SettingEntry* entry, int delta)
 {
 	if (entry->valuePtr)

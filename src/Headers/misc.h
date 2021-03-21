@@ -59,6 +59,16 @@ static inline int32_t Fix32_Mul(int32_t a, int32_t b)
 	return (int32_t)(((int64_t)a * (int64_t)b) >> 16);
 }
 
+static inline int PositiveModulo(int value, unsigned int m)
+{
+	int mod = value % (int)m;
+	if (mod < 0)
+	{
+		mod += m;
+	}
+	return mod;
+}
+
 
 #define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)
 #define TODO_REWRITE_THIS_MINOR()		printf("TODO: rewrite this! %s\n", __func__)
