@@ -81,6 +81,7 @@ static	Byte	**gAlternateMap = nil;
 
 static	long	gOldScrollX,gOldScrollY;
 long			gScrollX,gScrollY;
+long			gTweenedScrollX,gTweenedScrollY;
 long			gScrollRow,gScrollCol,gOldScrollRow,gOldScrollCol;
 
 short			gNumItems = -1;
@@ -435,6 +436,8 @@ Ptr		bytePtr,pfPtr;
 	gScrollY = 0;
 	gOldScrollX = 0;
 	gOldScrollY = 0;
+	gTweenedScrollX = 0;
+	gTweenedScrollY = 0;
 }
 
 
@@ -485,6 +488,8 @@ long		right,left,top,bottom;
 
 	gOldScrollX = gScrollX;
 	gOldScrollY = gScrollY;
+	gTweenedScrollX = gScrollX;
+	gTweenedScrollY = gScrollY;
 
 //				/* BUILD ITEM LIST */
 //
@@ -600,8 +605,26 @@ void ScrollPlayfield(void)
 	gOldScrollRow = gScrollRow;									// save old row/col
 	gOldScrollCol = gScrollCol;
 
-	gScrollCol = gScrollX>>TILE_SIZE_SH;						// get new row/col
-	gScrollRow = gScrollY>>TILE_SIZE_SH;
+	if (gTweenFrameFactor.L <= 0)
+	{
+		gTweenedScrollX = gOldScrollX;
+		gTweenedScrollY = gOldScrollY;
+	}
+	else if (gTweenFrameFactor.L >= 0x10000)
+	{
+		gTweenedScrollX = gScrollX;
+		gTweenedScrollY = gScrollY;
+	}
+	else if (gTweenFrameFactor.L < 0x10000)						// interpolate camera position
+	{
+		int32_t dx = gOldScrollX - gScrollX;
+		int32_t dy = gOldScrollY - gScrollY;
+		gTweenedScrollX = gScrollX + Fix32_Int(Fix32_Mul(dx << 16, gOneMinusTweenFrameFactor.L));
+		gTweenedScrollY = gScrollY + Fix32_Int(Fix32_Mul(dy << 16, gOneMinusTweenFrameFactor.L));
+	}
+	
+	gScrollCol = gTweenedScrollX / TILE_SIZE;			// get new row/col
+	gScrollRow = gTweenedScrollY / TILE_SIZE;
 
 
 			/* SEE IF SCROLLED A TILE VERTICALLY */
@@ -1371,24 +1394,14 @@ long		method;
 	int32_t scrollOffsetX = 0;
 	int32_t scrollOffsetY = 0;
 
-	if (gTweenFrameFactor.L < 0x10000)						// interpolate camera position
-	{
-		int32_t oldFactor = 0x10000 - gTweenFrameFactor.L;
-		int32_t dx = gOldScrollX - gScrollX;
-		int32_t dy = gOldScrollY - gScrollY;
-		scrollOffsetX += Fix32_Int(Fix32_Mul(dx << 16, oldFactor));
-		scrollOffsetY += Fix32_Int(Fix32_Mul(dy << 16, oldFactor));
-	}
-
 	if (gShakeyScreenCount)									// see if do shakey screen
 	{
 		scrollOffsetX += MyRandomLong() & 0b1111 - 8;
 		scrollOffsetY += MyRandomLong() & 0b1111 - 8;
 	}
 
-	// Apply scroll offset
-	left	= PositiveModulo(gScrollX + scrollOffsetX, PF_BUFFER_WIDTH);					// get PF buffer pixel coords to start @
-	top		= PositiveModulo(gScrollY + scrollOffsetY, PF_BUFFER_HEIGHT);
+	left	= PositiveModulo(gTweenedScrollX + scrollOffsetX, PF_BUFFER_WIDTH);		// get PF buffer pixel coords to start @
+	top		= PositiveModulo(gTweenedScrollY + scrollOffsetY, PF_BUFFER_HEIGHT);
 
 	if ((left+(PF_WINDOW_WIDTH-1)) > PF_BUFFER_WIDTH)		// see if 2 horiz segments
 	{

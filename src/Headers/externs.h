@@ -73,7 +73,8 @@ extern	short					gLoadOldGameNum;
 extern	Boolean					gLoadOldGameFlag;
 extern	Byte					gStartingScene;
 extern	Byte					gStartingArea;
-extern	MikeFixed				gTweenFrameFactor;
+extern	MikeFixed				gTweenFrameFactor;			// progress from previous frame to current frame
+extern	MikeFixed				gOneMinusTweenFrameFactor;	// 1 - gTweenFrameFactor
 extern	short					gMainAppRezFile;
 extern	long					someLong;
 extern	Boolean					gFinishedArea;
@@ -159,6 +160,8 @@ extern	Handle					gPlayfieldHandle;
 extern	uint16_t				**gPlayfield;
 extern	long					gScrollX;
 extern	long					gScrollY;
+extern	long					gTweenedScrollX;
+extern	long					gTweenedScrollY;
 extern	short					gItemDeleteWindow_Bottom;
 extern	short					gItemDeleteWindow_Top;
 extern	short					gItemDeleteWindow_Left;

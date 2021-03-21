@@ -22,11 +22,9 @@
 #include "bonus.h"
 #include "sound2.h"
 #include "miscanims.h"
-#include "spin.h"
 #include "weapon.h"
 #include "shape.h"
 #include "io.h"
-#include "racecar.h"
 #include "main.h"
 #include "input.h"
 #include "version.h"
@@ -74,7 +72,8 @@ short		gMainAppRezFile;
 
 Boolean		gScreenScrollFlag = true;
 
-MikeFixed	gTweenFrameFactor = { .L = 0 };
+MikeFixed	gTweenFrameFactor			= { .L = 0x00000000 };
+MikeFixed	gOneMinusTweenFrameFactor	= { .L = 0x00010000 };
 
 static const uint32_t	kDebugTextUpdateInterval = 50;
 static uint32_t			gDebugTextFrameAccumulator = 0;
@@ -351,37 +350,22 @@ long	r;
 
 	r = MyRandomLong();
 
-	uint32_t timeSinceSim = GAME_SPEED_SDL;							// force simulation to run once when we enter this function
-
 	do
 	{
-		gTweenFrameFactor.L = 0;										// reset subtic
 
-		
-					/* SIMULATION FRAMES */
-		
-		while (timeSinceSim >= GAME_SPEED_SDL)						// we need to run some simulation frames
+		if (!gGamePrefs.uncappedFramerate)
 		{
-			gFrames++;												// one more simulation frame
+			gTweenFrameFactor.L			= 0x00010000;				// reset frame interpolation (factor=1: force new coordinates)
+			gOneMinusTweenFrameFactor.L	= 0x00000000;
 
+			gFrames++;												// one more simulation frame
+			
 			if (gShakeyScreenCount)
 				gShakeyScreenCount--;
 
 			ReadKeyboard();
 			MoveObjects();
 			SortObjectsByY();										// sort 'em
-
-			timeSinceSim -= GAME_SPEED_SDL;							// catch up
-		}
-
-		const uint32_t timeAtEndOfSim = SDL_GetTicks();
-
-
-					/* GRAPHICS FRAMES */
-
-		if (!gGamePrefs.uncappedFramerate)
-		{
-			gTweenFrameFactor.L = 0x10000;					// full frame
 			ScrollPlayfield();										// do playfield updating
 			UpdateTileAnimation();
 			DrawObjects();
@@ -392,31 +376,60 @@ long	r;
 			RegulateSpeed(GAME_SPEED_MICROSECONDS);
 
 			gDebugTextFrameAccumulator++;
-
-			timeSinceSim = GAME_SPEED_SDL;
-
 		}
 		else
-		while (timeSinceSim < GAME_SPEED_SDL)						// render as many graphics frames as we can until it's time to run the simulation again
 		{
-			GAME_ASSERT(gTweenFrameFactor.L >= 0 && gTweenFrameFactor.L <= 0x10000);
+			gTweenFrameFactor.L			= 0x00000000;				// reset frame interpolation (factor=0: start interpolating from previous frame)
+			gOneMinusTweenFrameFactor.L	= 0x00010000;
+
+						/* SIMULATION FRAMES */
 			
-			ScrollPlayfield();										// do playfield updating
-			UpdateTileAnimation();
-			DrawObjects();
-			DisplayPlayfield();
-			UpdateInfoBar();
-			EraseObjects();
-			PresentIndexedFramebuffer();
+			uint32_t timeSinceSim = GAME_SPEED_SDL;					// force simulation to run once when we enter this function
 
-			gDebugTextFrameAccumulator++;
+			while (timeSinceSim >= GAME_SPEED_SDL)					// we need to run some simulation frames
+			{
+				gFrames++;											// one more simulation frame
 
-			timeSinceSim = SDL_GetTicks() - timeAtEndOfSim;
+				if (gShakeyScreenCount)
+					gShakeyScreenCount--;
 
-			// Update tween factor at end of loop
-			// (meaning tween factor at 1st iteration is 0, i.e. 1st graphics frame = end of previous simulation frame)
-			gTweenFrameFactor.L = 0x10000 * timeSinceSim / GAME_SPEED_SDL;
+						/* ROUTINES THAT ONLY NEED TO BE RUN ONCE PER SIM TIC */
+				
+				ReadKeyboard();
+				MoveObjects();
+				SortObjectsByY();									// sort 'em
+				UpdateTileAnimation();
+				UpdateInfoBar();
+
+				timeSinceSim -= GAME_SPEED_SDL;						// catch up
+			}
+
+						/* GRAPHICS FRAMES */
+			
+			const uint32_t timeAtEndOfSim = SDL_GetTicks();
+
+			while (timeSinceSim < GAME_SPEED_SDL)					// render as many graphics frames as we can until it's time to run the simulation again
+			{
+				GAME_ASSERT(gTweenFrameFactor.L >= 0 && gTweenFrameFactor.L <= 0x10000);
+				
+				ScrollPlayfield();									// also tweens camera position
+				DrawObjects();
+				DisplayPlayfield();
+				EraseObjects();
+				PresentIndexedFramebuffer();
+
+				gDebugTextFrameAccumulator++;
+
+				timeSinceSim = SDL_GetTicks() - timeAtEndOfSim;
+
+				// Update tween factor at end of loop
+				// (meaning tween factor at 1st iteration is 0, i.e. 1st graphics frame = end of previous simulation frame)
+				gTweenFrameFactor.L			= 0x10000 * timeSinceSim / GAME_SPEED_SDL;
+				gOneMinusTweenFrameFactor.L	= 0x10000 - gTweenFrameFactor.L;
+			}
 		}
+		
+
 
 
 					/* DEBUG INFO */

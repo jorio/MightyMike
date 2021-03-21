@@ -31,4 +31,4 @@ void	StopObjectMovement(ObjNode *);
 void	DeactivateObjectDraw(ObjNode *);
 void	SortObjectsByY(void);
 void	SimpleObjectMove(void);
-void	TweenObjectPosition(ObjNode* node, int32_t factor, int32_t* x, int32_t* y);
+void	TweenObjectPosition(ObjNode* node, int32_t* x, int32_t* y);

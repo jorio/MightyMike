@@ -696,28 +696,27 @@ void DumpUpdateRegions(void)
 // Static objects (without a MoveCall or MoveFlag) are not interpolated.
 //
 
-void TweenObjectPosition(ObjNode* node, int32_t factor, int32_t* x, int32_t* y)
+void TweenObjectPosition(ObjNode* node, int32_t* x, int32_t* y)
 {
 	if (	!node->MoveFlag								// the node might not have valid old coords
 		||	!node->MoveCall								// the node might not have valid old coords
-		||	factor >= 0x10000)							// or, no interpolation necessary on final position
+		||	gTweenFrameFactor.L >= 0x10000)				// or, no interpolation necessary on final position
 	{
 		*x = node->X.Int;
 		*y = Fix32_Int(node->Y.L + node->YOffset.L);
 	}
-	else if (factor == 0)								// No extrapolation necessary on initial position
+	else if (gTweenFrameFactor.L == 0)						// No extrapolation necessary on initial position
 	{
 		*x = node->OldX.Int;								// get short x coord (world)
 		*y = Fix32_Int(node->OldY.L + node->OldYOffset.L);	// get foot y and add any y adjustment offset
 	}
 	else
 	{
-		int oldFactor = 0x10000 - factor;
 		int32_t newX = node->X.L;
 		int32_t oldX = node->OldX.L;
 		int32_t newY = node->Y.L	+ node->YOffset.L;
 		int32_t oldY = node->OldY.L	+ node->OldYOffset.L;
-		*x = Fix32_Int(Fix32_Mul(oldFactor, oldX) + Fix32_Mul(factor, newX));
-		*y = Fix32_Int(Fix32_Mul(oldFactor, oldY) + Fix32_Mul(factor, newY));
+		*x = Fix32_Int(Fix32_Mul(gOneMinusTweenFrameFactor.L, oldX) + Fix32_Mul(gTweenFrameFactor.L, newX));
+		*y = Fix32_Int(Fix32_Mul(gOneMinusTweenFrameFactor.L, oldY) + Fix32_Mul(gTweenFrameFactor.L, newY));
 	}
 }

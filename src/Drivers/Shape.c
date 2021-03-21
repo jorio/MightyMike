@@ -652,7 +652,7 @@ int32_t	x, y;
 
 					/* GET OBJECT POSITION (INTERPOLATED IN FRAMERATE-INDEPENDENT MODE)  */
 
-	TweenObjectPosition(theNodePtr, gTweenFrameFactor.L, &x, &y);
+	TweenObjectPosition(theNodePtr, &x, &y);
 
 					/* CALC ADDRESS OF FRAME TO DRAW */
 
@@ -673,9 +673,9 @@ int32_t	x, y;
 				/*  CHECK IF VISIBLE    */
 				/************************/
 
-	if (((x+width) < gScrollX) || ((y+height) < gScrollY) ||
-		(x >= (gScrollX+PF_BUFFER_WIDTH)) ||
-		(y >= (gScrollY+PF_BUFFER_HEIGHT)))
+	if (((x+width) < gTweenedScrollX) || ((y+height) < gTweenedScrollY) ||
+		(x >= (gTweenedScrollX+PF_BUFFER_WIDTH)) ||
+		(y >= (gTweenedScrollY+PF_BUFFER_HEIGHT)))
 	{
 		theNodePtr->drawBox.left = 0;
 		theNodePtr->drawBox.right = 0;
@@ -688,27 +688,27 @@ int32_t	x, y;
 					/* CHECK VIEW CLIPPING */
 					/***********************/
 
-	if ((y+height) > (gScrollY+PF_BUFFER_HEIGHT))		// check vertical view clipping (bottom)
-		height -= (y+height)-(gScrollY+PF_BUFFER_HEIGHT);
+	if ((y+height) > (gTweenedScrollY+PF_BUFFER_HEIGHT))		// check vertical view clipping (bottom)
+		height -= (y+height)-(gTweenedScrollY+PF_BUFFER_HEIGHT);
 
-	if (y < gScrollY)									// check more vertical view clipping (top)
+	if (y < gTweenedScrollY)									// check more vertical view clipping (top)
 	{
-		topToClip = (gScrollY-y);
+		topToClip = (gTweenedScrollY-y);
 		y += topToClip;
 		height -= topToClip;
 	}
 	else
 		topToClip = 0;
 
-	if ((x+width) > (gScrollX+PF_BUFFER_WIDTH))			// check horiz view clipping (right)
+	if ((x+width) > (gTweenedScrollX+PF_BUFFER_WIDTH))			// check horiz view clipping (right)
 	{
-		width -= (x+width)-(gScrollX+PF_BUFFER_WIDTH);
+		width -= (x+width)-(gTweenedScrollX+PF_BUFFER_WIDTH);
 		drawWidth = width;
 	}
 
-	if (x < gScrollX)									// check more horiz view clip (left)
+	if (x < gTweenedScrollX)									// check more horiz view clip (left)
 	{
-		leftToClip = (gScrollX-x);
+		leftToClip = (gTweenedScrollX-x);
 		x += leftToClip;
 		width -= leftToClip;
 		drawWidth = width;
