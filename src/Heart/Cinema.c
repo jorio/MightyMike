@@ -1820,6 +1820,7 @@ short	selection;
 		PrintBonusNum(bonus, 5, 540, 180);						// draw bonus #
 		PresentIndexedFramebuffer();
 
+		ReadKeyboard();
 		if (UserWantsOutContinuous())							// see how long to wait
 			Wait4(2);
 		else
@@ -1872,7 +1873,10 @@ short	selection;
 
 	PresentIndexedFramebuffer();
 	Wait4(60*1);
-	while(UserWantsOutContinuous());					// wait for button & key up
+	while(UserWantsOutContinuous())						// wait for button & key up
+	{
+		Wait(10);
+	}
 
 	ReadKeyboard();
 	i = 0;

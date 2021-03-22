@@ -214,6 +214,7 @@ long	old;
 			SDL_Delay(SPINLOCK_DELAY);
 		}
 		--time;
+		ReadKeyboard();
 		if (UserWantsOut())							// see if keyboard break out
 			return(true);
 		DoSoundMaintenance(true);						// (must be after readkeyboard)
