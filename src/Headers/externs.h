@@ -69,6 +69,7 @@ extern	Byte					gSceneNum;
 extern	Byte					gAreaNum;
 extern	Byte					gPlayerMode;
 extern	Byte					gCurrentPlayer;
+extern	Byte					gDifficultySetting;			// set at start of game
 extern	short					gLoadOldGameNum;
 extern	Boolean					gLoadOldGameFlag;
 extern	Byte					gStartingScene;

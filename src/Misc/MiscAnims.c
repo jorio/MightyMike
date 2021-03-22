@@ -241,7 +241,7 @@ Boolean AddKeyColor(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
 
-//	if (gGamePrefs.difficulty == DIFFICULTY_EASY)			// no doors/keys in easy mode
+//	if (gDifficultySetting == DIFFICULTY_EASY)			// no doors/keys in easy mode
 //		return(false);
 
 	newObj = MakeNewShape(GroupNum_KeyColor,ObjType_KeyColor,itemPtr->parm[0],

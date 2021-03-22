@@ -65,6 +65,7 @@ Boolean		gLoadOldGameFlag;
 long		someLong;
 
 Byte		gStartingScene = 0, gStartingArea = 0;
+Byte		gDifficultySetting = DIFFICULTY_NORMAL;
 
 Boolean		gIsASavedGame[2];
 
@@ -118,6 +119,7 @@ void InitGame(void)
 	CleanMemory();
 
 	gCurrentPlayer = ONE_PLAYER;					// start with player 1
+	gDifficultySetting = gGamePrefs.difficulty;		// by default, use difficulty from prefs
 	InitWeaponsList();
 	InitScore();
 	InitCoins();
@@ -837,7 +839,7 @@ delete:
 	currentWeaponIndex = gCurrentWeaponIndex;
 	myHealth = gMyHealth;
 	myMaxHealth = gMyMaxHealth;
-	difficultySetting = gGamePrefs.difficulty;
+	difficultySetting = gDifficultySetting;
 	BlockMove((Ptr)&gMyWeapons[0],(Ptr)weaponList,sizeof(WeaponType)*MAX_WEAPONS);
 
 
@@ -866,7 +868,7 @@ delete:
 	gCurrentWeaponIndex = currentWeaponIndex;
 	gMyHealth = myHealth;
 	gMyMaxHealth = myMaxHealth;
-	gGamePrefs.difficulty = difficultySetting;
+	gDifficultySetting = difficultySetting;
 	BlockMove((Ptr)weaponList,(Ptr)&gMyWeapons[0],sizeof(WeaponType)*MAX_WEAPONS);
 }
 
@@ -999,7 +1001,7 @@ Byte		scene,area;
 	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
 
 	numBytes = 4;											// write DIFFICULTY SETTING
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gGamePrefs.difficulty);
+	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gDifficultySetting);
 	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
 
 
@@ -1103,7 +1105,7 @@ static const char*		errStr	= "Cannot Read Player Save File.";
 	if (iErr != noErr) {DoFatalAlert(errStr); return;}
 
 	numBytes = 4;											// read DIFFICULTY SETTING
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gGamePrefs.difficulty);
+	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gDifficultySetting);
 	if (iErr != noErr) {DoFatalAlert(errStr); return;}
 
 
@@ -1134,7 +1136,7 @@ short	maxScenes;
 
 				/* SEE HOW MANY LEVELS TO PLAY */
 
-	switch(gGamePrefs.difficulty)
+	switch(gDifficultySetting)
 	{
 //		case	DIFFICULTY_NORMAL:
 //				maxScenes = 4;

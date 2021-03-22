@@ -1194,7 +1194,7 @@ short	counter,i;
 	EraseCLUT();
 	EraseBackgroundBuffer();
 
-	switch(gGamePrefs.difficulty)
+	switch(gDifficultySetting)
 	{
 //		case	DIFFICULTY_NORMAL:
 //				LoadBackground(":data:images:overheadmap3.image",GET_PALETTE);
@@ -1348,8 +1348,8 @@ ObjNode	*newObj;
 
 
 
-//	if (gGamePrefs.difficulty != DIFFICULTY_HARD)
-	if (gGamePrefs.difficulty < DIFFICULTY_NORMAL)
+//	if (gDifficultySetting != DIFFICULTY_HARD)
+	if (gDifficultySetting < DIFFICULTY_NORMAL)
 	{
 		DoWhimpyWinScreen();
 		goto more;
@@ -1458,7 +1458,7 @@ ObjNode	*theNode;
 
 					/* INITIAL LOADING */
 
-	if (gGamePrefs.difficulty >= DIFFICULTY_NORMAL)
+	if (gDifficultySetting >= DIFFICULTY_NORMAL)
 		PlaySong(SONG_ID_WINHUM);
 	else
 		PlaySong(SONG_ID_WINGAMELOOP);
@@ -1467,13 +1467,13 @@ ObjNode	*theNode;
 	LoadBackground(":data:images:winbw.image",GET_PALETTE);
 	DumpBackground();											// dump to playfield
 
-	if (gGamePrefs.difficulty == DIFFICULTY_EASY)
+	if (gDifficultySetting == DIFFICULTY_EASY)
 		textRez = GetResource('Cred',129);						// load credits rez
 	else
-//	if (gGamePrefs.difficulty == DIFFICULTY_NORMAL)
+//	if (gDifficultySetting == DIFFICULTY_NORMAL)
 //		textRez = GetResource('Cred',130);
 //	else
-//	if (gGamePrefs.difficulty == DIFFICULTY_HARD)
+//	if (gDifficultySetting == DIFFICULTY_HARD)
 		textRez = GetResource('Cred',131);
 
 	if (textRez == nil)
@@ -1850,7 +1850,7 @@ short	selection;
 
 	if (gAreaNum == 2)
 	{
-		switch(gGamePrefs.difficulty)
+		switch(gDifficultySetting)
 		{
 //			case	DIFFICULTY_NORMAL:
 //					if (gSceneNum == 3)
