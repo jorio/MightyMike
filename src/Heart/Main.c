@@ -37,6 +37,7 @@
 /****************************/
 
 
+
 /**********************/
 /*     VARIABLES      */
 /**********************/
@@ -888,8 +889,8 @@ OSErr		iErr;
 short		fRefNum;
 long		numBytes;
 FSSpec		mySpec;
-static const char*		fullErr = "Cannot Write to Player Save File.  Disk may be locked or full.";
 Byte		scene,area;
+SaveGameFile	saveGame;
 
 
 	if (atNextFlag)
@@ -912,6 +913,28 @@ Byte		scene,area;
 		area = gAreaNum;
 		scene = gSceneNum;
 	}
+	
+					/*************************/
+					/* PREPARE DATA TO WRITE */
+					/*************************/
+
+	memset(&saveGame, 0xFF, sizeof(SaveGameFile));
+
+	_Static_assert(sizeof(gMyWeapons) == sizeof(saveGame.myWeapons), "size mismatch: weapons on disk vs in memory");
+
+	snprintf(saveGame.magic, sizeof(saveGame.magic), "%s", SAVEGAMEFILE_MAGIC);
+	memcpy(saveGame.myWeapons, gMyWeapons, sizeof(saveGame.myWeapons));
+	saveGame.score					= gScore;
+	saveGame.numCoins				= gNumCoins;
+	saveGame.numLives				= gNumLives;
+	saveGame.currentWeaponType		= gCurrentWeaponType;
+	saveGame.sceneNum				= scene;
+	saveGame.areaNum				= area;
+	saveGame.numWeaponsIHave		= gNumWeaponsIHave;
+	saveGame.currentWeaponIndex		= gCurrentWeaponIndex;
+	saveGame.myHealth				= gMyHealth;
+	saveGame.myMaxHealth			= gMyMaxHealth;
+	saveGame.difficultySetting		= gDifficultySetting;
 
 				/***************************************/
 				/* GET FSSPEC & SEE IF DELETE OLD FILE */
@@ -947,63 +970,12 @@ Byte		scene,area;
 	if (iErr != noErr)
 		DoFatalAlert("Cannot Open Player Save File.");
 
-
-				/******************/
 				/* WRITE THE DATA */
-				/******************/
 
-			/* WRITE INVENTORY LIST */
-
-	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
-	iErr = FSWrite(fRefNum, &numBytes, (Ptr) gMyWeapons);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-			/* WRITE MISC STUFF */
-
-	numBytes = 4;											// write SCORE
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gScore);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 4;											// write COINS
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gNumCoins);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 2;											// write LIVES
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gNumLives);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 1;											// write CURRENT WEAPON TYPE
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gCurrentWeaponType);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 1;											// write SCENE NUM
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&scene);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 1;											// write AREA NUM
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&area);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 1;											// write NUM WEAPONS
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gNumWeaponsIHave);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 1;											// write CURRENT WEAPON INDEX
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gCurrentWeaponIndex);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 2;											// write HEALTH
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gMyHealth);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 2;											// write MAX HEALTH
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gMyMaxHealth);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
-	numBytes = 4;											// write DIFFICULTY SETTING
-	iErr = FSWrite(fRefNum,&numBytes,(Ptr)&gDifficultySetting);
-	if (iErr != noErr) {DoFatalAlert(fullErr); return;}
-
+	numBytes = sizeof(SaveGameFile);
+	iErr = FSWrite(fRefNum, &numBytes, (Ptr)&saveGame);
+	if (iErr != noErr || numBytes != sizeof(SaveGameFile))
+		DoAlert("Cannot write save file.");
 
 			/*  CLOSE THE FILE */
 
@@ -1022,7 +994,7 @@ OSErr		iErr;
 short		fRefNum;
 long		numBytes;
 FSSpec		mySpec;
-static const char*		errStr	= "Cannot Read Player Save File.";
+SaveGameFile	saveGame;
 
 	InitKeys();
 
@@ -1051,70 +1023,39 @@ static const char*		errStr	= "Cannot Read Player Save File.";
 		return;
 	}
 
+				/* READ THE DATA */
 
-					/*****************/
-					/* READ THE DATA */
-					/*****************/
-
-															// READ INVENTORY LIST
-	numBytes = sizeof(WeaponType)*MAX_WEAPONS;
-	iErr = FSRead(fRefNum, &numBytes, (Ptr) gMyWeapons);
-	if (iErr != noErr)
-		DoAlert(errStr);
-
-			/* READ MISC STUFF */
-
-	numBytes = 4;											// read SCORE
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gScore);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 4;											// read COINS
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gNumCoins);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 2;											// read LIVES
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gNumLives);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 1;											// read CURRENT WEAPON TYPE
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gCurrentWeaponType);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 1;											// read SCENE NUM
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gSceneNum);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 1;											// read AREA NUM
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gAreaNum);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 1;											// read NUM WEAPONS
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gNumWeaponsIHave);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 1;											// read CURRENT WEAPON INDEX
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gCurrentWeaponIndex);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 2;											// read HEALTH
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gMyHealth);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 2;											// read MAX HEALTH
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gMyMaxHealth);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
-	numBytes = 4;											// read DIFFICULTY SETTING
-	iErr = FSRead(fRefNum,&numBytes,(Ptr)&gDifficultySetting);
-	if (iErr != noErr) {DoFatalAlert(errStr); return;}
-
+	numBytes = sizeof(SaveGameFile);
+	iErr = FSRead(fRefNum, &numBytes, (Ptr)&saveGame);
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Cannot Read Player Save File.");
+	GAME_ASSERT(numBytes == sizeof(SaveGameFile));
 
 				/*  CLOSE THE FILE */
 
 	iErr = FSClose(fRefNum);
-	if (iErr != noErr)
-		DoAlert("Cannot Close Player Save File.");
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Cannot Close Player Save File.");
 
+				/* COPY TO GLOBALS */
+
+	if (0 != strncmp(saveGame.magic, SAVEGAMEFILE_MAGIC, sizeof(saveGame.magic)))
+		GAME_ASSERT_MESSAGE(false, "Save File has incorrect magic header.");
+	
+	_Static_assert(sizeof(gMyWeapons) == sizeof(saveGame.myWeapons), "size mismatch: weapons on disk vs in memory");
+	
+	memcpy(gMyWeapons, saveGame.myWeapons, sizeof(saveGame.myWeapons));
+	gScore					= saveGame.score;
+	gNumCoins				= saveGame.numCoins;
+	gNumLives				= saveGame.numLives;
+	gCurrentWeaponType		= saveGame.currentWeaponType;
+	gSceneNum				= saveGame.sceneNum;
+	gAreaNum				= saveGame.areaNum;
+	gNumWeaponsIHave		= saveGame.numWeaponsIHave;
+	gCurrentWeaponIndex		= saveGame.currentWeaponIndex;
+	gMyHealth				= saveGame.myHealth;
+	gMyMaxHealth			= saveGame.myMaxHealth;
+	gDifficultySetting		= saveGame.difficultySetting;
+
+	
 	gIsASavedGame[gCurrentPlayer] = true;					// it exists
 
 	if (gAreaNum >= 3)

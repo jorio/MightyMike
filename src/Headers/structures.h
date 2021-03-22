@@ -11,6 +11,7 @@
 
 #define	MAX_SHAPES_IN_FILE		100
 
+#define	MAX_WEAPONS		50				// max weapons allowed in weapon list
 
 
 typedef uint32_t GamePalette[256];
@@ -136,6 +137,41 @@ struct CollisionRec
 	ObjNode		*objectPtr;		// object that collides with (if object type)
 };
 typedef struct CollisionRec CollisionRec;
+
+
+
+
+					/* WEAPON */
+
+struct WeaponType
+{
+	uint8_t		type;
+	uint16_t	life;
+};
+typedef struct WeaponType WeaponType;
+
+
+					/* SAVED GAME */
+
+struct SaveGameFile
+{
+	char		magic[32];
+	WeaponType	myWeapons[MAX_WEAPONS];
+	int32_t		score;
+	int32_t		numCoins;
+	int16_t		numLives;
+	uint8_t		currentWeaponType;
+	uint8_t		sceneNum;
+	uint8_t		areaNum;
+	uint8_t		numWeaponsIHave;
+	uint8_t		currentWeaponIndex;
+	int16_t		myHealth;
+	int16_t		myMaxHealth;
+	int8_t		difficultySetting;
+};
+typedef struct SaveGameFile SaveGameFile;
+
+#define SAVEGAMEFILE_MAGIC "Mighty Mike Save v0"
 
 
 			/* SAVED PLAYER INFO */

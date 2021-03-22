@@ -1,7 +1,7 @@
 #pragma once
 
 #include "equates.h"
-#include "weapon.h"
+#include "structures.h"
 #include "window.h"
 #include <SDL.h>
 
