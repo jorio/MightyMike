@@ -517,8 +517,7 @@ void SwitchPlayer(void)
 
 void SaveCurrentPlayer(void)
 {
-	DoAlert("TODO: SaveCurrentPlayer: we'll probably have to review this");
-const char*	saveName;
+Str255		saveName;
 OSErr		iErr;
 short		fRefNum;
 long		numBytes;
@@ -634,7 +633,7 @@ short		fRefNum;
 long		numBytes;
 register	ObjNode		*theNode;
 Ptr			tempPtr;
-long		diff;
+ptrdiff_t	diff;
 FSSpec		mySpec;
 
 	if (gPlayerMode == ONE_PLAYER)								// only for 2 player mode!
@@ -754,8 +753,6 @@ FSSpec		mySpec;
 
 	if (!minimal)
 	{
-		DoAlert("TODO: Check that RESET ALL OBJECTS' POINTERS works?");
-
 				/*******************************/
 				/* RESET ALL OBJECTS' POINTERS */
 				/*******************************/
@@ -774,7 +771,7 @@ FSSpec		mySpec;
 			if (theNode->Genre == SPRITE_GENRE)						// only adjust sprite objects
 			{
 				tempPtr = gSHAPE_HEADER_Ptrs[theNode->SpriteGroupNum][theNode->Type];	// get shape header ptr
-				diff = (long)StripAddress(tempPtr)-(long)StripAddress(theNode->SHAPE_HEADER_Ptr);	// calc how far it moved
+				diff = tempPtr - theNode->SHAPE_HEADER_Ptr;								// calc how far it moved
 				theNode->SHAPE_HEADER_Ptr = tempPtr;									// reset to new location
 				theNode->AnimsList = (Ptr)(theNode->AnimsList + diff);					// adjust anim ptr by the distance
 			}
