@@ -823,7 +823,7 @@ ColorSpec 	aTable[2];
 //	TextFont(monaco);
 //	DrawString("Charging Batteries:");
 
-	LoadIMAGE(":data:images:charging.image", 0);
+	LoadIMAGE(":images:charging.image", 0);
 
 														// draw thermometer box
 
@@ -857,13 +857,12 @@ Rect	theRect;
 
 void OpenMikeFile(const char* filename, short* fRefNumPtr, const char* errString)
 {
-short		vRefNum;
 OSErr		iErr;
+FSSpec		spec;
 
-				/* FIRST SEE IF WE CAN GET IT OFF OF DEFAULT VOLUME */
+	FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
 
-	GetVol(nil,&vRefNum);													// get default volume
-	iErr = FSOpen(filename,vRefNum,fRefNumPtr);								// try to open
+	iErr = FSpOpenDF(&spec, fsRdPerm, fRefNumPtr);			// try to open
 	if (iErr == noErr)
 		return;
 
@@ -876,14 +875,20 @@ OSErr		iErr;
 short OpenMikeRezFile(const char* filename, const char* errString)
 {
 short		srcFile;
+OSErr		iErr;
+FSSpec		spec;
 
-				/* FIRST SEE IF WE CAN GET IT OFF OF DEFAULT VOLUME */
+	FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
 
-	srcFile = OpenResFile(filename);						// open resource fork
-	if (srcFile != -1)										// see if error
-		return(srcFile);
+	srcFile = FSpOpenResFile(&spec, fsRdPerm);			// try to open
+	if (srcFile == -1)									// see if error
+	{
+		DoFatalAlert(errString);
+		return -1;
+	}
 
-	return(-1);
+	UseResFile(srcFile);
+	return srcFile;
 }
 
 

@@ -157,12 +157,12 @@ void InitGame(void)
 				/* LOAD ART WHICH IS ALWAYS WITH US */
 
 	if (gGamePrefs.pfSize != PFSIZE_SMALL)
-		LoadShapeTable(":data:shapes:infobar2.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
+		LoadShapeTable(":shapes:infobar2.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
 	else
-		LoadShapeTable(":data:shapes:infobar.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
+		LoadShapeTable(":shapes:infobar.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
 
-	LoadShapeTable(":data:shapes:weapon.shapes",GROUP_WEAPONS,DONT_GET_PALETTE);
-	LoadShapeTable(":data:shapes:main.shapes",GROUP_MAIN,DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:weapon.shapes",GROUP_WEAPONS,DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:main.shapes",GROUP_MAIN,DONT_GET_PALETTE);
 }
 
 
@@ -229,110 +229,110 @@ void LoadAreaArt(void)
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
-				LoadTileSet(":data:maps:Jurassic.tileset");
+				LoadTileSet(":maps:Jurassic.tileset");
 				FillThermometer(20);
-				LoadShapeTable(":data:shapes:jurassic1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:jurassic1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable(":data:shapes:jurassic2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:jurassic2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield(":data:maps:Jurassic.map-1");
+						LoadPlayfield(":maps:Jurassic.map-1");
 						break;
 					case 1:
-						LoadPlayfield(":data:maps:Jurassic.map-2");
+						LoadPlayfield(":maps:Jurassic.map-2");
 						break;
 					case 2:
-						LoadPlayfield(":data:maps:Jurassic.map-3");
+						LoadPlayfield(":maps:Jurassic.map-3");
 						break;
 				}
 				FillThermometer(80);
 				break;
 
 		case	SCENE_CANDY:
-				LoadTileSet(":data:maps:Candy.tileset");
+				LoadTileSet(":maps:Candy.tileset");
 				FillThermometer(20);
-				LoadShapeTable(":data:shapes:Candy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:Candy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable(":data:shapes:Candy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:Candy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield(":data:maps:Candy.map-1");
+						LoadPlayfield(":maps:Candy.map-1");
 						break;
 					case 1:
-						LoadPlayfield(":data:maps:Candy.map-2");
+						LoadPlayfield(":maps:Candy.map-2");
 						break;
 					case 2:
-						LoadPlayfield(":data:maps:Candy.map-3");
+						LoadPlayfield(":maps:Candy.map-3");
 						break;
 				}
 				FillThermometer(80);
 				break;
 
 		case	SCENE_CLOWN:
-				LoadTileSet(":data:maps:Clown.tileset");
+				LoadTileSet(":maps:Clown.tileset");
 				FillThermometer(20);
-				LoadShapeTable(":data:shapes:clown1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:clown1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable(":data:shapes:clown2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:clown2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield(":data:maps:Clown.map-1");
+						LoadPlayfield(":maps:Clown.map-1");
 						break;
 					case 1:
-						LoadPlayfield(":data:maps:Clown.map-2");
+						LoadPlayfield(":maps:Clown.map-2");
 						break;
 					case 2:
-						LoadPlayfield(":data:maps:Clown.map-3");
+						LoadPlayfield(":maps:Clown.map-3");
 						break;
 				}
 				FillThermometer(80);
 				break;
 
 		case	SCENE_FAIRY:
-				LoadTileSet(":data:maps:fairy.tileset");
+				LoadTileSet(":maps:fairy.tileset");
 				FillThermometer(20);
-				LoadShapeTable(":data:shapes:fairy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:fairy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable(":data:shapes:fairy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:fairy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield(":data:maps:fairy.map-1");
+						LoadPlayfield(":maps:fairy.map-1");
 						break;
 					case 1:
-						LoadPlayfield(":data:maps:fairy.map-2");
+						LoadPlayfield(":maps:fairy.map-2");
 						break;
 					case 2:
-						LoadPlayfield(":data:maps:fairy.map-3");
+						LoadPlayfield(":maps:fairy.map-3");
 						break;
 				}
 				FillThermometer(80);
   				break;
 
 		case	SCENE_BARGAIN:
-				LoadTileSet(":data:maps:bargain.tileset");
+				LoadTileSet(":maps:bargain.tileset");
 				FillThermometer(20);
-				LoadShapeTable(":data:shapes:bargain1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:bargain1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
 				FillThermometer(40);
-				LoadShapeTable(":data:shapes:bargain2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
+				LoadShapeTable(":shapes:bargain2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
 				FillThermometer(60);
 				switch(gAreaNum)
 				{
 					case 0:
-						LoadPlayfield(":data:maps:bargain.map-1");
+						LoadPlayfield(":maps:bargain.map-1");
 						break;
 					case 1:
-						LoadPlayfield(":data:maps:bargain.map-2");
+						LoadPlayfield(":maps:bargain.map-2");
 						break;
 					case 2:
-						LoadPlayfield(":data:maps:bargain.map-3");
+						LoadPlayfield(":maps:bargain.map-3");
 						break;
 				}
 				FillThermometer(80);

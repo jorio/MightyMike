@@ -147,13 +147,13 @@ void LoadBorderImage(void)
 	switch (gGamePrefs.pfSize)
 	{
 	case PFSIZE_SMALL:
-		path = ":data:images:border.image";
+		path = ":images:border.image";
 		break;
 	case PFSIZE_MEDIUM:
-		path = ":data:images:border2.image";
+		path = ":images:border2.image";
 		break;
 	case PFSIZE_WIDE:
-		path = ":data:images:border2.image";
+		path = ":images:border2.image";
 		flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
 		break;
 	default:

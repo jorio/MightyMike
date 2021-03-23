@@ -86,6 +86,7 @@ extern	Boolean					gScreenScrollFlag;
 extern	struct SDL_Window		*gSDLWindow;
 extern	struct SDL_Renderer		*gSDLRenderer;
 extern	struct SDL_Texture		*gSDLTexture;
+extern	FSSpec					gDataSpec;
 
 #pragma mark - MyGuy
 

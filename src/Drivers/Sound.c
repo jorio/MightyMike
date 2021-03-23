@@ -75,7 +75,7 @@ short	srcFile;
 static const char*	errStr = "Couldnt Open Music Resource File.";
 
 
-	srcFile = OpenMikeRezFile(":data:audio:music",errStr);	// open music rez file
+	srcFile = OpenMikeRezFile(":audio:music",errStr);	// open music rez file
 
 
 	gMaxChannels = 0;
@@ -128,9 +128,9 @@ short			srcFile1,srcFile2;
 
 						/* OPEN SOUNDS RESOURCE */
 
-	srcFile1 = OpenMikeRezFile(":data:audio:general.sounds",error);	// open sound resource fork
+	srcFile1 = OpenMikeRezFile(":audio:general.sounds",error);	// open sound resource fork
 	UseResFile( srcFile1 );
-	srcFile2 = OpenMikeRezFile(":data:audio:weapon.sounds",error);
+	srcFile2 = OpenMikeRezFile(":audio:weapon.sounds",error);
 	UseResFile( srcFile2 );
 
 					/* LOAD ALL EFFECTS */
@@ -259,7 +259,7 @@ static const char*	errStr = "Couldnt Open Music Resource File.";
 
 						/* OPEN MUSIC RESOURCE */
 
-	srcFile = OpenMikeRezFile(":data:audio:music",errStr);
+	srcFile = OpenMikeRezFile(":audio:music",errStr);
 	UseResFile( srcFile );
 
 	SoundHand_Music = (SndListResource**) GetResource('snd ',songNum);		// load the song
@@ -581,11 +581,11 @@ void PlayAreaMusic(void)
 
 void LoadAreaSound(void)
 {
-static const char*	jurassic	= ":data:audio:jurassic.sounds";
-static const char*	candy		= ":data:audio:candy.sounds";
-static const char*	clown		= ":data:audio:clown.sounds";
-static const char*	fairy		= ":data:audio:fairy.sounds";
-static const char*	bargain		= ":data:audio:bargain.sounds";
+static const char*	jurassic	= ":audio:jurassic.sounds";
+static const char*	candy		= ":audio:candy.sounds";
+static const char*	clown		= ":audio:clown.sounds";
+static const char*	fairy		= ":audio:fairy.sounds";
+static const char*	bargain		= ":audio:bargain.sounds";
 
 	switch(gSceneNum)
 	{
