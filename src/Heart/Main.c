@@ -163,6 +163,20 @@ void InitGame(void)
 
 	LoadShapeTable(":shapes:weapon.shapes",GROUP_WEAPONS,DONT_GET_PALETTE);
 	LoadShapeTable(":shapes:main.shapes",GROUP_MAIN,DONT_GET_PALETTE);
+
+				/* HACK: GET RID OF WHITE LINE AT RIGHT EDGE OF QUIT/RESUME GRAPHICS */
+
+	for (int i = 0; i < 3; i++)		// #0: quit, #1: resume, #2: none
+	{
+		const uint8_t* pixelData;
+		const FrameHeader* fh = GetFrameHeader(GroupNum_Quit, ObjType_Quit, i, &pixelData, nil);
+		pixelData += fh->width - 1;						// start on last column
+		for (int y = 0; y < fh->height; y++)
+		{
+			* (uint8_t*) pixelData = pixelData[-5];		// copy fifth-from-last column to last column
+			pixelData += fh->width;						// next row
+		}
+	}
 }
 
 
