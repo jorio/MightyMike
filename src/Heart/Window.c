@@ -19,11 +19,18 @@
 #include <SDL.h>
 #include <string.h>
 
+#ifdef _OPENMP
+	#include <omp.h>
+#else
+	#define omp_get_thread_num() 0
+	#define omp_get_max_threads() 1
+#endif
+
 /****************************/
 /*    PROTOTYPES            */
 /****************************/
 
-static void FilterDithering_Row(const uint8_t* indexedRow);
+static void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags);
 
 
 /****************************/
@@ -39,7 +46,7 @@ static void FilterDithering_Row(const uint8_t* indexedRow);
 uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
 
-uint8_t			gRowDitherStrides[VISIBLE_WIDTH];		// for dithering filter
+uint8_t*		gRowDitherStrides = nil;		// for dithering filter
 
 										// GAME STUFF
 Handle			gOffScreenHandle = nil;
@@ -426,6 +433,11 @@ long	x,y;
 
 void CleanupDisplay(void)
 {
+	if (gRowDitherStrides != nil)
+	{
+		DisposePtr((Ptr) gRowDitherStrides);
+		gRowDitherStrides = nil;
+	}
 }
 
 
@@ -433,11 +445,13 @@ void CleanupDisplay(void)
 
 static void ConvertIndexedFramebufferToRGBA_NoFilter(void)
 {
-	uint32_t* rgba = (uint32_t*) gRGBAFramebuffer;
-	const uint8_t* indexed = &gIndexedFramebuffer[0];
-
+#pragma omp parallel for schedule(static) default(none) \
+		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer)
 	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
+		uint32_t* rgba			= ((uint32_t*) gRGBAFramebuffer) + y * VISIBLE_WIDTH;
+		const uint8_t* indexed	= gIndexedFramebuffer + y * VISIBLE_WIDTH;
+
 		for (int x = 0; x < VISIBLE_WIDTH; x++)
 		{
 			*(rgba++) = gGamePalette[*(indexed++)];
@@ -447,16 +461,24 @@ static void ConvertIndexedFramebufferToRGBA_NoFilter(void)
 
 static void ConvertIndexedFramebufferToRGBA_FilterDithering(void)
 {
-	uint32_t* rgba = (uint32_t*) gRGBAFramebuffer;
-	const uint8_t* indexed = &gIndexedFramebuffer[0];
-
 	// initialize row bleed: no dithering by default
-	memset(gRowDitherStrides, 0, VISIBLE_WIDTH);
+	if (gRowDitherStrides == nil)
+	{
+		gRowDitherStrides = (uint8_t*) NewPtrClear(omp_get_max_threads() * VISIBLE_WIDTH);
+#if _DEBUG
+		printf("Rendering threads: %d\n", omp_get_max_threads());
+#endif
+	}
 
+#pragma omp parallel for schedule(static) default(none) \
+		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer, gRowDitherStrides)
 	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
-		uint8_t* smearFlag = gRowDitherStrides;
-		FilterDithering_Row(indexed);
+		uint32_t* rgba			= ((uint32_t*) gRGBAFramebuffer) + y * VISIBLE_WIDTH;
+		const uint8_t* indexed	= gIndexedFramebuffer + y * VISIBLE_WIDTH;
+
+		uint8_t* smearFlag		= &gRowDitherStrides[omp_get_thread_num() * VISIBLE_WIDTH];
+		FilterDithering_Row(indexed, smearFlag);
 
 		for (int x = 0; x < VISIBLE_WIDTH-1; x++)
 		{
@@ -485,7 +507,7 @@ static void ConvertIndexedFramebufferToRGBA_FilterDithering(void)
 	}
 }
 
-static inline void FilterDithering_Row(const uint8_t* indexedRow)
+static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags)
 {
 	static const int THRESH = 2;
 	static const int BLEED = 1;
@@ -501,7 +523,7 @@ static inline void FilterDithering_Row(const uint8_t* indexedRow)
 #define COMMIT_STRIDE do { \
 	int ditherLength = ditherEnd - ditherStart;								\
 	if (ditherLength > THRESH)												\
-		memset(gRowDitherStrides+ditherStart, 1, ditherLength+BLEED);		\
+		memset(rowSmearFlags+ditherStart, 1, ditherLength+BLEED);			\
 	} while(0)
 
 	for (int x = 0; x < VISIBLE_WIDTH-1; x++)
@@ -593,13 +615,6 @@ void PresentIndexedFramebuffer(void)
 	{
 		return;
 	}
-	
-	// Check dithering key
-//	if (GetNewSDLKeyState(SDL_SCANCODE_F10))
-//	{
-//		filterDithering = !filterDithering;
-//	}
-
 
 	// Check screenshot key
 //	if (CheckNewKeyDown2(kVK_F12, &kdScreenshot))
