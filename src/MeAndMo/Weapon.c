@@ -965,8 +965,8 @@ Byte	animNum;
 	if (gMyDirection == AIM_DOWN)						// special tweak if down
 		y += 30;
 
-	y += MyRandomLong()&0b11-2;								// scatter a bit
-	x += MyRandomLong()&0b11-2;
+	y += (MyRandomLong() & 0b11) - 2;					// scatter a bit
+	x += (MyRandomLong() & 0b11) - 2;
 
 					/* MAKE NEW OBJECT */
 

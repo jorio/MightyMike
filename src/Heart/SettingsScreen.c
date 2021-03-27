@@ -133,7 +133,7 @@ static SettingEntry gSettingEntries[] =
 	{nil							, "done"				, OnDone,					0,  { NULL } },
 };
 
-#define numSettingEntries (sizeof(gSettingEntries) / sizeof(SettingEntry))
+#define numSettingEntries ( (int) (sizeof(gSettingEntries) / sizeof(SettingEntry)) )
 
 /******************************************************************************/
 
@@ -486,14 +486,14 @@ static int LayOutText(const char* label, int row, int col, int flags)
 	bool jitter			= flags & kTextFlags_Jitter;
 
 	GAME_ASSERT(asObject || !bounceUp);
-	GAME_ASSERT(col >= 0 && col < sizeof(kColumnX)/sizeof(kColumnX[0]));
+	GAME_ASSERT(col >= 0 && col < (int)(sizeof(kColumnX)/sizeof(kColumnX[0])));
 
 	int x = kColumnX[col];
 	int y = GetRowY(row);
 
 	for (const char* c = label; *c; c++)
 	{
-		char cc = *c;
+		unsigned char cc = *c;
 
 		if (cc == ' ')
 		{

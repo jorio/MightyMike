@@ -96,7 +96,7 @@ void LoadIMAGE(const char* fileName, short showMode)
 	int16_t width	= Byteswap16(ptr16++);
 	int16_t height	= Byteswap16(ptr16++);
 
-	GAME_ASSERT(width * height <= sizeof(gIndexedFramebuffer));
+	GAME_ASSERT((int)width * (int)height <= (int)sizeof(gIndexedFramebuffer));
 
 	const uint8_t* srcPtr = (const uint8_t*) ptr16;
 	uint8_t* destPtr = gIndexedFramebuffer;

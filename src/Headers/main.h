@@ -20,4 +20,4 @@ void	CleanMemory(void);
 void	OptimizeMemory(void);
 OSErr LoadPrefs(void);
 void	SavePrefs(void);
-void	main(void);
+void	GameMain(void);

@@ -18,8 +18,6 @@
 #define		GAME_SPEED_MICROSECONDS		(1000L*1000L/(GAME_FPS))
 #define		GAME_SPEED_SDL				(1000/(GAME_FPS))
 
-#define 	REMOVE_ALL_EVENTS	0
-
 #define	GET_PALETTE			true
 #define	DONT_GET_PALETTE	false
 

@@ -56,9 +56,6 @@ static void MoveCreditLetter2(void);
 #define	OPTIONS_Y			410
 #define	OPTION_SPACING		100				// must be even!!!
 
-#define	VIEW_X				450
-#define	VIEW_Y				330
-
 enum
 {
 	CURSOR_MODE_READY,
@@ -79,14 +76,10 @@ enum
 
 static	short		gCursorSelection,gCursorMode;
 
-static	Boolean	gDownButtonPressedFlag,gUpButtonPressedFlag;
-
 static	int32_t		HighScoreList[MAX_HIGH_SCORES];							// note: keep arrays together for saving and loading
 static	char		HighScoreNames[MAX_HIGH_SCORES][MAX_NAME_LENGTH+1];
 
 static	long		gDemoTimeout;
-
-static	Boolean		gCursorAtTargetFlag;
 
 
 			/* CURSOR X */
@@ -116,7 +109,6 @@ short		i,startSelection;
 	gGameIsDemoFlag = false;								// assume wont be playing a demo.
 
 	songFlag = false;
-	gCursorAtTargetFlag = false;
 
 re_enter:
 	gStartingScene = 0;								// assume not cheating
@@ -1040,7 +1032,7 @@ ObjNode	*theNode;
 							theNode = MakeNewShape(GroupNum_BigFont,ObjType_BigFont,ASCIIToBigFont(lineBuff[i]),
 										x,470,100,MoveCreditLetter,SCREEN_RELATIVE);
 							theNode->ClipNum = 3;
-							theNode->Special1 = MyRandomLong()&0b111111111+0x500;
+							theNode->Special1 = (MyRandomLong() & 0b111111111) + 0x500;
 							theNode->DY = -0x10000L;
 						}
 						x += FONT_WIDTH;
@@ -1116,37 +1108,23 @@ static void MoveCreditLetter2(void)
 void DoOverheadMap(void)
 {
 ObjNode		*mikeObj;
-static	Point	toCoord[MAX_SCENES][3] =						// coords to move Mike TO (y,x)
-						{
-							419,537,							// jurassic
-							351,463,
-							246,518,
+static const Point	toCoord[MAX_SCENES][3] =					// coords to move Mike TO (y,x)
+{
+	{ {419,537}, {351,463}, {246,518} },						// jurassic
+	{ {437,100}, {332,214}, {345, 62} },						// candy
+	{ {176,203}, {181,281}, {167,383} },						// fairy
+	{ {144,438}, { 94,512}, { 93,375} },						// clown
+	{ {115,176}, { 81, 47}, { 39,216} },						// bargain
+};
 
-							437,100,							// candy
-							332,214,
-							345,62,
-
-							176,203,							// fairy
-							181,281,
-							167,383,
-
-							144,438,							// clown
-							94,512,
-							93,375,
-
-							115,176,							// bargain
-							81,47,
-							39,216
-						};
-
-static	Point		compCoord[MAX_SCENES] =						// coords to put COMPLETED icon
-						{
-							298,518,
-							353,168,
-							181,272,
-							95,469,
-							68,116
-						};
+static const Point	compCoord[MAX_SCENES] =						// coords to put COMPLETED icon
+{
+	{298,518},
+	{353,168},
+	{181,272},
+	{ 95,469},
+	{ 68,116},
+};
 
 short	destX,destY,fromX,fromY;
 Boolean	flag;
@@ -1531,7 +1509,7 @@ ObjNode	*theNode;
 							theNode = MakeNewShape(GroupNum_BigFont,ObjType_BigFont,ASCIIToBigFont(lineBuff[i]),
 										x,470,100,MoveCreditLetter2,SCREEN_RELATIVE);
 							theNode->ClipNum = 3;
-							theNode->Special1 = MyRandomLong()&0b111111111+0x500;
+							theNode->Special1 = (MyRandomLong() & 0b111111111) + 0x500;
 							theNode->DY = -0x10000L;
 						}
 						x += FONT_WIDTH;

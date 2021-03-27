@@ -165,14 +165,17 @@ static	Byte		gMySwimAnims[8] = {MY_ANIMBASE_SWIM,
 short			gMyBlinkieTimer;
 
 
-static	LongPoint	gWindVectorTable[8] = {-WIND_BASE,0,				// Y,X	(NOT X,Y!!!!!!)
-									-WIND_BASE,WIND_BASE,
-									0,WIND_BASE,
-									WIND_BASE,WIND_BASE,
-									WIND_BASE,0,
-									WIND_BASE,-WIND_BASE,
-									0,-WIND_BASE,
-									-WIND_BASE,-WIND_BASE};
+static	LongPoint	gWindVectorTable[8] =				// Y,X	(NOT X,Y!!!!!!)
+{
+	{-WIND_BASE,	0},
+	{-WIND_BASE,	WIND_BASE},
+	{0,				WIND_BASE},
+	{WIND_BASE,		WIND_BASE},
+	{WIND_BASE,		0},
+	{WIND_BASE,		-WIND_BASE},
+	{0,				-WIND_BASE},
+	{-WIND_BASE,	-WIND_BASE}
+};
 
 Boolean		gMeOnWaterFlag;
 short		gLastNonDeathX,gLastNonDeathY;

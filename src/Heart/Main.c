@@ -439,7 +439,7 @@ long	r;
 				float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 				snprintf(
 					gDebugTextBuffer, sizeof(gDebugTextBuffer),
-					"Mighty Mike %s - fps:%d - x:%d y:%d",
+					"Mighty Mike %s - fps:%d - x:%ld y:%ld",
 					PROJECT_VERSION,
 					(int)round(fps),
 					gMyX,
@@ -1081,6 +1081,7 @@ short	maxScenes;
 				break;
 		default:
 				DoFatalAlert("Unknown difficulty setting");
+				return;
 	}
 
 	for (gSceneNum = gStartingScene; gSceneNum < maxScenes; gSceneNum++)	// do each Scene
@@ -1094,8 +1095,9 @@ short	maxScenes;
 
 			if (gAreaNum == 0)
 				DoSceneScreen();								// if 1st area, show the Scene/World intro
-				if (gAbortDemoFlag)
-					goto game_over;
+
+			if (gAbortDemoFlag)
+				goto game_over;
 
 			InitArea();											// init the area
 retry_area:	PlayArea();											// PLAY IT

@@ -309,7 +309,7 @@ register	short		x,y,z;
 		if (newObj == nil)
 			return;
 
-		newObj->SplatTimer = MyRandomLong()&0b11111+SPLAT_TIME;		// set life of splat
+		newObj->SplatTimer = (MyRandomLong() & 0b11111) + SPLAT_TIME;	// set life of splat
 
 		InitYOffset(newObj, -15);
 		newObj->DZ = -0x80000L-MyRandomShort();						// start bouncing up

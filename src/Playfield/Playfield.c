@@ -254,7 +254,7 @@ int16_t* tileXparentList		= nil;
 
 			/* GET ENTRY COUNTS */
 
-	int numTileDefinitions				= Byteswap16SignedRW(tileSetPtr + offsetToTileDefinitions			- 2	);
+	/*int numTileDefinitions		=*/   Byteswap16SignedRW(tileSetPtr + offsetToTileDefinitions			- 2	);
 	int numXlateEntries					= Byteswap16SignedRW(tileSetPtr + offsetToXlateTable				- 2	);
 	int numTileAttributeEntries			= Byteswap16SignedRW(tileSetPtr + offsetToTileAttributes			- 2	);
 	gNumTileAnims						= Byteswap16SignedRW(tileSetPtr + offsetToTileAnimList			- 2	);
@@ -328,7 +328,7 @@ int16_t* tileXparentList		= nil;
 	{
 		GAME_ASSERT(HandleBoundsCheck(gTileSetHandle, (Ptr) &tileXparentList[i]));
 		GAME_ASSERT(tileXparentList[i] >= 0);
-		GAME_ASSERT(tileXparentList[i] < sizeof(gColorMaskArray));
+		GAME_ASSERT(tileXparentList[i] < (int)sizeof(gColorMaskArray));
 
 		gColorMaskArray[tileXparentList[i]] = false;
 	}
@@ -861,7 +861,7 @@ Boolean		flag;
 			}
 		}
 		itemPtr++;													// point to next item
-		if ((long)itemPtr > (long)gMaxItemAddress)					// see if its past the last address
+		if ((Ptr) itemPtr > gMaxItemAddress)						// see if its past the last address
 			break;
 	}
 }
@@ -1393,8 +1393,8 @@ long		method;
 
 	if (gShakeyScreenCount)									// see if do shakey screen
 	{
-		scrollOffsetX += MyRandomLong() & 0b1111 - 8;
-		scrollOffsetY += MyRandomLong() & 0b1111 - 8;
+		scrollOffsetX += (MyRandomLong() & 0b1111) - 8;
+		scrollOffsetY += (MyRandomLong() & 0b1111) - 8;
 	}
 
 	left	= PositiveModulo(gTweenedScrollX + scrollOffsetX, PF_BUFFER_WIDTH);		// get PF buffer pixel coords to start @
@@ -1598,7 +1598,7 @@ unsigned long 	origRow,origCol;
 						col = 0;
 				} while (--x);
 
-				if (++row >= PF_TILE_HEIGHT)								// see if row wrap
+				if (++row >= (unsigned long) PF_TILE_HEIGHT)				// see if row wrap
 					row = 0;
 
 				basePtr += gPlayfieldTileWidth;								// next row in map

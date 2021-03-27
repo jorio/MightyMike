@@ -141,7 +141,8 @@ short			srcFile1,srcFile2;
 		GAME_ASSERT(EffectHandles[i]);
 
 		DetachResource((Handle) EffectHandles[i]);					// detach resource from rez file & make a normal Handle
-		if ( iErr = ResError() )
+		iErr = ResError();
+		if (iErr)
 			ShowSystemErr(iErr);
 
 		gNumEffectsLoaded++;
@@ -262,8 +263,9 @@ static const char*	errStr = "Couldnt Open Music Resource File.";
 	if (SoundHand_Music == nil)
 		return;						// (if err, just don't play anything)
 //		DoFatalAlert("Couldnt find Music Resource.");
-	DetachResource(SoundHand_Music);					// detach resource from rez file & make a normal Handle
-	if ( iErr = ResError() )
+	DetachResource((Handle) SoundHand_Music);			// detach resource from rez file & make a normal Handle
+	iErr = ResError();
+	if (iErr)
 		ShowSystemErr(iErr);
 
 	CloseResFile(srcFile);
@@ -288,7 +290,7 @@ void KillSong(void)
 	if (SoundHand_Music != nil)							// see if zap existing song
 	{
 		StopMusic();
-		DisposeHandle(SoundHand_Music);
+		DisposeHandle((Handle) SoundHand_Music);
 		SoundHand_Music = nil;
 	}
 }
@@ -304,7 +306,6 @@ void KillSong(void)
 short PlaySound(short soundNum)
 {
 static	SndCommand 		mySndCmd;
-static 	OSErr			iErr;
 static	SndChannelPtr	chanPtr;
 short					theChan;
 SCStatus				theStatus;
@@ -314,8 +315,7 @@ OSErr	myErr;
 	if (!gEffectsOnFlag)								// see if effects activated
 		return(-1);
 
-	if (soundNum >= gNumEffectsLoaded)					// see if illegal sound #
-		DoFatalAlert("Illegal sound number!");
+	GAME_ASSERT_MESSAGE(soundNum < gNumEffectsLoaded, "Illegal sound number!");		// see if illegal sound #
 
 	for (theChan=gMusicOnFlag; theChan < gMaxChannels; theChan++)
 	{
@@ -497,9 +497,9 @@ short			srcFile;
 	short addedID = gNumAddedSounds;
 	short effectID = gNumEffectsLoaded;
 
-	AddedHandles[addedID] = GetResource('snd ',rezNum);
+	AddedHandles[addedID] = (SndListHandle) GetResource('snd ',rezNum);
 	GAME_ASSERT(AddedHandles[addedID]);
-	DetachResource(AddedHandles[addedID]);
+	DetachResource((Handle) AddedHandles[addedID]);
 
 			/* PRE-DECOMPRESS IT (Source port addition) */
 
@@ -534,7 +534,7 @@ short		i;
 
 	for (i = 0; i < gNumAddedSounds; i++)
 	{
-		DisposeHandle(AddedHandles[i]);
+		DisposeHandle((Handle) AddedHandles[i]);
 	}
 	gNumAddedSounds = 0;
 }

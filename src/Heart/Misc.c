@@ -29,26 +29,10 @@
 /*    CONSTANTS             */
 /****************************/
 
-#define		MOUSE_RESET_X	300
-#define		MOUSE_RESET_Y	200
-
-#define		ERROR_ALERT_ID		401
-#define		ERROR_ALERT2_ID		402
-#define		COPY2HD_ALERT_ID	403
-
-#define		MAX_PACK_SEG_SIZE	0x7fff
-
 // Source port note: the game's Wait functions were pure spinlocks.
 // I threw in a simple SDL_Delay in Wait's loop so the game consumes less power
 // until I get around to implementing a better solution for speed regulation.
 #define		SPINLOCK_DELAY		2
-
-enum {
-	MTemp = 0x828,
-    RawMouse = 0x82C,               /*[GLOBAL VAR]  un-jerked mouse coordinates [long]*/
-	Mouse	=	0x830,
-    CrsrNew = 0x08CE 				// char - set != 0 if mouse has moved
-};
 
 #define	DECOMP_PACKET_SIZE	20000L
 
@@ -68,12 +52,6 @@ enum
 };
 
 
-        /* REGISTRATION */
-
-
-#define REG_LENGTH      12
-
-
 /**********************/
 /*     VARIABLES      */
 /**********************/
@@ -91,9 +69,6 @@ Boolean		gGlobalFlagList[MAX_GLOBAL_FLAGS];
 short		gThermometerX,gThermometerY;
 
 static	unsigned long seed0 = 0, seed1 = 0, seed2 = 0;
-
-long		gOriginalSystemVolume = 200;
-long		gOriginalSystemVolumeFudge;
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
 
@@ -181,15 +156,6 @@ static Boolean beenHereFlag = false;
 
 exit:
 
-#if 0
-    if (gISPInitialized)
-   		ISpShutdown();
-#endif
-
-	ShowCursor();
-//	MyShowMenuBar();
-	SetDefaultOutputVolume(gOriginalSystemVolume);	// reset to entry volume
-	FlushEvents (everyEvent, REMOVE_ALL_EVENTS);	// flush before exiting
 	ExitToShell();
 }
 
@@ -204,7 +170,7 @@ exit:
 
 Boolean Wait(long time)
 {
-long	old;
+uint32_t	old;
 
 	while (time > 0)
 	{
@@ -276,7 +242,7 @@ void Wait3(long time)
 
 void Wait4(long time)
 {
-long	start;
+uint32_t	start;
 
 	start = TickCount();
 	while (TickCount() < (start+time))
@@ -701,10 +667,6 @@ OSErr	iErr;
 long		createdDirID;
 
 
-	GetDefaultOutputVolume(&gOriginalSystemVolume);				// remember entry volume
-	gOriginalSystemVolumeFudge = gOriginalSystemVolume&0xff0;
-
-
 			/* CHECK PREFERENCES FOLDER */
 
 	iErr = FindFolder(kOnSystemDisk,kPreferencesFolderType,kDontCreateFolder,		// locate the folder
@@ -820,7 +782,8 @@ short		srcFile;
 OSErr		iErr;
 FSSpec		spec;
 
-	FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
+	iErr = FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
+	GAME_ASSERT(iErr == noErr);
 
 	srcFile = FSpOpenResFile(&spec, fsRdPerm);			// try to open
 	if (srcFile == -1)									// see if error

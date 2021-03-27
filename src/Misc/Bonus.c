@@ -411,6 +411,7 @@ Byte	group,type;
 
 		default:
 				DoFatalAlert("No food defined for this Scene.");
+				return false;
 	}
 
 	newObj = MakeNewShape(group,type,itemPtr->parm[0],itemPtr->x,itemPtr->y,

@@ -180,7 +180,7 @@ void LoadShapeTable(const char* fileName, long groupNum, Boolean usePalFlag)
 	gNumShapesInFile[groupNum] = Byteswap16SignedRW(shapeList);		// get # shapes in the file
 	shapeList += 2;
 
-	int32_t* offsetsToShapeHeaders = shapeList;						// get offset to SHAPE_HEADER_n
+	int32_t* offsetsToShapeHeaders = (int32_t*) shapeList;			// get offset to SHAPE_HEADER_n
 	ByteswapInts(4, gNumShapesInFile[groupNum], offsetsToShapeHeaders);
 
 	for (int i = 0; i < gNumShapesInFile[groupNum]; i++)
@@ -287,7 +287,7 @@ static void DrawFrameToBuffer(
 		long shapeNum,
 		long frameNum,
 		bool mask,
-		Ptr destBuffer,
+		uint8_t* destBuffer,
 		int destBufferWidth,
 		int destBufferHeight
 		)
@@ -312,7 +312,7 @@ static void DrawFrameToBuffer(
 		y < 0 || y >= destBufferHeight)
 		return;
 
-	Ptr destPtr = destBuffer + y*destBufferWidth + x;
+	uint8_t* destPtr = destBuffer + y*destBufferWidth + x;
 
 						/* DO THE DRAW */
 
@@ -403,7 +403,7 @@ void DrawFrameToBackground(long x,long y,long groupNum,long shapeNum,long frameN
 			shapeNum,
 			frameNum,
 			true,
-			*gBackgroundHandle,
+			(uint8_t*) *gBackgroundHandle,
 			OFFSCREEN_WIDTH,
 			OFFSCREEN_HEIGHT
 	);
@@ -447,13 +447,13 @@ long	i,i2;
 
 /************************** CHECK FOOT PRIORITY ****************************/
 
-Boolean CheckFootPriority(unsigned long x, unsigned long y, long width)
+bool CheckFootPriority(long x, long y, long width)
 {
-register	long	col,row;
-register	long	x2;
+long	col,row;
+long	x2;
 
 
-	if ((y >= gPlayfieldHeight) || (x >= gPlayfieldWidth))		// check for bounds error  (automatically checks for <0)
+	if (y < 0 || y >= gPlayfieldHeight || x < 0 || x >= gPlayfieldWidth)		// check for bounds error
 		return(false);
 
 	row = y >> TILE_SIZE_SH;
@@ -505,8 +505,8 @@ int32_t	shapeNum,groupNum;
 			groupNum,
 			shapeNum,
 			frameNum,
-			&srcPtr32,
-			&maskPtr32
+			(const uint8_t**) &srcPtr32,
+			(const uint8_t**) &maskPtr32
 	);
 
 	width = fh->width >> 2;							// get word width
@@ -660,8 +660,8 @@ int32_t	x, y;
 			groupNum,
 			shapeNum,
 			frameNum,
-			&srcStartPtr,
-			&maskStartPtr
+			(const uint8_t**) &srcStartPtr,
+			(const uint8_t**) &maskStartPtr
 	);
 
 	drawWidth = realWidth = width = fh->width;		// get pixel width
@@ -761,13 +761,19 @@ int32_t	x, y;
 				maskPtr = (int32_t *)maskStartPtr;
 
 				for (i=(width>>2); i ; i--)					// draw longs
-					*destPtr++ = (*destPtr & (*maskPtr++)) | (*srcPtr++);
+				{
+					*destPtr = (*destPtr & (*maskPtr++)) | (*srcPtr++);
+					destPtr++;
+				}
 
 				destPtrB = (Ptr)destPtr;
 				maskPtrB = (Ptr)maskPtr;
 				srcPtrB = (Ptr)srcPtr;
 				for (i=(width&0b11); i; i--)						// draw remaining pixels
-					*destPtrB++ = (*destPtrB & (*maskPtrB++)) | (*srcPtrB++);
+				{
+					*destPtrB = (*destPtrB & (*maskPtrB++)) | (*srcPtrB++);
+					destPtrB++;
+				}
 
 				srcStartPtr += realWidth;						// next sprite line
 				maskStartPtr += realWidth;						// next mask line
@@ -810,8 +816,9 @@ int32_t	x, y;
 
 				for (i=(width>>2); i ; i--)
 				{
-					*destPtr++ = (*destPtr & (*maskPtr | *tileMaskPtr)) |		// draw longs
+					*destPtr =   (*destPtr & (*maskPtr | *tileMaskPtr)) |		// draw longs
 								 (*srcPtr & (*tileMaskPtr ^ 0xffffffffL));
+					destPtr++;
 					tileMaskPtr++;
 					maskPtr++;
 					srcPtr++;
@@ -823,8 +830,9 @@ int32_t	x, y;
 				srcPtrB = (Ptr)srcPtr;
 				for (i=(width&0b11); i; i--)						// draw remaining pixels
 				{
-					*destPtrB++ = (*destPtrB & (*maskPtrB | *tmP)) |
+					*destPtrB =  (*destPtrB & (*maskPtrB | *tmP)) |
 								 (*srcPtrB & (*tmP ^ 0xff));
+					destPtrB++;
 					maskPtrB++;
 					srcPtrB++;
 					tmP++;
@@ -911,7 +919,7 @@ long	drawHeight,originalY;
 			srcPtrB = (Ptr)srcPtr;
 
 
-			for (i = (width&0b111-1); i >= 0; i--)				// do remaining pixels
+			for (i = (width & 0b111) - 1; i >= 0; i--)				// do remaining pixels
 				destPtrB[i] = srcPtrB[i];
 
 			if (++y >=  PF_BUFFER_HEIGHT)					// see if wrap buffer vertically

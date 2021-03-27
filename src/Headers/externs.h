@@ -59,7 +59,6 @@ extern	short					gPrefsFolderVRefNum;
 extern	long					gPrefsFolderDirID;
 extern	Boolean					gGlobalFlagList[MAX_GLOBAL_FLAGS];
 extern	long					gTick;
-extern	long					gOriginalSystemVolumeFudge;
 
 #pragma mark - Main
 

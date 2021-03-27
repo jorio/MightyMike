@@ -491,6 +491,10 @@ long	spacing;
 				type = ObjType_BargainKeys;
 				diffSubs = true;
 				break;
+
+		default:
+				GAME_ASSERT_MESSAGE(false, "Unsupported gSceneNum");
+				return;
 	}
 
 	s = 0;															// start on anim #0

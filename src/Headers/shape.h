@@ -30,6 +30,6 @@ void	DrawFrameToScreen(long, long, long, long, long);
 void	DrawFrameToScreen_NoMask(long, long, long, long, long);
 void DrawFrameToBackground(long x, long y, long groupNum, long shapeNum, long frameNum);
 void	ZapShapeTable(long);
-Boolean	CheckFootPriority(unsigned long, unsigned long, long);
+bool	CheckFootPriority(long x, long y, long width);
 void	DrawASprite(ObjNode *);
 void	EraseASprite(ObjNode *);

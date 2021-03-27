@@ -97,28 +97,31 @@ void MakeGameWindow(void)
 	InitScreenBuffers();
 
 
-#define CHECKED_DISPOSE(disposefunc, p) do { if (p) { disposefunc(p); (p) = nil; } } while(0)
-	CHECKED_DISPOSE(DisposePtr, gPFLookUpTable);
-	CHECKED_DISPOSE(DisposePtr, gPFCopyLookUpTable);
-	CHECKED_DISPOSE(DisposePtr, gPFMaskLookUpTable);
-	CHECKED_DISPOSE(DisposeHandle, gPFBufferHandle);
-	CHECKED_DISPOSE(DisposeHandle, gPFBufferCopyHandle);
-	CHECKED_DISPOSE(DisposeHandle, gPFMaskBufferHandle);
-#undef CHECKED_DISPOSE
+#define CHECKED_DISPOSEPTR(p) do { if (p) { DisposePtr((Ptr) p); (p) = nil; } } while(0)
+	CHECKED_DISPOSEPTR(gPFLookUpTable);
+	CHECKED_DISPOSEPTR(gPFCopyLookUpTable);
+	CHECKED_DISPOSEPTR(gPFMaskLookUpTable);
+#undef CHECKED_DISPOSEPTR
+
+#define CHECKED_DISPOSEHANDLE(h) do { if (h) { DisposeHandle(h); (h) = nil; } } while(0)
+	CHECKED_DISPOSEHANDLE(gPFBufferHandle);
+	CHECKED_DISPOSEHANDLE(gPFBufferCopyHandle);
+	CHECKED_DISPOSEHANDLE(gPFMaskBufferHandle);
+#undef CHECKED_DISPOSEHANDLE
 	
 
 				/* ALLOC MEM FOR PF LOOKUP TABLES */
 
-	gPFLookUpTable = NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFCopyLookUpTable = NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFMaskLookUpTable = NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFLookUpTable		= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFCopyLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFMaskLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
 
 
 					/* MAKE PLAYFIELD BUFFERS */
 
-	gPFBufferHandle = NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-	gPFBufferCopyHandle = NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-	gPFMaskBufferHandle = NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFBufferHandle		= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFBufferCopyHandle	= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFMaskBufferHandle	= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
 
 	GAME_ASSERT(gPFLookUpTable);
 	GAME_ASSERT(gPFCopyLookUpTable);
@@ -347,13 +350,13 @@ void InitScreenBuffers(void)
 
 	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
-		gOffScreenLookUpTable[i] = (*gOffScreenHandle)+(i*OFFSCREEN_WIDTH);
+		gOffScreenLookUpTable[i] = ((uint8_t*) *gOffScreenHandle) + (i*OFFSCREEN_WIDTH);
 	}
 					/* BUILD BACKGROUND LOOKUP TABLE */
 
 	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
-		gBackgroundLookUpTable[i] = (*gBackgroundHandle)+(i*OFFSCREEN_WIDTH);
+		gBackgroundLookUpTable[i] = ((uint8_t*) *gBackgroundHandle) + (i*OFFSCREEN_WIDTH);
 	}
 }
 

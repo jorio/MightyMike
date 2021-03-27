@@ -127,7 +127,7 @@ short	anim;
 short	GuessSlinkyAnim(short fromAnim, short x, short y)
 {
 short	diffX,diffY,toAnim,i;
-Boolean	wall;
+Boolean	wall = false;
 
 
 					/* DETERMINE THE ANIM */
