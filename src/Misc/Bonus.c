@@ -311,7 +311,7 @@ short		xDist,yDist;
 	Byteswap16SignedRW(&width);
 	Byteswap16SignedRW(&height);
 
-	Ptr linePtr = AllocPtr(width*4);					// alloc memory to hold 4 lines of data
+	Ptr linePtr = NewPtr(width*4);							// alloc memory to hold 4 lines of data
 
 				/* WRITE TO BUFFER */
 

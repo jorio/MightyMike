@@ -143,8 +143,6 @@ short			srcFile1,srcFile2;
 		DetachResource((Handle) EffectHandles[i]);					// detach resource from rez file & make a normal Handle
 		if ( iErr = ResError() )
 			ShowSystemErr(iErr);
-		HNoPurge((Handle) EffectHandles[i]);						// make non-purgeable
-		HLockHi((Handle) EffectHandles[i]);
 
 		gNumEffectsLoaded++;
 
@@ -254,8 +252,6 @@ OSErr 		iErr;
 static const char*	errStr = "Couldnt Open Music Resource File.";
 
 	KillSong();											// see if zap existing song
-	MaxMem(&someLong);									// clean up
-	CompactMem(maxSize);
 
 						/* OPEN MUSIC RESOURCE */
 
@@ -269,8 +265,6 @@ static const char*	errStr = "Couldnt Open Music Resource File.";
 	DetachResource(SoundHand_Music);					// detach resource from rez file & make a normal Handle
 	if ( iErr = ResError() )
 		ShowSystemErr(iErr);
-
-	HLockHi (SoundHand_Music);
 
 	CloseResFile(srcFile);
 	UseResFile(gMainAppRezFile);
@@ -514,9 +508,6 @@ short			srcFile;
 	Pomme_DecompressSoundResource(&AddedHandles[addedID], &offset);
 
 	EffectHandles[effectID] = AddedHandles[addedID];
-
-	HNoPurge(EffectHandles[effectID]);					// make non-purgeable
-	HLockHi(EffectHandles[effectID]);
 
 	gNumEffectsLoaded++;
 	gNumAddedSounds++;

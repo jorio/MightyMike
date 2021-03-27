@@ -72,8 +72,8 @@ Handle	ObjHandle;
 
 	if (ObjectList == nil)								// see if need to allocate memory for object list
 	{
-		ObjHandle = AllocHandle(sizeof(ObjNode)*MAX_OBJECTS);
-		HLockHi(ObjHandle);
+		ObjHandle = NewHandleClear(sizeof(ObjNode)*MAX_OBJECTS);
+		GAME_ASSERT(ObjHandle);
 		ObjectList = (ObjNode *)*ObjHandle;
 	}
 
@@ -86,21 +86,7 @@ Handle	ObjHandle;
 	NumObjects = 0;
 	for (i=0; i<MAX_OBJECTS; i++)
 	{
-		ObjectList[i].Genre = 0;
-		ObjectList[i].Z = 0;
-		ObjectList[i].Type = 0;
-		ObjectList[i].SubType = 0;
-		ObjectList[i].DrawFlag = false;
-		ObjectList[i].EraseFlag = false;
-		ObjectList[i].MoveFlag = false;
-		ObjectList[i].AnimFlag = false;
-		ObjectList[i].X.L = 0;
-		ObjectList[i].Y.L = 0;
-		ObjectList[i].DX = 0;
-		ObjectList[i].DY = 0;
-		ObjectList[i].AnimsList = nil;
-		ObjectList[i].PrevNode = nil;
-		ObjectList[i].NextNode = nil;
+		// No need to init most fields to 0 since we used NewHandleClear.
 		ObjectList[i].NodeNum = i;
 	}
 

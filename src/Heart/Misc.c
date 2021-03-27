@@ -320,14 +320,12 @@ void WaitWhileMusic(void)
 Handle LoadPackedFile(const char* fileName)
 {
 OSErr		iErr;
-short		fRefNum,vRefNum;
-long		fileSize,fileSizeCopy;
+short		fRefNum;
+long		fileSize;
 Handle		dataHand;
 long		numToRead;
 int32_t		decompSize;
 int32_t		decompType;
-
-	iErr = GetVol(nil, &vRefNum);					// get default volume
 
 					/*  OPEN THE FILE */
 
@@ -335,16 +333,14 @@ int32_t		decompType;
 
 					/* GET SIZE OF FILE */
 
-	if	(GetEOF(fRefNum,&fileSize) != noErr)
-		DoFatalAlert("Err Packed file EOF!");
-	fileSizeCopy = fileSize;							// remember size
+	iErr = GetEOF(fRefNum, &fileSize);
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Packed file EOF!");
 
 					/*	READ DECOMP SIZE */
 
 	numToRead = 4;
 	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompSize);			// read 4 byte length
-	if (iErr != noErr)
-		DoFatalAlert ("Error reading Packed data!");
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Error reading Packed data!");
 	GAME_ASSERT(numToRead == 4);
 	ByteswapInts(numToRead, 1, &decompSize);
 	fileSize -= numToRead;
@@ -353,19 +349,15 @@ int32_t		decompType;
 
 	numToRead = 4;
 	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompType);			// read compression type
-	if (iErr != noErr)
-		DoFatalAlert ("Error reading Packed data Header!");
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Error reading Packed data Header!");
 	GAME_ASSERT(numToRead == 4);
 	ByteswapInts(numToRead, 1, &decompType);
 	fileSize -= numToRead;
 
 					/* GET MEMORY FOR UNPACKED DATA */
 
-	dataHand = AllocHandle(decompSize);
-	if (dataHand == nil)
-	{
-		DoFatalAlert2("No Memory for Unpacked Data!", fileName);
-	}
+	dataHand = NewHandle(decompSize);
+	GAME_ASSERT_MESSAGE(dataHand, "No Memory for Unpacked Data!");
 
 	switch(decompType)
 	{
@@ -734,47 +726,6 @@ long		createdDirID;
 
 
 #pragma mark -
-
-
-
-
-/****************** ALLOC HANDLE ********************/
-
-Handle	AllocHandle(long size)
-{
-Handle	hand;
-
-	hand = NewHandle(size);							// alloc in APPL
-	if (hand == nil)
-	{
-#if BETA
-		SysBeep(0);	//----------
-#endif
-		hand = NewHandleSys(size);					// try SYS
-		return(hand);								// use TEMP
-	}
-	else
-		return(hand);								// use APPL
-}
-
-
-/****************** ALLOC PTR ********************/
-
-Ptr	AllocPtr(long size)
-{
-Ptr	pr;
-
-	pr = NewPtr(size);						// alloc in APPL
-	if (pr == nil)
-	{
-#if BETA
-		SysBeep(0);	//----------
-#endif
-		return(NewPtrSys(size));			// alloc in SYS
-	}
-	else
-		return(pr);
-}
 
 
 /******************* INIT THERMOMETER ***********************/

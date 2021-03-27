@@ -33,8 +33,6 @@ unsigned short	RandomRange(unsigned short, unsigned short);
 void	Decay(long *, unsigned long);
 long	Absolute(long);
 void	VerifySystem(void);
-Handle	AllocHandle(long);
-Ptr	AllocPtr(long);
 void	InitThermometer(void);
 void	FillThermometer(short);
 void	OpenMikeFile(const char* filename, short* fRefNumPtr, const char* errString);

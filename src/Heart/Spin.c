@@ -152,15 +152,13 @@ static		long	mem,numToRead,decompSize;
 
 					/* GET SIZE OF FILE */
 
-	if	(GetEOF(gSpinfRefNum,&gSpinFileSize) != noErr)
-		DoFatalAlert("Err SPIN file EOF!");
+	iErr = GetEOF(gSpinfRefNum, &gSpinFileSize);
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Err SPIN file EOF!");
 
 				/* ALLOC MEMORY FOR THE FILE */
 
-	gSpinFileHandle = AllocHandle(gSpinFileSize);
-	if (gSpinFileHandle == nil)
-		DoFatalAlert("Sorry, not enough memory to play SPIN file movie!");
-	HLockHi(gSpinFileHandle);
+	gSpinFileHandle = NewHandle(gSpinFileSize);
+	GAME_ASSERT_MESSAGE(gSpinFileHandle, "Sorry, not enough memory to play SPIN file movie!");
 	gSpinPtr = *gSpinFileHandle;								// set master process pointer
 	gSpinLoadPtr = *gSpinFileHandle;							// set load pointer
 
@@ -170,8 +168,7 @@ static		long	mem,numToRead,decompSize;
 		preLoadSize = gSpinFileSize;
 
 	iErr = FSRead(gSpinfRefNum,&preLoadSize,gSpinLoadPtr);		// read the preLoad amount only
-	if (iErr != noErr)
-		DoFatalAlert("Cant Read SPIN file!");
+	GAME_ASSERT_MESSAGE(iErr == noErr, "Can't Read SPIN file!");
 
 	gSpinLoadPtr += preLoadSize;								// set ptr to next load
 	gSpinFileSize -= preLoadSize;								// dec size of remaining data
@@ -312,8 +309,8 @@ Ptr		framePtrBase;
 
 					/* GET MEMORY FOR FRAME */
 
-	if ((framePtrBase = AllocPtr(frameSize)) == nil)
-		DoFatalAlert ("No Memory for SPIN Frame!");
+	framePtrBase = NewPtr(frameSize);
+	GAME_ASSERT_MESSAGE(framePtrBase, "No Memory for SPIN Frame!");
 	framePtr = framePtrBase;
 
 						/* UNPACK IT */

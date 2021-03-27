@@ -401,7 +401,7 @@ Ptr		bytePtr,pfPtr;
 	gPlayfieldWidth = gPlayfieldTileWidth<<TILE_SIZE_SH;
 	gPlayfieldHeight = gPlayfieldTileHeight<<TILE_SIZE_SH;
 
-	gPlayfield = (uint16_t **)AllocPtr(sizeof(uint16_t *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
+	gPlayfield = (uint16_t **)NewPtrClear(sizeof(uint16_t *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
 	GAME_ASSERT(gPlayfield);
 	for (i = 0; i < gPlayfieldTileHeight; i++)						// build 1st dimension of matrix
 	{
@@ -421,9 +421,8 @@ Ptr		bytePtr,pfPtr;
 	}
 	else
 	{
-		gAlternateMap = (Byte **)AllocPtr(sizeof(Byte *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
-		if (gPlayfield == nil)
-			DoFatalAlert("NewPtr failed trying to get gAlternateMap!");
+		gAlternateMap = (Byte **)NewPtrClear(sizeof(Byte *) * gPlayfieldTileHeight);	// alloc memory for 1st dimension of matrix
+		GAME_ASSERT(gAlternateMap);
 		for (i = 0; i < gPlayfieldTileHeight; i++)					// build matrix
 		{
 			gAlternateMap[i]= (Byte *)bytePtr;						// set pointer to row
@@ -1222,10 +1221,8 @@ Handle		tempHand;
 
 				/* ALLOC MEMORY FOR ITEM LOOKUP TABLE */
 
-	tempHand = AllocHandle(sizeof(ObjectEntryType *)*MAX_PLAYFIELD_WIDTH);
-	if (tempHand == nil)
-		DoFatalAlert("Couldnt alloc memory for gItemLookupTableX");
-	HLockHi(tempHand);
+	tempHand = NewHandleClear(sizeof(ObjectEntryType *)*MAX_PLAYFIELD_WIDTH);
+	GAME_ASSERT(tempHand);
 	gItemLookupTableX = (ObjectEntryType **)*tempHand;
 }
 

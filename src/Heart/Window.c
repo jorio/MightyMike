@@ -109,16 +109,16 @@ void MakeGameWindow(void)
 
 				/* ALLOC MEM FOR PF LOOKUP TABLES */
 
-	gPFLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFCopyLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFMaskLookUpTable = NewPtr(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFLookUpTable = NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFCopyLookUpTable = NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFMaskLookUpTable = NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
 
 
 					/* MAKE PLAYFIELD BUFFERS */
 
-	gPFBufferHandle = AllocHandle(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-	gPFBufferCopyHandle = AllocHandle(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-	gPFMaskBufferHandle = AllocHandle(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFBufferHandle = NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFBufferCopyHandle = NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFMaskBufferHandle = NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
 
 	GAME_ASSERT(gPFLookUpTable);
 	GAME_ASSERT(gPFCopyLookUpTable);
@@ -333,13 +333,13 @@ void InitScreenBuffers(void)
 
 					/* MAKE OFFSCREEN DRAW BUFFER */
 
-	gOffScreenHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
+	gOffScreenHandle = NewHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 	GAME_ASSERT(gOffScreenHandle);
 
 
 					/* MAKE BACKPLANE BUFFER */
 
-	gBackgroundHandle = AllocHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// get mem for background
+	gBackgroundHandle = NewHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// get mem for background
 	GAME_ASSERT(gBackgroundHandle);
 
 

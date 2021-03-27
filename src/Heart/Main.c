@@ -88,25 +88,7 @@ static char				gDebugTextBuffer[1024];
 
 void ToolBoxInit(void)
 {
-	TODO_REWRITE_THIS_MINOR();
-#if 0
- 	MaxApplZone();
- 	MoreMasters();	MoreMasters();	MoreMasters();	MoreMasters();
- 	MoreMasters();	MoreMasters();	MoreMasters();	MoreMasters();
- 	MoreMasters();	MoreMasters();	MoreMasters();	MoreMasters();
-
-	InitGraf(&qd.thePort);
-	InitFonts();
-	FlushEvents ( everyEvent, REMOVE_ALL_EVENTS);
-	InitWindows();
-	InitMenus();
-	TEInit();
-	InitDialogs(nil);
-	InitCursor();
-#endif
-
 	gMainAppRezFile = CurResFile();
-
 }
 
 
@@ -237,9 +219,6 @@ void InitArea(void)
 
 void LoadAreaArt(void)
 {
-	MaxMem(&someLong);														// clean up again
-	CompactMem(maxSize);
-
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
@@ -1328,8 +1307,6 @@ void CleanMemory(void)
 	KillSong();
 	DisposeCurrentMapData();
 	ZapShapeTable(0xff);								// zap all shape tables
-	MaxMem(&someLong);									// clean up again
-	CompactMem(maxSize);
 }
 
 
@@ -1467,8 +1444,6 @@ long				count;
 void GameMain(void)
 {
 	ToolBoxInit();
- 	MaxApplZone();
- 	MoreMasters();
 	VerifySystem();
 
 	InitDefaultPrefs();
