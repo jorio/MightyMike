@@ -60,7 +60,3 @@ void	FadeOutGameCLUT(void);
 void	AnimateASprite(ObjNode *);
 void	SwitchAnim(ObjNode *, short);
 
-
-		/* LZSS */
-
-long	LZSS_Decode(short, Ptr, long);

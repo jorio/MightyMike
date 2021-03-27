@@ -55,6 +55,7 @@ enum {
 									// FILE COMPRESSION TYPES
 									//=======================
 
+// Note: Mighty Mike data files only use RLB, NONE or RLW.
 enum
 {
 	PACK_TYPE_RLB	=	0,					// Run-Length-Byte compression
@@ -365,19 +366,6 @@ int32_t		decompType;
 				DecompressRLBFile(fRefNum,*dataHand,decompSize);
 				break;
 
-		case	PACK_TYPE_LZSS:
-				if (LZSS_Decode(fRefNum,*dataHand,fileSize) != decompSize)
-					DoAlert("Decomp Sizes Dont match!");
-				break;
-
-//		case	PACK_TYPE_ARTN:
-//				ARITHN_Expand(fRefNum,*dataHand,fileSize);
-//				break;
-
-//		case	PACK_TYPE_LZW:
-//				LZW_Expand(fRefNum,(unsigned char *)*dataHand,fileSize);
-//				break;
-
 		case	PACK_TYPE_RLW:
 				RLW_Expand(fRefNum,(unsigned short *)*dataHand,fileSize);
 				break;
@@ -387,8 +375,11 @@ int32_t		decompType;
 				break;
 
 		default:
-				DoFatalAlert("Unsupported compression Type!");
-
+		{
+				char error[256];
+				snprintf(error, 256, "Unsupported compression type %d", decompType);
+				DoFatalAlert(error);
+		}
 	}
 
 

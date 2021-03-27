@@ -64,7 +64,6 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Heart/Infobar.c
 	${GAME_SRCDIR}/Heart/input.c
 	${GAME_SRCDIR}/Heart/IO.c
-	${GAME_SRCDIR}/Heart/LZSS.c
 	${GAME_SRCDIR}/Heart/Misc.c
 	${GAME_SRCDIR}/Heart/Picture.c
 	${GAME_SRCDIR}/Heart/Spin.c
