@@ -23,7 +23,6 @@
 /*    PROTOTYPES            */
 /****************************/
 
-static void PrepDrawSprockets(void);
 static void FilterDithering_Row(const uint8_t* indexedRow);
 
 
@@ -61,9 +60,6 @@ uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 Ptr				*gPFLookUpTable = nil;
 Ptr				*gPFCopyLookUpTable = nil;
 Ptr				*gPFMaskLookUpTable = nil;
-
-Boolean			gLoadedDrawSprocket = false;
-//DSpContextReference 	gDisplayContext = nil;
 
 
 
@@ -426,123 +422,10 @@ long	x,y;
 
 #pragma mark -
 
-/****************** PREP DRAW SPROCKETS *********************/
-
-static void PrepDrawSprockets(void)
-{
-	TODO_REWRITE_THIS();
-#if 0
-DSpContextAttributes 	displayConfig;
-OSStatus 				theError;
-Boolean					confirmIt = false;
-
-        /* SEE IF DSP EXISTS */
-
-    if ((void *)DSpStartup == (void *)kUnresolvedCFragSymbolAddress)
-		DoFatalAlert("You do not seem to have Draw Sprocket installed.  This game requires Draw Sprocket to function.  To install Apple's Game Sprockets, go to www.pangeasoft.net/downloads.html");
-
-
-		/* startup DrawSprocket */
-
-	theError = DSpStartup();
-	if( theError )
-	{
-		DoFatalAlert("DSpStartup failed!");
-	}
-	gLoadedDrawSprocket = true;
-
-
-				/*************************/
-				/* SETUP A REQUEST BLOCK */
-				/*************************/
-
-	displayConfig.frequency					= 00;
-	displayConfig.displayWidth				= VISIBLE_WIDTH;
-	displayConfig.displayHeight				= VISIBLE_HEIGHT;
-	displayConfig.reserved1					= 0;
-	displayConfig.reserved2					= 0;
-	displayConfig.colorNeeds				= kDSpColorNeeds_Request;
-	displayConfig.colorTable				= nil;
-	displayConfig.contextOptions			= 0;
-	displayConfig.backBufferDepthMask		= kDSpDepthMask_8;
-	displayConfig.displayDepthMask			= kDSpDepthMask_8;
-	displayConfig.backBufferBestDepth		= 8;
-	displayConfig.displayBestDepth			= 8;
-	displayConfig.pageCount					= 1;
-	displayConfig.filler[0]                 = 0;
-	displayConfig.filler[1]                 = 0;
-	displayConfig.filler[2]                 = 0;
-	displayConfig.gameMustConfirmSwitch		= false;
-	displayConfig.reserved3[0]				= 0;
-	displayConfig.reserved3[1]				= 0;
-	displayConfig.reserved3[2]				= 0;
-	displayConfig.reserved3[3]				= 0;
-
-				/* AUTOMATICALLY FIND BEST CONTEXT */
-
-	theError = DSpFindBestContext( &displayConfig, &gDisplayContext );
-	if (theError)
-	{
-		DoFatalAlert("PrepDrawSprockets: DSpFindBestContext failed");
-	}
-
-				/* RESERVE IT */
-
-	theError = DSpContext_Reserve( gDisplayContext, &displayConfig );
-	if( theError )
-		DoFatalAlert("PrepDrawSprockets: DSpContext_Reserve failed");
-
-
-			/* MAKE STATE ACTIVE */
-
-	theError = DSpContext_SetState( gDisplayContext, kDSpContextState_Active );
-	if (theError == kDSpConfirmSwitchWarning)
-	{
-		confirmIt = true;
-	}
-	else
-	if (theError)
-	{
-		DSpContext_Release( gDisplayContext );
-		gDisplayContext = nil;
-		DoFatalAlert("PrepDrawSprockets: DSpContext_SetState failed");
-	}
-#endif
-}
-
-
 /****************** CLEANUP DISPLAY *************************/
 
 void CleanupDisplay(void)
 {
-	TODO_REWRITE_THIS_MINOR();
-#if 0
-OSStatus 		theError;
-
-	if (gDisplayContext != nil)
-	{
-		DSpContext_SetState( gDisplayContext, kDSpContextState_Inactive );	// deactivate
-		DSpContext_Release( gDisplayContext );								// release
-
-		gDisplayContext = nil;
-	}
-
-
-	/* shutdown draw sprocket */
-
-	if (gLoadedDrawSprocket)
-	{
-		theError = DSpShutdown();
-		gLoadedDrawSprocket = false;
-	}
-
-
-//	{
-//        GDHandle 	gdh;
-//    	gdh = GetMainDevice();
-//	    SetDepth(gdh,16,1,1);				//------ set to 16-bit
-//    }
-#endif
 }
 
 
