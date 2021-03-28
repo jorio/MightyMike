@@ -7,8 +7,6 @@
 #include "equates.h"
 #include "structures.h"
 
-#define		BETA	0			//-------------- 0 for final
-
 #ifdef __powerc
 #define		GAME_FPS		32L
 #else

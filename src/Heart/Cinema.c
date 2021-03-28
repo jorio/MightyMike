@@ -24,6 +24,7 @@
 #include "infobar.h"
 #include "input.h"
 #include "externs.h"
+#include "weapon.h"
 
 static void DoDifficultyScreen(void);
 static void DoWhimpyWinScreen(void);
@@ -173,11 +174,6 @@ re_enter:
 //			return;
 //		}
 
-#if !BETA
-	if (Button())								// button + KEYS for final game = cheat
-	{
-#endif
-
 		if (GetSDLKeyState(SDL_SCANCODE_R) && GetSDLKeyState(SDL_SCANCODE_E))	// see if record demo
 		{
 			gPlayerMode = ONE_PLAYER;
@@ -188,21 +184,28 @@ re_enter:
 
 					/* CHECK FOR SCENE CHEATS */
 
-		if (GetSDLKeyState(SDL_SCANCODE_1))
-			gStartingScene = 1;
-		else
-		if (GetSDLKeyState(SDL_SCANCODE_2))
-			gStartingScene = 2;
-		else
-		if (GetSDLKeyState(SDL_SCANCODE_3))
-			gStartingScene = 3;
-		else
-		if (GetSDLKeyState(SDL_SCANCODE_4))
-			gStartingScene = 4;
-
-#if !BETA
-	}
-#endif
+		if (SDL_GetMouseState(nil, nil))			// mouse button down
+		{
+			for (i = 1; i <= 5; i++)
+			{
+				if (GetSDLKeyState(SDL_SCANCODE_1 + i - 1))
+				{
+					gStartingScene = i - 1;
+					gStartingArea = 0;
+					InitGame();
+					gNumWeaponsIHave = NUM_WEAPON_TYPES;
+					for (int j = 0; j < gNumWeaponsIHave; j++)
+					{
+						gMyWeapons[j].type = j;
+						gMyWeapons[j].life = 999;
+					}
+					Do1PlayerGame();
+					KillSong();
+					songFlag = false;
+					goto re_enter;
+				}
+			}
+		}
 
 		if (gCursorMode != CURSOR_MODE_READY)
 			continue;
