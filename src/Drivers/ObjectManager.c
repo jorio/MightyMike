@@ -196,36 +196,42 @@ out:
 
 void MoveObjects(void)
 {
-ObjNode		*thisNodePtr;
-static bool	nodesMoved[MAX_OBJECTS];
-
+static ObjNode*	nodesToMove[MAX_OBJECTS];
+int numNodesToMove = 0;
 
 	if (FirstNodePtr == nil)								// see if there are any objects
 		return;
 
-	thisNodePtr = FirstNodePtr;								// start at head of node list
+					/* FREEZE LIST OF OBJECTS THAT NEED TO BE UPDATED */
+					//
+					// An ObjNode's move routine may insert/delete nodes in the global linked list.
+					// This may modify the order of the nodes in the list, so we must ensure
+					// not to update any given ObjNode more than once.
+					//
 
-	memset(nodesMoved, 0, sizeof(nodesMoved));				// reset move flags
-
-					/* MAIN NODE TASK LOOP */
-
-	while (thisNodePtr)
+	for (ObjNode* node = FirstNodePtr; node != nil; node = node->NextNode)
 	{
-		ObjNode* nextNode = thisNodePtr->NextNode;
+		if (node->CType == INVALID_NODE_FLAG)
+			continue;
 
-		if (thisNodePtr->CType == INVALID_NODE_FLAG)		// trying to move deleted node
-			goto next;
+		nodesToMove[numNodesToMove] = node;
+		numNodesToMove++;
+	}
 
-		if (nodesMoved[thisNodePtr->NodeNum])				// trying to move a node that we moved already
-			goto next;
+					/* MOVE THE OBJECTS */
 
-		nodesMoved[thisNodePtr->NodeNum] = true;			// remember that we've moved this one
+	for (int i = 0; i < numNodesToMove; i++)
+	{
+		ObjNode* node = nodesToMove[i];
 
-		if ((thisNodePtr->MoveFlag) && (thisNodePtr->MoveCall != nil))
+		if (node->CType == INVALID_NODE_FLAG)		// node was deleted by another node's move routine
+			continue;
+
+		if (node->MoveFlag && node->MoveCall != nil)
 		{
-			gThisNodePtr = thisNodePtr;						// set current object node
+			gThisNodePtr = node;					// set current object node
 
-			gThisNodePtr->OldX = gThisNodePtr->X;			// set old info
+			gThisNodePtr->OldX = gThisNodePtr->X;	// set old info
 			gThisNodePtr->OldY = gThisNodePtr->Y;
 			gThisNodePtr->OldYOffset = gThisNodePtr->YOffset;
 			gThisNodePtr->OldLeftSide = gThisNodePtr->LeftSide;
@@ -233,17 +239,14 @@ static bool	nodesMoved[MAX_OBJECTS];
 			gThisNodePtr->OldTopSide = gThisNodePtr->TopSide;
 			gThisNodePtr->OldBottomSide = gThisNodePtr->BottomSide;
 
-			thisNodePtr->MoveCall();						// call object's move routine
+			node->MoveCall();						// call object's move routine
 
-			if (thisNodePtr->CType == INVALID_NODE_FLAG)	// move routine may have caused object to kill itself
-				goto next;
+			if (node->CType == INVALID_NODE_FLAG)	// move routine may have caused object to kill itself
+				continue;
 		}
 
-		if (thisNodePtr->AnimFlag)
-			AnimateASprite(thisNodePtr);					// animate the sprite
-
-next:
-		thisNodePtr = nextNode;								// next node
+		if (node->AnimFlag)
+			AnimateASprite(node);					// animate the sprite
 	}
 }
 
