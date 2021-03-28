@@ -76,6 +76,7 @@ Boolean		gScreenScrollFlag = true;
 
 MikeFixed	gTweenFrameFactor			= { .L = 0x00000000 };
 MikeFixed	gOneMinusTweenFrameFactor	= { .L = 0x00010000 };
+static uint32_t	gTimeSinceSim = GAME_SPEED_SDL;
 
 static const uint32_t	kDebugTextUpdateInterval = 50;
 static uint32_t			gDebugTextFrameAccumulator = 0;
@@ -252,6 +253,127 @@ void LoadAreaArt(void)
 }
 
 
+/*************** CORE GAME UPDATE: FIXED FRAMERATE VERSION ****************/
+//
+// Updates the simulation and renders the playfield.
+// This version renders one graphics frame for each simulation frame (as in the vanilla Mac game).
+//
+
+static void UpdateSimAndRenderFixedFrame(void)
+{
+	gTweenFrameFactor.L			= 0x00010000;				// reset frame interpolation (factor=1: force new coordinates)
+	gOneMinusTweenFrameFactor.L	= 0x00000000;
+
+	gFrames++;												// one more simulation frame
+
+	if (gShakeyScreenCount)
+		gShakeyScreenCount--;
+
+	ReadKeyboard();
+	MoveObjects();
+	SortObjectsByY();										// sort 'em
+	ScrollPlayfield();										// do playfield updating
+	UpdateTileAnimation();
+	DrawObjects();
+	DisplayPlayfield();
+	UpdateInfoBar();
+	EraseObjects();
+	PresentIndexedFramebuffer();
+	RegulateSpeed(GAME_SPEED_MICROSECONDS);
+
+	gDebugTextFrameAccumulator++;
+}
+
+
+/*************** CORE GAME UPDATE: VARIABLE FRAMERATE VERSION ****************/
+//
+// Updates the simulation and renders the playfield.
+// This version renders a variable number of graphics frames for each simulation frame.
+//
+
+static void UpdateSimAndRenderTweenedFrames(void)
+{
+	gTweenFrameFactor.L			= 0x00000000;				// reset frame interpolation (factor=0: start interpolating from previous frame)
+	gOneMinusTweenFrameFactor.L	= 0x00010000;
+
+				/* SEE IF WE NEED TO SKIP SIMULATION FRAMES */
+
+	if (gTimeSinceSim >= GAME_SPEED_SDL*2)					// if we need to skip sim frames, the program probably got paused
+	{														// in that case, slow down the sim
+		gTimeSinceSim = GAME_SPEED_SDL;
+	}
+
+				/* RUN ONE SIMULATION FRAME */
+				// The simulation runs at a constant rate (32 FPS).
+				// Call routines that only need to run once per sim frame.
+
+	gFrames++;												// one more simulation frame
+
+	if (gShakeyScreenCount)
+		gShakeyScreenCount--;
+
+	ReadKeyboard();
+	MoveObjects();
+	SortObjectsByY();										// sort 'em
+	UpdateTileAnimation();
+	UpdateInfoBar();
+
+	gTimeSinceSim -= GAME_SPEED_SDL;						// catch up
+
+				/* GRAPHICS FRAMES */
+				// We can render a variable number of
+
+	uint32_t startOfFrameTimestamp = SDL_GetTicks();
+
+	while (gTimeSinceSim < GAME_SPEED_SDL)					// render as many graphics frames as we can until it's time to run the sim again
+	{
+		// Update tween factor at beginning of frame
+		gTweenFrameFactor.L			= 0x10000 * gTimeSinceSim / GAME_SPEED_SDL;
+		gOneMinusTweenFrameFactor.L	= 0x10000 - gTweenFrameFactor.L;
+
+		GAME_ASSERT(gTweenFrameFactor.L >= 0 && gTweenFrameFactor.L <= 0x10000);
+
+		ScrollPlayfield();									// also tweens camera position
+		DrawObjects();
+		DisplayPlayfield();
+		EraseObjects();
+		PresentIndexedFramebuffer();
+
+		gDebugTextFrameAccumulator++;
+
+		uint32_t now = SDL_GetTicks();
+		gTimeSinceSim += now - startOfFrameTimestamp;
+		startOfFrameTimestamp = now;
+	}
+
+	gTweenFrameFactor.L			= 0x00010000;				// reset frame interpolation for non-game screens (factor=1: force new coordinates)
+	gOneMinusTweenFrameFactor.L	= 0x00000000;
+}
+
+
+/******************* UPDATE DEBUG INFO *****************/
+
+static void UpdateDebugInfo(void)
+{
+	uint32_t ticksNow = SDL_GetTicks();
+	uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
+	if (ticksElapsed >= kDebugTextUpdateInterval)
+	{
+		float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
+		snprintf(
+				gDebugTextBuffer, sizeof(gDebugTextBuffer),
+				"Mighty Mike %s - fps:%d - x:%ld y:%ld",
+				PROJECT_VERSION,
+				(int)roundf(fps),
+				gMyX,
+				gMyY
+		);
+		SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
+		gDebugTextFrameAccumulator = 0;
+		gDebugTextLastUpdatedAt = ticksNow;
+	}
+}
+
 
 /******************* PLAY AREA *****************/
 //
@@ -264,110 +386,21 @@ long	r;
 
 	r = MyRandomLong();
 
+	gTimeSinceSim = GAME_SPEED_SDL;						// force simulation to run once when we enter this function
+
 	do
 	{
+					/* UPDATE SIMULATION & RENDER FRAME(S) */
 
-		if (!gGamePrefs.uncappedFramerate)
-		{
-			gTweenFrameFactor.L			= 0x00010000;				// reset frame interpolation (factor=1: force new coordinates)
-			gOneMinusTweenFrameFactor.L	= 0x00000000;
-
-			gFrames++;												// one more simulation frame
-			
-			if (gShakeyScreenCount)
-				gShakeyScreenCount--;
-
-			ReadKeyboard();
-			MoveObjects();
-			SortObjectsByY();										// sort 'em
-			ScrollPlayfield();										// do playfield updating
-			UpdateTileAnimation();
-			DrawObjects();
-			DisplayPlayfield();
-			UpdateInfoBar();
-			EraseObjects();
-			PresentIndexedFramebuffer();
-			RegulateSpeed(GAME_SPEED_MICROSECONDS);
-
-			gDebugTextFrameAccumulator++;
-		}
+		if (gGamePrefs.uncappedFramerate)
+			UpdateSimAndRenderTweenedFrames();
 		else
-		{
-			gTweenFrameFactor.L			= 0x00000000;				// reset frame interpolation (factor=0: start interpolating from previous frame)
-			gOneMinusTweenFrameFactor.L	= 0x00010000;
-
-						/* SIMULATION FRAMES */
-			
-			uint32_t timeSinceSim = GAME_SPEED_SDL;					// force simulation to run once when we enter this function
-
-			while (timeSinceSim >= GAME_SPEED_SDL)					// we need to run some simulation frames
-			{
-				gFrames++;											// one more simulation frame
-
-				if (gShakeyScreenCount)
-					gShakeyScreenCount--;
-
-						/* ROUTINES THAT ONLY NEED TO BE RUN ONCE PER SIM TIC */
-				
-				ReadKeyboard();
-				MoveObjects();
-				SortObjectsByY();									// sort 'em
-				UpdateTileAnimation();
-				UpdateInfoBar();
-
-				timeSinceSim -= GAME_SPEED_SDL;						// catch up
-			}
-
-						/* GRAPHICS FRAMES */
-			
-			const uint32_t timeAtEndOfSim = SDL_GetTicks();
-
-			while (timeSinceSim < GAME_SPEED_SDL)					// render as many graphics frames as we can until it's time to run the simulation again
-			{
-				GAME_ASSERT(gTweenFrameFactor.L >= 0 && gTweenFrameFactor.L <= 0x10000);
-				
-				ScrollPlayfield();									// also tweens camera position
-				DrawObjects();
-				DisplayPlayfield();
-				EraseObjects();
-				PresentIndexedFramebuffer();
-
-				gDebugTextFrameAccumulator++;
-
-				timeSinceSim = SDL_GetTicks() - timeAtEndOfSim;
-
-				// Update tween factor at end of loop
-				// (meaning tween factor at 1st iteration is 0, i.e. 1st graphics frame = end of previous simulation frame)
-				gTweenFrameFactor.L			= 0x10000 * timeSinceSim / GAME_SPEED_SDL;
-				gOneMinusTweenFrameFactor.L	= 0x10000 - gTweenFrameFactor.L;
-			}
-		}
-		
-
-
+			UpdateSimAndRenderFixedFrame();
 
 					/* DEBUG INFO */
 
 		//if (gGamePrefs.debugInfoInTitleBar)
-		{
-			uint32_t ticksNow = SDL_GetTicks();
-			uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
-			if (ticksElapsed >= kDebugTextUpdateInterval)
-			{
-				float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
-				snprintf(
-					gDebugTextBuffer, sizeof(gDebugTextBuffer),
-					"Mighty Mike %s - fps:%d - x:%ld y:%ld",
-					PROJECT_VERSION,
-					(int)round(fps),
-					gMyX,
-					gMyY
-				);
-				SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
-				gDebugTextFrameAccumulator = 0;
-				gDebugTextLastUpdatedAt = ticksNow;
-			}
-		}
+			UpdateDebugInfo();
 
 //		if (GetKeyState(kKey_Pause))			    // see if pause
 //			ShowPaused();
@@ -391,21 +424,13 @@ long	r;
 
 #if _DEBUG
 		if (GetNewSDLKeyState(SDL_SCANCODE_F8))
-		{
-			DumpIndexedTGA(
-				"playfield.tga",
-				PF_BUFFER_WIDTH,
-				PF_BUFFER_HEIGHT,
-				*gPFBufferHandle
-			);
-		}
-#endif
+			DumpIndexedTGA("playfield.tga", PF_BUFFER_WIDTH, PF_BUFFER_HEIGHT, *gPFBufferHandle);
 
 		if (GetNewSDLKeyState(SDL_SCANCODE_F9))
 			gScreenScrollFlag = !gScreenScrollFlag;
+#endif
 
-	} while((!gGlobFlag_MeDoneDead) && (!gAbortGameFlag) &&
-			(!gFinishedArea) && (!gAbortDemoFlag));
+	} while (!gGlobFlag_MeDoneDead && !gAbortGameFlag && !gFinishedArea && !gAbortDemoFlag);
 }
 
 
