@@ -129,6 +129,7 @@ extern	long					gRightSide;
 extern	long					gLeftSide;
 extern	long					gTopSide;
 extern	long					gBottomSide;
+extern	Boolean					gDiscreteMovementFlag;		// prevent movement interpolation on current node (applied in UpdateObject)
 extern	MikeFixed				gX;
 extern	MikeFixed				gY;
 extern	long					gDX;

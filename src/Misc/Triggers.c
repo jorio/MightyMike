@@ -192,6 +192,7 @@ short		matchNum,i;
 				{
 					gX.Int = gMasterItemList[i].x;					// move me there
 					gY.Int = gMasterItemList[i].y;
+					gDiscreteMovementFlag = true;					// prevent movement interpolation (applied in UpdateObject)
 					gTeleportingFlag = true;
 					StartShield();
 					SetMyStandAnim();

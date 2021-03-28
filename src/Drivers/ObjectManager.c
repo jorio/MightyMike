@@ -45,6 +45,8 @@ long		gDX,gDY,gSumDX,gSumDY;		// global object stuff
 MikeFixed	gX;
 MikeFixed	gY;
 
+Boolean		gDiscreteMovementFlag;
+
 long		gRegionClipTop[MAX_CLIP_REGIONS],gRegionClipBottom[MAX_CLIP_REGIONS],
 			gRegionClipLeft[MAX_CLIP_REGIONS],gRegionClipRight[MAX_CLIP_REGIONS];
 
@@ -355,6 +357,7 @@ void GetObjectInfo(void)
 	gDY = gThisNodePtr->DY;
 	gX.L = gThisNodePtr->X.L;
 	gY.L = gThisNodePtr->Y.L;
+	gDiscreteMovementFlag = false;
 }
 
 /************************** UPDATE OBJECT ***********************/
@@ -370,6 +373,12 @@ void UpdateObject(void)
 	gThisNodePtr->BottomSide = gBottomSide;
 	gThisNodePtr->LeftSide = gLeftSide;
 	gThisNodePtr->RightSide = gRightSide;
+
+	if (gDiscreteMovementFlag)			// prevent movement interpolation
+	{
+		gThisNodePtr->OldX = gX;
+		gThisNodePtr->OldY = gY;
+	}
 }
 
 

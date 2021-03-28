@@ -236,6 +236,11 @@ Boolean	wall = false;
 				break;
 	}
 
+
+			/* SET DISCRETE MOVEMENT FLAG SO MY POSITION ISN'T TWEENED */
+
+	gDiscreteMovementFlag = true;
+
 	return(toAnim);
 }
 
