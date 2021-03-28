@@ -196,21 +196,35 @@ out:
 
 void MoveObjects(void)
 {
-register	ObjNode		*thisNodePtr;
+ObjNode		*thisNodePtr;
+static bool	nodesMoved[MAX_OBJECTS];
 
 
 	if (FirstNodePtr == nil)								// see if there are any objects
 		return;
 
-	thisNodePtr = FirstNodePtr;
+	thisNodePtr = FirstNodePtr;								// start at head of node list
+
+	memset(nodesMoved, 0, sizeof(nodesMoved));				// reset move flags
 
 					/* MAIN NODE TASK LOOP */
 
-	do
+	while (thisNodePtr)
 	{
+		ObjNode* nextNode = thisNodePtr->NextNode;
+
+		if (thisNodePtr->CType == INVALID_NODE_FLAG)		// trying to move deleted node
+			goto next;
+
+		if (nodesMoved[thisNodePtr->NodeNum])				// trying to move a node that we moved already
+			goto next;
+
+		nodesMoved[thisNodePtr->NodeNum] = true;			// remember that we've moved this one
+
 		if ((thisNodePtr->MoveFlag) && (thisNodePtr->MoveCall != nil))
 		{
 			gThisNodePtr = thisNodePtr;						// set current object node
+
 			gThisNodePtr->OldX = gThisNodePtr->X;			// set old info
 			gThisNodePtr->OldY = gThisNodePtr->Y;
 			gThisNodePtr->OldYOffset = gThisNodePtr->YOffset;
@@ -220,15 +234,17 @@ register	ObjNode		*thisNodePtr;
 			gThisNodePtr->OldBottomSide = gThisNodePtr->BottomSide;
 
 			thisNodePtr->MoveCall();						// call object's move routine
+
+			if (thisNodePtr->CType == INVALID_NODE_FLAG)	// move routine may have caused object to kill itself
+				goto next;
 		}
 
-		if ((thisNodePtr->AnimFlag) && (thisNodePtr->CType != INVALID_NODE_FLAG))
+		if (thisNodePtr->AnimFlag)
 			AnimateASprite(thisNodePtr);					// animate the sprite
 
-		thisNodePtr = (ObjNode *)thisNodePtr->NextNode;		// next node
+next:
+		thisNodePtr = nextNode;								// next node
 	}
-	while (thisNodePtr != nil);
-
 }
 
 
@@ -400,14 +416,9 @@ Rect	box;
 
 	if (theNode->CType == INVALID_NODE_FLAG)		// see if already deleted
 	{
-//#if BETA
-//Str255	errString;		//-----------
-//		DoAlert("Attempted to Double Delete an Object.  Object was already deleted!");
-//		NumToString(theNode->Type,errString);		//------------
-//		DoFatalAlert(errString);					//---------
-//#else
+		printf("Double delete attempt on object of type %ld\n", theNode->Type);
+		DoAlert("Attempted to Double Delete an Object.  Object was already deleted!");
 		return;
-//#endif
 	}
 
 					/* DO NODE SWITCHING */
