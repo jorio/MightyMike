@@ -219,118 +219,36 @@ void InitArea(void)
 
 void LoadAreaArt(void)
 {
-	switch(gSceneNum)
+	char path[256];
+
+	const char* sceneName = nil;
+	switch (gSceneNum)
 	{
-		case	SCENE_JURASSIC:
-				LoadTileSet(":maps:Jurassic.tileset");
-				FillThermometer(20);
-				LoadShapeTable(":shapes:jurassic1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
-				FillThermometer(40);
-				LoadShapeTable(":shapes:jurassic2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
-				FillThermometer(60);
-				switch(gAreaNum)
-				{
-					case 0:
-						LoadPlayfield(":maps:Jurassic.map-1");
-						break;
-					case 1:
-						LoadPlayfield(":maps:Jurassic.map-2");
-						break;
-					case 2:
-						LoadPlayfield(":maps:Jurassic.map-3");
-						break;
-				}
-				FillThermometer(80);
-				break;
-
-		case	SCENE_CANDY:
-				LoadTileSet(":maps:Candy.tileset");
-				FillThermometer(20);
-				LoadShapeTable(":shapes:Candy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
-				FillThermometer(40);
-				LoadShapeTable(":shapes:Candy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
-				FillThermometer(60);
-				switch(gAreaNum)
-				{
-					case 0:
-						LoadPlayfield(":maps:Candy.map-1");
-						break;
-					case 1:
-						LoadPlayfield(":maps:Candy.map-2");
-						break;
-					case 2:
-						LoadPlayfield(":maps:Candy.map-3");
-						break;
-				}
-				FillThermometer(80);
-				break;
-
-		case	SCENE_CLOWN:
-				LoadTileSet(":maps:Clown.tileset");
-				FillThermometer(20);
-				LoadShapeTable(":shapes:clown1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
-				FillThermometer(40);
-				LoadShapeTable(":shapes:clown2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
-				FillThermometer(60);
-				switch(gAreaNum)
-				{
-					case 0:
-						LoadPlayfield(":maps:Clown.map-1");
-						break;
-					case 1:
-						LoadPlayfield(":maps:Clown.map-2");
-						break;
-					case 2:
-						LoadPlayfield(":maps:Clown.map-3");
-						break;
-				}
-				FillThermometer(80);
-				break;
-
-		case	SCENE_FAIRY:
-				LoadTileSet(":maps:fairy.tileset");
-				FillThermometer(20);
-				LoadShapeTable(":shapes:fairy2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
-				FillThermometer(40);
-				LoadShapeTable(":shapes:fairy1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
-				FillThermometer(60);
-				switch(gAreaNum)
-				{
-					case 0:
-						LoadPlayfield(":maps:fairy.map-1");
-						break;
-					case 1:
-						LoadPlayfield(":maps:fairy.map-2");
-						break;
-					case 2:
-						LoadPlayfield(":maps:fairy.map-3");
-						break;
-				}
-				FillThermometer(80);
-  				break;
-
-		case	SCENE_BARGAIN:
-				LoadTileSet(":maps:bargain.tileset");
-				FillThermometer(20);
-				LoadShapeTable(":shapes:bargain1.shapes",GROUP_AREA_SPECIFIC,DONT_GET_PALETTE);
-				FillThermometer(40);
-				LoadShapeTable(":shapes:bargain2.shapes",GROUP_AREA_SPECIFIC2,DONT_GET_PALETTE);
-				FillThermometer(60);
-				switch(gAreaNum)
-				{
-					case 0:
-						LoadPlayfield(":maps:bargain.map-1");
-						break;
-					case 1:
-						LoadPlayfield(":maps:bargain.map-2");
-						break;
-					case 2:
-						LoadPlayfield(":maps:bargain.map-3");
-						break;
-				}
-				FillThermometer(80);
-  				break;
+		case SCENE_JURASSIC:		sceneName = "jurassic";		break;
+		case SCENE_CANDY:			sceneName = "candy";		break;
+		case SCENE_FAIRY:			sceneName = "fairy";		break;
+		case SCENE_CLOWN:			sceneName = "clown";		break;
+		case SCENE_BARGAIN:			sceneName = "bargain";		break;
+		default:
+			GAME_ASSERT_MESSAGE(false, "Unsupported scene ID!");
 	}
+
+	snprintf(path, sizeof(path), ":maps:%s.tileset", sceneName);
+	LoadTileSet(path);
+	FillThermometer(20);
+
+	snprintf(path, sizeof(path), ":shapes:%s1.shapes", sceneName);
+	LoadShapeTable(path, GROUP_AREA_SPECIFIC, DONT_GET_PALETTE);
+	FillThermometer(40);
+
+	snprintf(path, sizeof(path), ":shapes:%s2.shapes", sceneName);
+	LoadShapeTable(path, GROUP_AREA_SPECIFIC2, DONT_GET_PALETTE);
+	FillThermometer(60);
+
+	GAME_ASSERT(gAreaNum < 3);
+	snprintf(path, sizeof(path), ":maps:%s.map-%d", sceneName, gAreaNum + 1);
+	LoadPlayfield(path);
+	FillThermometer(80);
 }
 
 
