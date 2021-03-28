@@ -323,13 +323,6 @@ static	void(*myMoveTable[])(void) =
 	gMyWindDX = gMyWindDY = 0;							// assume no wind
 
 	myMoveTable[gThisNodePtr->SubType]();
-
-//	PrintNum(Absolute(gThisNodePtr->X.Int - gThisNodePtr->OldX),	//-------
-//			 3, 100,440);
-//	if (Absolute(gThisNodePtr->X.Int - gThisNodePtr->OldX) > 15)	//------------
-//	{
-//		SysBeep(0);
-//	}
 }
 
 
@@ -497,6 +490,8 @@ void MoveMe_Liftoff(void)
 ObjNode	*newObj;
 
 	gMyNodePtr->DrawFlag = true;
+
+	StopScrollingPlayfield();
 
 	if (gThisNodePtr->Flag0)
 	{
@@ -1524,8 +1519,6 @@ void StartMyLiftoff(void)
 {
 	if (gMyNodePtr->SubType != MY_ANIMBASE_LIFTOFF)
 	{
-		StopScrollingPlayfield();
-
 		SwitchAnim(gMyNodePtr,MY_ANIMBASE_LIFTOFF);			// make Me do liftoff
 		gMyNodePtr->Flag0 = false;
 
