@@ -184,7 +184,8 @@ ObjNode	*newObj;
 	else												// else SPIKING
 	{
 		if ((Absolute(gThisNodePtr->X.Int - gMyX) < PLANT_KILL_DISTX) &&	// see if hurt me
-			(Absolute(gThisNodePtr->Y.Int - gMyY) < PLANT_KILL_DISTY))
+			(Absolute(gThisNodePtr->Y.Int - gMyY) < PLANT_KILL_DISTY) &&
+			gMyHealth >= 0)													// only if still alive
 		{
 			IGotHurt();
 		}
