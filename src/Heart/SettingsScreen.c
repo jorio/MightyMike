@@ -687,7 +687,7 @@ void DoSettingsScreen(void)
 
 	do
 	{
-		RegulateSpeed2(1);									// @ 30fps
+		RegulateSpeed2(2);									// @ 30fps
 		EraseObjects();
 		MoveObjects();
 
@@ -718,8 +718,6 @@ void DoSettingsScreen(void)
 		}
 
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
-
-		PresentIndexedFramebuffer();
 
 	} while (gSettingsState != kSettingsState_Off);
 

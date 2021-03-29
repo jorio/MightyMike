@@ -685,9 +685,6 @@ void DumpUpdateRegions_DontPresentFramebuffer(void)
 
 void DumpUpdateRegions(void)
 {
-	if (numRegions == 0)
-		return;
-
 	DumpUpdateRegions_DontPresentFramebuffer();
 	PresentIndexedFramebuffer();
 }

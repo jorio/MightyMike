@@ -58,7 +58,6 @@ extern	Boolean					gGameIsDemoFlag;
 extern	short					gPrefsFolderVRefNum;
 extern	long					gPrefsFolderDirID;
 extern	Boolean					gGlobalFlagList[MAX_GLOBAL_FLAGS];
-extern	long					gTick;
 
 #pragma mark - Main
 

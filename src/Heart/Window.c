@@ -15,6 +15,7 @@
 #include "misc.h"
 #include "input.h"
 #include "externs.h"
+#include <version.h>
 
 #include <SDL.h>
 #include <string.h>
@@ -68,6 +69,10 @@ Ptr				*gPFLookUpTable = nil;
 Ptr				*gPFCopyLookUpTable = nil;
 Ptr				*gPFMaskLookUpTable = nil;
 
+static const uint32_t	kDebugTextUpdateInterval = 200;
+static uint32_t			gDebugTextFrameAccumulator = 0;
+static uint32_t			gDebugTextLastUpdatedAt = 0;
+static char				gDebugTextBuffer[1024];
 
 
 /********************** ERASE OFFSCREEN BUFFER ********************/
@@ -639,10 +644,33 @@ void PresentIndexedFramebuffer(void)
 
 	//-------------------------------------------------------------------------
 	// Update SDL texture and swap buffers
+
 	SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
 	SDL_RenderClear(gSDLRenderer);
 	SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
 	SDL_RenderPresent(gSDLRenderer);
+
+	//-------------------------------------------------------------------------
+	// Update debug info
+
+	gDebugTextFrameAccumulator++;
+	uint32_t ticksNow = SDL_GetTicks();
+	uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
+	if (ticksElapsed >= kDebugTextUpdateInterval)
+	{
+		float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
+		snprintf(
+				gDebugTextBuffer, sizeof(gDebugTextBuffer),
+				"Mighty Mike %s - fps:%d - x:%ld y:%ld",
+				PROJECT_VERSION,
+				(int)roundf(fps),
+				gMyX,
+				gMyY
+		);
+		SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
+		gDebugTextFrameAccumulator = 0;
+		gDebugTextLastUpdatedAt = ticksNow;
+	}
 }
 
 void SetFullscreenMode(void)

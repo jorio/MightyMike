@@ -91,6 +91,7 @@ void FadeInGameCLUT(void)
 
 		PresentIndexedFramebuffer();
 		ReadKeyboard();		// flush keypresses
+		RegulateSpeed2(1);
 	}
 
 						/* SET TO ORIGINAL PALETTE TO BE SURE */
@@ -153,6 +154,7 @@ void FadeOutGameCLUT(void)
 
 		PresentIndexedFramebuffer();
 		ReadKeyboard();		// flush keypresses
+		RegulateSpeed2(1);
 	}
 
 			/* LOCK PresentIndexedFramebuffer UNTIL NEXT FADEIN */

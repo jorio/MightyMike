@@ -54,8 +54,6 @@ short			gSoundNum_ClownLaugh;
 
 static	Boolean			gSongPlayingFlag = false;
 
-static	short			gStatusBits[MAX_CHANNELS];				// set in maintainsounds (for debugging)
-
 /********************* INIT SOUND TOOLS ********************/
 
 static long GetSoundChannelInitializationParameters(void)
@@ -424,10 +422,6 @@ void ToggleEffects(void)
 
 void DoSoundMaintenance(Boolean checkKeys)
 {
-short		theChan;
-SCStatus	theStatus;
-
-
     if (checkKeys)
     {
     			/* SEE IF TOGGLE MUSIC */
@@ -462,14 +456,6 @@ SCStatus	theStatus;
     		}
     	}
     }
-
-				/* GET STATUS OF CHANNELS (FOR TESTING ONLY) */
-
-	for (theChan=0; theChan < gMaxChannels; theChan++)
-	{
-		SndChannelStatus(gSndChannel[theChan],sizeof(SCStatus),&theStatus);	// get channel info
-		gStatusBits[theChan] = theStatus.scChannelBusy;
-	}
 }
 
 

@@ -59,8 +59,6 @@ enum
 short	gPrefsFolderVRefNum;
 long	gPrefsFolderDirID;
 
-long	gTick;							// used for regulating speed
-
 
 						/* GLOBAL FLAGS */
 
@@ -177,9 +175,9 @@ uint32_t	old;
 		old = TickCount();							// wait for 1 tick to pass
 		while(TickCount() == old)
 		{
-			PresentIndexedFramebuffer();
 			SDL_Delay(SPINLOCK_DELAY);
 		}
+		PresentIndexedFramebuffer();
 		--time;
 		ReadKeyboard();
 		if (UserWantsOut())							// see if keyboard break out
@@ -213,27 +211,6 @@ void Wait2(long time)
 	}
 }
 
-/********************* WAIT 3 ********************/
-//
-// Waits while running the task loop & cannot be stopped early.
-//
-
-void Wait3(long time)
-{
-	for ( ;time > 0; time--)
-	{
-		RegulateSpeed2(1);
-		EraseObjects();
-		MoveObjects();
-		DrawObjects();
-		DumpUpdateRegions();
-		ReadKeyboard();
-//		if (GetKeyState(KEY_Q))						// see if key quit
-//			CleanQuit();
-
-		DoSoundMaintenance(true);						// (must be after readkeyboard)
-	}
-}
 
 /************************* WAIT 4 ***********************/
 //
@@ -593,6 +570,8 @@ static	UnsignedWide oldTick = {0,0};
 
 void RegulateSpeed2(short speed)
 {
+static uint32_t gTick = 0;
+
 	while ((TickCount() - gTick) < speed)				// wait for 1 tick
 		SDL_Delay(SPINLOCK_DELAY);
 	gTick = TickCount();							// remember current time

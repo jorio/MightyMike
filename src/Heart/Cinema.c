@@ -467,6 +467,7 @@ loop:
 			goto loop;
 		}
 		DoSoundMaintenance(false);
+		PresentIndexedFramebuffer();
 	}
 	FadeOutGameCLUT();
 }
@@ -1006,7 +1007,7 @@ ObjNode	*theNode;
 
 	do
 	{
-		RegulateSpeed2(1);									// @ 30fps
+		RegulateSpeed2(1);									// @ 60fps
 		EraseObjects();
 		MoveObjects();
 
@@ -1050,9 +1051,6 @@ ObjNode	*theNode;
 
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
-
-		if (Button())
-			break;
 
 	}while (!UserWantsOut() && NumObjects > 0);
 
@@ -1361,7 +1359,7 @@ ObjNode	*newObj;
 
 	do
 	{
-		RegulateSpeed2(1);									// @ 30fps
+		RegulateSpeed2(1);									// @ 60fps
 		EraseObjects();
 		MoveObjects();
 
@@ -1381,9 +1379,6 @@ ObjNode	*newObj;
 
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
-
-		if (Button())
-			break;
 
 	} while (!UserWantsOut() && IsMusicPlaying());
 
@@ -1483,7 +1478,7 @@ ObjNode	*theNode;
 
 	do
 	{
-		RegulateSpeed2(1);									// @ 30fps
+		RegulateSpeed2(1);									// @ 60fps
 		EraseObjects();
 		MoveObjects();
 
@@ -1527,9 +1522,6 @@ ObjNode	*theNode;
 
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
-
-		if (Button())
-			break;
 
 	}while(!UserWantsOut() && NumObjects > 0);
 

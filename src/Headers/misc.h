@@ -21,7 +21,6 @@ void	DoFatalAlert2(const char*, const char*);
 void	CleanQuit(void);
 Boolean	Wait(long);
 void	Wait2(long);
-void	Wait3(long);
 void	Wait4(long);
 void	WaitWhileMusic(void);
 Handle	LoadPackedFile(const char* file);

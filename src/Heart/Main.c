@@ -78,11 +78,6 @@ MikeFixed	gTweenFrameFactor			= { .L = 0x00000000 };
 MikeFixed	gOneMinusTweenFrameFactor	= { .L = 0x00010000 };
 static uint32_t	gTimeSinceSim = GAME_SPEED_SDL;
 
-static const uint32_t	kDebugTextUpdateInterval = 50;
-static uint32_t			gDebugTextFrameAccumulator = 0;
-static uint32_t			gDebugTextLastUpdatedAt = 0;
-static char				gDebugTextBuffer[1024];
-
 /*****************/
 /* TOOLBOX INIT  */
 /*****************/
@@ -280,8 +275,6 @@ static void UpdateSimAndRenderFixedFrame(void)
 	EraseObjects();
 	PresentIndexedFramebuffer();
 	RegulateSpeed(GAME_SPEED_MICROSECONDS);
-
-	gDebugTextFrameAccumulator++;
 }
 
 
@@ -339,8 +332,6 @@ static void UpdateSimAndRenderTweenedFrames(void)
 		EraseObjects();
 		PresentIndexedFramebuffer();
 
-		gDebugTextFrameAccumulator++;
-
 		uint32_t now = SDL_GetTicks();
 		gTimeSinceSim += now - startOfFrameTimestamp;
 		startOfFrameTimestamp = now;
@@ -348,30 +339,6 @@ static void UpdateSimAndRenderTweenedFrames(void)
 
 	gTweenFrameFactor.L			= 0x00010000;				// reset frame interpolation for non-game screens (factor=1: force new coordinates)
 	gOneMinusTweenFrameFactor.L	= 0x00000000;
-}
-
-
-/******************* UPDATE DEBUG INFO *****************/
-
-static void UpdateDebugInfo(void)
-{
-	uint32_t ticksNow = SDL_GetTicks();
-	uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
-	if (ticksElapsed >= kDebugTextUpdateInterval)
-	{
-		float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
-		snprintf(
-				gDebugTextBuffer, sizeof(gDebugTextBuffer),
-				"Mighty Mike %s - fps:%d - x:%ld y:%ld",
-				PROJECT_VERSION,
-				(int)roundf(fps),
-				gMyX,
-				gMyY
-		);
-		SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
-		gDebugTextFrameAccumulator = 0;
-		gDebugTextLastUpdatedAt = ticksNow;
-	}
 }
 
 
@@ -396,11 +363,6 @@ long	r;
 			UpdateSimAndRenderTweenedFrames();
 		else
 			UpdateSimAndRenderFixedFrame();
-
-					/* DEBUG INFO */
-
-		//if (gGamePrefs.debugInfoInTitleBar)
-			UpdateDebugInfo();
 
 //		if (GetKeyState(kKey_Pause))			    // see if pause
 //			ShowPaused();
