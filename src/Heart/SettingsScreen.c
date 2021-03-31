@@ -46,8 +46,12 @@ static void NukeText(int row, int col);
 static const char* ProcessScancodeName(int scancode);
 static void OnEnterControls(void);
 static void OnDone(void);
-static void LayOutControlsPage(void);
+static void OnChangePlayfieldSizeViaSettings(void);
+static void LayOutSettingsPageBackground(void);
+static void LayOutSettingsPageObjects(void);
 static void LayOutSettingsPage(void);
+static void LayOutControlsPage(void);
+
 
 /****************************/
 /*    CONSTANTS             */
@@ -123,7 +127,7 @@ static SettingEntry gSettingEntries[] =
 	{nil							, "configure controls"	, OnEnterControls,			0,	{ NULL } },
 	{nil							, nil					, nil,						0,  { NULL } },
 	{&gGamePrefs.fullscreen			, "fullscreen"			, SetFullscreenMode,		2,	{ "no", "yes" }, },
-	{&gGamePrefs.pfSize				, "playfield size"		, OnChangePlayfieldSize,	2 /* TODO: set this to 3 to enable wide */,  { "small", "medium", "wide" } },
+	{&gGamePrefs.pfSize				, "playfield size"		, OnChangePlayfieldSizeViaSettings,	2 /* TODO: set this to 3 to enable wide */,  { "small", "medium", "wide" } },
 	{&gGamePrefs.integerScaling		, "upscaling"			, OnChangeIntegerScaling,	2,  { "stretch", "crisp" } },
 	{&gGamePrefs.uncappedFramerate	, "frame rate"			, nil,						2,  { "32 fps original", "uncapped" } },
 	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "   raw", "   filtered" } },
@@ -211,6 +215,14 @@ static void OnDone(void)
 		gSettingsState = kSettingsState_Off;
 		break;
 	}
+}
+
+static void OnChangePlayfieldSizeViaSettings(void)
+{
+	gScreenBlankedFlag = true;
+	OnChangePlayfieldSize();
+	gScreenBlankedFlag = false;
+	LayOutSettingsPageBackground();
 }
 
 /****************************/
@@ -588,9 +600,8 @@ static void NukeText(int row, int col)
 /****************************/
 #pragma mark - Page Layout
 
-static void LayOutSettingsPage(void)
+static void LayOutSettingsPageBackground(void)
 {
-	DeleteAllObjects();
 	EraseBackgroundBuffer();
 
 	LayOutText("S E T T I N G S", -2, 0, 0);
@@ -615,21 +626,38 @@ static void LayOutSettingsPage(void)
 		if (entry->label)
 		{
 			LayOutText(entry->label, i, 0, 0);
-
-			if (entry->numChoices > 0)
-			{
-				const char* choiceCaption = entry->choices[*entry->valuePtr];
-				LayOutText(choiceCaption, i, 1, kTextFlags_AsObject | kTextFlags_BounceUp);
-			}
 		}
 	}
 
 	ForceUpdateBackground();
 	DumpBackground();											// dump to playfield
+}
+
+static void LayOutSettingsPageObjects(void)
+{
+	DeleteAllObjects();
+
+	for (int i = 0; i < numSettingEntries; i++)
+	{
+		SettingEntry* entry = &gSettingEntries[i];
+
+		if (entry->label && entry->numChoices > 0)
+		{
+			const char* choiceCaption = entry->choices[*entry->valuePtr];
+			LayOutText(choiceCaption, i, 1, kTextFlags_AsObject | kTextFlags_BounceUp);
+		}
+	}
 
 	// Make cursor
 	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, GetRowY(gSettingsRow), 0, MoveCursor, 0);
 }
+
+static void LayOutSettingsPage(void)
+{
+	LayOutSettingsPageBackground();
+	LayOutSettingsPageObjects();
+}
+
 
 static void LayOutControlsPage(void)
 {
