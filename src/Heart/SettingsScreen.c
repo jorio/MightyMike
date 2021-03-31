@@ -193,7 +193,6 @@ static void OnDone(void)
 	switch (gSettingsState)
 	{
 	case kSettingsState_ControlsPage:
-		PlaySound(SOUND_SQUEEK);
 		FadeOutGameCLUT();
 		gSettingsState = kSettingsState_MainPage;
 		LayOutSettingsPage();
@@ -208,7 +207,6 @@ static void OnDone(void)
 
 	case kSettingsState_MainPage:
 	default:
-		PlaySound(SOUND_SQUEEK);
 		FadeOutGameCLUT();
 		gSettingsState = kSettingsState_Off;
 		break;
@@ -369,15 +367,15 @@ static void NavigateSettingsPage(void)
 	{
 		SettingEntry* entry = &gSettingEntries[gSettingsRow];
 
-		int delta = GetNewNeedState(kNeed_UILeft) ? -1 : 1;
-		Cycle(entry, delta);
-
 		if (entry->valuePtr == &gGamePrefs.interpolateAudio)
 			PlaySound(SOUND_COMEHERERODENT);
 		else if (entry->callback == OnDone)		// let OnDone play its own sound
-			;
+			PlaySound(SOUND_SQUEEK);
 		else
 			PlaySound(SOUND_GETPOW);
+
+		int delta = GetNewNeedState(kNeed_UILeft) ? -1 : 1;
+		Cycle(entry, delta);
 
 		if (entry->numChoices > 0)
 		{
@@ -439,12 +437,13 @@ static void NavigateControlsPage(void)
 		if (gControlsRow == kKeybindingRow_Reset)
 		{
 			memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
-//			_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
+			_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
 			PlaySound(SOUND_FIREHOLE);
 			LayOutControlsPage();
 		}
 		else if (gControlsRow == kKeybindingRow_Done)
 		{
+			PlaySound(SOUND_SQUEEK);
 			OnDone();
 		}
 	}
