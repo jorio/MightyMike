@@ -217,6 +217,9 @@ void UpdateMeFrog(void)
 	gRealMePtr->X.Int = gThisNodePtr->X.Int;			// update the "real" me with some info
 	gRealMePtr->Y.Int = gThisNodePtr->Y.Int;
 
+	gRealMePtr->OldX = gThisNodePtr->OldX;				// correct position interpolation when we exit frog mode
+	gRealMePtr->OldY = gThisNodePtr->OldY;
+
 	UpdateMe();
 }
 
