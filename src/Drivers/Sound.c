@@ -33,6 +33,10 @@ static	SndListHandle	SoundHand_Music = nil;
 
 static	SndChannelPtr	gSndChannel[MAX_CHANNELS];
 
+
+static  short			gSndLastEffectInChannel[MAX_CHANNELS];
+static  short			gSndEffectLastPlayedInChannel[MAX_EFFECTS];
+
 static	short			gMaxChannels;
 
 Boolean			gMusicOnFlag = true;
@@ -87,9 +91,14 @@ static const char*	errStr = "Couldnt Open Music Resource File.";
 						/* ALLOC CHANNEL */
 
 		iErr = SndNewChannel(&gSndChannel[gMaxChannels], sampledSynth, initBits, nil);
-		if (iErr)
-			break;
+		GAME_ASSERT(iErr == noErr);
 	}
+
+	for (int i = 0; i < MAX_EFFECTS; i++)
+		gSndEffectLastPlayedInChannel[i] = -1;
+
+	for (int i = 0; i < MAX_CHANNELS; i++)
+		gSndLastEffectInChannel[i] = -1;
 
 	LoadDefaultSounds();									// these are never deleted!
 
@@ -226,6 +235,8 @@ OSErr 		myErr;
 	myErr = SndDoImmediate(gSndChannel[channelNum], &mySndCmd);
 	if (myErr)
 		ShowSystemErr(myErr);
+
+	gSndLastEffectInChannel[channelNum] = -1;
 }
 
 
@@ -315,6 +326,23 @@ OSErr	myErr;
 
 	GAME_ASSERT_MESSAGE(soundNum < gNumEffectsLoaded, "Illegal sound number!");		// see if illegal sound #
 
+			/* DON'T PLAY EFFECT MULTIPLE TIMES AT ONCE */
+			// (Source port addition)
+
+	theChan = gSndEffectLastPlayedInChannel[soundNum];
+	if (theChan != -1 && gSndLastEffectInChannel[theChan] == soundNum)
+	{
+		myErr = SndChannelStatus(gSndChannel[theChan], sizeof(SCStatus), &theStatus);
+		if (myErr == noErr && theStatus.scChannelBusy)
+		{
+			StopAChannel(theChan);
+		}
+		goto got_chan;
+	}
+
+
+			/* FIND A FREE CHANNEL */
+
 	for (theChan=gMusicOnFlag; theChan < gMaxChannels; theChan++)
 	{
 		myErr = SndChannelStatus(gSndChannel[theChan],sizeof(SCStatus),&theStatus);	// get channel info
@@ -331,6 +359,8 @@ OSErr	myErr;
 	return(-1);
 
 got_chan:
+	gSndEffectLastPlayedInChannel[soundNum] = theChan;
+	gSndLastEffectInChannel[theChan] = soundNum;
 
 					/* GET IT GOING */
 
