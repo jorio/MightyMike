@@ -23,6 +23,7 @@ Boolean	Wait(long);
 void	Wait2(long);
 void	Wait4(long);
 void	WaitWhileMusic(void);
+Handle	LoadRawFile(const char* file);
 Handle	LoadPackedFile(const char* file);
 void	DecompressRLBFile(short, Ptr, long);
 void	RLW_Expand(short, unsigned short *, long);

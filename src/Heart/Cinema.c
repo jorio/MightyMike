@@ -27,8 +27,6 @@
 #include "weapon.h"
 
 static void DoDifficultyScreen(void);
-static void DoWhimpyWinScreen(void);
-static void MoveCreditLetter2(void);
 
 
 /****************************/
@@ -959,46 +957,124 @@ long		restoreMode;
 
 #pragma mark -
 
-/******************** DO CREDITS SCREEN ********************/
+/*********************** MOVE CREDIT LETTER ****************************/
+//
+// Special1: base scroll speed
+// Special2: random upwards acceleration
+// Special3: Y coordinate above which letters disappear
+//
 
-void DoCredits(void)
+static void MoveScrollingTextLetter(void)
 {
-Handle	textRez;
-Ptr		textPtr;
-short	lineCount,lineLength,x,i;
-char	lineBuff[70];
-Boolean	endFlag;
-ObjNode	*theNode;
+	if (gThisNodePtr->Y.Int > 250)
+	{
+		gThisNodePtr->Y.L -= gThisNodePtr->Special1;			// scroll up
+	}
+	else
+	{
+		gThisNodePtr->Y.L += gThisNodePtr->DY;
+		gThisNodePtr->DY -= gThisNodePtr->Special2;				// accelerate upwards
+	}
 
-					/* INITIAL LOADING */
+	if (gThisNodePtr->Y.Int < gThisNodePtr->Special3)
+	{
+		DeleteObject(gThisNodePtr);								// vanish
+	}
+}
 
-	FadeOutGameCLUT();
-	PlaySong(SONG_ID_RACE);
+/******************** LAY OUT LETTERS FOR SCROLLING TEXT ********************/
+//
+// Returns next position in text buffer
+//
+
+static int LayOutScrollingTextLine(
+		const char* const text,
+		int textLength,
+		int textStartOfLine,
+		int letterBaseScrollSpeed,
+		int letterVanishAtY)
+{
+	int lineLength = 0;
+	int textPosition = textStartOfLine;
+
+	while (textPosition < textLength)			// find out length of line
+	{
+		char c = text[textPosition++];
+
+		if (c == '\r' && textPosition < textLength && text[textPosition] == '\n') // windows CRLF
+		{
+			textPosition++;						// skip LF
+			break;
+		}
+		
+		if (c == '\n' || c == '~')
+			break;
+
+		lineLength++;
+	}
+
+	int x = 320-(FONT_WIDTH*lineLength/2);		// calc starting x
+
+	for (int i = 0; i < lineLength; i++)		// create letter objects
+	{
+		char c = text[textStartOfLine + i];
+
+		if (c != ' ')				// skip spaces
+		{
+			ObjNode* theNode = MakeNewShape(GroupNum_BigFont, ObjType_BigFont, ASCIIToBigFont(c),
+											x, 470, 100, MoveScrollingTextLetter, SCREEN_RELATIVE);
+			theNode->ClipNum = 3;
+			theNode->Special1 = letterBaseScrollSpeed;
+			theNode->Special2 = (MyRandomLong() & 0b111111111) + 0x500;
+			theNode->Special3 = letterVanishAtY;
+			theNode->DY = -0x10000L;
+		}
+
+		x += FONT_WIDTH;
+	}
+
+	return textPosition;
+}
+
+/******************** GENERIC SCROLLING TEXT SCREEN ********************/
+
+static void DoScrollingTextScreen(
+		const char* backgroundFilePath,
+		const char* textFilePath,
+		int letterBaseScrollSpeed,
+		int letterVanishAtY)
+{
+Handle	textRez = nil;
+int		textPos;
+int		textLength;
+short	lineCount;
+
+				/* INITIAL LOADING */
+
+	InitScreenBuffers();					// restore offscreen buffers so we can animate
+
 	InitObjectManager();
-	LoadShapeTable(":shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
-	EraseBackgroundBuffer();
-	LoadBackground(":images:credits1.image",GET_PALETTE);
-	DumpBackground();											// dump to playfield
+	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN, DONT_GET_PALETTE);
 
-	textRez = GetResource('Cred',128);							// load credits rez
-	if (textRez == nil)
-		DoFatalAlert("No Credits Rez!");
-	DetachResource(textRez);
-	HLock(textRez);
-	textPtr = *textRez;											// get ptr to text string
+	EraseBackgroundBuffer();
+	LoadBackground(backgroundFilePath, GET_PALETTE);
+	DumpBackground();											// dump to playfield
 
 				/* SET CLIPPING ZONE */
 
-	gRegionClipTop[3] = OFFSCREEN_WINDOW_TOP+94;
-	gRegionClipBottom[3] = OFFSCREEN_WINDOW_TOP+VISIBLE_HEIGHT-20;
-	gRegionClipLeft[3] = OFFSCREEN_WINDOW_LEFT;
-	gRegionClipRight[3] = OFFSCREEN_WINDOW_LEFT+VISIBLE_WIDTH-1;
+	gRegionClipTop[3]		= OFFSCREEN_WINDOW_TOP+letterVanishAtY;
+	gRegionClipBottom[3] 	= OFFSCREEN_WINDOW_TOP+VISIBLE_HEIGHT-20;
+	gRegionClipLeft[3]		= OFFSCREEN_WINDOW_LEFT;
+	gRegionClipRight[3]		= OFFSCREEN_WINDOW_LEFT+VISIBLE_WIDTH-1;
 
+				/* LET'S DO IT */
 
-						/* LETS DO IT */
+	textRez = LoadRawFile(textFilePath);						// load credits file
+	GAME_ASSERT(textRez);
 
+	textLength = GetHandleSize(textRez);
+	textPos = 0;
 	lineCount = 100;
-	endFlag = false;
 
 	DumpGameWindow();
 	DrawObjects();
@@ -1013,38 +1089,11 @@ ObjNode	*theNode;
 
 					/* SEE IF MAKE NEXT TEXT LINE */
 
-		if (++lineCount > 50)								// see if ready for next line
+		if (textPos < textLength && ++lineCount > 50)		// see if ready for next line
 		{
 			lineCount = 0;
-
-			if (*textPtr == '~')							// see if @ the end
-				endFlag = true;
-			else
-			{
-				lineLength = 0;									// read next line into buffer
-				do
-				{
-					lineBuff[lineLength++] = *textPtr;			// get a char
-				} while(*textPtr++ != '^');
-				if (--lineLength > 0)							// check for blank lines
-				{
-					x = 320-(FONT_WIDTH*lineLength/2);			// calc starting x
-					for (i=0; i < lineLength; i++)
-					{
-						if (lineBuff[i] != ' ')					// skip spaces
-						{
-							theNode = MakeNewShape(GroupNum_BigFont,ObjType_BigFont,ASCIIToBigFont(lineBuff[i]),
-										x,470,100,MoveCreditLetter,SCREEN_RELATIVE);
-							theNode->ClipNum = 3;
-							theNode->Special1 = (MyRandomLong() & 0b111111111) + 0x500;
-							theNode->DY = -0x10000L;
-						}
-						x += FONT_WIDTH;
-					}
-				}
-			}
+			textPos = LayOutScrollingTextLine(*textRez, textLength, textPos, letterBaseScrollSpeed, letterVanishAtY);
 		}
-
 
 		DrawObjects();
 		DumpUpdateRegions();
@@ -1052,52 +1101,25 @@ ObjNode	*theNode;
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-	}while (!UserWantsOut() && NumObjects > 0);
+	} while (!UserWantsOut() && NumObjects > 0);
 
-	FadeOutGameCLUT();
+				/* CLEAN UP */
+
 	DisposeHandle(textRez);							// zap the text rez
 	ZapShapeTable(GROUP_WIN);
+
+	FadeOutGameCLUT();
 }
 
+/******************** DO CREDITS SCREEN ********************/
 
-/*********************** MOVE CREDIT LETTER ****************************/
-//
-// also moves letters for whimpy win text
-//
-
-void MoveCreditLetter(void)
+void DoCredits(void)
 {
-	if (gThisNodePtr->Y.Int > 250)
-		gThisNodePtr->Y.L -= 0x8000L;					// move up
-	else
-	{
-		gThisNodePtr->Y.L += gThisNodePtr->DY;
-		gThisNodePtr->DY -= gThisNodePtr->Special1;
-	}
-
-	if (gThisNodePtr->Y.Int < 95)
-		DeleteObject(gThisNodePtr);
-
+	FadeOutGameCLUT();
+	PlaySong(SONG_ID_RACE);
+	DoScrollingTextScreen(":images:credits1.image", ":system:credits.txt", 0x8000L, 95);
 }
 
-/*********************** MOVE CREDIT LETTER2 ****************************/
-//
-//  win text
-//
-
-static void MoveCreditLetter2(void)
-{
-	if (gThisNodePtr->Y.Int > 250)
-		gThisNodePtr->Y.L -= 0xb000L;					// move up
-	else
-	{
-		gThisNodePtr->Y.L += gThisNodePtr->DY;
-		gThisNodePtr->DY -= gThisNodePtr->Special1;
-	}
-
-	if (gThisNodePtr->Y.Int < 30)					// (for whimpy text)
-		DeleteObject(gThisNodePtr);
-}
 
 #pragma mark -
 
@@ -1323,18 +1345,27 @@ void DoLoseScreen(void)
 
 void DoWinScreen(void)
 {
-ObjNode	*newObj;
+	bool easyWin = gDifficultySetting == DIFFICULTY_EASY;
 
 
+					/* WIN TEXT SCREEN */
 
-//	if (gDifficultySetting != DIFFICULTY_HARD)
-	if (gDifficultySetting < DIFFICULTY_NORMAL)
-	{
-		DoWhimpyWinScreen();
+	FadeOutGameCLUT();
+
+	PlaySong(easyWin ? SONG_ID_WINGAMELOOP : SONG_ID_WINHUM);
+
+	DoScrollingTextScreen(
+			":images:winbw.image",
+			easyWin ? ":system:win1.txt" : ":system:win3.txt",		// note: win2 is unused
+			0xb000L,
+			30
+	);
+
+
+					/* SKIP CONFETTI SCREEN IF PLAYING ON EASY */
+
+	if (easyWin)
 		goto more;
-	}
-	else
-		DoWhimpyWinScreen();
 
 
 					/* INITIAL LOADING */
@@ -1365,7 +1396,7 @@ ObjNode	*newObj;
 
 							/* ADD CONFETTI */
 
-		newObj = MakeNewShape(GroupNum_Confetti,ObjType_Confetti,RandomRange(0,9),
+		ObjNode* newObj = MakeNewShape(GroupNum_Confetti,ObjType_Confetti,RandomRange(0,9),
 								RandomRange(40,600),10,100,MoveConfetti,SCREEN_RELATIVE);
 		if (newObj != nil)
 		{
@@ -1382,8 +1413,9 @@ ObjNode	*newObj;
 
 	} while (!UserWantsOut() && IsMusicPlaying());
 
-more:
 	FadeOutGameCLUT();
+
+more:
 	StopMusic();
 
 				/* SHOW CREDITS WHEN DONE */
@@ -1413,120 +1445,6 @@ void MoveConfetti(void)
 	UpdateObject();
 }
 
-
-/******************** DO WHIMPY WIN SCREEN ********************/
-//
-// Lame scrolling text for whimpy win EASY/NORMAL difficulty
-//
-
-static void DoWhimpyWinScreen(void)
-{
-Handle	textRez;
-Ptr		textPtr;
-short	lineCount,lineLength,x,i;
-char	lineBuff[70];
-Boolean	endFlag;
-ObjNode	*theNode;
-
-	FadeOutGameCLUT();
-	InitScreenBuffers();					// restore offscreen buffers so we can animate
-	InitObjectManager();
-
-					/* INITIAL LOADING */
-
-	if (gDifficultySetting >= DIFFICULTY_NORMAL)
-		PlaySong(SONG_ID_WINHUM);
-	else
-		PlaySong(SONG_ID_WINGAMELOOP);
-	LoadShapeTable(":shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
-	EraseBackgroundBuffer();
-	LoadBackground(":images:winbw.image",GET_PALETTE);
-	DumpBackground();											// dump to playfield
-
-	if (gDifficultySetting == DIFFICULTY_EASY)
-		textRez = GetResource('Cred',129);						// load credits rez
-	else
-//	if (gDifficultySetting == DIFFICULTY_NORMAL)
-//		textRez = GetResource('Cred',130);
-//	else
-//	if (gDifficultySetting == DIFFICULTY_HARD)
-		textRez = GetResource('Cred',131);
-
-	if (textRez == nil)
-		DoFatalAlert("No WinText Rez!");
-	DetachResource(textRez);
-	HLock(textRez);
-	textPtr = *textRez;											// get ptr to text string
-
-				/* SET CLIPPING ZONE */
-
-	gRegionClipTop[3] = OFFSCREEN_WINDOW_TOP+40;
-	gRegionClipBottom[3] = OFFSCREEN_WINDOW_TOP+VISIBLE_HEIGHT-20;
-	gRegionClipLeft[3] = OFFSCREEN_WINDOW_LEFT;
-	gRegionClipRight[3] = OFFSCREEN_WINDOW_LEFT+VISIBLE_WIDTH-1;
-
-
-						/* LETS DO IT */
-
-	lineCount = 100;
-	endFlag = false;
-
-	DumpGameWindow();
-	DrawObjects();
-	DumpUpdateRegions();
-	FadeInGameCLUT();
-
-	do
-	{
-		RegulateSpeed2(1);									// @ 60fps
-		EraseObjects();
-		MoveObjects();
-
-					/* SEE IF MAKE NEXT TEXT LINE */
-
-		if (++lineCount > 50)								// see if ready for next line
-		{
-			lineCount = 0;
-
-			if (*textPtr == '~')							// see if @ the end
-				endFlag = true;
-			else
-			{
-				lineLength = 0;									// read next line into buffer
-				do
-				{
-					lineBuff[lineLength++] = *textPtr;			// get a char
-				} while(*textPtr++ != '^');
-				if (--lineLength > 0)							// check for blank lines
-				{
-					x = 320-(FONT_WIDTH*lineLength/2);			// calc starting x
-					for (i=0; i < lineLength; i++)
-					{
-						if (lineBuff[i] != ' ')					// skip spaces
-						{
-							theNode = MakeNewShape(GroupNum_BigFont,ObjType_BigFont,ASCIIToBigFont(lineBuff[i]),
-										x,470,100,MoveCreditLetter2,SCREEN_RELATIVE);
-							theNode->ClipNum = 3;
-							theNode->Special1 = (MyRandomLong() & 0b111111111) + 0x500;
-							theNode->DY = -0x10000L;
-						}
-						x += FONT_WIDTH;
-					}
-				}
-			}
-		}
-
-
-		DrawObjects();
-		DumpUpdateRegions();
-
-		ReadKeyboard();
-		DoSoundMaintenance(true);							// (must be after readkeyboard)
-
-	}while(!UserWantsOut() && NumObjects > 0);
-
-	DisposeHandle(textRez);								// zap the text rez
-}
 
 #pragma mark -
 

@@ -258,6 +258,31 @@ void WaitWhileMusic(void)
 	}
 }
 
+/******************** LOAD RAW FILE *****************/
+
+Handle LoadRawFile(const char* fileName)
+{
+OSErr		iErr;
+short		fRefNum;
+long		fileSize;
+Handle		dataHand;
+
+	OpenMikeFile(fileName, &fRefNum, "Can't open Raw file!");
+
+	iErr = GetEOF(fRefNum, &fileSize);
+	GAME_ASSERT(iErr == noErr);
+
+	dataHand = NewHandle(fileSize);
+	GAME_ASSERT(dataHand);
+
+	iErr = FSRead(fRefNum,&fileSize,*dataHand);
+	GAME_ASSERT(iErr == noErr);
+
+	iErr = FSClose(fRefNum);
+	GAME_ASSERT(iErr == noErr);
+
+	return dataHand;
+}
 
 /******************** LOAD PACKED FILE *****************/
 

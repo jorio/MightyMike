@@ -132,7 +132,6 @@ void	DoPangeaLogo(void);
 void DoLegal(void);
 void	ChoosePlayerMode(void);
 void	DoCredits(void);
-void	MoveCreditLetter(void);
 void	DoOverheadMap(void);
 void	DoLoseScreen(void);
 void	DoWinScreen(void);
