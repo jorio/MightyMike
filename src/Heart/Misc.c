@@ -267,7 +267,7 @@ short		fRefNum;
 long		fileSize;
 Handle		dataHand;
 
-	OpenMikeFile(fileName, &fRefNum, "Can't open Raw file!");
+	fRefNum = OpenMikeFile(fileName);
 
 	iErr = GetEOF(fRefNum, &fileSize);
 	GAME_ASSERT(iErr == noErr);
@@ -298,7 +298,7 @@ int32_t		decompType;
 
 					/*  OPEN THE FILE */
 
-	OpenMikeFile(fileName,&fRefNum,"Cant open Packed file!");
+	fRefNum = OpenMikeFile(fileName);
 
 					/* GET SIZE OF FILE */
 
@@ -763,24 +763,28 @@ Rect	theRect;
 
 /**************** OPEN MIKE FILE **********************/
 
-void OpenMikeFile(const char* filename, short* fRefNumPtr, const char* errString)
+short OpenMikeFile(const char* filename)
 {
 OSErr		iErr;
 FSSpec		spec;
+short		fRefNum;
 
 	FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
 
-	iErr = FSpOpenDF(&spec, fsRdPerm, fRefNumPtr);			// try to open
-	if (iErr == noErr)
-		return;
+	iErr = FSpOpenDF(&spec, fsRdPerm, &fRefNum);			// try to open
+	if (iErr != noErr)
+	{
+		DoFatalAlert2("Cannot open data file", filename);
+		return -1;
+	}
 
-	DoFatalAlert(errString);
+	return fRefNum;
 }
 
 
 /**************** OPEN MIKE REZ FILE **********************/
 
-short OpenMikeRezFile(const char* filename, const char* errString)
+short OpenMikeRezFile(const char* filename)
 {
 short		srcFile;
 OSErr		iErr;
@@ -792,7 +796,7 @@ FSSpec		spec;
 	srcFile = FSpOpenResFile(&spec, fsRdPerm);			// try to open
 	if (srcFile == -1)									// see if error
 	{
-		DoFatalAlert(errString);
+		DoFatalAlert2("Cannot open resource file", filename);
 		return -1;
 	}
 

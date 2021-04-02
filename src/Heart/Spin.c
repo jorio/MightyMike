@@ -145,7 +145,7 @@ OSErr		iErr;
 
 					/*  OPEN THE FILE */
 
-	OpenMikeFile(fileName,&gSpinfRefNum,"Cant open SPIN file!");
+	gSpinfRefNum = OpenMikeFile(fileName);
 
 					/* GET SIZE OF FILE */
 

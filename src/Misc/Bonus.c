@@ -298,7 +298,7 @@ short		xDist,yDist;
 						/***********************/
 
 	GetVol(nil,&vRefNum);									// get default volume
-	OpenMikeFile(":images:radarmap.image",&fRefNum,"Cant open Radar Image!");
+	fRefNum = OpenMikeFile(":images:radarmap.image");
 	SetFPos(fRefNum,fsFromStart,256*sizeof(RGBColor)+8);	// skip palette & pack header
 
 	PlaySound(SOUND_RADAR);

@@ -74,10 +74,9 @@ void InitSoundTools(void)
 {
 OSErr		iErr;
 short	srcFile;
-static const char*	errStr = "Couldnt Open Music Resource File.";
 
 
-	srcFile = OpenMikeRezFile(":audio:music",errStr);	// open music rez file
+	srcFile = OpenMikeRezFile(":audio:music");	// open music rez file
 
 
 	gMaxChannels = 0;
@@ -126,7 +125,6 @@ void OnChangeAudioInterpolation(void)
 
 void LoadDefaultSounds(void)
 {
-static const char*		error = "Couldnt Open Sound Resource File.";
 OSErr		iErr;
 short			i;
 short			srcFile1,srcFile2;
@@ -135,9 +133,9 @@ short			srcFile1,srcFile2;
 
 						/* OPEN SOUNDS RESOURCE */
 
-	srcFile1 = OpenMikeRezFile(":audio:general.sounds",error);	// open sound resource fork
+	srcFile1 = OpenMikeRezFile(":audio:general.sounds");	// open sound resource fork
 	UseResFile( srcFile1 );
-	srcFile2 = OpenMikeRezFile(":audio:weapon.sounds",error);
+	srcFile2 = OpenMikeRezFile(":audio:weapon.sounds");
 	UseResFile( srcFile2 );
 
 					/* LOAD ALL EFFECTS */
@@ -259,13 +257,12 @@ void PlaySong(short songNum)
 {
 short	srcFile;
 OSErr 		iErr;
-static const char*	errStr = "Couldnt Open Music Resource File.";
 
 	KillSong();											// see if zap existing song
 
 						/* OPEN MUSIC RESOURCE */
 
-	srcFile = OpenMikeRezFile(":audio:music",errStr);
+	srcFile = OpenMikeRezFile(":audio:music");
 	UseResFile( srcFile );
 
 	SoundHand_Music = (SndListResource**) GetResource('snd ',songNum);		// load the song
@@ -505,7 +502,7 @@ short			srcFile;
 
 						/* OPEN SOUNDS RESOURCE */
 
-	srcFile = OpenMikeRezFile(rezFile,"Couldnt Open a Sound Resource File.");	// open sound resource fork
+	srcFile = OpenMikeRezFile(rezFile);	// open sound resource fork
 	UseResFile( srcFile );
 
 					/* LOAD IT */
