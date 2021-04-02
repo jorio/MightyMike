@@ -121,9 +121,10 @@ void LoadBorderImage(void)
 		break;
 	case PFSIZE_MEDIUM:
 		path = ":images:border2.tga";
+		flags |= LOADIMAGE_ALIGNBOTTOM;
 		break;
 	case PFSIZE_WIDE:
-		path = ":images:border2.tga";
+		path = ":images:border832.tga";
 		flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
 		break;
 	default:
