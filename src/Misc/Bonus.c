@@ -27,6 +27,9 @@
 #include "collision.h"
 #include "input.h"
 #include "externs.h"
+#include "tga.h"
+
+#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -288,46 +291,31 @@ void DecBunnyCount(void)
 
 void DisplayBunnyRadar(void)
 {
-int16_t		width,height;
-long		numToRead;
-short		fRefNum,vRefNum;
+int			width,height;
 short		xDist,yDist;
 
 						/***********************/
 						/* LOAD THE RADAR PICT */
 						/***********************/
 
-	GetVol(nil,&vRefNum);									// get default volume
-	fRefNum = OpenMikeFile(":images:radarmap.image");
-	SetFPos(fRefNum,fsFromStart,256*sizeof(RGBColor)+8);	// skip palette & pack header
+	Handle imageHandle = LoadTGA(":images:radarmap.tga", false, &width, &height);
+	GAME_ASSERT(imageHandle);
 
 	PlaySound(SOUND_RADAR);
-
-	numToRead = 2;
-	FSRead(fRefNum, &numToRead, (Ptr) &width);				// read width
-	numToRead = 2;
-	FSRead(fRefNum, &numToRead, (Ptr) &height);				// read height
-
-	Byteswap16SignedRW(&width);
-	Byteswap16SignedRW(&height);
-
-	Ptr linePtr = NewPtr(width*4);							// alloc memory to hold 4 lines of data
 
 				/* WRITE TO BUFFER */
 
 	Ptr destPtr = gPFLookUpTable[0];
+	Ptr srcPtr = *imageHandle;
 
-	for (int i = 0; i < (height/4); i++)
+	for (int i = 0; i < height; i++)
 	{
-		numToRead = width*4;								// read 4 lines of data
-		FSRead(fRefNum,&numToRead,linePtr);
-
-		BlockMove(linePtr, destPtr, width*4);				// copy
-		destPtr += width*4;
+		memcpy(destPtr, srcPtr, width);
+		destPtr += width;
+		srcPtr += width;
 	}
 
-	FSClose(fRefNum);
-	DisposePtr((Ptr)linePtr);
+	DisposeHandle(imageHandle);
 
 						/************************************/
 						/* SHOW THE RADAR PICT & DRAW BLIPS */

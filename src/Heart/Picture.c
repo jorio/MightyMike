@@ -13,6 +13,7 @@
 #include "picture.h"
 #include "misc.h"
 #include "externs.h"
+#include "tga.h"
 #include <string.h>
 
 /****************************/
@@ -34,39 +35,24 @@ void LoadBackground(const char* fileName, Boolean getPalFlag)
 {
 	EraseBackgroundBuffer();
 
-	Handle theImageHand = LoadPackedFile(fileName);				// load & unpack image file
-
-
-					/* GET COLOR INFO FOR IMAGE */
-	if (getPalFlag)
-	{
-		RGBColor* rgbPtr = (RGBColor *)(*theImageHand);			// get ptr to palette data
-		ByteswapInts(2, 256*3, rgbPtr);							// byteswap colors (each component is 16-bit)
-		for (int i = 0; i < 256; i++)
-		{
-			gGamePalette[i] = RGBColorToU32(&rgbPtr[i]);
-		}
-	}
-
+	int width;
+	int height;
+	Handle imageHandle = LoadTGA(fileName, getPalFlag, &width, &height);
+	GAME_ASSERT_MESSAGE(imageHandle, fileName);					// load & unpack image file
 
 						/* DRAW THE IMAGE */
 
-	int16_t* ptr16 = (int16_t *)(*theImageHand + (256*2*3));	// get width & height
-	int16_t width	= Byteswap16(ptr16++);
-	int16_t height	= Byteswap16(ptr16++);
-
 	Ptr dest = (*gBackgroundHandle)+WINDOW_OFFSET;				// init pointers
-	Ptr source = (Ptr)ptr16;
+	Ptr source = *imageHandle;
 
 	for (int y = 0; y < height; y++)
 	{
 		memcpy(dest, source, width);
-
 		dest += OFFSCREEN_WIDTH;								// next row
 		source += width;
 	}
 
-	DisposeHandle(theImageHand);								// zap image data
+	DisposeHandle(imageHandle);									// zap image data
 }
 
 
@@ -79,26 +65,16 @@ void LoadBackground(const char* fileName, Boolean getPalFlag)
 
 void LoadIMAGE(const char* fileName, short showMode)
 {
-	Handle imageHandle = LoadPackedFile(fileName);			// load & unpack image file
-
-					/* GET COLOR INFO FOR PICTURE */
-
-	RGBColor* rgbPtr = (RGBColor *)(*imageHandle);				// get ptr to palette data
-	ByteswapInts(2, 256*3, rgbPtr);						// byteswap colors (each component is 16-bit)
-	for (int i = 0; i < 256; i++)
-	{
-		gGamePalette[i] = RGBColorToU32(&rgbPtr[i]);
-	}
+	int width;
+	int height;
+	Handle imageHandle = LoadTGA(fileName, true, &width, &height);
+	GAME_ASSERT_MESSAGE(imageHandle, fileName);			// load & unpack image file
 
 				/* DUMP PIXEL IMAGE INTO BUFFER */
 
-	int16_t* ptr16	= (int16_t *)(*imageHandle + (256*2*3));	// get width & height
-	int16_t width	= Byteswap16(ptr16++);
-	int16_t height	= Byteswap16(ptr16++);
-
 	GAME_ASSERT((int)width * (int)height <= (int)sizeof(gIndexedFramebuffer));
 
-	const uint8_t* srcPtr = (const uint8_t*) ptr16;
+	const uint8_t* srcPtr = *imageHandle;
 	uint8_t* destPtr = gIndexedFramebuffer;
 
 	// offset X
@@ -130,12 +106,6 @@ void LoadIMAGE(const char* fileName, short showMode)
 
 
 /********************** LOAD BORDER IMAGE *****************************/
-//
-// The border image is saved as a non-compressed .image file.  It is not packed
-// so that it can easily be drawn to the screen without a loading buffer or decompression buffer.
-// Since it is the last thing loaded before beginning a level, memory
-// is at a premium.
-//
 
 void LoadBorderImage(void)
 {
@@ -147,13 +117,13 @@ void LoadBorderImage(void)
 	switch (gGamePrefs.pfSize)
 	{
 	case PFSIZE_SMALL:
-		path = ":images:border.image";
+		path = ":images:border.tga";
 		break;
 	case PFSIZE_MEDIUM:
-		path = ":images:border2.image";
+		path = ":images:border2.tga";
 		break;
 	case PFSIZE_WIDE:
-		path = ":images:border2.image";
+		path = ":images:border2.tga";
 		flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
 		break;
 	default:
