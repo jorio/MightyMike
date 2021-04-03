@@ -41,11 +41,9 @@
 
 #define BUNNY_BOUNCE_FACTOR	0xC0000L
 #define	BUNNY_MAP_ID		3							// map item # for bunny
-#define	BUNNY_HINT_DELAY	(GAME_FPS*20)
-#define	BUNNY_HINT_MARGIN	50
 
-#define	RADAR_CENTER_X		234
-#define	RADAR_CENTER_Y		240
+#define	RADAR_CENTER_X		232
+#define	RADAR_CENTER_Y		237
 #define	RADAR_RANGE			20
 
 #define	RADAR_CENTER_Xf		318
@@ -294,35 +292,29 @@ void DisplayBunnyRadar(void)
 int			width,height;
 short		xDist,yDist;
 
-						/***********************/
-						/* LOAD THE RADAR PICT */
-						/***********************/
+const int	radarCenterX = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_X : RADAR_CENTER_Xf;
+const int	radarCenterY = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_Y : RADAR_CENTER_Yf;
+
+						/* DRAW RADAR BACKGROUND */
 
 	Handle imageHandle = LoadTGA(":images:radarmap.tga", false, &width, &height);
 	GAME_ASSERT(imageHandle);
 
 	PlaySound(SOUND_RADAR);
 
-				/* WRITE TO BUFFER */
-
-	Ptr destPtr = gPFLookUpTable[0];
+	Ptr destPtr = gScreenLookUpTable[0] + (radarCenterX - width/2) + (radarCenterY - height/2) * gScreenRowOffset;
 	Ptr srcPtr = *imageHandle;
 
 	for (int i = 0; i < height; i++)
 	{
 		memcpy(destPtr, srcPtr, width);
-		destPtr += width;
+		destPtr += gScreenRowOffset;
 		srcPtr += width;
 	}
 
 	DisposeHandle(imageHandle);
 
-						/************************************/
-						/* SHOW THE RADAR PICT & DRAW BLIPS */
-						/************************************/
-
-	DisplayStoreBuffer();
-	PresentIndexedFramebuffer();
+						/* DRAW BLIPS */
 
 	for (int i=0; i < gNumItems; i++)
 	{
@@ -333,11 +325,7 @@ short		xDist,yDist;
 
 			if ((Absolute(xDist) < 180) && (Absolute(yDist) < 172))				// draw if on radar screen
 			{
-				if (gGamePrefs.pfSize != PFSIZE_SMALL)
-					DrawFrameToScreen(RADAR_CENTER_Xf+xDist,RADAR_CENTER_Yf+yDist,
-							GroupNum_RadarBlip,ObjType_RadarBlip,0);
-				else
-					DrawFrameToScreen(RADAR_CENTER_X+xDist,RADAR_CENTER_Y+yDist,
+				DrawFrameToScreen(radarCenterX+xDist, radarCenterY+yDist,
 							GroupNum_RadarBlip,ObjType_RadarBlip,0);
 			}
 		}

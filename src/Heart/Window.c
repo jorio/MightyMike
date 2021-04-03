@@ -58,7 +58,6 @@ Handle			gPFMaskBufferHandle = nil;
 
 uint8_t*		gScreenAddr	= gIndexedFramebuffer;	// SCREEN ACCESS
 long			gScreenRowOffset = VISIBLE_WIDTH;		// offset for bytes
-long			gScreenRowOffsetLW = VISIBLE_WIDTH/4;	// offset for Long Words
 long			gScreenXOffset,gScreenYOffset;
 
 
@@ -95,8 +94,7 @@ void EraseBackgroundBuffer(void)
 
 void MakeGameWindow(void)
 {
-	gScreenXOffset = 0;
-	gScreenYOffset = 0;
+	SetScreenOffsetFor640x480();
 
 
 	WindowToBlack();
@@ -254,9 +252,8 @@ void WipeScreenBuffers(void)
 
 void EraseStore(void)
 {
-int32_t	*destPtr;
-register	short		height,width;
-register	long	destAdd,size;
+uint8_t*	destPtr;
+long		size;
 
 				/* COPY PF BUFFER 2 TO BUFFER 1 TO ERASE STORE IMAGE */
 
@@ -267,54 +264,13 @@ register	long	destAdd,size;
 
 	if (gGamePrefs.interlaceMode)
 	{
-		destPtr = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP+1]+PF_WINDOW_LEFT);
-		destAdd = gScreenRowOffsetLW*2-(PF_WINDOW_WIDTH>>2);
+		destPtr = gScreenLookUpTable[PF_WINDOW_TOP+1] + PF_WINDOW_LEFT;
 
-		for ( height = PF_WINDOW_HEIGHT>>1; height > 0; height--)
+		for (short height = PF_WINDOW_HEIGHT>>1; height > 0; height--)
 		{
-			for (width = PF_WINDOW_WIDTH>>2; width > 0; width--)
-			{
-				*destPtr++ = 0xfefefefe;				// dark grey
-			}
-			destPtr += destAdd;
+			memset(destPtr, 0xFE, PF_WINDOW_WIDTH);		// dark grey
+			destPtr += gScreenRowOffset;
 		}
-	}
-}
-
-
-/******************* DISPLAY STORE BUFFER *********************/
-//
-// The store image has been drawn into the primary PF buffer, so copy the PF buffer
-// to the screen.
-//
-
-void DisplayStoreBuffer(void)
-{
-int32_t	*srcPtr,*destPtr,*destStart;
-long	x,y,width,height;
-
-	srcPtr = (int32_t *)(gPFLookUpTable[0]);
-	if (gGamePrefs.pfSize != PFSIZE_SMALL)						// special for playfield display size
-	{
-		width = 13*32/4;
-		height = 12*32;
-		destStart = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP+22]+PF_WINDOW_LEFT+110);
-	}
-	else
-	{
-		width = (PF_WINDOW_WIDTH/4);
-		height = PF_WINDOW_HEIGHT;
-		destStart = (int32_t *)(gScreenLookUpTable[PF_WINDOW_TOP]+PF_WINDOW_LEFT);
-	}
-
-
-	for (y = 0; y < height; y++)
-	{
-		destPtr = destStart;
-
-		for (x = 0; x < width; x++)
-			*destPtr++ = *srcPtr++;
-		destStart += gScreenRowOffsetLW;
 	}
 }
 
@@ -434,7 +390,23 @@ long	x,y;
 	}
 }
 
+#pragma mark -
 
+/****************** SET GLOBAL SPRITE OFFSET - IN-GAME ***********************/
+
+void SetScreenOffsetForArea(void)
+{
+	gScreenXOffset = 0;
+	gScreenYOffset = 0;
+}
+
+/************* SET GLOBAL SPRITE OFFSET - NON-GAME SCREENS *******************/
+
+void SetScreenOffsetFor640x480(void)
+{
+	gScreenXOffset = (VISIBLE_WIDTH - 640) / 2;
+	gScreenYOffset = (VISIBLE_HEIGHT - 480) / 2;
+}
 
 #pragma mark -
 

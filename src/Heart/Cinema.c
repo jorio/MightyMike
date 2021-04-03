@@ -553,7 +553,7 @@ void ShowLastScore(void)
 
 					/* DISPLAY SCORE */
 
-	gHtab = VISIBLE_WIDTH/2-50;
+	gHtab = 640/2-50;
 	gVtab = 480/2-50;
 	WriteLn("SCORE");
 
@@ -619,8 +619,11 @@ ObjNode		*nameObj;
 				HighScoreNames[n][i] = '\0';
 				gHtab = NAME_HTAB;						// set coords of name
 				gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
-				SetRect(&eraseRect,gHtab+OFFSCREEN_WINDOW_LEFT-30,gVtab+OFFSCREEN_WINDOW_TOP-20,
-						gHtab+OFFSCREEN_WINDOW_LEFT+350,gVtab+OFFSCREEN_WINDOW_TOP+20);
+				SetRect(&eraseRect,
+					gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT - 30,
+					gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP - 20,
+					gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT + 350,
+					gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP + 20);
 				AddUpdateRegion(eraseRect,0);				// erase existing name
 				DumpUpdateRegions_DontPresentFramebuffer();	// commit erased regions; don't present framebuffer yet to avoid flashing
 				WriteLn(HighScoreNames[n]);					// print it (will present framebuffer)
@@ -642,8 +645,11 @@ ObjNode		*nameObj;
 			i++;
 			gHtab = NAME_HTAB;						// set coords of name
 			gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
-			SetRect(&eraseRect,gHtab+OFFSCREEN_WINDOW_LEFT-30,gVtab+OFFSCREEN_WINDOW_TOP-20,
-					OFFSCREEN_WINDOW_RIGHT,gVtab+OFFSCREEN_WINDOW_TOP+20);
+			SetRect(&eraseRect,
+				gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT - 30,
+				gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP - 20,
+				OFFSCREEN_WINDOW_RIGHT,
+				gScreenYOffset + gVtab+OFFSCREEN_WINDOW_TOP + 20);
 
 			AddUpdateRegion(eraseRect,0);				// erase area of cursor
 			DumpUpdateRegions_DontPresentFramebuffer();	// commit erased regions; don't present framebuffer yet to avoid flashing
@@ -655,6 +661,7 @@ ObjNode		*nameObj;
 			nameObj->drawBox.right = nameObj->X.Int;
 			nameObj->drawBox.top = nameObj->Y.Int;
 			nameObj->drawBox.bottom = nameObj->Y.Int;
+			OffsetRect(&nameObj->drawBox, gScreenXOffset, gScreenYOffset);
 		}
 
 		MoveObjects();

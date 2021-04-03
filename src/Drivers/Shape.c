@@ -84,6 +84,7 @@ int32_t	offset;
 		newSpritePtr->drawBox.right = x+2;
 		newSpritePtr->drawBox.top = y-2;
 		newSpritePtr->drawBox.bottom = y+2;
+		OffsetRect(&newSpritePtr->drawBox, gScreenXOffset, gScreenYOffset);
 	}
 
 	newSpritePtr->AnimSpeed = 								// init animation stuff
@@ -305,6 +306,9 @@ static void DrawFrameToBuffer(
 	x += fh->x;										// use position offsets
 	y += fh->y;
 
+	x += gScreenXOffset;							// global centering offset
+	y += gScreenYOffset;
+
 	if (x < 0 || x >= destBufferWidth ||			// see if out of bounds
 		y < 0 || y >= destBufferHeight)
 		return;
@@ -508,8 +512,12 @@ int32_t	shapeNum,groupNum;
 
 	width = fh->width >> 2;							// get word width
 	height = fh->height;							// get height
+
 	x += fh->x;										// use position offsets
 	y += fh->y;
+
+	x += gScreenXOffset;							// global centering offset
+	y += gScreenYOffset;
 
 	oldBox = theNodePtr->drawBox;						// remember old box
 

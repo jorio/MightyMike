@@ -174,6 +174,8 @@ void InitArea(void)
 	LoadAreaSound();											// load sound
 	FillThermometer(100);
 
+	SetScreenOffsetForArea();
+
 	gFinishedArea = false;
 
 	ClearGlobalFlags();
@@ -1007,6 +1009,8 @@ short	maxScenes;
 			InitArea();											// init the area
 retry_area:	PlayArea();											// PLAY IT
 
+			SetScreenOffsetFor640x480();						// reset global offset
+
 			if (gAbortGameFlag || gAbortDemoFlag)				// see if ABORTED (via demo or ESC key)
 				goto game_over;
 
@@ -1016,6 +1020,7 @@ retry_area:	PlayArea();											// PLAY IT
 
 				if (--gNumLives)								// see if got another life
 				{
+					SetScreenOffsetForArea();
 					ReviveMe();
 					goto retry_area;							// try again
 				}
@@ -1028,10 +1033,6 @@ retry_area:	PlayArea();											// PLAY IT
 			FadeOutGameCLUT();
 			ShowBonusScreen();
 			OptimizeMemory();
-			if (gAreaNum == 2)
-			{
-				OptimizeMemory();
-			}
 		}
 	}
 
@@ -1094,6 +1095,8 @@ ok_screens:
 	InitArea();											// init the area
 again:
 	PlayArea();											// play it
+
+	SetScreenOffsetFor640x480();						// reset global offset
 
 														// SEE IF I WAS KILLED
 														//====================

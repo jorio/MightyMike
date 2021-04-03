@@ -45,8 +45,9 @@ void	BlankScreenArea(Rect);
 void	WipeScreenBuffers(void);
 void	InitScreenBuffers(void);
 void	EraseStore(void);
-void	DisplayStoreBuffer(void);
 void	BlankEntireScreenArea(void);
+void	SetScreenOffsetForArea(void);
+void	SetScreenOffsetFor640x480(void);
 
 void PresentIndexedFramebuffer(void);
 void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data);

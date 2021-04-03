@@ -214,7 +214,6 @@ extern	long					gLastPixieTime;
 
 extern	uint8_t					gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
 extern	uint8_t					*gScreenAddr;
-extern	long					gScreenRowOffsetLW;
 extern	long					gScreenRowOffset;
 extern	uint8_t					*gScreenLookUpTable[VISIBLE_HEIGHT];
 extern	uint8_t					*gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
@@ -222,8 +221,8 @@ extern	uint8_t					*gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
 extern	Ptr						*gPFLookUpTable;
 extern	Ptr						*gPFCopyLookUpTable;
 extern	Ptr						*gPFMaskLookUpTable;
-extern	long					gScreenXOffset;
-extern	long					gScreenYOffset;
+extern	long					gScreenXOffset;				// global centering offset applied to sprites
+extern	long					gScreenYOffset;				// global centering offset applied to sprites
 extern	Handle					gBackgroundHandle;
 extern	Handle					gOffScreenHandle;
 extern	Handle					gPFBufferHandle;

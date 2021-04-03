@@ -604,12 +604,12 @@ static void LayOutSettingsPageBackground(void)
 {
 	EraseBackgroundBuffer();
 
-	LayOutText("S E T T I N G S", -2, 0, 0);
+	LayOutText(" SETTINGS", -2, 0, 0);
 
 	// Draw dithering pattern
 	Ptr ditheringPatternPlot = *gBackgroundHandle;
-	ditheringPatternPlot += (GetRowY(6) - kRowHeight/3) * OFFSCREEN_WIDTH;
-	ditheringPatternPlot += kColumnX[1];
+	ditheringPatternPlot += (gScreenYOffset + GetRowY(6) - kRowHeight/3) * OFFSCREEN_WIDTH;
+	ditheringPatternPlot += gScreenXOffset + kColumnX[1];
 	for (int y = 0; y < 2*kRowHeight/3; y++)
 	{
 		for (int x = y % 2; x < 20; x += 2)
@@ -664,7 +664,7 @@ static void LayOutControlsPage(void)
 	DeleteAllObjects();
 	EraseBackgroundBuffer();
 
-	LayOutText("C O N F I G U R E   C O N T R O L S", -2, 0, 0);
+	LayOutText(" CONFIGURE   CONTROLS", -2, 0, 0);
 
 	for (int i = 0; i < NUM_REMAPPABLE_NEEDS; i++)
 	{
