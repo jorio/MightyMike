@@ -50,6 +50,7 @@ uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
 uint8_t*		gRowDitherStrides = nil;		// for dithering filter
 
 										// GAME STUFF
+Handle			gBackgroundHandle = nil;
 Handle			gOffScreenHandle = nil;
 Handle			gPFBufferHandle = nil;
 Handle			gPFBufferCopyHandle = nil;

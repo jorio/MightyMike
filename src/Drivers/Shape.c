@@ -116,7 +116,7 @@ int32_t	offset;
 
 /************************ LOAD SHAPE TABLE *****************/
 
-void LoadShapeTable(const char* fileName, long groupNum, Boolean usePalFlag)
+void LoadShapeTable(const char* fileName, long groupNum)
 {
 					/* THE REAL WORK */
 
@@ -135,17 +135,13 @@ void LoadShapeTable(const char* fileName, long groupNum, Boolean usePalFlag)
 	int16_t colorListSize = Byteswap16SignedRW(shapeTablePtr + offsetToColorTable);	// # entries in color list
 	GAME_ASSERT(colorListSize >= 0 && colorListSize <= 256);
 
+#if 0
 	/****************************** BUILD SHAPE PALETTE ********************/
-	//
-	// This must be the 1st thing done to the new game palette.  Assumes all clear.
-	//
+	// Source port note: Mighty Mike always sets palette colors from image files, never from shape
+	// files. Furthermore, the game's shape files never seem to actually define palette colors.
 
 	if (usePalFlag)															// get shape table's pal going
 	{
-		// Source port note: I left this code in, even though it's used for just one shape table in the entire game
-		// (see ShowLastScore), and even then, shape files never seem to define more than one color. They apparently
-		// rely on the standard game palette.
-
 				/* BYTESWAP COLORS IN PALETTE */
 
 		RGBColor* colorEntryPtr = (RGBColor *)(shapeTablePtr + offsetToColorTable + 2);	// point to color list
@@ -167,6 +163,7 @@ void LoadShapeTable(const char* fileName, long groupNum, Boolean usePalFlag)
 			gGamePalette[255] = RGBColorToU32(&black);				// set color
 		}
 	}
+#endif
 
  	/***************** CREATE SHAPE HEADER POINTERS ********************/
 	//

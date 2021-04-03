@@ -16,9 +16,6 @@
 #define		GAME_SPEED_MICROSECONDS		(1000L*1000L/(GAME_FPS))
 #define		GAME_SPEED_SDL				(1000/(GAME_FPS))
 
-#define	GET_PALETTE			true
-#define	DONT_GET_PALETTE	false
-
 #define	ONE_PLAYER		0
 #define	TWO_PLAYER		1
 

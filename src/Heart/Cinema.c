@@ -116,12 +116,10 @@ re_enter:
 					/* INITIAL LOADING */
 
 	InitObjectManager();
-	LoadShapeTable(":shapes:title.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
+	LoadShapeTable(":shapes:title.shapes", GROUP_MAIN);
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadBackground(
-		gGamePrefs.gameTitlePowerPete ? ":images:titlepagepp.tga" : ":images:titlepage.tga",
-		GET_PALETTE);
+	LoadBackground(gGamePrefs.gameTitlePowerPete ? ":images:titlepagepp.tga" : ":images:titlepage.tga");
 	DumpBackground();
 
 
@@ -401,29 +399,21 @@ void DoSceneScreen(void)
 					/* INITIAL LOADING */
 
 	PlaySong(SONG_ID_WORLD_INTRO);
-	switch(gSceneNum)
+
+	const char* imagePath = nil;
+	switch (gSceneNum)
 	{
-		case	SCENE_JURASSIC:
-			LoadIMAGE(":images:dinoscene.tga", SHOW_IMAGE_FLAG_FADEIN);
-			break;
-
-		case	SCENE_CANDY:
-			LoadIMAGE(":images:candyscene.tga", SHOW_IMAGE_FLAG_FADEIN);
-			break;
-
-		case	SCENE_CLOWN:
-			LoadIMAGE(":images:clownscene.tga", SHOW_IMAGE_FLAG_FADEIN);
-			break;
-
-		case	SCENE_FAIRY:
-			LoadIMAGE(":images:fairyscene.tga", SHOW_IMAGE_FLAG_FADEIN);
-			break;
-
-		case	SCENE_BARGAIN:
-			LoadIMAGE(":images:bargainscene.tga", SHOW_IMAGE_FLAG_FADEIN);
-			break;
-
+		case SCENE_JURASSIC:		imagePath = ":images:dinoscene.tga";		break;
+		case SCENE_CANDY:			imagePath = ":images:candyscene.tga";		break;
+		case SCENE_FAIRY:			imagePath = ":images:fairyscene.tga";		break;
+		case SCENE_CLOWN:			imagePath = ":images:clownscene.tga";		break;
+		case SCENE_BARGAIN:			imagePath = ":images:bargainscene.tga";		break;
+		default:
+			GAME_ASSERT_MESSAGE(false, "Unsupported scene ID!");
 	}
+
+	LoadImage(imagePath, LOADIMAGE_FADEIN);
+
 	WaitWhileMusic();
 	StopMusic();
 
@@ -477,8 +467,8 @@ void	DisplayScores(void)
 short		i;
 
 	EraseCLUT();
-	LoadShapeTable(":shapes:highscore.shapes",GROUP_WIN,DONT_GET_PALETTE);
-	LoadBackground(":images:scores.tga", GET_PALETTE);
+	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
+	LoadBackground(":images:scores.tga");
 	DumpBackground();							// dump to playfield
 	DumpGameWindow();									// show the whole thing
 
@@ -553,8 +543,7 @@ gotit:
 
 void ShowLastScore(void)
 {
-
-	LoadShapeTable(":shapes:highscore.shapes",GROUP_WIN,GET_PALETTE);
+	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
 	EraseBackgroundBuffer();
 
 	EraseCLUT();
@@ -592,7 +581,7 @@ ObjNode		*nameObj;
 
 						/* LOAD LETTERS FOR WRITELN */
 
-	LoadShapeTable(":shapes:highscore.shapes",GROUP_WIN,GET_PALETTE);
+	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
 
 
 						/* MAKE CURSOR SPRITE */
@@ -773,7 +762,7 @@ void DoPangeaLogo(void)
 void DoLegal(void)
 {
 	EraseCLUT();
-	LoadIMAGE(":images:legal.tga", SHOW_IMAGE_FLAG_FADEIN);
+	LoadImage(":images:legal.tga", LOADIMAGE_FADEIN);
 	Wait2(60*6);
 	FadeOutGameCLUT();
 }
@@ -790,10 +779,10 @@ long		restoreMode;
 					/* INITIAL LOADING */
 
 	InitObjectManager();
-	LoadShapeTable(":shapes:playerchoose.shapes",GROUP_OVERHEAD,DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:playerchoose.shapes", GROUP_OVERHEAD);
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadBackground(":images:playerchoose.tga", GET_PALETTE);
+	LoadBackground(":images:playerchoose.tga");
 	DumpBackground();										// dump to playfield
 
 
@@ -1054,10 +1043,10 @@ short	lineCount;
 	InitScreenBuffers();					// restore offscreen buffers so we can animate
 
 	InitObjectManager();
-	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN, DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
 
 	EraseBackgroundBuffer();
-	LoadBackground(backgroundFilePath, GET_PALETTE);
+	LoadBackground(backgroundFilePath);
 	DumpBackground();											// dump to playfield
 
 				/* SET CLIPPING ZONE */
@@ -1167,47 +1156,24 @@ short	counter,i;
 
 	switch(gSceneNum)
 	{
-		case	SCENE_JURASSIC:
-				PlaySong(SONG_ID_JURASSIC_INTRO);
-				break;
-
-		case	SCENE_CANDY:
-				PlaySong(SONG_ID_CANDY_INTRO);
-				break;
-
-		case	SCENE_CLOWN:
-				PlaySong(SONG_ID_CLOWN_INTRO);
-				break;
-
-		case	SCENE_FAIRY:
-				PlaySong(SONG_ID_FAIRY_INTRO);
-				break;
-
-		case	SCENE_BARGAIN:
-				PlaySong(SONG_ID_BARGAIN_INTRO);
-				break;
+		case	SCENE_JURASSIC:		PlaySong(SONG_ID_JURASSIC_INTRO);		break;
+		case	SCENE_CANDY:		PlaySong(SONG_ID_CANDY_INTRO);			break;
+		case	SCENE_FAIRY:		PlaySong(SONG_ID_FAIRY_INTRO);			break;
+		case	SCENE_CLOWN:		PlaySong(SONG_ID_CLOWN_INTRO);			break;
+		case	SCENE_BARGAIN:		PlaySong(SONG_ID_BARGAIN_INTRO);		break;
 	}
 
 					/* INITIAL LOADING */
 
 	InitObjectManager();
-	LoadShapeTable(":shapes:overheadmap.shapes",GROUP_OVERHEAD,DONT_GET_PALETTE);	// load graphix & palette
+	LoadShapeTable(":shapes:overheadmap.shapes", GROUP_OVERHEAD);
 	EraseCLUT();
 	EraseBackgroundBuffer();
 
-	switch(gDifficultySetting)
-	{
-//		case	DIFFICULTY_NORMAL:
-//				LoadBackground(":images:overheadmap3.tga", GET_PALETTE);
-//				break;
-		case	DIFFICULTY_EASY:
-				LoadBackground(":images:overheadmap2.tga", GET_PALETTE);
-				break;
-		case	DIFFICULTY_NORMAL:
-		case	DIFFICULTY_HARD:
-				LoadBackground(":images:overheadmap.tga", GET_PALETTE);
-				break;
-	}
+	if (gDifficultySetting == DIFFICULTY_EASY)
+		LoadBackground(":images:overheadmap2.tga");				// clown and bargain scenes grayed out
+	else
+		LoadBackground(":images:overheadmap.tga");				// all scenes in full color
 
 	DumpBackground();
 
@@ -1335,7 +1301,7 @@ void DoLoseScreen(void)
 					/* INITIAL LOADING */
 
 	PlaySong(SONG_ID_LOSEGAME);
-	LoadIMAGE(":images:lose.tga", SHOW_IMAGE_FLAG_FADEIN);
+	LoadImage(":images:lose.tga", LOADIMAGE_FADEIN);
 	WaitWhileMusic();
 	StopMusic();
 }
@@ -1376,9 +1342,9 @@ void DoWinScreen(void)
 
 
 	PlaySong(SONG_ID_WINGAME);
-	LoadShapeTable(":shapes:win.shapes",GROUP_WIN,DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:win.shapes", GROUP_WIN);
 	EraseBackgroundBuffer();
-	LoadBackground(":images:win.tga", GET_PALETTE);
+	LoadBackground(":images:win.tga");
 	DumpBackground();
 
 						/* LETS DO IT */
@@ -1477,8 +1443,8 @@ static	short	xCoords[] = {105,319,540};
 	FadeOutGameCLUT();
 	InitObjectManager();
 	EraseBackgroundBuffer();
-	LoadShapeTable(":shapes:difficulty.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
-	LoadBackground(":images:diff.tga", GET_PALETTE);
+	LoadShapeTable(":shapes:difficulty.shapes", GROUP_MAIN);
+	LoadBackground(":images:diff.tga");
 	DumpBackground();
 
 	mode = gGamePrefs.difficulty;
@@ -1580,8 +1546,8 @@ ObjNode	*newObj;
 	InitObjectManager();
 	EraseCLUT();
 	EraseBackgroundBuffer();
-	LoadShapeTable(":shapes:view.shapes",GROUP_MAIN,DONT_GET_PALETTE);	// load graphix & palette
-	LoadBackground(":images:head.tga", GET_PALETTE);
+	LoadShapeTable(":shapes:view.shapes", GROUP_MAIN);
+	LoadBackground(":images:head.tga");
 	DumpBackground();
 
 
@@ -1665,11 +1631,11 @@ short	selection;
 	ZapShapeTable(GROUP_AREA_SPECIFIC2);
 
 	InitObjectManager();
-	LoadShapeTable(":shapes:bonus.shapes",GROUP_BONUS,DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:bonus.shapes", GROUP_BONUS);
 	EraseCLUT();
 
 	BlankEntireScreenArea();
-	LoadIMAGE(":images:bonus.tga", SHOW_IMAGE_FLAG_FADEIN);
+	LoadImage(":images:bonus.tga", LOADIMAGE_FADEIN);
 
 	if (gMusicOnFlag)
 	{

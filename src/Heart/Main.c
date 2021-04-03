@@ -135,12 +135,12 @@ void InitGame(void)
 				/* LOAD ART WHICH IS ALWAYS WITH US */
 
 	if (gGamePrefs.pfSize != PFSIZE_SMALL)
-		LoadShapeTable(":shapes:infobar2.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
+		LoadShapeTable(":shapes:infobar2.shapes", GROUP_INFOBAR);
 	else
-		LoadShapeTable(":shapes:infobar.shapes",GROUP_INFOBAR,DONT_GET_PALETTE);
+		LoadShapeTable(":shapes:infobar.shapes", GROUP_INFOBAR);
 
-	LoadShapeTable(":shapes:weapon.shapes",GROUP_WEAPONS,DONT_GET_PALETTE);
-	LoadShapeTable(":shapes:main.shapes",GROUP_MAIN,DONT_GET_PALETTE);
+	LoadShapeTable(":shapes:weapon.shapes", GROUP_WEAPONS);
+	LoadShapeTable(":shapes:main.shapes", GROUP_MAIN);
 
 				/* HACK: GET RID OF WHITE LINE AT RIGHT EDGE OF QUIT/RESUME GRAPHICS */
 
@@ -234,11 +234,11 @@ void LoadAreaArt(void)
 	FillThermometer(20);
 
 	snprintf(path, sizeof(path), ":shapes:%s1.shapes", sceneName);
-	LoadShapeTable(path, GROUP_AREA_SPECIFIC, DONT_GET_PALETTE);
+	LoadShapeTable(path, GROUP_AREA_SPECIFIC);
 	FillThermometer(40);
 
 	snprintf(path, sizeof(path), ":shapes:%s2.shapes", sceneName);
-	LoadShapeTable(path, GROUP_AREA_SPECIFIC2, DONT_GET_PALETTE);
+	LoadShapeTable(path, GROUP_AREA_SPECIFIC2);
 	FillThermometer(60);
 
 	GAME_ASSERT(gAreaNum < 3);

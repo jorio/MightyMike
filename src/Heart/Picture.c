@@ -20,76 +20,74 @@
 /*    CONSTANTS             */
 /****************************/
 
-
-
 /**********************/
 /*     VARIABLES      */
 /**********************/
 
-Handle	gBackgroundHandle = nil;
-
-
 /************************ LOAD BACKGROUND *****************/
 
-void LoadBackground(const char* fileName, Boolean getPalFlag)
+void LoadBackground(const char* fileName)
 {
-	EraseBackgroundBuffer();
-
-	int width;
-	int height;
-	Handle imageHandle = LoadTGA(fileName, getPalFlag, &width, &height);
-	GAME_ASSERT_MESSAGE(imageHandle, fileName);					// load & unpack image file
-
-						/* DRAW THE IMAGE */
-
-	Ptr dest = (*gBackgroundHandle)+WINDOW_OFFSET;				// init pointers
-	Ptr source = *imageHandle;
-
-	for (int y = 0; y < height; y++)
-	{
-		memcpy(dest, source, width);
-		dest += OFFSCREEN_WIDTH;								// next row
-		source += width;
-	}
-
-	DisposeHandle(imageHandle);									// zap image data
+	LoadImage(fileName, LOADIMAGE_BACKGROUND);
 }
-
 
 /************************ LOAD IMAGE *****************/
 //
 // showMode determines how the IMAGE is to be displayed:
 //
-// NOTE: image is loaded directly onto the screen.
-//
 
-void LoadIMAGE(const char* fileName, short showMode)
+void LoadImage(const char* fileName, short showMode)
 {
-	int width;
-	int height;
-	Handle imageHandle = LoadTGA(fileName, true, &width, &height);
+	const bool		getPalette = true;
+	int				width;
+	int				height;
+	uint8_t*		destPtr;
+	int				destRowBytes;
+	const uint8_t*	srcPtr;
+
+				/* LOAD TGA FILE */
+
+	Handle imageHandle = LoadTGA(fileName, getPalette, &width, &height);
 	GAME_ASSERT_MESSAGE(imageHandle, fileName);			// load & unpack image file
 
-				/* DUMP PIXEL IMAGE INTO BUFFER */
+	GAME_ASSERT(width <= VISIBLE_WIDTH);				// image must fit on screen
+	GAME_ASSERT(height <= VISIBLE_HEIGHT);
 
-	GAME_ASSERT((int)width * (int)height <= (int)sizeof(gIndexedFramebuffer));
+				/* GET DESTINATION POINTER */
 
-	const uint8_t* srcPtr = *imageHandle;
-	uint8_t* destPtr = gIndexedFramebuffer;
+	if (showMode & LOADIMAGE_BACKGROUND)
+	{
+		destPtr = (uint8_t*) *gBackgroundHandle;
+		destPtr += OFFSCREEN_WINDOW_TOP*OFFSCREEN_WIDTH;
+		destPtr += OFFSCREEN_WINDOW_LEFT;
+		destRowBytes = OFFSCREEN_WIDTH;
+		EraseBackgroundBuffer();
+	}
+	else
+	{
+		destPtr = gIndexedFramebuffer;
+		destRowBytes = gScreenRowOffset;
+	}
+
+				/* OFFSET DESTINATION POINTER */
 
 	// offset X
 	destPtr += (VISIBLE_WIDTH - width) / 2;
 
 	// offset Y
-	if (showMode & SHOW_IMAGE_FLAG_ALIGNBOTTOM)
-		destPtr += gScreenRowOffset * (VISIBLE_HEIGHT - height);
+	if (showMode & LOADIMAGE_ALIGNBOTTOM)
+		destPtr += destRowBytes * (VISIBLE_HEIGHT - height);
 	else
-		destPtr += gScreenRowOffset * (VISIBLE_HEIGHT - height) / 2;
+		destPtr += destRowBytes * (VISIBLE_HEIGHT - height) / 2;
+
+				/* DUMP PIXEL IMAGE INTO BUFFER */
+
+	srcPtr = (const uint8_t*) *imageHandle;
 
 	for (int y = 0; y < height; y++)
 	{
 		memcpy(destPtr, srcPtr, width);
-		destPtr += gScreenRowOffset;
+		destPtr += destRowBytes;
 		srcPtr += width;
 	}
 
@@ -97,7 +95,7 @@ void LoadIMAGE(const char* fileName, short showMode)
 
 						/* LETS SEE IT */
 
-	if (showMode & SHOW_IMAGE_FLAG_FADEIN)
+	if (showMode & LOADIMAGE_FADEIN)
 		FadeInGameCLUT();
 	else
 		PresentIndexedFramebuffer();
@@ -125,13 +123,13 @@ void LoadBorderImage(void)
 		break;
 	case PFSIZE_WIDE:
 		path = ":images:border832.tga";
-		flags |= SHOW_IMAGE_FLAG_ALIGNBOTTOM;
+		flags |= LOADIMAGE_ALIGNBOTTOM;
 		break;
 	default:
 		GAME_ASSERT_MESSAGE(false, "Unknown pfSize!");
 		return;
 	}
 
-	LoadIMAGE(path, flags);
+	LoadImage(path, flags);
 }
 

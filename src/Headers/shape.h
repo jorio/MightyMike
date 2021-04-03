@@ -24,7 +24,7 @@ typedef struct FrameList
 #pragma pack(pop)
 
 ObjNode	*MakeNewShape(long groupNum, long type, long subType, short x, short y, short z, void (*moveCall)(void), Boolean pfRelativeFlag);
-void LoadShapeTable(const char* filename, long groupNum, Boolean usePalFlag);
+void LoadShapeTable(const char* filename, long groupNum);
 const FrameHeader* GetFrameHeader(long groupNum, long shapeNum, long frameNum, const uint8_t** outPixelPtr, const uint8_t** outMaskPtr);
 void	DrawFrameToScreen(long, long, long, long, long);
 void	DrawFrameToScreen_NoMask(long, long, long, long, long);

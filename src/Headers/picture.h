@@ -4,11 +4,12 @@
 
 enum
 {
-	SHOW_IMAGE_FLAG_FADEIN		= 1 << 0,
-	SHOW_IMAGE_FLAG_ALIGNBOTTOM = 1 << 1,
+	LOADIMAGE_FADEIN		= 1 << 0,
+	LOADIMAGE_ALIGNBOTTOM	= 1 << 1,
+	LOADIMAGE_BACKGROUND	= 1 << 2,
 };
 
 
-void	LoadBackground(const char* filename, Boolean getPalFlag);
-void	LoadIMAGE(const char* filename, short showMode);
+void	LoadBackground(const char* filename);
+void	LoadImage(const char* filename, short showMode);
 void	LoadBorderImage(void);

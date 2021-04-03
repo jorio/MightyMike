@@ -701,9 +701,9 @@ void DoSettingsScreen(void)
 
 	FadeOutGameCLUT();
 	InitObjectManager();
-	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN, DONT_GET_PALETTE);
-	LoadShapeTable(":shapes:jurassic1.shapes", GROUP_AREA_SPECIFIC, DONT_GET_PALETTE);	// cursor bone
-	LoadBackground(":images:credits1.tga",  GET_PALETTE);		// just to load the palette...
+	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
+	LoadShapeTable(":shapes:jurassic1.shapes", GROUP_AREA_SPECIFIC);	// cursor bone
+	LoadBackground(":images:winbw.tga");								// just to load the palette
 
 						/* LETS DO IT */
 

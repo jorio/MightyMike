@@ -145,10 +145,6 @@ extern	long					gRegionClipRight[MAX_CLIP_REGIONS];
 extern	GamePalette				gGamePalette;
 extern	Boolean					gScreenBlankedFlag;
 
-#pragma mark - Picture
-
-extern	Handle					gBackgroundHandle;
-
 #pragma mark - Playfield
 
 extern	long					PF_TILE_HEIGHT;
@@ -228,5 +224,6 @@ extern	Ptr						*gPFCopyLookUpTable;
 extern	Ptr						*gPFMaskLookUpTable;
 extern	long					gScreenXOffset;
 extern	long					gScreenYOffset;
+extern	Handle					gBackgroundHandle;
 extern	Handle					gOffScreenHandle;
 extern	Handle					gPFBufferHandle;
