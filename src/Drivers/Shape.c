@@ -221,7 +221,6 @@ void LoadShapeTable(const char* fileName, long groupNum)
 			*/
 		}
 
-
 //		printf("Num Anims: %d    Num Frames: %d\n", numAnims, numFrames);
 	}
 }
@@ -365,7 +364,7 @@ void DrawFrameToScreen(long x,long y,long groupNum,long shapeNum,long frameNum)
 			shapeNum,
 			frameNum,
 			true,
-			gScreenAddr,
+			gIndexedFramebuffer,
 			VISIBLE_WIDTH,
 			VISIBLE_HEIGHT
 	);
@@ -387,7 +386,7 @@ void DrawFrameToScreen_NoMask(long x,long y,long groupNum,long shapeNum,long fra
 			shapeNum,
 			frameNum,
 			false,
-			gScreenAddr,
+			gIndexedFramebuffer,
 			VISIBLE_WIDTH,
 			VISIBLE_HEIGHT
 	);

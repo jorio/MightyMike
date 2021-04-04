@@ -503,8 +503,6 @@ void AddHighScore(long	newScore)
 {
 short		i,z,m;
 
-	InitScreenBuffers();					// restore offscreen buffers so we can animate
-
 				/* SEE IF WORTHY */
 
 	for (i=0; i<MAX_HIGH_SCORES; i++)
@@ -513,7 +511,6 @@ short		i,z,m;
 			goto gotit;
 	}
 	ShowLastScore();										// not a high score, so just show it
-	WipeScreenBuffers();									// free some of that buffer memory
 	return;
 
 				/* ADD THE SCORE */
@@ -536,7 +533,6 @@ gotit:
 	DisplayScores();										// put em up there
 	DoEnterName(i);											// ask for a name
 	SaveHighScores();
-	WipeScreenBuffers();									// free some of that buffer memory
 }
 
 /************************ SHOW LAST SCORE ******************/
@@ -1047,8 +1043,6 @@ short	lineCount;
 
 				/* INITIAL LOADING */
 
-	InitScreenBuffers();					// restore offscreen buffers so we can animate
-
 	InitObjectManager();
 	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
 
@@ -1155,8 +1149,6 @@ short	counter,i;
 	FadeOutGameCLUT();											// fade out old screen
 	BlankEntireScreenArea();
 	OptimizeMemory();											// free up some memory so we can allocate draw buffers for animation
-
-	InitScreenBuffers();										// restore offscreen buffers so we can animate
 
 
 					/* PLAY INTRO MELODY */
@@ -1290,7 +1282,6 @@ short	counter,i;
 	WaitWhileMusic();
 
 	StopMusic();
-	WipeScreenBuffers();							// free some of that buffer memory
 	ZapShapeTable(GROUP_OVERHEAD);
 	OptimizeMemory();
 }
@@ -1343,7 +1334,6 @@ void DoWinScreen(void)
 
 					/* INITIAL LOADING */
 	FadeOutGameCLUT();
-	InitScreenBuffers();					// restore offscreen buffers so we can animate
 	InitObjectManager();
 
 
@@ -1396,7 +1386,6 @@ more:
 	DoCredits();
 	StopMusic();
 	ZapShapeTable(GROUP_WIN);
-	WipeScreenBuffers();							// free some of that buffer memory
 }
 
 /********************** MOVE CONFETTI ******************************/

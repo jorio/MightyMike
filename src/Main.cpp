@@ -3,8 +3,6 @@
 #include "PommeFiles.h"
 #include "PommeGraphics.h"
 
-#include "window.h"
-
 #include <SDL.h>
 
 #include <iostream>
@@ -77,8 +75,8 @@ int CommonMain(int argc, const char** argv)
 			"Mighty Mike",
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			VISIBLE_WIDTH,
-			VISIBLE_HEIGHT,
+			640,
+			480,
 			SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
 	if (!gSDLWindow)
 		throw std::runtime_error("Couldn't create SDL window.");
@@ -88,7 +86,7 @@ int CommonMain(int argc, const char** argv)
 		throw std::runtime_error("Couldn't create SDL renderer.");
 	// The texture bound to the renderer is created in-game after loading the prefs.
 
-	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+	SDL_RenderSetLogicalSize(gSDLRenderer, 640, 480);
 
 	fs::path dataPath = FindGameData();
 #if !(__APPLE__)

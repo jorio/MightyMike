@@ -302,13 +302,13 @@ const int	radarCenterY = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_Y : RA
 
 	PlaySound(SOUND_RADAR);
 
-	Ptr destPtr = gScreenLookUpTable[0] + (radarCenterX - width/2) + (radarCenterY - height/2) * gScreenRowOffset;
+	Ptr destPtr = (Ptr) gScreenLookUpTable[radarCenterY - height/2] + (radarCenterX - width/2);
 	Ptr srcPtr = *imageHandle;
 
 	for (int i = 0; i < height; i++)
 	{
 		memcpy(destPtr, srcPtr, width);
-		destPtr += gScreenRowOffset;
+		destPtr += VISIBLE_WIDTH;
 		srcPtr += width;
 	}
 

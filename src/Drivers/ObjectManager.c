@@ -51,22 +51,26 @@ long		gRegionClipTop[MAX_CLIP_REGIONS],gRegionClipBottom[MAX_CLIP_REGIONS],
 			gRegionClipLeft[MAX_CLIP_REGIONS],gRegionClipRight[MAX_CLIP_REGIONS];
 
 
-/************************ INIT OBJECT MANAGER **********************/
+/************************ INIT CLIPPING REGIONS **********************/
 
-void InitObjectManager(void)
+void InitClipRegions(void)
 {
-short		i;
-Handle	ObjHandle;
-
-					/* INIT CLIPPING REGIONS */
-
-	for (i=0; i<MAX_CLIP_REGIONS; i++)						// init ALL clipping areas to full buffer size
+	for (int i = 0; i < MAX_CLIP_REGIONS; i++)				// init ALL clipping areas to full buffer size
 	{
 		gRegionClipTop[i] = OFFSCREEN_WINDOW_TOP;
 		gRegionClipBottom[i] = OFFSCREEN_WINDOW_TOP+VISIBLE_HEIGHT-1;
 		gRegionClipLeft[i] = OFFSCREEN_WINDOW_LEFT;
 		gRegionClipRight[i] = OFFSCREEN_WINDOW_LEFT+VISIBLE_WIDTH-1;
 	}
+}
+
+/************************ INIT OBJECT MANAGER **********************/
+
+void InitObjectManager(void)
+{
+					/* INIT CLIPPING REGIONS */
+
+	InitClipRegions();
 
 
 				/* INIT LIKED LIST */
@@ -74,7 +78,7 @@ Handle	ObjHandle;
 
 	if (ObjectList == nil)								// see if need to allocate memory for object list
 	{
-		ObjHandle = NewHandleClear(sizeof(ObjNode)*MAX_OBJECTS);
+		Handle ObjHandle = NewHandleClear(sizeof(ObjNode)*MAX_OBJECTS);
 		GAME_ASSERT(ObjHandle);
 		ObjectList = (ObjNode *)*ObjHandle;
 	}
@@ -86,7 +90,7 @@ Handle	ObjHandle;
 
 	FirstNodePtr = nil;									// no node yet
 	NumObjects = 0;
-	for (i=0; i<MAX_OBJECTS; i++)
+	for (int i = 0; i < MAX_OBJECTS; i++)
 	{
 		// No need to init most fields to 0 since we used NewHandleClear.
 		ObjectList[i].NodeNum = i;
@@ -95,7 +99,7 @@ Handle	ObjHandle;
 					/* INIT FREE NODE STACK */
 
 	NodeStackFront = 0;
-	for (i=0; i<MAX_OBJECTS; i++)
+	for (int i = 0; i < MAX_OBJECTS; i++)
 	{
 		FreeNodeStack[i] = &ObjectList[i];
 	}
@@ -672,7 +676,7 @@ void DumpUpdateRegions_DontPresentFramebuffer(void)
 		{
 			memcpy(destPtr, srcPtr, width);
 
-			destPtr += gScreenRowOffset;				// Bump to start of next row.
+			destPtr += VISIBLE_WIDTH;					// Bump to start of next row.
 			srcPtr += OFFSCREEN_WIDTH;
 
 		} while (--height);

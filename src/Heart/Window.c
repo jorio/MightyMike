@@ -31,6 +31,7 @@
 /*    PROTOTYPES            */
 /****************************/
 
+static void InitScreenBuffers(void);
 static void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags);
 
 
@@ -44,8 +45,11 @@ static void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlag
 /**********************/
 
 
-uint8_t			gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
-uint8_t			gRGBAFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT * 4];
+int				VISIBLE_WIDTH = 640;			// dimensions of visible area (MULTIPLE OF 4!!!)
+int				VISIBLE_HEIGHT = 480;
+
+uint8_t*		gIndexedFramebuffer = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT]
+uint8_t*		gRGBAFramebuffer = nil;			// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4]
 
 uint8_t*		gRowDitherStrides = nil;		// for dithering filter
 
@@ -56,14 +60,14 @@ Handle			gPFBufferHandle = nil;
 Handle			gPFBufferCopyHandle = nil;
 Handle			gPFMaskBufferHandle = nil;
 
-uint8_t*		gScreenAddr	= gIndexedFramebuffer;	// SCREEN ACCESS
-long			gScreenRowOffset = VISIBLE_WIDTH;		// offset for bytes
-long			gScreenXOffset,gScreenYOffset;
+										// SCREEN ACCESS
+long			gScreenXOffset = 0;				// to center 640x480 screens in widescreen mode
+long			gScreenYOffset = 0;
 
 
-uint8_t*		gScreenLookUpTable[VISIBLE_HEIGHT];
-uint8_t*		gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-uint8_t*		gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
+uint8_t**		gScreenLookUpTable = nil;		//[VISIBLE_HEIGHT]
+uint8_t**		gOffScreenLookUpTable = nil;	//[OFFSCREEN_HEIGHT]
+uint8_t**		gBackgroundLookUpTable = nil;	//[OFFSCREEN_HEIGHT]
 
 Ptr				*gPFLookUpTable = nil;
 Ptr				*gPFCopyLookUpTable = nil;
@@ -75,17 +79,11 @@ static uint32_t			gDebugTextLastUpdatedAt = 0;
 static char				gDebugTextBuffer[1024];
 
 
-/********************** ERASE OFFSCREEN BUFFER ********************/
-
-void EraseOffscreenBuffer(void)
-{
-	memset(*gOffScreenHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// clear to black
-}
-
 /********************** ERASE BACKGROUND BUFFER ********************/
 
 void EraseBackgroundBuffer(void)
 {
+	GAME_ASSERT(GetHandleSize(gBackgroundHandle) == OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 	memset(*gBackgroundHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// clear to black
 }
 
@@ -96,99 +94,22 @@ void MakeGameWindow(void)
 {
 	SetScreenOffsetFor640x480();
 
-
-	WindowToBlack();
 	InitScreenBuffers();
 
-
-#define CHECKED_DISPOSEPTR(p) do { if (p) { DisposePtr((Ptr) p); (p) = nil; } } while(0)
-	CHECKED_DISPOSEPTR(gPFLookUpTable);
-	CHECKED_DISPOSEPTR(gPFCopyLookUpTable);
-	CHECKED_DISPOSEPTR(gPFMaskLookUpTable);
-#undef CHECKED_DISPOSEPTR
-
-#define CHECKED_DISPOSEHANDLE(h) do { if (h) { DisposeHandle(h); (h) = nil; } } while(0)
-	CHECKED_DISPOSEHANDLE(gPFBufferHandle);
-	CHECKED_DISPOSEHANDLE(gPFBufferCopyHandle);
-	CHECKED_DISPOSEHANDLE(gPFMaskBufferHandle);
-#undef CHECKED_DISPOSEHANDLE
-	
-
-				/* ALLOC MEM FOR PF LOOKUP TABLES */
-
-	gPFLookUpTable		= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFCopyLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFMaskLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-
-
-					/* MAKE PLAYFIELD BUFFERS */
-
-	gPFBufferHandle		= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-	gPFBufferCopyHandle	= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-	gPFMaskBufferHandle	= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
-
-	GAME_ASSERT(gPFLookUpTable);
-	GAME_ASSERT(gPFCopyLookUpTable);
-	GAME_ASSERT(gPFMaskLookUpTable);
-	GAME_ASSERT(gPFBufferHandle);
-	GAME_ASSERT(gPFBufferCopyHandle);
-	GAME_ASSERT(gPFMaskBufferHandle);
-
-
-
-
-	/******************** BUILD LOOKUP TABLES *******************/
-	//
-	// NOTE: Does NOT build the Offscreen & Background lookup tables (SEE INITSCREENBUFFERS)
-	//
-
-					/* BUILD SCREEN LOOKUP TABLE */
-
-	for (int i = 0; i < VISIBLE_HEIGHT; i++)
-		gScreenLookUpTable[i] = gScreenAddr + (gScreenRowOffset * i);
-
-		
-					/* BUILD PLAYFIELD LOOKUP TABLES */
-
-	for (int i = 0; i < PF_BUFFER_HEIGHT; i++)
-	{
-		gPFLookUpTable[i]		= (*gPFBufferHandle)		+ (i * PF_BUFFER_WIDTH);
-		gPFCopyLookUpTable[i]	= (*gPFBufferCopyHandle)	+ (i * PF_BUFFER_WIDTH);
-		gPFMaskLookUpTable[i]	= (*gPFMaskBufferHandle)	+ (i * PF_BUFFER_WIDTH);
-	}
-
-
-	
-	EraseGameWindow();												// erase buffer & screen
-}
-
-
-/********************** ERASE GAME WINDOW ******************/
-
-void EraseGameWindow (void)
-{
-	EraseOffscreenBuffer();
 	DumpGameWindow();
-}
-
-/********************** WINDOW TO BLACK *****************/
-
-void WindowToBlack(void)
-{
-	memset(gIndexedFramebuffer, 0xFF, VISIBLE_WIDTH * VISIBLE_HEIGHT);
 	PresentIndexedFramebuffer();
 }
 
 /********************** DUMP GAME WINDOW ****************/
 //
-// Dumps the full 640*480 screen (from larger buffer) to screen
+// Dumps offscreen buffer to framebuffer
 //
 
 void DumpGameWindow(void)
 {
 				/* GET SCREEN PIXMAP INFO */
 
-	uint8_t* destPtr	= (uint8_t *)gScreenAddr;
+	uint8_t* destPtr	= gIndexedFramebuffer;
 	uint8_t* srcPtr		= (uint8_t *)(gOffScreenLookUpTable[0]+WINDOW_OFFSET);
 
 						/* DO THE QUICK COPY */
@@ -197,7 +118,7 @@ void DumpGameWindow(void)
 	{
 		memcpy(destPtr, srcPtr, VISIBLE_WIDTH);
 
-		destPtr += gScreenRowOffset;				// Bump to start of next row
+		destPtr += VISIBLE_WIDTH;				// Bump to start of next row
 		srcPtr += OFFSCREEN_WIDTH;
 	}
 }
@@ -212,35 +133,6 @@ void DumpGameWindow(void)
 void DumpBackground(void)
 {
 	memcpy(gOffScreenLookUpTable[0], gBackgroundLookUpTable[0], OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
-}
-
-
-
-
-/********************** WIPE SCREEN BUFFERS *************************/
-//
-// Deletes the Offscreen & Background buffers and wipes their xlate tables
-//
-
-void WipeScreenBuffers(void)
-{
-	if (gOffScreenHandle != nil)
-	{
-		DisposeHandle(gOffScreenHandle);
-		gOffScreenHandle = nil;
-	}
-
-	if (gBackgroundHandle != nil)
-	{
-		DisposeHandle(gBackgroundHandle);
-		gBackgroundHandle = nil;
-	}
-
-	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
-	{
-		gOffScreenLookUpTable[i] = nil;
-		gBackgroundLookUpTable[i] = nil;
-	}
 }
 
 
@@ -269,7 +161,7 @@ long		size;
 		for (short height = PF_WINDOW_HEIGHT>>1; height > 0; height--)
 		{
 			memset(destPtr, 0xFE, PF_WINDOW_WIDTH);		// dark grey
-			destPtr += gScreenRowOffset;
+			destPtr += VISIBLE_WIDTH;
 		}
 	}
 }
@@ -292,34 +184,105 @@ Rect	r;
 
 void InitScreenBuffers(void)
 {
-	WipeScreenBuffers();										// clear from any previous time
+	CHECKED_DISPOSEPTR(gIndexedFramebuffer);
+	CHECKED_DISPOSEPTR(gRGBAFramebuffer);
 
+	CHECKED_DISPOSEHANDLE(gOffScreenHandle);
+	CHECKED_DISPOSEHANDLE(gBackgroundHandle);
+	CHECKED_DISPOSEPTR(gOffScreenLookUpTable);
+	CHECKED_DISPOSEPTR(gBackgroundLookUpTable);
 
+	CHECKED_DISPOSEPTR(gPFLookUpTable);
+	CHECKED_DISPOSEPTR(gPFCopyLookUpTable);
+	CHECKED_DISPOSEPTR(gPFMaskLookUpTable);
+
+	CHECKED_DISPOSEHANDLE(gPFBufferHandle);
+	CHECKED_DISPOSEHANDLE(gPFBufferCopyHandle);
+	CHECKED_DISPOSEHANDLE(gPFMaskBufferHandle);
+
+	CHECKED_DISPOSEPTR(gRowDitherStrides);
+
+					/* MAKE INDEXED FRAMEBUFFER */
+
+	gIndexedFramebuffer = (uint8_t*) NewPtrClear(VISIBLE_WIDTH * VISIBLE_HEIGHT);
+	GAME_ASSERT(gIndexedFramebuffer);
+
+	// Clear to black
+	memset(gIndexedFramebuffer, 0xFF, VISIBLE_WIDTH * VISIBLE_HEIGHT);
+
+					/* MAKE RGBA FRAMEBUFFER */
+
+	gRGBAFramebuffer = (uint8_t*) NewPtrClear(VISIBLE_WIDTH * VISIBLE_HEIGHT * 4);
+	GAME_ASSERT(gRGBAFramebuffer);
 
 					/* MAKE OFFSCREEN DRAW BUFFER */
 
-	gOffScreenHandle = NewHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
+	gOffScreenHandle = NewHandleClear(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 	GAME_ASSERT(gOffScreenHandle);
 
+	// Clear to black
+	memset(*gOffScreenHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 
 					/* MAKE BACKPLANE BUFFER */
 
-	gBackgroundHandle = NewHandle(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// get mem for background
+	gBackgroundHandle = NewHandleClear(OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 	GAME_ASSERT(gBackgroundHandle);
-
 
 					/* BUILD OFFSCREEN LOOKUP TABLE */
 
+	gOffScreenLookUpTable = (uint8_t**) NewPtrClear(sizeof(uint8_t*) * OFFSCREEN_HEIGHT);
 	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
 		gOffScreenLookUpTable[i] = ((uint8_t*) *gOffScreenHandle) + (i*OFFSCREEN_WIDTH);
 	}
+
 					/* BUILD BACKGROUND LOOKUP TABLE */
 
+	gBackgroundLookUpTable = (uint8_t**) NewPtrClear(sizeof(uint8_t*) * OFFSCREEN_HEIGHT);
 	for (int i = 0; i < OFFSCREEN_HEIGHT; i++)
 	{
 		gBackgroundLookUpTable[i] = ((uint8_t*) *gBackgroundHandle) + (i*OFFSCREEN_WIDTH);
 	}
+
+					/* ALLOC MEM FOR PF LOOKUP TABLES */
+
+	gPFLookUpTable		= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFCopyLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFMaskLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+
+					/* MAKE PLAYFIELD BUFFERS */
+
+	gPFBufferHandle		= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFBufferCopyHandle	= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+	gPFMaskBufferHandle	= NewHandleClear(PF_BUFFER_HEIGHT * PF_BUFFER_WIDTH);
+
+	GAME_ASSERT(gPFLookUpTable);
+	GAME_ASSERT(gPFCopyLookUpTable);
+	GAME_ASSERT(gPFMaskLookUpTable);
+	GAME_ASSERT(gPFBufferHandle);
+	GAME_ASSERT(gPFBufferCopyHandle);
+	GAME_ASSERT(gPFMaskBufferHandle);
+
+					/* BUILD SCREEN LOOKUP TABLE */
+
+	gScreenLookUpTable = (uint8_t**) NewPtrClear(sizeof(uint8_t*) * VISIBLE_HEIGHT);
+	for (int i = 0; i < VISIBLE_HEIGHT; i++)
+	{
+		gScreenLookUpTable[i] = gIndexedFramebuffer + (VISIBLE_WIDTH * i);
+	}
+
+					/* BUILD PLAYFIELD LOOKUP TABLES */
+
+	for (int i = 0; i < PF_BUFFER_HEIGHT; i++)
+	{
+		gPFLookUpTable[i]		= (*gPFBufferHandle)		+ (i * PF_BUFFER_WIDTH);
+		gPFCopyLookUpTable[i]	= (*gPFBufferCopyHandle)	+ (i * PF_BUFFER_WIDTH);
+		gPFMaskLookUpTable[i]	= (*gPFMaskBufferHandle)	+ (i * PF_BUFFER_WIDTH);
+	}
+
+					/* BUILD DITHERING FILTER BUFFER */
+
+	gRowDitherStrides = (uint8_t*) NewPtrClear(omp_get_max_threads() * VISIBLE_WIDTH);
 }
 
 
@@ -386,7 +349,7 @@ long	x,y;
 	{
 		memset(destPtr, 0xFF, width);
 
-		destPtr += gScreenRowOffset;				// next row
+		destPtr += VISIBLE_WIDTH;					// next row
 	}
 }
 
@@ -427,7 +390,7 @@ void CleanupDisplay(void)
 static void ConvertIndexedFramebufferToRGBA_NoFilter(void)
 {
 #pragma omp parallel for schedule(static) default(none) \
-		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer)
+		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer, VISIBLE_WIDTH, VISIBLE_HEIGHT)
 	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
 		uint32_t* rgba			= ((uint32_t*) gRGBAFramebuffer) + y * VISIBLE_WIDTH;
@@ -452,7 +415,7 @@ static void ConvertIndexedFramebufferToRGBA_FilterDithering(void)
 	}
 
 #pragma omp parallel for schedule(static) default(none) \
-		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer, gRowDitherStrides)
+		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer, gRowDitherStrides, VISIBLE_WIDTH, VISIBLE_HEIGHT)
 	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
 		uint32_t* rgba			= ((uint32_t*) gRGBAFramebuffer) + y * VISIBLE_WIDTH;

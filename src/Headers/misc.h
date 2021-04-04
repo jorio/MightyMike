@@ -83,3 +83,19 @@ static inline int PositiveModulo(int value, unsigned int m)
 		if (!(condition))												\
 			DoAssert(message, __func__, __LINE__);						\
 	} while(0)
+
+#define CHECKED_DISPOSEPTR(p)											\
+	do {																\
+		if (p) {														\
+			DisposePtr((Ptr) p);										\
+			(p) = nil;													\
+		}																\
+	} while(0)
+
+#define CHECKED_DISPOSEHANDLE(h)										\
+	do {																\
+		if (h) {														\
+			DisposeHandle(h);											\
+			(h) = nil;													\
+		}																\
+	} while(0)

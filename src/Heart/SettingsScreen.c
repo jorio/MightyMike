@@ -127,7 +127,7 @@ static SettingEntry gSettingEntries[] =
 	{nil							, "configure controls"	, OnEnterControls,			0,	{ NULL } },
 	{nil							, nil					, nil,						0,  { NULL } },
 	{&gGamePrefs.fullscreen			, "fullscreen"			, SetFullscreenMode,		2,	{ "no", "yes" }, },
-	{&gGamePrefs.pfSize				, "playfield size"		, OnChangePlayfieldSizeViaSettings,	2 /* TODO: set this to 3 to enable wide */,  { "small", "medium", "wide" } },
+	{&gGamePrefs.pfSize				, "playfield size"		, OnChangePlayfieldSizeViaSettings, 3, { "small: 68k original", "medium: ppc original", "large: widescreen" } },
 	{&gGamePrefs.integerScaling		, "upscaling"			, OnChangeIntegerScaling,	2,  { "stretch", "crisp" } },
 	{&gGamePrefs.uncappedFramerate	, "frame rate"			, nil,						2,  { "32 fps original", "uncapped" } },
 	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "   raw", "   filtered" } },
@@ -221,6 +221,8 @@ static void OnChangePlayfieldSizeViaSettings(void)
 {
 	gScreenBlankedFlag = true;
 	OnChangePlayfieldSize();
+	SetScreenOffsetFor640x480();
+	InitClipRegions();
 	gScreenBlankedFlag = false;
 	LayOutSettingsPageBackground();
 }
@@ -603,6 +605,12 @@ static void NukeText(int row, int col)
 static void LayOutSettingsPageBackground(void)
 {
 	EraseBackgroundBuffer();
+
+#if 0
+	// Color test
+	for (int y = 0; y < OFFSCREEN_HEIGHT; y++)
+		memset(*gBackgroundHandle + y*OFFSCREEN_WIDTH, y%256, OFFSCREEN_WIDTH);
+#endif
 
 	LayOutText(" SETTINGS", -2, 0, 0);
 

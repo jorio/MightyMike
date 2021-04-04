@@ -66,7 +66,7 @@ void LoadImage(const char* fileName, short showMode)
 	else
 	{
 		destPtr = gIndexedFramebuffer;
-		destRowBytes = gScreenRowOffset;
+		destRowBytes = VISIBLE_WIDTH;
 	}
 
 				/* OFFSET DESTINATION POINTER */

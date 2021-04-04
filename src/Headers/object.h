@@ -11,6 +11,7 @@
 #define	FARTHEST_Z				0xfff0		// $fff0-$ffff are Z's which will NOT sort
 #define NEAREST_Z				0x000f		// $0000-$000f are Z's which will NOT sort
 
+void	InitClipRegions(void);
 void	InitObjectManager(void);
 ObjNode	*MakeNewObject(Byte genre, short x, short y, unsigned short z, void (*moveCall)(void));
 void	MoveObjects(void);

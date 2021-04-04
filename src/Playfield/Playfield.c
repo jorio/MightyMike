@@ -190,16 +190,44 @@ void OnChangePlayfieldSize(void)
 		break;
 	case PFSIZE_WIDE:
 		PF_TILE_WIDTH	= 27;
-		PF_TILE_HEIGHT	= 15;				// dimensions of scrolling Playfield
+		PF_TILE_HEIGHT	= 14;				// dimensions of scrolling Playfield
 		PF_WINDOW_LEFT	= 0;				// left MUST be on 4 pixel boundary!!!!!
 		PF_WINDOW_TOP	= 0;
-		// TODO: Change VISIBLE_WIDTH, VISIBLE_HEIGHT; resize window; call SDL_RenderSetLogicalSize
 		break;
 	default:
 		GAME_ASSERT_MESSAGE(false, "OnChangePlayfieldSize: Unsupported pfSize!");
 	}
 
+	if (gGamePrefs.pfSize != PFSIZE_SMALL)
+	{
+		VISIBLE_WIDTH = (PF_TILE_WIDTH - 1) * TILE_SIZE;
+		VISIBLE_HEIGHT = (PF_TILE_HEIGHT + 1) * TILE_SIZE;
+	}
+	else
+	{
+		VISIBLE_WIDTH = 640;
+		VISIBLE_HEIGHT = 480;
+	}
+
+	GAME_ASSERT(VISIBLE_WIDTH >= 640);
+	GAME_ASSERT(VISIBLE_HEIGHT >= 480);
+
+	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+
+	int currentWindowWidth;
+	int currentWindowHeight;
+	Uint32 windowFlags = SDL_GetWindowFlags(gSDLWindow);
+	SDL_RestoreWindow(gSDLWindow);
+	SDL_GetWindowSize(gSDLWindow, &currentWindowWidth, &currentWindowHeight);
+	SDL_SetWindowSize(gSDLWindow, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+	if (windowFlags & SDL_WINDOW_MAXIMIZED)
+	{
+		SDL_MaximizeWindow(gSDLWindow);
+	}
+
 	MakeGameWindow();
+
+	OnChangeIntegerScaling();
 }
 
 /****************** CLEAR TILE COLOR MASKS ***************/
@@ -1486,9 +1514,9 @@ long		method;
 			width2 = widths[1+seg];						// set width
 
 			srcAdd = (PF_BUFFER_WIDTH)-width;			// calc line add (for normal display)
-			destAdd = (gScreenRowOffset)-width;
+			destAdd = (VISIBLE_WIDTH)-width;
 			srcAdd2 = (PF_BUFFER_WIDTH)-width2;			// calc line add (for normal display)
-			destAdd2 = (gScreenRowOffset)-width2;
+			destAdd2 = (VISIBLE_WIDTH)-width2;
 
 						/* DO 1ST SEG */
 			do
@@ -1529,8 +1557,8 @@ long		method;
 			height = heights[seg];						// set height
 			width = widths[seg];						// set width
 
-			srcAdd = (PF_BUFFER_WIDTH);				// calc line rowdoubles
-			destAdd = (gScreenRowOffset);
+			srcAdd = PF_BUFFER_WIDTH;					// line bytes
+			destAdd = VISIBLE_WIDTH;
 
 			do
 			{

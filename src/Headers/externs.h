@@ -212,12 +212,12 @@ extern	long					gLastPixieTime;
 
 #pragma mark - Window
 
-extern	uint8_t					gIndexedFramebuffer[VISIBLE_WIDTH * VISIBLE_HEIGHT];
-extern	uint8_t					*gScreenAddr;
-extern	long					gScreenRowOffset;
-extern	uint8_t					*gScreenLookUpTable[VISIBLE_HEIGHT];
-extern	uint8_t					*gOffScreenLookUpTable[OFFSCREEN_HEIGHT];
-extern	uint8_t					*gBackgroundLookUpTable[OFFSCREEN_HEIGHT];
+extern	int						VISIBLE_WIDTH;
+extern	int						VISIBLE_HEIGHT;
+extern	uint8_t					*gIndexedFramebuffer;
+extern	uint8_t					**gScreenLookUpTable;		// VISIBLE_HEIGHT elements
+extern	uint8_t					**gOffScreenLookUpTable;	// OFFSCREEN_HEIGHT elements
+extern	uint8_t					**gBackgroundLookUpTable;	// OFFSCREEN_HEIGHT elements
 extern	Ptr						*gPFLookUpTable;
 extern	Ptr						*gPFCopyLookUpTable;
 extern	Ptr						*gPFMaskLookUpTable;

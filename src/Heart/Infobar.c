@@ -46,8 +46,8 @@
 #define	COINS_X		560
 #define	COINS_Y		426
 
-#define	BUNNIES_X	585
-#define	BUNNIES_Y	322
+#define	BUNNIES_X	586
+#define	BUNNIES_Y	324
 
 #define	KEYS_X		360
 #define	KEYS_Y		35
@@ -107,8 +107,8 @@ long		gNumCoins;
 
 short		gMyHealth,gMyMaxHealth;
 
-static	int			gInfobarXAdjust = (VISIBLE_WIDTH - 640) / 2;
-static	int			gInfobarYAdjust = (VISIBLE_HEIGHT - 480);
+#define		gInfobarXAdjust		((VISIBLE_WIDTH - 640) / 2)
+#define		gInfobarYAdjust		(VISIBLE_HEIGHT - 480)
 
 
 /**************** INIT HEALTH ********************/

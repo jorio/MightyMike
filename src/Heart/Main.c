@@ -1054,7 +1054,6 @@ game_over:
 
 		AddHighScore(gScore);									// try to add to high scores
 	}
-	InitScreenBuffers();										// restore offscreen buffers
 }
 
 
@@ -1201,7 +1200,6 @@ next_player:
 game_over:
 	FadeOutGameCLUT();
 	CleanMemory();												// clean up memory
-	InitScreenBuffers();										// restore offscreen buffers
 }
 
 
@@ -1409,7 +1407,6 @@ loop:
 
 	StopMusic();
 
-	WipeScreenBuffers();					// free some of that buffer memory
 	InitGame();
 
 	if (gPlayerMode == TWO_PLAYER)
