@@ -92,8 +92,8 @@ static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 	[kNeed_Left			] = "go left",
 	[kNeed_Right		] = "go right",
 	[kNeed_Attack		] = "attack",
-	//[kNeed_PrevWeapon	] = "previous weapon",
 	[kNeed_NextWeapon	] = "next weapon",
+	[kNeed_PrevWeapon	] = "prev weapon",
 	[kNeed_Radar		] = "bunny radar",
 };
 

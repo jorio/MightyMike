@@ -222,6 +222,7 @@ enum
 	kNeed_Right,
 	kNeed_Attack,
 	kNeed_NextWeapon,
+	kNeed_PrevWeapon,
 	kNeed_Radar,
 	NUM_REMAPPABLE_NEEDS,
 

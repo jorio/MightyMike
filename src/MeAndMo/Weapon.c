@@ -244,7 +244,9 @@ Boolean		shotFlag;
 				/* CHECK WEAPON SELECTION */
 
 	if (GetNewNeedState(kNeed_NextWeapon))
-		SelectNextWeapon();
+		SelectNextWeapon(1);
+	else if (GetNewNeedState(kNeed_PrevWeapon))
+		SelectNextWeapon(-1);
 
 
 	if (gCurrentWeaponType != NO_WEAPON)
@@ -267,14 +269,13 @@ Boolean		shotFlag;
 
 /***************** SELECT NEXT WEAPON *****************/
 
-void SelectNextWeapon(void)
+void SelectNextWeapon(int delta)
 {
 
 	if (gNumWeaponsIHave < 2)							// see if either 0 or 1 weapon
 		return;
 
-	if (++gCurrentWeaponIndex >= gNumWeaponsIHave)		// see if wrap to front
-		gCurrentWeaponIndex = 0;
+	gCurrentWeaponIndex = PositiveModulo((signed int) gCurrentWeaponIndex + delta, gNumWeaponsIHave);
 
 	gCurrentWeaponType = gMyWeapons[gCurrentWeaponIndex].type;
 	ShowWeaponIcon();

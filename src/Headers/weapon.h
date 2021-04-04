@@ -92,7 +92,7 @@ void	InitBullets(void);
 Boolean	AddWeaponPowerup(ObjectEntryType *);
 void	GetAWeapon(short);
 void	CheckFireWeapon(void);
-void	SelectNextWeapon(void);
+void	SelectNextWeapon(int delta);
 void	RemoveCurrentWeaponFromInventory(void);
 void	WeaponHitEnemy(ObjNode *);
 void	DeleteWeapon(ObjNode *);
