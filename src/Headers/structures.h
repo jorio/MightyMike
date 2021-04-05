@@ -224,6 +224,10 @@ enum
 	kNeed_NextWeapon,
 	kNeed_PrevWeapon,
 	kNeed_Radar,
+	kNeed_ToggleFullscreen,
+	kNeed_ToggleMusic,
+	kNeed_RaiseVolume,
+	kNeed_LowerVolume,
 	NUM_REMAPPABLE_NEEDS,
 
 	// ^^^ REMAPPABLE
@@ -237,11 +241,6 @@ enum
 	kNeed_UIConfirm,
 	kNeed_UIBack,
 	kNeed_UIPause,
-	kNeed_ToggleFullscreen,
-	kNeed_ToggleMusic,
-	kNeed_ToggleEffects,
-	kNeed_RaiseVolume,
-	kNeed_LowerVolume,
 	NUM_CONTROL_NEEDS
 };
 
@@ -265,11 +264,11 @@ struct PrefsType
 	Boolean		interlaceMode;
 	Byte		difficulty;
 	Boolean		fullscreen;
-	Boolean		vsync;
 	Byte		pfSize;
 	Boolean		integerScaling;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
+	Boolean		music;
 	Boolean		interpolateAudio;
 	Boolean		gameTitlePowerPete;
 	KeyBinding	keys[NUM_CONTROL_NEEDS];

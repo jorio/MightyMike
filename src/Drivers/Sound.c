@@ -33,13 +33,11 @@ static	SndListHandle	SoundHand_Music = nil;
 
 static	SndChannelPtr	gSndChannel[MAX_CHANNELS];
 
-
 static  short			gSndLastEffectInChannel[MAX_CHANNELS];
 static  short			gSndEffectLastPlayedInChannel[MAX_EFFECTS];
 
 static	short			gMaxChannels;
 
-Boolean			gMusicOnFlag = true;
 static	Boolean			gEffectsOnFlag = true;
 
 static	unsigned char	gVolume = DEFAULT_VOLUME;
@@ -175,7 +173,7 @@ void StartMusic(void)
 SndCommand 	mySndCmd;
 long		offset;
 
-	if (!gMusicOnFlag)									// see if music activated
+	if (!gGamePrefs.music)								// see if music activated
 		return;
 
 	GetSoundHeaderOffset(SoundHand_Music, &offset);		// get offset to header
@@ -198,9 +196,6 @@ long		offset;
 
 void StopMusic(void)
 {
-	if (!gMusicOnFlag)									// see if music activated
-		return;
-
 	StopAChannel(0);									// music is always on channel 0
 
 	gSongPlayingFlag = false;
@@ -340,7 +335,7 @@ OSErr	myErr;
 
 			/* FIND A FREE CHANNEL */
 
-	for (theChan=gMusicOnFlag; theChan < gMaxChannels; theChan++)
+	for (theChan = 1; theChan < gMaxChannels; theChan++)	// start at 1; channel 0 is reserved for music
 	{
 		myErr = SndChannelStatus(gSndChannel[theChan],sizeof(SCStatus),&theStatus);	// get channel info
 		if (myErr)
@@ -393,6 +388,13 @@ got_chan:
 	if (myErr)
 		ShowSystemErr(myErr);
 
+	mySndCmd.cmd = ampCmd;
+	mySndCmd.param1 = gVolume;
+	mySndCmd.param2 = 0;
+	myErr = SndDoImmediate(chanPtr, &mySndCmd);
+	if (myErr)
+		ShowSystemErr(myErr);
+
 	return(theChan);									// return channel #
 }
 
@@ -418,19 +420,24 @@ static 	OSErr		iErr;
 	}
 }
 
+
+/******************** TOGGLE MUSIC CALLBACK *********************/
+
+void OnToggleMusic(void)
+{
+	if (gGamePrefs.music)
+		StartMusic();
+	else
+		StopMusic();
+}
+
+
 /******************** TOGGLE MUSIC *********************/
 
 void ToggleMusic(void)
 {
-	if (gMusicOnFlag)
-		StopMusic();
-
-
-	gMusicOnFlag = gMusicOnFlag^1;
-
-	if (gMusicOnFlag)
-		StartMusic();
-
+	gGamePrefs.music = !gGamePrefs.music;
+	OnToggleMusic();
 }
 
 
@@ -449,40 +456,33 @@ void ToggleEffects(void)
 
 void DoSoundMaintenance(Boolean checkKeys)
 {
-    if (checkKeys)
-    {
-    			/* SEE IF TOGGLE MUSIC */
+	if (!checkKeys)
+		return;
 
-    	if (GetNewNeedState(kNeed_ToggleMusic))
-    		ToggleMusic();
+			/* SEE IF TOGGLE MUSIC */
 
+	if (GetNewNeedState(kNeed_ToggleMusic))
+		ToggleMusic();
 
-    			/* SEE IF TOGGLE EFFECTS */
+			/* SEE IF CHANGE VOLUME */
 
-    	if (GetNewNeedState(kNeed_ToggleEffects))
-    		ToggleEffects();
-
-
-    			/* SEE IF CHANGE VOLUME */
-
-    	if (GetNewNeedState(kNeed_RaiseVolume))
-    	{
-    		if (gVolume < (255-4))
-    		{
-    			gVolume+=4;
-    			SetVolume();
-    		}
-    	}
-    	else
-    	if (GetNewNeedState(kNeed_LowerVolume))
-    	{
-    		if (gVolume > 4)
-    		{
-    			gVolume -= 4;
-    			SetVolume();
-    		}
-    	}
-    }
+	if (GetNewNeedState(kNeed_RaiseVolume))
+	{
+		if (gVolume < (255-4))
+		{
+			gVolume+=4;
+			SetVolume();
+		}
+	}
+	else
+	if (GetNewNeedState(kNeed_LowerVolume))
+	{
+		if (gVolume > 4)
+		{
+			gVolume -= 4;
+			SetVolume();
+		}
+	}
 }
 
 
@@ -642,7 +642,7 @@ Boolean	IsMusicPlaying(void)
 {
 SCStatus	theStatus;
 
-	if (!gMusicOnFlag)						// if music is deactivated, then return true anyway to trick wait routines
+	if (!gGamePrefs.music)					// if music is deactivated, then return true anyway to trick wait routines
 		return(true);
 
 	SndChannelStatus(gSndChannel[0],sizeof(SCStatus),&theStatus);	// get channel info

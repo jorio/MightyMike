@@ -234,7 +234,7 @@ uint32_t	start;
 
 void WaitWhileMusic(void)
 {
-	if (!gMusicOnFlag)								// if user aborted music, then just wait .. seconds
+	if (!gGamePrefs.music)								// if user aborted music, then just wait .. seconds
 		Wait2(60*5);
 	else
 	{

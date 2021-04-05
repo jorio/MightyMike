@@ -1249,11 +1249,11 @@ static void InitDefaultPrefs(void)
 #else
 	gGamePrefs.fullscreen = true;
 #endif
-	gGamePrefs.pfSize = PFSIZE_MEDIUM;
-	gGamePrefs.vsync = true;
-	gGamePrefs.integerScaling = true;
+	gGamePrefs.pfSize = PFSIZE_WIDE;
+	gGamePrefs.integerScaling = false;
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.filterDithering = true;
+	gGamePrefs.music = true;
 	gGamePrefs.interpolateAudio = true;
 	gGamePrefs.gameTitlePowerPete = false;
 	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
@@ -1304,7 +1304,14 @@ PrefsType	prefs;
 	{
 		return iErr;
 	}
-	
+
+	// Always reset non-remappable keys to defaults
+	memcpy(
+			&prefs.keys[NUM_REMAPPABLE_NEEDS],
+			&kDefaultKeyBindings[NUM_REMAPPABLE_NEEDS],
+			(NUM_CONTROL_NEEDS - NUM_REMAPPABLE_NEEDS) * sizeof(kDefaultKeyBindings[0])
+	);
+
 	gGamePrefs = prefs;
 	
 	return noErr;

@@ -176,7 +176,6 @@ extern	ObjNode					*gMostRecentShape;
 
 #pragma mark - Sound
 
-extern	Boolean					gMusicOnFlag;
 extern	short					gSoundNum_UngaBunga;
 extern	short					gSoundNum_DinoBoom;
 extern	short					gSoundNum_DoorOpen;

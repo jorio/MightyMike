@@ -77,8 +77,7 @@ enum
 {
 	kTextFlags_AsObject			= 1 << 0,
 	kTextFlags_BounceUp			= 1 << 1,
-	kTextFlags_Condensed		= 1 << 2,
-	kTextFlags_Jitter			= 1 << 3,
+	kTextFlags_Jitter			= 1 << 2,
 };
 
 static const int kNumKeybindingRows		= NUM_REMAPPABLE_NEEDS + 2;  // +2 extra rows for Reset to defaults & Done
@@ -87,21 +86,25 @@ static const int kKeybindingRow_Done	= NUM_REMAPPABLE_NEEDS + 1;
 
 static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 {
-	[kNeed_Up			] = "go up",
-	[kNeed_Down			] = "go down",
-	[kNeed_Left			] = "go left",
-	[kNeed_Right		] = "go right",
-	[kNeed_Attack		] = "attack",
-	[kNeed_NextWeapon	] = "next weapon",
-	[kNeed_PrevWeapon	] = "prev weapon",
-	[kNeed_Radar		] = "bunny radar",
+	[kNeed_Up				] = "go up",
+	[kNeed_Down				] = "go down",
+	[kNeed_Left				] = "go left",
+	[kNeed_Right			] = "go right",
+	[kNeed_Attack			] = "attack",
+	[kNeed_NextWeapon		] = "next weapon",
+	[kNeed_PrevWeapon		] = "prev weapon",
+	[kNeed_Radar			] = "bunny radar",
+	[kNeed_ToggleMusic		] = "toggle music",
+	[kNeed_ToggleFullscreen	] = "toggle fullscreen",
+	[kNeed_RaiseVolume		] = "volume up",
+	[kNeed_LowerVolume		] = "volume down",
 };
 
 static const int8_t kLetterWidths[] =
 {
 	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,
 	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,
-	 8, 5,13,13, 13,13,13, 5, 13,13,13,13,  5,13, 5,13,	//  !"# $%&' ()*+ ,-./
+	 6, 5,13,13, 13,13,13, 5, 13,13,13,13,  5,13, 5,13,	//  !"# $%&' ()*+ ,-./
 	12,12,12,12, 12,12,12,12, 12,12, 5, 5, 13,13,13,13,	// 0123 4567 89:; <=>?
 	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,	// @ABC DEFG HIJK LMNO
 	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,	// PQRS TUVW XYZ
@@ -111,7 +114,7 @@ static const int8_t kLetterWidths[] =
 
 static const int kColumnX[] = { 64, 300, 475, 550 };
 static const int kRowY0 = 100;
-static const int kRowHeight = 30;
+static const int kRowHeight = 24;
 
 /****************************/
 /*    VARIABLES             */
@@ -131,6 +134,7 @@ static SettingEntry gSettingEntries[] =
 	{&gGamePrefs.integerScaling		, "upscaling"			, OnChangeIntegerScaling,	2,  { "stretch", "crisp" } },
 	{&gGamePrefs.uncappedFramerate	, "frame rate"			, nil,						2,  { "32 fps original", "uncapped" } },
 	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "   raw", "   filtered" } },
+	{&gGamePrefs.music				, "music"				, OnToggleMusic,			2,	{ "off", "on" } },
 	{&gGamePrefs.interpolateAudio	, "audio quality"		,OnChangeAudioInterpolation,2,	{ "raw", "interpolated" } },
 	{&gGamePrefs.gameTitlePowerPete	, "game title"			, nil,						2,  { "mighty mike", "power pete" } },
 	{nil							, nil					, nil,						0,  { NULL } },
@@ -205,7 +209,7 @@ static void OnDone(void)
 	case kSettingsState_ControlsPage_AwaitingPress:
 		PlaySound(SOUND_BADHIT);
 		NukeText(gControlsRow, gControlsColumn + 1);
-		LayOutText(ProcessScancodeName(gGamePrefs.keys[gControlsRow].key[gControlsColumn]), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
+		LayOutText(ProcessScancodeName(gGamePrefs.keys[gControlsRow].key[gControlsColumn]), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp);
 		gSettingsState = kSettingsState_ControlsPage;
 		break;
 
@@ -302,6 +306,11 @@ static const char* ProcessScancodeName(int scancode)
 		case SDL_SCANCODE_APOSTROPHE:	return "apostrophe";
 		case SDL_SCANCODE_COMMA:		return "comma";
 		case SDL_SCANCODE_PERIOD:		return "period";
+		case SDL_SCANCODE_KP_PLUS:		return "keypad plus";
+		case SDL_SCANCODE_KP_MINUS:		return "keypad minus";
+		case SDL_SCANCODE_KP_DIVIDE:	return "keypad divide";
+		case SDL_SCANCODE_KP_MULTIPLY:	return "keypad mult";
+		case SDL_SCANCODE_KP_DECIMAL:	return "keypad decimal";
 	}
 
 #define kNameBufferLength 64
@@ -436,7 +445,7 @@ static void NavigateControlsPage(void)
 		PlaySound(SOUND_POP);
 
 		NukeText(gControlsRow, gControlsColumn + 1);
-		LayOutText(ProcessScancodeName(0), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
+		LayOutText(ProcessScancodeName(0), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp);
 	}
 
 	if (GetNewSDLKeyState(SDL_SCANCODE_RETURN) && gControlsRow < NUM_REMAPPABLE_NEEDS)
@@ -478,7 +487,7 @@ static void NavigateControlsPage_AwaitingPress(void)
 			UnbindScancodeFromAllRemappableInputNeeds(i);
 			*GetSelectedKeybindingKeyPtr() = i;
 			NukeText(gControlsRow, gControlsColumn + 1);
-			LayOutText(ProcessScancodeName(i), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
+			LayOutText(ProcessScancodeName(i), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp);
 			gSettingsState = kSettingsState_ControlsPage;
 			PlaySound(SOUND_COINS);
 			break;
@@ -495,7 +504,6 @@ static int LayOutText(const char* label, int row, int col, int flags)
 {
 	bool asObject		= flags & kTextFlags_AsObject;
 	bool bounceUp		= flags & kTextFlags_BounceUp;
-	bool condensed		= flags & kTextFlags_Condensed;
 	bool jitter			= flags & kTextFlags_Jitter;
 
 	GAME_ASSERT(asObject || !bounceUp);
@@ -510,10 +518,7 @@ static int LayOutText(const char* label, int row, int col, int flags)
 
 		if (cc == ' ')
 		{
-			if (condensed)
-				x += kLetterWidths[' '] / 2;
-			else
-				x += kLetterWidths[' '];
+			x += kLetterWidths[' '];
 			continue;
 		}
 
@@ -572,7 +577,7 @@ static int LayOutText(const char* label, int row, int col, int flags)
 			DrawFrameToBackground(x + cancelXOff, y + cancelYOff, GroupNum_BigFont, ObjType_BigFont, frameID);
 		}
 
-		x += myWidth + (condensed? 0: 2);
+		x += myWidth + 1;
 	}
 
 	return x;
@@ -618,7 +623,7 @@ static void LayOutSettingsPageBackground(void)
 	Ptr ditheringPatternPlot = *gBackgroundHandle;
 	ditheringPatternPlot += (gScreenYOffset + GetRowY(6) - kRowHeight/3) * OFFSCREEN_WIDTH;
 	ditheringPatternPlot += gScreenXOffset + kColumnX[1];
-	for (int y = 0; y < 2*kRowHeight/3; y++)
+	for (int y = 0; y <= 2*kRowHeight/3; y++)
 	{
 		for (int x = y % 2; x < 20; x += 2)
 		{
@@ -684,7 +689,7 @@ static void LayOutControlsPage(void)
 		{
 			const char* name = ProcessScancodeName(kb->key[j]);
 
-			LayOutText(name, i+0, j+1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Condensed);
+			LayOutText(name, i+0, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
 		}
 	}
 

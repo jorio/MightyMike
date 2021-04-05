@@ -1633,7 +1633,7 @@ short	selection;
 	BlankEntireScreenArea();
 	LoadImage(":images:bonus.tga", LOADIMAGE_FADEIN);
 
-	if (gMusicOnFlag)
+	if (gGamePrefs.music)
 	{
 		WaitWhileMusic();									// wait for music to stop
 		KillSong();
