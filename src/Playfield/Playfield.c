@@ -98,7 +98,9 @@ static	Boolean			gColorMaskArray[256];							// array of xparent tile colors, fa
 
 static	Boolean			gAltMapFlag = false;
 
-long					gShakeyScreenCount;
+static	long			gShakeyScreenCount = 0;
+static	long			gShakeyScreenOffsetX = 0;
+static	long			gShakeyScreenOffsetY = 0;
 
 static	Ptr				gMaxItemAddress;								// addr of last item in current item list
 
@@ -1176,6 +1178,22 @@ void StartShakeyScreen(short duration)
 }
 
 
+void UpdateShakeyScreen(void)
+{
+	if (gShakeyScreenCount)
+	{
+		gShakeyScreenOffsetX = (MyRandomLong() & 0b111ul) - 4;
+		gShakeyScreenOffsetY = (MyRandomLong() & 0b111ul) - 4;
+		gShakeyScreenCount--;
+	}
+	else
+	{
+		gShakeyScreenOffsetX = 0;
+		gShakeyScreenOffsetY = 0;
+	}
+}
+
+
 /******************** MOVE ON PATH *******************/
 //
 // Moves given object along the Alternate Map's path tiles
@@ -1416,17 +1434,8 @@ long		widths[4];
 long		srcAdd,destAdd;
 long		method;
 
-	int32_t scrollOffsetX = 0;
-	int32_t scrollOffsetY = 0;
-
-	if (gShakeyScreenCount)									// see if do shakey screen
-	{
-		scrollOffsetX += (MyRandomLong() & 0b1111) - 8;
-		scrollOffsetY += (MyRandomLong() & 0b1111) - 8;
-	}
-
-	left	= PositiveModulo(gTweenedScrollX + scrollOffsetX, PF_BUFFER_WIDTH);		// get PF buffer pixel coords to start @
-	top		= PositiveModulo(gTweenedScrollY + scrollOffsetY, PF_BUFFER_HEIGHT);
+	left	= PositiveModulo(gTweenedScrollX + gShakeyScreenOffsetX, PF_BUFFER_WIDTH);		// get PF buffer pixel coords to start @
+	top		= PositiveModulo(gTweenedScrollY + gShakeyScreenOffsetY, PF_BUFFER_HEIGHT);
 
 	if ((left+(PF_WINDOW_WIDTH-1)) > PF_BUFFER_WIDTH)		// see if 2 horiz segments
 	{

@@ -263,9 +263,7 @@ static void UpdateSimAndRenderFixedFrame(void)
 
 	gFrames++;												// one more simulation frame
 
-	if (gShakeyScreenCount)
-		gShakeyScreenCount--;
-
+	UpdateShakeyScreen();
 	ReadKeyboard();
 	MoveObjects();
 	SortObjectsByY();										// sort 'em
@@ -304,9 +302,7 @@ static void UpdateSimAndRenderTweenedFrames(void)
 
 	gFrames++;												// one more simulation frame
 
-	if (gShakeyScreenCount)
-		gShakeyScreenCount--;
-
+	UpdateShakeyScreen();
 	ReadKeyboard();
 	MoveObjects();
 	SortObjectsByY();										// sort 'em

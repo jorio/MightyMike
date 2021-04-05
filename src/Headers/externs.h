@@ -163,7 +163,6 @@ extern	short					gItemDeleteWindow_Bottom;
 extern	short					gItemDeleteWindow_Top;
 extern	short					gItemDeleteWindow_Left;
 extern	short					gItemDeleteWindow_Right;
-extern	long					gShakeyScreenCount;
 extern	short					gNumItems;
 extern	ObjectEntryType			*gMasterItemList;
 extern	struct TileAttribType	*gTileAttributes;

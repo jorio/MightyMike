@@ -111,6 +111,7 @@ Byte	GetAlternateTileInfo(unsigned short, unsigned short);
 unsigned short	GetMapTileAttribs(unsigned short, unsigned short);
 extern TileAttribType	*GetFullMapTileAttribs(unsigned short, unsigned short);
 void	StartShakeyScreen(short);
+void	UpdateShakeyScreen(void);
 short	MoveOnPath(long, Boolean);
 Boolean	NilAdd(ObjectEntryType *);
 void	CreatePlayfieldPermanentMemory(void);
