@@ -113,7 +113,7 @@ static const int8_t kLetterWidths[] =
 };
 
 static const int kColumnX[] = { 64, 300, 475, 550 };
-static const int kRowY0 = 100;
+static const int kRowY0 = 90;
 static const int kRowHeight = 24;
 
 /****************************/
@@ -245,17 +245,27 @@ static void MoveText(void)
 
 	ObjNode* theNode = gThisNodePtr;
 
-	theNode->DY += 0x10000L;							// add gravity
+	theNode->DY += 0x10000L / 4;						// add gravity
 
 	theNode->YOffset.L += theNode->DY;					// move it
 
 	if (theNode->YOffset.Int > 0)						// see if bounce
 	{
 		theNode->YOffset.Int = 0;						// rebound
+
 		if (theNode->FlagLetterJitter)
-			theNode->DY = -0x10000 * RandomRange(2, 4);
+		{
+			theNode->DY = -0x10000 * RandomRange(2, 4) / 2;
+		}
 		else
+		{
 			theNode->DY = -theNode->DY / 2;
+			if (theNode->DY > -0x10000)					// don't rebound forever
+			{
+				theNode->DY = 0;
+				theNode->MoveFlag = false;
+			}
+		}
 	}
 
 	gThisNodePtr->Y.L = theNode->SpecialLetterBaseY + theNode->YOffset.L;		// move up
@@ -265,27 +275,67 @@ static void MoveText(void)
 
 static void MoveCursor(void)
 {
+	int targetX;
+	int targetY;
+
+				/* FIND TARGET X, Y */
+
 	switch (gSettingsState)
 	{
-		case kSettingsState_MainPage:
-			gThisNodePtr->X.Int = kColumnX[0] - 20;
-			gThisNodePtr->Y.Int = GetRowY(gSettingsRow);
-			break;
-
 		case kSettingsState_ControlsPage:
 		case kSettingsState_ControlsPage_AwaitingPress:
 			if (gControlsRow < NUM_REMAPPABLE_NEEDS)
 			{
-				gThisNodePtr->X.Int = kColumnX[1 + gControlsColumn] - 20;
-				gThisNodePtr->Y.Int = GetRowY(gControlsRow);
+				targetX = kColumnX[1 + gControlsColumn];
+				targetY = GetRowY(gControlsRow);
 			}
 			else
 			{
-				gThisNodePtr->X.Int = kColumnX[0] - 20;
-				gThisNodePtr->Y.Int = GetRowY(gControlsRow + 1);
+				targetX = kColumnX[0];
+				targetY = GetRowY(gControlsRow + 1);
 			}
 			break;
+
+		case kSettingsState_MainPage:
+		default:
+			targetX = kColumnX[0];
+			targetY = GetRowY(gSettingsRow);
+			break;
 	}
+
+	targetX -= 20;
+	targetY += 4;
+
+				/* CALC DIFF X, Y */
+
+	int diffX = (targetX << 16) - gThisNodePtr->X.L;
+	int diffY = (targetY << 16) - gThisNodePtr->Y.L;
+
+				/* CHANGE ANIM DEPENDING ON DIRECTION */
+
+	int anim = gThisNodePtr->SubType;
+	if (abs(diffX) < 0x8000 && abs(diffY) < 0x8000)
+	{
+	}
+	else if (abs(diffX) > abs(diffY))
+	{
+		anim = diffX < 0 ? 3 : 1;
+	}
+	else
+	{
+		anim = diffY < 0 ? 2 : 0;
+	}
+
+	if (gThisNodePtr->SubType  != anim)
+	{
+		SwitchAnim(gThisNodePtr, anim);
+		gThisNodePtr->AnimSpeed = 0x080;
+	}
+
+				/* MOVE IT */
+
+	gThisNodePtr->X.L += diffX / 6;
+	gThisNodePtr->Y.L += diffY / 6;
 }
 
 /****************************/
@@ -562,7 +612,7 @@ static int LayOutText(const char* label, int row, int col, int flags)
 					ASCIIToBigFont(cc),
 					x + cancelXOff,
 					y + cancelYOff,
-					-row,
+					0x0080,
 					MoveText,
 					false);
 			GAME_ASSERT_MESSAGE(newObj, "Too many objects on screen!");
@@ -575,7 +625,7 @@ static int LayOutText(const char* label, int row, int col, int flags)
 
 			if (bounceUp)
 			{
-				newObj->DY = -0x10000 * RandomRange(3, 6);
+				newObj->DY = -0x10000 * RandomRange(3, 6) / 2;
 			}
 		}
 		else
@@ -668,7 +718,9 @@ static void LayOutSettingsPageObjects(void)
 	}
 
 	// Make cursor
-	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, GetRowY(gSettingsRow), 0, MoveCursor, 0);
+	ObjNode* cursor = MakeNewShape(GROUP_AREA_SPECIFIC, ObjType_Spider, 1,
+			64, GetRowY(gSettingsRow), FARTHEST_Z, MoveCursor, 0);
+	cursor->AnimSpeed = 0x080;
 }
 
 static void LayOutSettingsPage(void)
@@ -706,7 +758,9 @@ static void LayOutControlsPage(void)
 	DumpBackground();											// dump to playfield
 
 	// Make cursor
-	MakeNewShape(GroupNum_Bone, ObjType_Bone, 0, 64, GetRowY(gControlsRow), 0, MoveCursor, 0);
+	ObjNode* cursor = MakeNewShape(GROUP_AREA_SPECIFIC, ObjType_BadBattery, 1,
+			64, GetRowY(gControlsRow), FARTHEST_Z, MoveCursor, 0);
+	cursor->AnimSpeed = 0x080;
 }
 
 /****************************/
@@ -721,7 +775,7 @@ void DoSettingsScreen(void)
 	FadeOutGameCLUT();
 	InitObjectManager();
 	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
-	LoadShapeTable(":shapes:jurassic1.shapes", GROUP_AREA_SPECIFIC);	// cursor bone
+	LoadShapeTable(":shapes:fairy2.shapes", GROUP_AREA_SPECIFIC);		// cursor
 	LoadBackground(":images:winbw.tga");								// just to load the palette
 
 						/* LETS DO IT */
@@ -733,9 +787,10 @@ void DoSettingsScreen(void)
 
 	do
 	{
-		RegulateSpeed2(2);									// @ 30fps
+		RegulateSpeed2(1);									// @ 60fps
 		EraseObjects();
 		MoveObjects();
+		SortObjectsByY();
 
 		DrawObjects();
 		DumpUpdateRegions();

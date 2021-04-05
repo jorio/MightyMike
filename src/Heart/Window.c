@@ -597,9 +597,10 @@ void PresentIndexedFramebuffer(void)
 		float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 		snprintf(
 				gDebugTextBuffer, sizeof(gDebugTextBuffer),
-				"Mighty Mike %s - fps:%d - x:%ld y:%ld",
+				"Mighty Mike %s - fps:%d - objs:%ld - x:%ld y:%ld",
 				PROJECT_VERSION,
 				(int)roundf(fps),
+				NumObjects,
 				gMyX,
 				gMyY
 		);
