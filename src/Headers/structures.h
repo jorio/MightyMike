@@ -271,6 +271,7 @@ struct PrefsType
 	Boolean		music;
 	Boolean		interpolateAudio;
 	Boolean		gameTitlePowerPete;
+	Boolean		thermometerScreen;
 	KeyBinding	keys[NUM_CONTROL_NEEDS];
 };
 typedef struct PrefsType PrefsType;

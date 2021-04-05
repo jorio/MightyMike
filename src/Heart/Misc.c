@@ -64,8 +64,6 @@ long	gPrefsFolderDirID;
 
 Boolean		gGlobalFlagList[MAX_GLOBAL_FLAGS];
 
-short		gThermometerX,gThermometerY;
-
 static	unsigned long seed0 = 0, seed1 = 0, seed2 = 0;
 
 Byte		gRLBDecompBuffer[DECOMP_PACKET_SIZE];
@@ -692,54 +690,7 @@ long		createdDirID;
 
 void InitThermometer(void)
 {
-Rect	theRect;
-ColorSpec 	aTable[2];
-
-	SetRect(&theRect,0,0,VISIBLE_WIDTH,VISIBLE_HEIGHT);		// erase screen
-	BlankScreenArea(theRect);
-
-
-				/* SETUP B&W&R PALETTE */
-
-#if 0
-	ReserveEntry(0,false);
-	ProtectEntry(0,false);
-	ReserveEntry(1,false);
-	ProtectEntry(1,false);
-#endif
-	aTable[0].rgb.red =
-	aTable[0].rgb.green =
-	aTable[0].rgb.blue = 0xffff;						// white
-	aTable[0].value = 0;
-	aTable[1].rgb.red =	0xffff;							// red
-	aTable[1].rgb.green =
-	aTable[1].rgb.blue = 0x00ff;
-	aTable[1].value = 0;
-	SetEntries(0,1,aTable);								// use it
-
-				/* INIT THERMOMETER */
-
-	gThermometerX = gScreenXOffset+220;
-	gThermometerY = gScreenYOffset+230;
-
-//	SetPort(gGameWindow);								// show wait text
-	ForeColor(whiteColor);
-//	MoveTo(gThermometerX,gThermometerY+3);
-//	TextMode(srcBic);
-//	TextFace(0);
-//	TextSize(9);
-//	TextFont(monaco);
-//	DrawString("Charging Batteries:");
-
-	LoadImage(":images:charging.tga", 0);
-
-														// draw thermometer box
-
-TODO_REWRITE_THIS_MINOR();
-#if 0
-	SetRect(&theRect,gThermometerX,gThermometerY,gThermometerX+200,gThermometerY+16);
-	FrameRect(&theRect);
-#endif
+	FillThermometer(0);
 }
 
 
@@ -747,17 +698,48 @@ TODO_REWRITE_THIS_MINOR();
 
 void FillThermometer(short percent)
 {
-	TODO_REWRITE_THIS_MINOR();
-#if 0
-Rect	theRect;
+	if (!gGamePrefs.thermometerScreen)
+		return;
 
-	percent *= 2;
+	const uint8_t borderColor = 0;
+	const uint8_t fillColor = 80;
+	const int width = 200;
+	const int height = 16;
 
-	ForeColor(redColor);
-	SetRect(&theRect,gThermometerX+1,gThermometerY+1,
-			gThermometerX+percent-2,gThermometerY+16-1);
-	PaintRect(&theRect);
-#endif
+	int left = gScreenXOffset + 220;
+	int top  = gScreenYOffset + 230;
+	int right = left + width;
+	int bottom = top + height;
+
+	if (percent == 0)
+	{
+				/* INIT THERMOMETER */
+
+		gScreenBlankedFlag = false;
+		LoadImage(":images:charging.tga", LOADIMAGE_FADEIN);
+
+																			// draw thermometer box
+		memset(gScreenLookUpTable[top] + left, borderColor, width);			// top line
+		memset(gScreenLookUpTable[bottom] + left, borderColor, width);		// bottom line
+		for (int y = top; y < bottom; y++)
+		{
+			gScreenLookUpTable[y][left] = borderColor;						// left line
+			gScreenLookUpTable[y][right-1] = borderColor;					// right line
+		}
+	}
+	else																	// fill thermometer
+	{
+				/* FILL THERMOMETER */
+
+		int filledWidth = (width-2) * percent / 100;
+		for (int y = top+1; y < bottom; y++)
+		{
+			memset(gScreenLookUpTable[y] + left+1, fillColor, filledWidth);
+		}
+	}
+
+	PresentIndexedFramebuffer();
+	SDL_Delay(RandomRange(50, 250));
 }
 
 

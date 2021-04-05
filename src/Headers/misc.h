@@ -2,11 +2,7 @@
 // MISC.H
 //
 
-#include <stdio.h>
-
 #define gGlobFlag_MeDoneDead	gGlobalFlagList[0]		// flag set when I'm done with death anim
-
-#define		ONE_MINUTE_DELAY	(60L*1000L*1000L)					// delay in microseconds
 
 #if _MSC_VER
 	#define _Static_assert static_assert
@@ -66,10 +62,6 @@ static inline int PositiveModulo(int value, unsigned int m)
 	}
 	return mod;
 }
-
-
-#define TODO_REWRITE_THIS()		DoFatalAlert2("REWRITE THIS!", __func__)
-#define TODO_REWRITE_THIS_MINOR()		printf("TODO: rewrite this! %s\n", __func__)
 
 
 #define GAME_ASSERT(condition)											\

@@ -1256,6 +1256,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.music = true;
 	gGamePrefs.interpolateAudio = true;
 	gGamePrefs.gameTitlePowerPete = false;
+	gGamePrefs.thermometerScreen = true;
 	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
 }
 

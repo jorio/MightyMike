@@ -134,9 +134,12 @@ static SettingEntry gSettingEntries[] =
 	{&gGamePrefs.integerScaling		, "upscaling"			, OnChangeIntegerScaling,	2,  { "stretch", "crisp" } },
 	{&gGamePrefs.uncappedFramerate	, "frame rate"			, nil,						2,  { "32 fps original", "uncapped" } },
 	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "   raw", "   filtered" } },
-	{&gGamePrefs.music				, "music"				, OnToggleMusic,			2,	{ "off", "on" } },
+	{nil							, nil					, nil,						0,  { NULL } },
+	{&gGamePrefs.music				, "music"				, OnToggleMusic,			2,	{ "no", "yes" } },
 	{&gGamePrefs.interpolateAudio	, "audio quality"		,OnChangeAudioInterpolation,2,	{ "raw", "interpolated" } },
+	{nil							, nil					, nil,						0,  { NULL } },
 	{&gGamePrefs.gameTitlePowerPete	, "game title"			, nil,						2,  { "mighty mike", "power pete" } },
+	{&gGamePrefs.thermometerScreen	, "loading screen"		, nil,						2,  { "none", "charging batteries" } },
 	{nil							, nil					, nil,						0,  { NULL } },
 	{nil							, "done"				, OnDone,					0,  { NULL } },
 };
@@ -502,6 +505,9 @@ static void NavigateControlsPage_AwaitingPress(void)
 
 static int LayOutText(const char* label, int row, int col, int flags)
 {
+	if (!label)
+		label = "NULL???";
+
 	bool asObject		= flags & kTextFlags_AsObject;
 	bool bounceUp		= flags & kTextFlags_BounceUp;
 	bool jitter			= flags & kTextFlags_Jitter;
