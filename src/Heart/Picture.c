@@ -78,7 +78,7 @@ void LoadImage(const char* fileName, short showMode)
 	if (showMode & LOADIMAGE_ALIGNBOTTOM)
 		destPtr += destRowBytes * (VISIBLE_HEIGHT - height);
 	else
-		destPtr += destRowBytes * (VISIBLE_HEIGHT - height) / 2;
+		destPtr += destRowBytes * ((VISIBLE_HEIGHT - height) / 2);
 
 				/* DUMP PIXEL IMAGE INTO BUFFER */
 

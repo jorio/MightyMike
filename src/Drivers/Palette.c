@@ -37,8 +37,8 @@ void InitPaletteStuff(void)
 {
 	for (int i = 0; i < 256; i++)
 	{
-		gGamePalette[i]		= 0xFF000000 | i;
-		gBackUpPalette[i]	= 0xFF000000 | i;
+		gGamePalette[i]		= 0x000000FF;	// black
+		gBackUpPalette[i]	= 0x000000FF;
 	}
 }
 

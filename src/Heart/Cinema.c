@@ -765,6 +765,7 @@ void DoPangeaLogo(void)
 void DoLegal(void)
 {
 	EraseCLUT();
+	BlankEntireScreenArea();
 	LoadImage(":images:legal.tga", LOADIMAGE_FADEIN);
 	Wait2(60*6);
 	FadeOutGameCLUT();
