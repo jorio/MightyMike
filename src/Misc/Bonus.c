@@ -448,6 +448,10 @@ short	group,type;
 				group = GroupNum_BargainKeys;
 				type = ObjType_BargainKeys;
 				break;
+
+		default:
+				GAME_ASSERT_MESSAGE(false, "Unknown gSceneNum");
+				return false;
 	}
 
 
