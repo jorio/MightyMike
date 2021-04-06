@@ -152,7 +152,7 @@ static Boolean beenHereFlag = false;
 
 exit:
 
-	ExitToShell();
+	ExitToShell();									// throws Pomme::QuitRequest
 }
 
 
