@@ -38,3 +38,6 @@ void PresentIndexedFramebuffer(void);
 void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data);
 void SetFullscreenMode(void);
 void OnChangeIntegerScaling(void);
+
+void ConvertFramebufferToRGBA(void);
+void ShutdownRenderThreads(void);

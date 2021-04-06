@@ -4,8 +4,8 @@
 #include "PommeGraphics.h"
 
 #include <SDL.h>
-
 #include <iostream>
+#include <thread>
 
 #if __APPLE__
 #include <libproc.h>
@@ -23,6 +23,8 @@ extern "C"
 	FSSpec gDataSpec;
 
 	void GameMain(void);
+
+	int gNumThreads = 0;
 }
 
 static fs::path FindGameData()
@@ -60,6 +62,12 @@ static fs::path FindGameData()
 
 int CommonMain(int argc, const char** argv)
 {
+	gNumThreads = (int) std::thread::hardware_concurrency();
+	if (gNumThreads >= 32)
+		gNumThreads = 32;
+	else if (gNumThreads <= 0)
+		gNumThreads = 1;
+
 	// Start our "machine"
 	Pomme::Init();
 

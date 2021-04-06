@@ -20,19 +20,11 @@
 #include <SDL.h>
 #include <string.h>
 
-#ifdef _OPENMP
-	#include <omp.h>
-#else
-	#define omp_get_thread_num() 0
-	#define omp_get_max_threads() 1
-#endif
-
 /****************************/
 /*    PROTOTYPES            */
 /****************************/
 
 static void InitScreenBuffers(void);
-static void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags);
 
 
 /****************************/
@@ -282,7 +274,7 @@ void InitScreenBuffers(void)
 
 					/* BUILD DITHERING FILTER BUFFER */
 
-	gRowDitherStrides = (uint8_t*) NewPtrClear(omp_get_max_threads() * VISIBLE_WIDTH);
+	gRowDitherStrides = (uint8_t*) NewPtrClear(gNumThreads * VISIBLE_WIDTH);
 }
 
 
@@ -377,6 +369,8 @@ void SetScreenOffsetFor640x480(void)
 
 void CleanupDisplay(void)
 {
+	ShutdownRenderThreads();
+
 	if (gRowDitherStrides != nil)
 	{
 		DisposePtr((Ptr) gRowDitherStrides);
@@ -384,127 +378,9 @@ void CleanupDisplay(void)
 	}
 }
 
-
 /****************** PRESENT FRAMEBUFFER *************************/
 
-static void ConvertIndexedFramebufferToRGBA_NoFilter(void)
-{
-#pragma omp parallel for schedule(static) default(none) \
-		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer, VISIBLE_WIDTH, VISIBLE_HEIGHT)
-	for (int y = 0; y < VISIBLE_HEIGHT; y++)
-	{
-		uint32_t* rgba			= ((uint32_t*) gRGBAFramebuffer) + y * VISIBLE_WIDTH;
-		const uint8_t* indexed	= gIndexedFramebuffer + y * VISIBLE_WIDTH;
-
-		for (int x = 0; x < VISIBLE_WIDTH; x++)
-		{
-			*(rgba++) = gGamePalette[*(indexed++)];
-		}
-	}
-}
-
-static void ConvertIndexedFramebufferToRGBA_FilterDithering(void)
-{
-	// initialize row bleed: no dithering by default
-	if (gRowDitherStrides == nil)
-	{
-		gRowDitherStrides = (uint8_t*) NewPtrClear(omp_get_max_threads() * VISIBLE_WIDTH);
 #if _DEBUG
-		printf("Rendering threads: %d\n", omp_get_max_threads());
-#endif
-	}
-
-#pragma omp parallel for schedule(static) default(none) \
-		shared(gGamePalette, gRGBAFramebuffer, gIndexedFramebuffer, gRowDitherStrides, VISIBLE_WIDTH, VISIBLE_HEIGHT)
-	for (int y = 0; y < VISIBLE_HEIGHT; y++)
-	{
-		uint32_t* rgba			= ((uint32_t*) gRGBAFramebuffer) + y * VISIBLE_WIDTH;
-		const uint8_t* indexed	= gIndexedFramebuffer + y * VISIBLE_WIDTH;
-
-		uint8_t* smearFlag		= &gRowDitherStrides[omp_get_thread_num() * VISIBLE_WIDTH];
-		FilterDithering_Row(indexed, smearFlag);
-
-		for (int x = 0; x < VISIBLE_WIDTH-1; x++)
-		{
-			if (*smearFlag)
-			{
-				uint8_t* me		= (uint8_t*) &gGamePalette[*indexed];
-				uint8_t* next	= (uint8_t*) &gGamePalette[*(indexed+1)];
-				uint8_t* out	= (uint8_t*) rgba;
-				out[1] = (me[1] + next[1]) >> 1;
-				out[2] = (me[2] + next[2]) >> 1;
-				out[3] = (me[3] + next[3]) >> 1;
-			}
-			else
-				*rgba = gGamePalette[*indexed];
-
-			rgba++;
-			indexed++;
-
-			*smearFlag = 0;	// clear for next row
-			smearFlag++;
-		}
-
-		*rgba = gGamePalette[*indexed];		// last
-		rgba++;
-		indexed++;
-	}
-}
-
-static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags)
-{
-	static const int THRESH = 2;
-	static const int BLEED = 1;
-
-	int prev	= -1;
-	int me		= indexedRow[0];
-	int next	= indexedRow[1];
-
-	int ditherStart		= 0;
-	int ditherEnd		= -1;
-
-
-#define COMMIT_STRIDE do { \
-	int ditherLength = ditherEnd - ditherStart;								\
-	if (ditherLength > THRESH)												\
-		memset(rowSmearFlags+ditherStart, 1, ditherLength+BLEED);			\
-	} while(0)
-
-	for (int x = 0; x < VISIBLE_WIDTH-1; x++)
-	{
-		next = indexedRow[x+1];
-
-		if (me==next || me==prev)	// contiguous solid color
-		{
-			COMMIT_STRIDE;			// 			commit current dither stride if any
-			ditherEnd = -1;			// 			break dither stride
-		}
-		else if (prev==next)		// middle of dithered stride
-		{
-			if (ditherEnd < 0)		// 			no current dither stride yet
-				ditherStart = x-1;	// 			start stride on left dither pixel
-			ditherEnd = x+1;		// 			extend stride to right dither pixel
-		}
-		else if (x == ditherEnd)	// pixel was used to dither previous column
-		{
-			;						// 			let it be -- perhaps next pixel will detect we're still in dither stride
-		}
-		else						// lone non-dithered pixel
-		{
-			COMMIT_STRIDE;			// 			commit current dither stride if any
-			ditherEnd = -1;			// 			break dither stride
-		}
-
-		prev = me;
-		me = next;
-	}
-
-	// commit last
-	COMMIT_STRIDE;
-
-#undef COMMIT_STRIDE
-}
-
 static void SaveIndexedScreenshot(void)
 {
 	DumpIndexedTGA("/tmp/MikeIndexedScreenshot.tga", VISIBLE_WIDTH, VISIBLE_HEIGHT, (const char*) gIndexedFramebuffer);
@@ -552,6 +428,7 @@ void DumpIndexedTGA(const char* hostPath, int width, int height, const char* dat
 
 	printf("wrote %s\n", hostPath);
 }
+#endif
 
 void PresentIndexedFramebuffer(void)
 {
@@ -569,14 +446,7 @@ void PresentIndexedFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
 
-	if (!gGamePrefs.filterDithering)
-	{
-		ConvertIndexedFramebufferToRGBA_NoFilter();
-	}
-	else
-	{
-		ConvertIndexedFramebufferToRGBA_FilterDithering();
-	}
+	ConvertFramebufferToRGBA();
 
 	//-------------------------------------------------------------------------
 	// Update SDL texture and swap buffers
@@ -597,8 +467,9 @@ void PresentIndexedFramebuffer(void)
 		float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 		snprintf(
 				gDebugTextBuffer, sizeof(gDebugTextBuffer),
-				"Mighty Mike %s - fps:%d - objs:%ld - x:%ld y:%ld",
+				"Mighty Mike %s - thr:%d - fps:%d - objs:%ld - x:%ld y:%ld",
 				PROJECT_VERSION,
+				gNumThreads,
 				(int)roundf(fps),
 				NumObjects,
 				gMyX,

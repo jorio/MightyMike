@@ -85,6 +85,7 @@ extern	struct SDL_Window		*gSDLWindow;
 extern	struct SDL_Renderer		*gSDLRenderer;
 extern	struct SDL_Texture		*gSDLTexture;
 extern	FSSpec					gDataSpec;
+extern	int						gNumThreads;
 
 #pragma mark - MyGuy
 
@@ -213,6 +214,7 @@ extern	long					gLastPixieTime;
 extern	int						VISIBLE_WIDTH;
 extern	int						VISIBLE_HEIGHT;
 extern	uint8_t					*gIndexedFramebuffer;
+extern	uint8_t					*gRGBAFramebuffer;
 extern	uint8_t					**gScreenLookUpTable;		// VISIBLE_HEIGHT elements
 extern	uint8_t					**gOffScreenLookUpTable;	// OFFSCREEN_HEIGHT elements
 extern	uint8_t					**gBackgroundLookUpTable;	// OFFSCREEN_HEIGHT elements
@@ -224,3 +226,4 @@ extern	long					gScreenYOffset;				// global centering offset applied to sprites
 extern	Handle					gBackgroundHandle;
 extern	Handle					gOffScreenHandle;
 extern	Handle					gPFBufferHandle;
+extern	uint8_t					*gRowDitherStrides;			// for dithering filter

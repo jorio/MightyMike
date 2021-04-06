@@ -41,13 +41,7 @@ add_subdirectory(extern/Pomme)
 
 find_package(SDL2 REQUIRED COMPONENTS main)
 
-# OpenMP is not mandatory to compile the game. If it's not available, framebuffer
-# filtering in Window.c will be single-threaded.
-# Disabled by default because on some systems (including Windows),
-# the default wait policy is "active", causing high CPU load.
-if (USE_OPENMP)
-	find_package(OpenMP)
-endif()
+find_package(Threads REQUIRED)
 
 #------------------------------------------------------------------------------
 # GAME SOURCES
@@ -61,6 +55,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in ${GAME_SRCDIR}/Hea
 set(GAME_SOURCES
 	${GAME_SRCDIR}/Heart/Cinema.c
 	${GAME_SRCDIR}/Heart/Collision.c
+	${GAME_SRCDIR}/Heart/Filter.cpp
 	${GAME_SRCDIR}/Heart/Infobar.c
 	${GAME_SRCDIR}/Heart/input.c
 	${GAME_SRCDIR}/Heart/IO.c
@@ -178,6 +173,7 @@ target_include_directories(${GAME_TARGET} PRIVATE
 target_link_libraries(${GAME_TARGET}
 	Pomme
 	${SDL2_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
 	"$<$<BOOL:${APPLE}>:-framework Foundation>"		# Required for KillMacMouseAcceleration
 	"$<$<BOOL:${APPLE}>:-framework IOKit>"			# Required for KillMacMouseAcceleration
 )
@@ -200,13 +196,6 @@ endif()
 #------------------------------------------------------------------------------
 # COMPILER OPTIONS
 #------------------------------------------------------------------------------
-
-if(OpenMP_FOUND)
-	message("OpenMP found; framebuffer filtering will be multithreaded")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
 
 if(NOT MSVC)
 	target_compile_options(${GAME_TARGET} PRIVATE
