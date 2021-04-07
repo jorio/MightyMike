@@ -432,7 +432,6 @@ Rect	box;
 
 	if (theNode->CType == INVALID_NODE_FLAG)		// see if already deleted
 	{
-		printf("Double delete attempt on object of type %ld\n", theNode->Type);
 		DoAlert("Attempted to Double Delete an Object.  Object was already deleted!");
 		return;
 	}

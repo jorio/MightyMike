@@ -9,6 +9,7 @@
 /***************/
 
 #include <SDL.h>
+#include <stdio.h>
 #include "myglobals.h"
 #include "window.h"
 #include "io.h"
@@ -105,7 +106,7 @@ void DoAlert(const char* s)
 
 void DoAssert(const char* msg, const char* file, int line)
 {
-	printf("NANOSAUR ASSERTION FAILED: %s - %s:%d\n", msg, file, line);
+	fprintf(stderr, "MIKE ASSERTION FAILED: %s - %s:%d\n", msg, file, line);
 	static char alertbuf[1024];
 	snprintf(alertbuf, 1024, "%s\n%s:%d", msg, file, line);
 	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Nanosaur: Assertion Failed!", alertbuf, NULL);

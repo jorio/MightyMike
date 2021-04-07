@@ -30,6 +30,7 @@
 #include "version.h"
 #include "externs.h"
 #include <SDL.h>
+#include <stdio.h>
 #include <string.h>
 
 /****************************/

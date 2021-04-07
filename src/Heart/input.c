@@ -10,7 +10,9 @@
 /***************/
 
 #include <SDL.h>
+#include <stdio.h>
 #include <string.h>
+
 #include "misc.h"
 #include "input.h"
 #include "window.h"
