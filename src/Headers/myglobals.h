@@ -7,13 +7,14 @@
 #include "equates.h"
 #include "structures.h"
 
-#ifdef __powerc
+// Simulation frames per second.
+// This is based on the PowerPC version. The game ran at 31 FPS on 68K.
 #define		GAME_FPS		32L
-#else
-#define		GAME_FPS		31L
-#endif
 
+// Duration of a simulation frame in microseconds.
 #define		GAME_SPEED_MICROSECONDS		(1000L*1000L/(GAME_FPS))
+
+// Duration of a simulation frame in milliseconds (SDL clock ticks).
 #define		GAME_SPEED_SDL				(1000/(GAME_FPS))
 
 #define	ONE_PLAYER		0

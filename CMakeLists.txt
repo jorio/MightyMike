@@ -184,7 +184,6 @@ target_link_libraries(${GAME_TARGET}
 
 add_compile_definitions(
 	"$<$<CONFIG:DEBUG>:_DEBUG>"
-	__powerc		# TODO: REMOVEME once all 68k asm is gone
 )
 
 if(WIN32)
