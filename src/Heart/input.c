@@ -25,6 +25,7 @@
 
 SDL_GameController* gSDLController = NULL;
 SDL_JoystickID		gSDLJoystickInstanceID = -1;		// ID of the joystick bound to gSDLController
+SDL_Haptic*			gSDLHaptic = NULL;
 
 Byte				gRawKeyboardState[SDL_NUM_SCANCODES];
 bool				gAnyNewKeysPressed = false;
@@ -32,7 +33,6 @@ char				gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
 Byte				gNeedStates[NUM_CONTROL_NEEDS];
 
-static SDL_GameController* TryOpenController(bool showMessage);
 static void OnJoystickRemoved(SDL_JoystickID which);
 
 /****************************/
@@ -50,10 +50,8 @@ enum
 	KEYSTATE_ACTIVE_BIT	= 0b10,
 };
 
-#define JOYSTICK_DEAD_ZONE_RAW (32767/10)
-#define JOYSTICK_DEAD_ZONE_RAW_SQUARED (JOYSTICK_DEAD_ZONE_RAW*JOYSTICK_DEAD_ZONE_RAW)
-
-#define JOYSTICK_FAKEDIGITAL_DEAD_ZONE .66f
+const int16_t kJoystickDeadZone		= (33 * 32767 / 100);
+const int16_t kJoystickDeadZone_UI	= (66 * 32767 / 100);
 
 #if __APPLE__
 #define DEFAULTKB2_NEXTWEAPON		SDL_SCANCODE_LGUI
@@ -72,7 +70,7 @@ const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS] =
 	[kNeed_Right			] = {{SDL_SCANCODE_RIGHT,	SDL_SCANCODE_D,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_RIGHT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		+1,		},
 	[kNeed_PrevWeapon		] = {{SDL_SCANCODE_RSHIFT,	DEFAULTKB2_PREVWEAPON,	}, 0,					+1, {SDL_CONTROLLER_BUTTON_LEFTSHOULDER, SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID, 	0,		},
 	[kNeed_NextWeapon		] = {{SDL_SCANCODE_LSHIFT,	DEFAULTKB2_NEXTWEAPON,	}, 0,					-1,	{SDL_CONTROLLER_BUTTON_B, 			SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_Attack			] = {{SDL_SCANCODE_SPACE,	SDL_SCANCODE_LCTRL,		}, SDL_BUTTON_LEFT,		0,	{SDL_CONTROLLER_BUTTON_X,			SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
+	[kNeed_Attack			] = {{SDL_SCANCODE_SPACE,	SDL_SCANCODE_LCTRL,		}, SDL_BUTTON_LEFT,		0,	{SDL_CONTROLLER_BUTTON_X,			SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_TRIGGERRIGHT,+1,		},
 	[kNeed_Radar			] = {{SDL_SCANCODE_R,		SDL_SCANCODE_TAB,		}, SDL_BUTTON_MIDDLE,	0,	{SDL_CONTROLLER_BUTTON_Y,			SDL_CONTROLLER_BUTTON_BACK,			}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
 	[kNeed_UIUp				] = {{SDL_SCANCODE_UP,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_UP,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		-1,		},
 	[kNeed_UIDown			] = {{SDL_SCANCODE_DOWN,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_DOWN,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		+1,		},
@@ -255,9 +253,13 @@ void UpdateInput(void)
 
 			if (kb->gamepadAxis != SDL_CONTROLLER_AXIS_INVALID)
 			{
+				int16_t deadZone = i >= NUM_REMAPPABLE_NEEDS
+						? kJoystickDeadZone_UI
+						: kJoystickDeadZone;
+
 				int16_t rawValue = SDL_GameControllerGetAxis(gSDLController, kb->gamepadAxis);
-				downNow |= (kb->gamepadAxisSign > 0 && rawValue > (int16_t)(JOYSTICK_FAKEDIGITAL_DEAD_ZONE * 32767.0f))
-					|| (kb->gamepadAxisSign < 0 && rawValue < (int16_t)(JOYSTICK_FAKEDIGITAL_DEAD_ZONE * -32768.0f));
+				downNow |= (kb->gamepadAxisSign > 0 && rawValue > deadZone)
+						|| (kb->gamepadAxisSign < 0 && rawValue < -deadZone);
 			}
 		}
 
@@ -327,7 +329,7 @@ bool GetNewNeedState(int needID)
 
 /****************************** SDL JOYSTICK FUNCTIONS ********************************/
 
-static SDL_GameController* TryOpenController(bool showMessage)
+SDL_GameController* TryOpenController(bool showMessage)
 {
 	if (gSDLController)
 	{
@@ -357,7 +359,7 @@ static SDL_GameController* TryOpenController(bool showMessage)
 			char messageBuf[1024];
 			snprintf(messageBuf, sizeof(messageBuf),
 				"The game does not support your controller yet (\"%s\").\n\n"
-				"You can play with the keyboard and mouse instead. Sorry!",
+				"You can play with the keyboard instead. Sorry!",
 				SDL_JoystickNameForIndex(0));
 			SDL_ShowSimpleMessageBox(
 				SDL_MESSAGEBOX_WARNING,
@@ -370,13 +372,11 @@ static SDL_GameController* TryOpenController(bool showMessage)
 
 	printf("Opened joystick %d as controller: %s\n", gSDLJoystickInstanceID, SDL_GameControllerName(gSDLController));
 
-	/*
 	gSDLHaptic = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(gSDLController));
-	if (!gSDLHaptic)
-		printf("This joystick can't do haptic.\n");
-	else
-		printf("This joystick can do haptic!\n");
-	*/
+	if (gSDLHaptic)
+	{
+		SDL_HapticRumbleInit(gSDLHaptic);
+	}
 
 	return gSDLController;
 }
@@ -391,6 +391,13 @@ static void OnJoystickRemoved(SDL_JoystickID which)
 
 	printf("Current joystick was removed: %d\n", which);
 
+	// Nuke haptic device, if any
+	if (gSDLHaptic)
+	{
+		SDL_HapticClose(gSDLHaptic);
+		gSDLHaptic = NULL;
+	}
+
 	// Nuke reference to this controller+joystick
 	SDL_GameControllerClose(gSDLController);
 	gSDLController = NULL;
@@ -400,20 +407,52 @@ static void OnJoystickRemoved(SDL_JoystickID which)
 	TryOpenController(false);
 }
 
-static void GetThumbStickVector(bool rightStick, int16_t* dx, int16_t* dy)
+int32_t GetLeftStickMagnitude_Fix32(void)
 {
-	Sint16 dxRaw = SDL_GameControllerGetAxis(gSDLController, rightStick ? SDL_CONTROLLER_AXIS_RIGHTX : SDL_CONTROLLER_AXIS_LEFTX);
-	Sint16 dyRaw = SDL_GameControllerGetAxis(gSDLController, rightStick ? SDL_CONTROLLER_AXIS_RIGHTY : SDL_CONTROLLER_AXIS_LEFTY);
-
-	float magnitudeSquared = dxRaw * dxRaw + dyRaw * dyRaw;
-	if (magnitudeSquared < JOYSTICK_DEAD_ZONE_RAW_SQUARED)
+	if (!gSDLController)
 	{
-		*dx = dxRaw;
-		*dy = dyRaw;
+		return 0;
+	}
+
+	int dxRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_LEFTX);
+	int dyRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_LEFTY);
+
+	int magnitudeSquared = dxRaw * dxRaw + dyRaw * dyRaw;
+
+	if (magnitudeSquared < kJoystickDeadZone * kJoystickDeadZone)
+	{
+		return 0;
+	}
+
+	return (int32_t)(0x10000 * sqrtf(dxRaw * dxRaw + dyRaw * dyRaw) / 32767.0f);
+}
+
+short GetRightStick8WayAim(void)
+{
+	int dxRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTX);
+	int dyRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTY);
+
+	bool right	= dxRaw > kJoystickDeadZone;
+	bool left	= dxRaw < -kJoystickDeadZone;
+	bool down	= dyRaw > kJoystickDeadZone;
+	bool up		= dyRaw < -kJoystickDeadZone;
+
+	if (down)
+	{
+		if (right)		return AIM_DOWN_RIGHT;
+		else if (left)	return AIM_DOWN_LEFT;
+		else			return AIM_DOWN;
+	}
+	else if (up)
+	{
+		if (right)		return AIM_UP_RIGHT;
+		else if (left)	return AIM_UP_LEFT;
+		else			return AIM_UP;
 	}
 	else
 	{
-		*dx = 0;
-		*dy = 0;
+		if (right)		return AIM_RIGHT;
+		else if (left)	return AIM_LEFT;
+		else			return -1;
 	}
 }

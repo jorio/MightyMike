@@ -78,6 +78,8 @@ long		gMyWindDX,gMyWindDY;					// force of wind
 short		gMyGunDrawnTimer;
 Boolean		gMyKeys[6] = {false,false,false,false,false,false};
 
+static bool	gMeAnalogAim = false;
+
 static	Byte		gMyWalkAnims[8] = {MY_ANIMBASE_WALK,
 							MY_ANIMBASE_WALK+1,
 							MY_ANIMBASE_WALK+1,
@@ -334,7 +336,14 @@ void MoveMe_Walking(void)
 
 	HandleMyCenter();									// check any center spot stuff
 	if (CalcMyAim())									// calc my aiming vector
+	{
+		if (gMeAnalogAim)
+		{
+			gMyMode = MY_MODE_SHOOTWALK;
+			gMyGunDrawnTimer = GUN_DRAW_DURATION;
+		}
 		SetMyWalkAnim();
+	}
 
 	DoMyMove();											// do the move
 
@@ -414,7 +423,14 @@ void MoveMe_Standing(void)
 
 	HandleMyCenter();									// check any center spot stuff
 	if (CalcMyAim())									// calc my aiming vector
+	{
+		if (gMeAnalogAim)
+		{
+			gMyMode = MY_MODE_SHOOTSTAND;
+			gMyGunDrawnTimer = GUN_DRAW_DURATION;
+		}
 		SetMyStandAnim();
+	}
 
 	DoMyMove();
 
@@ -676,34 +692,38 @@ void ControlMeByKeyboard(Boolean *horizFlag, Boolean *vertFlag)
 
 void PinMyDeltas(void)
 {
+	long maxSpeedX;
+	long maxSpeedY;
+
 	if (gMeOnWaterFlag)					// WATER PIN
 	{
-		if (gDX > (MY_WALK_SPEED/2))
-			gDX = MY_WALK_SPEED/2;
-		else
-		if (gDX < (-(MY_WALK_SPEED/2)))
-			gDX = -(MY_WALK_SPEED/2);
-
-		if (gDY > (MY_WALK_SPEED/2))
-			gDY = MY_WALK_SPEED/2;
-		else
-		if (gDY < (-(MY_WALK_SPEED/2)))
-			gDY = -(MY_WALK_SPEED/2);
+		maxSpeedX = MY_WALK_SPEED/2;
+		maxSpeedY = MY_WALK_SPEED/2;
 	}
 	else								// NORMAL PIN
 	{
-		if (gDX > gMyMaxSpeedX)
-			gDX = gMyMaxSpeedX;
-		else
-		if (gDX < -gMyMaxSpeedX)
-			gDX = -gMyMaxSpeedX;
-
-		if (gDY > gMyMaxSpeedY)
-			gDY = gMyMaxSpeedY;
-		else
-		if (gDY < -gMyMaxSpeedY)
-			gDY = -gMyMaxSpeedY;
+		maxSpeedX = gMyMaxSpeedX;
+		maxSpeedY = gMyMaxSpeedY;
 	}
+
+	int32_t mag = GetLeftStickMagnitude_Fix32();
+	if (mag != 0 && mag < 0x10000)
+	{
+		maxSpeedX = Fix32_Mul(maxSpeedX, mag);
+		maxSpeedY = Fix32_Mul(maxSpeedY, mag);
+	}
+
+	if (gDX > maxSpeedX)
+		gDX = maxSpeedX;
+	else
+	if (gDX < -maxSpeedX)
+		gDX = -maxSpeedX;
+
+	if (gDY > maxSpeedY)
+		gDY = maxSpeedY;
+	else
+	if (gDY < -maxSpeedY)
+		gDY = -maxSpeedY;
 }
 
 
@@ -1051,6 +1071,14 @@ static	Byte	oldDirection;
 
 				/* FIND CURRENT AIM */
 
+	gMeAnalogAim = false;
+	short analog = GetRightStick8WayAim();
+	if (analog != -1)
+	{
+		gMyDirection = analog;
+		gMeAnalogAim = true;
+	}
+	else
 	if (gDY < 0)
 	{
 		if (gDX < 0)
@@ -1081,6 +1109,7 @@ static	Byte	oldDirection;
 		else
 		if (gDX > 0)
 			gMyDirection = AIM_RIGHT;
+		// else if dx == 0 and dy == 0, don't change direction
 	}
 
 				/**********************************/

@@ -1356,6 +1356,8 @@ long				count;
 
 void GameMain(void)
 {
+	TryOpenController(true);
+
 	ToolBoxInit();
 	VerifySystem();
 
