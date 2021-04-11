@@ -556,14 +556,14 @@ void ShowPaused(void)
 // OUTPUT: True = yes, quit
 //
 
-#define	QUIT_X		240
-#define	QUIT_Y		220
-
 Boolean	AskIfQuit(void)
 {
 long	tick;
 Boolean	mode;
 short	selection;
+
+const int	quitX = gGamePrefs.pfSize == PFSIZE_SMALL ? 240 : (VISIBLE_WIDTH/2)-11;
+const int	quitY = gGamePrefs.pfSize == PFSIZE_SMALL ? 220 : ((VISIBLE_HEIGHT-64)/2)-2;
 
 	if (gDemoMode != DEMO_MODE_OFF)
 		return(true);
@@ -580,9 +580,9 @@ short	selection;
 		
 		RegulateSpeed2(1);
 		if (!mode)
-			DrawFrameToScreen_NoMask(QUIT_X,QUIT_Y,GroupNum_Quit,ObjType_Quit,selection);
+			DrawFrameToScreen_NoMask(quitX, quitY, GroupNum_Quit, ObjType_Quit, selection);
 		else
-			DrawFrameToScreen_NoMask(QUIT_X,QUIT_Y,GroupNum_Quit,ObjType_Quit,2);
+			DrawFrameToScreen_NoMask(quitX, quitY, GroupNum_Quit, ObjType_Quit, 2);
 
 		PresentIndexedFramebuffer();
 

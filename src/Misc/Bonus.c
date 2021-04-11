@@ -46,9 +46,6 @@
 #define	RADAR_CENTER_Y		237
 #define	RADAR_RANGE			20
 
-#define	RADAR_CENTER_Xf		318
-#define	RADAR_CENTER_Yf		214
-
 #define	SHIELD_DURATION		(GAME_FPS*10)
 
 /**********************/
@@ -292,8 +289,8 @@ void DisplayBunnyRadar(void)
 int			width,height;
 short		xDist,yDist;
 
-const int	radarCenterX = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_X : RADAR_CENTER_Xf;
-const int	radarCenterY = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_Y : RADAR_CENTER_Yf;
+const int	radarCenterX = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_X : (VISIBLE_WIDTH/2);
+const int	radarCenterY = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_Y : ((VISIBLE_HEIGHT-64)/2);
 
 						/* DRAW RADAR BACKGROUND */
 
