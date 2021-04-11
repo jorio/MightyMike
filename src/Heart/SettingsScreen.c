@@ -13,8 +13,6 @@
 #include "picture.h"
 #include "playfield.h"
 #include "object.h"
-#include "infobar.h"
-#include "cinema.h"
 #include "misc.h"
 #include "sound2.h"
 #include "shape.h"
@@ -23,6 +21,7 @@
 #include "input.h"
 #include "version.h"
 #include "externs.h"
+#include "font.h"
 #include <SDL.h>
 #include <ctype.h>
 #include <string.h>
@@ -31,58 +30,66 @@
 /*    PROTOTYPES            */
 /****************************/
 
-typedef struct SettingEntry
+typedef enum
 {
-	Byte*			valuePtr;
-	const char*		label;
-	void			(*callback)(void);
-	unsigned int	numChoices;
-	const char*		choices[8];
-} SettingEntry;
+	kMenuItem_END_SENTINEL,
+	kMenuItem_Label,
+	kMenuItem_Action,
+	kMenuItem_Submenu,
+	kMenuItem_Separator,
+	kMenuItem_Cycler,
+	kMenuItem_KeyBinding,
+	kMenuItem_PadBinding,
+} MenuItemType;
 
+typedef struct MenuItem
+{
+	MenuItemType			type;
 
-static int LayOutText(const char* label, int row, int col, int flags);
-static void NukeText(int row, int col);
+	union
+	{
+		const char*			label;
+
+		struct
+		{
+			const char*		caption;
+			void			(*callback)(void);
+		} button;
+
+		struct
+		{
+			const char*		caption;
+			struct MenuItem* menu;
+		} submenu;
+
+		struct
+		{
+			const char*		caption;
+			void			(*callback)(void);
+			Byte*			valuePtr;
+			unsigned int	numChoices;
+			const char*		choices[8];
+		} cycler;
+
+		int 				kb;
+	};
+} MenuItem;
+
+static int MakeTextAtRowCol(const char* label, int row, int col, int flags);
+static void DeleteTextAtRowCol(int row, int col);
 static const char* ProcessScancodeName(int scancode);
-static void OnEnterControls(void);
 static void OnDone(void);
 static void OnChangePlayfieldSizeViaSettings(void);
-static void LayOutSettingsPageBackground(void);
-static void LayOutSettingsPageObjects(void);
-static void LayOutSettingsPage(void);
-static void LayOutControlsPage(void);
-
+static void OnResetKeys(void);
+static void OnResetGamepad(void);
+static void LayOutMenu(MenuItem* menu);
+static void DrawDitheringPattern(void);
 
 /****************************/
 /*    CONSTANTS             */
 /****************************/
 
-#define kSpecialLetterMagicValue 'LTTR'		// stored in an ObjNode's Special0 to signify that it is a letter node
-
-#define SpecialLetterMagic	Special0
-#define SpecialLetterBaseY	Special1
-#define SpecialLetterRow	Special2
-#define SpecialLetterCol	Special3
-#define FlagLetterJitter	Flag0
-
-enum
-{
-	kSettingsState_Off,
-	kSettingsState_MainPage,
-	kSettingsState_ControlsPage,
-	kSettingsState_ControlsPage_AwaitingPress,
-};
-
-enum
-{
-	kTextFlags_AsObject			= 1 << 0,
-	kTextFlags_BounceUp			= 1 << 1,
-	kTextFlags_Jitter			= 1 << 2,
-};
-
-static const int kNumKeybindingRows		= NUM_REMAPPABLE_NEEDS + 2;  // +2 extra rows for Reset to defaults & Done
-static const int kKeybindingRow_Reset	= NUM_REMAPPABLE_NEEDS + 0;
-static const int kKeybindingRow_Done	= NUM_REMAPPABLE_NEEDS + 1;
+#define MAX_ENTRIES_PER_MENU 25
 
 static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 {
@@ -100,51 +107,201 @@ static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 	[kNeed_LowerVolume		] = "volume down",
 };
 
-static const int8_t kLetterWidths[] =
+static const int kColumnX[] = { 64, 300, 475, 550 };
+static const int kRowY0 = 90-24*2;
+static const int kRowHeight = 24;
+
+/****************************/
+/*    MENU CONTENTS         */
+/****************************/
+
+#pragma mark - Menu Contents
+
+static MenuItem gVideoMenu[] =
 {
-	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,
-	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,
-	 6, 5,13,13, 13,13,13, 5, 13,13,13,13,  5,13, 5,13,	//  !"# $%&' ()*+ ,-./
-	12,12,12,12, 12,12,12,12, 12,12, 5, 5, 13,13,13,13,	// 0123 4567 89:; <=>?
-	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,	// @ABC DEFG HIJK LMNO
-	20,20,20,20, 20,20,20,20, 20,20,20,20, 20,20,20,20,	// PQRS TUVW XYZ
-	18,13,13,11, 15,11,11,18, 13, 5, 9,13, 10,19,15,18,	//  abc defg hijk lmno
-	13,18,13,12, 11,13,15,19, 14,12,13,20, 20,20,20,20,	// pqrs tuvw xyz
+	{ .type = kMenuItem_Label, .label = " VIDEO   SETTINGS" },
+	{ .type = kMenuItem_Separator },
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "fullscreen",
+			.callback = SetFullscreenMode,
+			.valuePtr = &gGamePrefs.fullscreen,
+			.numChoices = 2,
+			.choices = {"no", "yes"},
+		},
+	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "playfield size",
+			.callback = OnChangePlayfieldSizeViaSettings,
+			.valuePtr = &gGamePrefs.pfSize,
+			.numChoices = 3,
+			.choices = { "small: 68k original", "medium: ppc original", "large: widescreen" },
+		}
+	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "upscaling",
+			.callback = OnChangeIntegerScaling,
+			.valuePtr = &gGamePrefs.integerScaling,
+			.numChoices = 2,
+			.choices = { "stretch", "crisp" },
+		}
+	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "frame rate",
+			.callback = nil,
+			.valuePtr = &gGamePrefs.uncappedFramerate,
+			.numChoices = 2,
+			.choices = { "32 fps original", "uncapped" },
+		}
+	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "dithering",
+			.callback = nil,
+			.valuePtr = &gGamePrefs.filterDithering,
+			.numChoices = 2,
+			.choices = { "   raw", "   filtered" },
+		}
+	},
+	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
+	{ .type = kMenuItem_END_SENTINEL },
 };
 
-static const int kColumnX[] = { 64, 300, 475, 550 };
-static const int kRowY0 = 90;
-static const int kRowHeight = 24;
+static MenuItem gAudioMenu[] =
+{
+	{ .type = kMenuItem_Label, .label = " AUDIO   SETTINGS" },
+	{ .type = kMenuItem_Separator },
+	{
+			kMenuItem_Cycler,
+		.cycler =
+		{
+			.caption = "music",
+			.callback = OnToggleMusic,
+			.valuePtr = &gGamePrefs.music,
+			.numChoices = 2,
+			.choices = { "no", "yes" },
+		}
+	},
+	{
+		.type = kMenuItem_Cycler,
+		.cycler =
+		{
+			.caption = "audio quality",
+			.callback = OnChangeAudioInterpolation,
+			.valuePtr = &gGamePrefs.interpolateAudio,
+			.numChoices = 2,
+			.choices = { "raw", "interpolated" },
+		}
+	},
+	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
+	{ .type = kMenuItem_END_SENTINEL },
+};
+
+static MenuItem gPresentationMenu[] =
+{
+	{ .type = kMenuItem_Label, .label = " PRESENTATION   SETTINGS" },
+	{ .type = kMenuItem_Separator },
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "game title",
+			.callback = nil,
+			.valuePtr = &gGamePrefs.gameTitlePowerPete,
+			.numChoices = 2,
+			.choices = { "mighty mike", "power pete" },
+		}
+	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "loading screen",
+			.callback = nil,
+			.valuePtr = &gGamePrefs.thermometerScreen,
+			.numChoices = 2,
+			.choices = { "none", "charging batteries" },
+		}
+	},
+	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
+	{ .type = kMenuItem_END_SENTINEL },
+};
+
+static MenuItem gKeyboardMenu[] =
+{
+	{ .type = kMenuItem_Label, .label = " CONFIGURE   KEYBOARD" },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Up },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Down },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Left },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Right },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Attack },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_NextWeapon },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_PrevWeapon },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Radar },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleFullscreen },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleMusic },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_RaiseVolume },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_LowerVolume },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Action, .button = { .caption = "reset to defaults", .callback = OnResetKeys } },
+	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
+	{ .type = kMenuItem_END_SENTINEL },
+};
+
+static MenuItem gGamepadMenu[] =
+{
+	{ .type = kMenuItem_Label, .label = " CONFIGURE   GAMEPAD" },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_PadBinding, .kb = kNeed_Attack },
+	{ .type = kMenuItem_PadBinding, .kb = kNeed_NextWeapon },
+	{ .type = kMenuItem_PadBinding, .kb = kNeed_PrevWeapon },
+	{ .type = kMenuItem_PadBinding, .kb = kNeed_Radar },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Action, .button = { .caption = "reset to defaults", .callback = OnResetGamepad } },
+	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
+	{ .type = kMenuItem_END_SENTINEL },
+};
+
+static MenuItem gRootMenu[] =
+{
+	{ .type = kMenuItem_Label, .label = " SETTINGS", },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Submenu, .submenu = {.caption = "configure keyboard",	.menu = gKeyboardMenu} },
+	{ .type = kMenuItem_Submenu, .submenu = {.caption = "configure gamepad",	.menu = gGamepadMenu} },
+	{ .type = kMenuItem_Submenu, .submenu = {.caption = "video",				.menu = gVideoMenu} },
+	{ .type = kMenuItem_Submenu, .submenu = {.caption = "audio",				.menu = gAudioMenu} },
+	{ .type = kMenuItem_Submenu, .submenu = {.caption = "presentation",			.menu = gPresentationMenu} },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Action, .button = {.caption = "done", .callback = OnDone} },
+	{ .type = kMenuItem_END_SENTINEL },
+};
 
 /****************************/
 /*    VARIABLES             */
 /****************************/
 
-static int gSettingsState = kSettingsState_Off;
-static int gSettingsRow = 0;
-static int gControlsRow = 0;
-static int gControlsColumn = 0;
+#pragma mark - Static Globals
 
-static SettingEntry gSettingEntries[] =
-{
-	{nil							, "configure controls"	, OnEnterControls,			0,	{ NULL } },
-	{nil							, nil					, nil,						0,  { NULL } },
-	{&gGamePrefs.fullscreen			, "fullscreen"			, SetFullscreenMode,		2,	{ "no", "yes" }, },
-	{&gGamePrefs.pfSize				, "playfield size"		, OnChangePlayfieldSizeViaSettings, 3, { "small: 68k original", "medium: ppc original", "large: widescreen" } },
-	{&gGamePrefs.integerScaling		, "upscaling"			, OnChangeIntegerScaling,	2,  { "stretch", "crisp" } },
-	{&gGamePrefs.uncappedFramerate	, "frame rate"			, nil,						2,  { "32 fps original", "uncapped" } },
-	{&gGamePrefs.filterDithering	, "dithering"			, nil,						2,  { "   raw", "   filtered" } },
-	{nil							, nil					, nil,						0,  { NULL } },
-	{&gGamePrefs.music				, "music"				, OnToggleMusic,			2,	{ "no", "yes" } },
-	{&gGamePrefs.interpolateAudio	, "audio quality"		,OnChangeAudioInterpolation,2,	{ "raw", "interpolated" } },
-	{nil							, nil					, nil,						0,  { NULL } },
-	{&gGamePrefs.gameTitlePowerPete	, "game title"			, nil,						2,  { "mighty mike", "power pete" } },
-	{&gGamePrefs.thermometerScreen	, "loading screen"		, nil,						2,  { "none", "charging batteries" } },
-	{nil							, nil					, nil,						0,  { NULL } },
-	{nil							, "done"				, OnDone,					0,  { NULL } },
-};
+static MenuItem* gMenu;
+static int gNumMenuEntries;
+static int gMenuRow = 0;
+static int gKeyColumn = 0;
+static int gPadColumn = 0;
+static bool gAwaitingKeyPressForRebind = false;
+static bool gExitMenu = false;
 
-#define numSettingEntries ( (int) (sizeof(gSettingEntries) / sizeof(SettingEntry)) )
+static int gMenuRowYs[MAX_ENTRIES_PER_MENU];
+
+static int gLastRowOnRootMenu = -1;
+
 
 /******************************************************************************/
 
@@ -152,21 +309,6 @@ static SettingEntry gSettingEntries[] =
 /*    UTILITIES             */
 /****************************/
 #pragma mark - Utilities
-
-static void Cycle(SettingEntry* entry, int delta)
-{
-	if (entry->valuePtr)
-	{
-		unsigned int value = (unsigned int)*entry->valuePtr;
-		value = PositiveModulo(value + delta, entry->numChoices);
-		*entry->valuePtr = value;
-	}
-
-	if (entry->callback)
-	{
-		entry->callback();
-	}
-}
 
 static void ForceUpdateBackground(void)
 {
@@ -178,49 +320,39 @@ static void ForceUpdateBackground(void)
 	AddUpdateRegion(r, CLIP_REGION_PLAYFIELD);
 }
 
-static int GetRowY(int row)
-{
-	return kRowY0 + row * kRowHeight;
-}
-
 /****************************/
 /*    CALLBACKS             */
 /****************************/
 #pragma mark - Callbacks
 
-static void OnEnterControls(void)
-{
-	ReadKeyboard();	// flush keypresses
-
-	gSettingsState = kSettingsState_ControlsPage;
-	FadeOutGameCLUT();
-	LayOutControlsPage();
-}
-
 static void OnDone(void)
 {
 	ReadKeyboard();
 
-	switch (gSettingsState)
+	if (gAwaitingKeyPressForRebind)
 	{
-	case kSettingsState_ControlsPage:
-		FadeOutGameCLUT();
-		gSettingsState = kSettingsState_MainPage;
-		LayOutSettingsPage();
-		break;
-
-	case kSettingsState_ControlsPage_AwaitingPress:
 		PlaySound(SOUND_BADHIT);
-		NukeText(gControlsRow, gControlsColumn + 1);
-		LayOutText(ProcessScancodeName(gGamePrefs.keys[gControlsRow].key[gControlsColumn]), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp);
-		gSettingsState = kSettingsState_ControlsPage;
-		break;
-
-	case kSettingsState_MainPage:
-	default:
+		if (gMenu == gKeyboardMenu)
+		{
+			DeleteTextAtRowCol(gMenuRow, gKeyColumn + 1);
+			MakeTextAtRowCol(ProcessScancodeName(gGamePrefs.keys[gMenuRow].key[gKeyColumn]), gMenuRow, 1 + gKeyColumn, kTextFlags_AsObject | kTextFlags_BounceUp);
+		}
+		else if (gMenu == gGamepadMenu)
+		{
+			DeleteTextAtRowCol(gMenuRow, gPadColumn + 1);
+			MakeTextAtRowCol("TODO!!", gMenuRow, 1 + gPadColumn, kTextFlags_AsObject | kTextFlags_BounceUp);
+		}
+		gAwaitingKeyPressForRebind = false;
+	}
+	else if (gMenu != gRootMenu)
+	{
+//		FadeOutGameCLUT();
+		LayOutMenu(gRootMenu);
+	}
+	else
+	{
 		FadeOutGameCLUT();
-		gSettingsState = kSettingsState_Off;
-		break;
+		gExitMenu = true;
 	}
 }
 
@@ -231,47 +363,31 @@ static void OnChangePlayfieldSizeViaSettings(void)
 	SetScreenOffsetFor640x480();
 	InitClipRegions();
 	gScreenBlankedFlag = false;
-	LayOutSettingsPageBackground();
+	LayOutMenu(gMenu);//LayOutSettingsPageBackground();
+}
+
+static void OnResetKeys(void)
+{
+	printf("TODO: reset keyboard only (not gamepad)\n");
+	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
+	_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
+	PlaySound(SOUND_FIREHOLE);
+	LayOutMenu(gMenu);//LayOutControlsPage();
+}
+
+static void OnResetGamepad(void)
+{
+	printf("TODO: reset gamepad bindings only (not keyboard)\n");
+	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
+	_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
+	PlaySound(SOUND_FIREHOLE);
+	LayOutMenu(gMenu);//LayOutControlsPage();
 }
 
 /****************************/
 /*    MOVE CALLS            */
 /****************************/
 #pragma mark - Move Calls
-
-static void MoveText(void)
-{
-	GetObjectInfo();
-
-	ObjNode* theNode = gThisNodePtr;
-
-	theNode->DY += 0x10000L / 4;						// add gravity
-
-	theNode->YOffset.L += theNode->DY;					// move it
-
-	if (theNode->YOffset.Int > 0)						// see if bounce
-	{
-		theNode->YOffset.Int = 0;						// rebound
-
-		if (theNode->FlagLetterJitter)
-		{
-			theNode->DY = -0x10000 * RandomRange(2, 4) / 2;
-		}
-		else
-		{
-			theNode->DY = -theNode->DY / 2;
-			if (theNode->DY > -0x10000)					// don't rebound forever
-			{
-				theNode->DY = 0;
-				theNode->MoveFlag = false;
-			}
-		}
-	}
-
-	gThisNodePtr->Y.L = theNode->SpecialLetterBaseY + theNode->YOffset.L;		// move up
-
-//	UpdateObject();
-}
 
 static void MoveCursor(void)
 {
@@ -280,26 +396,20 @@ static void MoveCursor(void)
 
 				/* FIND TARGET X, Y */
 
-	switch (gSettingsState)
-	{
-		case kSettingsState_ControlsPage:
-		case kSettingsState_ControlsPage_AwaitingPress:
-			if (gControlsRow < NUM_REMAPPABLE_NEEDS)
-			{
-				targetX = kColumnX[1 + gControlsColumn];
-				targetY = GetRowY(gControlsRow);
-			}
-			else
-			{
-				targetX = kColumnX[0];
-				targetY = GetRowY(gControlsRow + 1);
-			}
-			break;
+	MenuItem* entry = &gMenu[gMenuRow];
 
-		case kSettingsState_MainPage:
+	targetY = gMenuRowYs[gMenuRow];
+
+	switch (entry->type)
+	{
+		case kMenuItem_KeyBinding:
+			targetX = kColumnX[1 + gKeyColumn];
+			break;
+		case kMenuItem_PadBinding:
+			targetX = kColumnX[1 + gPadColumn];
+			break;
 		default:
 			targetX = kColumnX[0];
-			targetY = GetRowY(gSettingsRow);
 			break;
 	}
 
@@ -388,25 +498,43 @@ static const char* ProcessScancodeName(int scancode)
 #undef kNameBufferLength
 }
 
-static int16_t* GetSelectedKeybindingKeyPtr(void)
+static const char* ProcessPadButtonName(int button)
 {
-	GAME_ASSERT(gControlsRow >= 0 && gControlsRow < NUM_REMAPPABLE_NEEDS);
-	GAME_ASSERT(gControlsColumn >= 0 && gControlsColumn < KEYBINDING_MAX_KEYS);
-	KeyBinding* kb = &gGamePrefs.keys[gControlsRow];
-	return &kb->key[gControlsColumn];
+	switch (button)
+	{
+		case SDL_CONTROLLER_BUTTON_INVALID:			return "---";
+		case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:	return "lb";
+		case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:	return "rb";
+		case SDL_CONTROLLER_BUTTON_LEFTSTICK:		return "ls";
+		case SDL_CONTROLLER_BUTTON_RIGHTSTICK:		return "rs";
+		default:
+			return SDL_GameControllerGetStringForButton(button);
+	}
+}
+
+static KeyBinding* GetBinding(int row)
+{
+	return &gGamePrefs.keys[gMenu[row].kb];
 }
 
 static void UnbindScancodeFromAllRemappableInputNeeds(int16_t sdlScancode)
 {
-	for (int i = 0; i < NUM_REMAPPABLE_NEEDS; i++)
+	for (int row = 0; row < gNumMenuEntries; row++)
 	{
+		MenuItem* entry = &gMenu[row];
+
+		if (entry->type != kMenuItem_KeyBinding)
+			continue;
+
+		KeyBinding* binding = GetBinding(row);
+
 		for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
 		{
-			if (gGamePrefs.keys[i].key[j] == sdlScancode)
+			if (binding->key[j] == sdlScancode)
 			{
-				gGamePrefs.keys[i].key[j] = 0;
-				NukeText(i, j+1);
-				LayOutText(ProcessScancodeName(0), i, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+				binding->key[j] = 0;
+				DeleteTextAtRowCol(row, j+1);
+				MakeTextAtRowCol(ProcessScancodeName(0), row, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
 			}
 		}
 	}
@@ -419,15 +547,151 @@ static void UnbindScancodeFromAllRemappableInputNeeds(int16_t sdlScancode)
 
 static void NavigateSettingEntriesVertically(int delta)
 {
+	bool skipEntry = false;
 	do
 	{
-		gSettingsRow += delta;
-		gSettingsRow = PositiveModulo(gSettingsRow, (unsigned int)numSettingEntries);
-	} while (nil == gSettingEntries[gSettingsRow].label);
+		gMenuRow += delta;
+		gMenuRow = PositiveModulo(gMenuRow, (unsigned int)gNumMenuEntries);
+
+		int kind = gMenu[gMenuRow].type;
+		skipEntry = kind == kMenuItem_Separator || kind == kMenuItem_Label;
+	} while (skipEntry);
 	PlaySound(SOUND_SELECTCHIME);
 }
 
-static void NavigateSettingsPage(void)
+static void NavigateButton(MenuItem* entry)
+{
+	if (GetNewNeedState(kNeed_UIConfirm))
+	{
+		if (entry->button.callback == OnDone)
+			PlaySound(SOUND_SQUEEK);
+		else
+			PlaySound(SOUND_GETPOW);
+
+		if (entry->button.callback)
+			entry->button.callback();
+	}
+}
+
+static void NavigateSubmenuButton(MenuItem* entry)
+{
+	if (GetNewNeedState(kNeed_UIConfirm))
+	{
+		if (entry->button.callback == OnDone)
+			PlaySound(SOUND_GETPOW);
+
+		ReadKeyboard();	// flush keypresses
+
+//		FadeOutGameCLUT();
+		LayOutMenu(entry->submenu.menu);
+	}
+}
+
+static void NavigateCycler(MenuItem* entry)
+{
+	bool wantConfirm	= GetNewNeedState(kNeed_UIConfirm);
+	bool wantLeft		= GetNewNeedState(kNeed_UILeft);
+	bool wantRight		= GetNewNeedState(kNeed_UIRight);
+	if (wantConfirm || wantLeft || wantRight)
+	{
+		if (entry->cycler.valuePtr == &gGamePrefs.interpolateAudio)
+			PlaySound(SOUND_COMEHERERODENT);
+		else
+			PlaySound(SOUND_GETPOW);
+
+		int delta = GetNewNeedState(kNeed_UILeft) ? -1 : 1;
+
+		if (entry->cycler.valuePtr)
+		{
+			unsigned int value = (unsigned int)*entry->cycler.valuePtr;
+			value = PositiveModulo(value + delta, entry->cycler.numChoices);
+			*entry->cycler.valuePtr = value;
+		}
+
+		if (entry->cycler.callback)
+			entry->cycler.callback();
+
+		if (entry->cycler.numChoices > 0)
+		{
+			DeleteTextAtRowCol(gMenuRow, 1);
+			MakeTextAtRowCol(entry->cycler.choices[*entry->cycler.valuePtr], gMenuRow, 1, kTextFlags_AsObject | kTextFlags_BounceUp);
+		}
+	}
+}
+
+static void NavigateKeyBinding(MenuItem* entry)
+{
+	if (GetNewNeedState(kNeed_UILeft))
+	{
+		gKeyColumn = PositiveModulo(gKeyColumn - 1, KEYBINDING_MAX_KEYS);
+		PlaySound(SOUND_SELECTCHIME);
+		return;
+	}
+
+	if (GetNewNeedState(kNeed_UIRight))
+	{
+		gKeyColumn = PositiveModulo(gKeyColumn + 1, KEYBINDING_MAX_KEYS);
+		PlaySound(SOUND_SELECTCHIME);
+		return;
+	}
+
+	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
+	{
+		GetBinding(gMenuRow)->key[gKeyColumn] = 0;
+		PlaySound(SOUND_PIESQUISH);
+		PlaySound(SOUND_POP);
+
+		DeleteTextAtRowCol(gMenuRow, gKeyColumn+1);
+		MakeTextAtRowCol(ProcessScancodeName(0), gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+		return;
+	}
+
+	if (GetNewSDLKeyState(SDL_SCANCODE_RETURN))
+	{
+		gAwaitingKeyPressForRebind = true;
+		DeleteTextAtRowCol(gMenuRow, gKeyColumn+1);
+		MakeTextAtRowCol("press a key!", gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Jitter);
+		return;
+	}
+}
+
+static void NavigatePadBinding(MenuItem* entry)
+{
+	if (GetNewNeedState(kNeed_UILeft))
+	{
+		gPadColumn = PositiveModulo(gPadColumn - 1, KEYBINDING_MAX_GAMEPAD_BUTTONS);
+		PlaySound(SOUND_SELECTCHIME);
+		return;
+	}
+
+	if (GetNewNeedState(kNeed_UIRight))
+	{
+		gPadColumn = PositiveModulo(gPadColumn + 1, KEYBINDING_MAX_GAMEPAD_BUTTONS);
+		PlaySound(SOUND_SELECTCHIME);
+		return;
+	}
+
+	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
+	{
+		GetBinding(gMenuRow)->gamepadButton[gPadColumn] = SDL_CONTROLLER_BUTTON_INVALID;
+		PlaySound(SOUND_PIESQUISH);
+		PlaySound(SOUND_POP);
+
+		DeleteTextAtRowCol(gMenuRow, gPadColumn+1);
+		MakeTextAtRowCol(ProcessScancodeName(0), gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+		return;
+	}
+
+	if (GetNewSDLKeyState(SDL_SCANCODE_RETURN))
+	{
+		gAwaitingKeyPressForRebind = true;
+		DeleteTextAtRowCol(gMenuRow, gPadColumn+1);
+		MakeTextAtRowCol("press button!", gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Jitter);
+		return;
+	}
+}
+
+static void NavigateMenu(void)
 {
 	if (GetNewNeedState(kNeed_UIBack))
 		OnDone();
@@ -438,94 +702,37 @@ static void NavigateSettingsPage(void)
 	if (GetNewNeedState(kNeed_UIDown))
 		NavigateSettingEntriesVertically(1);
 
-	if (GetNewNeedState(kNeed_UIConfirm) ||
-		(gSettingEntries[gSettingsRow].valuePtr && (GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIRight))))
+	MenuItem* entry = &gMenu[gMenuRow];
+
+	switch (entry->type)
 	{
-		SettingEntry* entry = &gSettingEntries[gSettingsRow];
+		case kMenuItem_Action:
+			NavigateButton(entry);
+			break;
 
-		if (entry->valuePtr == &gGamePrefs.interpolateAudio)
-			PlaySound(SOUND_COMEHERERODENT);
-		else if (entry->callback == OnDone)		// let OnDone play its own sound
-			PlaySound(SOUND_SQUEEK);
-		else
-			PlaySound(SOUND_GETPOW);
+		case kMenuItem_Submenu:
+			NavigateSubmenuButton(entry);
+			break;
 
-		int delta = GetNewNeedState(kNeed_UILeft) ? -1 : 1;
-		Cycle(entry, delta);
+		case kMenuItem_Cycler:
+			NavigateCycler(entry);
+			break;
 
-		if (entry->numChoices > 0)
-		{
-			NukeText(gSettingsRow, 1);
+		case kMenuItem_KeyBinding:
+			NavigateKeyBinding(entry);
+			break;
 
-			LayOutText(entry->choices[*entry->valuePtr], gSettingsRow, 1, kTextFlags_AsObject | kTextFlags_BounceUp);
-		}
+		case kMenuItem_PadBinding:
+			NavigatePadBinding(entry);
+			break;
+
+		default:
+			DoFatalAlert("Not supposed to be hovering on this menu item!");
+			break;
 	}
 }
 
-static void NavigateControlsPage(void)
-{
-	if (GetNewNeedState(kNeed_UIBack))
-		OnDone();
-
-	if (GetNewNeedState(kNeed_UIUp))
-	{
-		gControlsRow = PositiveModulo(gControlsRow - 1, (unsigned int)kNumKeybindingRows);
-		PlaySound(SOUND_SELECTCHIME);
-	}
-
-	if (GetNewNeedState(kNeed_UIDown))
-	{
-		gControlsRow = PositiveModulo(gControlsRow + 1, (unsigned int)kNumKeybindingRows);
-		PlaySound(SOUND_SELECTCHIME);
-	}
-
-	if (GetNewNeedState(kNeed_UILeft))
-	{
-		gControlsColumn = PositiveModulo(gControlsColumn - 1, 2);
-		PlaySound(SOUND_SELECTCHIME);
-	}
-
-	if (GetNewNeedState(kNeed_UIRight))
-	{
-		gControlsColumn = PositiveModulo(gControlsColumn + 1, 2);
-		PlaySound(SOUND_SELECTCHIME);
-	}
-
-	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
-	{
-		*GetSelectedKeybindingKeyPtr() = 0;
-		PlaySound(SOUND_PIESQUISH);
-		PlaySound(SOUND_POP);
-
-		NukeText(gControlsRow, gControlsColumn + 1);
-		LayOutText(ProcessScancodeName(0), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp);
-	}
-
-	if (GetNewSDLKeyState(SDL_SCANCODE_RETURN) && gControlsRow < NUM_REMAPPABLE_NEEDS)
-	{
-		gSettingsState = kSettingsState_ControlsPage_AwaitingPress;
-		NukeText(gControlsRow, gControlsColumn + 1);
-		LayOutText("press a key!", gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Jitter);
-	}
-
-	if (GetNewNeedState(kNeed_UIConfirm))
-	{
-		if (gControlsRow == kKeybindingRow_Reset)
-		{
-			memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
-			_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
-			PlaySound(SOUND_FIREHOLE);
-			LayOutControlsPage();
-		}
-		else if (gControlsRow == kKeybindingRow_Done)
-		{
-			PlaySound(SOUND_SQUEEK);
-			OnDone();
-		}
-	}
-}
-
-static void NavigateControlsPage_AwaitingPress(void)
+static void OnAwaitingKeyPress(void)
 {
 	if (GetNewNeedState(kNeed_UIBack))
 	{
@@ -533,17 +740,20 @@ static void NavigateControlsPage_AwaitingPress(void)
 		return;
 	}
 
-	for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+	if (gMenu == gKeyboardMenu)
 	{
-		if (GetNewSDLKeyState(i))
+		for (int i = 0; i < SDL_NUM_SCANCODES; i++)
 		{
-			UnbindScancodeFromAllRemappableInputNeeds(i);
-			*GetSelectedKeybindingKeyPtr() = i;
-			NukeText(gControlsRow, gControlsColumn + 1);
-			LayOutText(ProcessScancodeName(i), gControlsRow, gControlsColumn + 1, kTextFlags_AsObject | kTextFlags_BounceUp);
-			gSettingsState = kSettingsState_ControlsPage;
-			PlaySound(SOUND_COINS);
-			break;
+			if (GetNewSDLKeyState(i))
+			{
+				UnbindScancodeFromAllRemappableInputNeeds(i);
+				GetBinding(gMenuRow)->key[gKeyColumn] = i;
+				DeleteTextAtRowCol(gMenuRow, gKeyColumn+1);
+				MakeTextAtRowCol(ProcessScancodeName(i), gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+				gAwaitingKeyPressForRebind = false;
+				PlaySound(SOUND_COINS);
+				break;
+			}
 		}
 	}
 }
@@ -553,109 +763,21 @@ static void NavigateControlsPage_AwaitingPress(void)
 /****************************/
 #pragma mark - Text Layout
 
-static int LayOutText(const char* label, int row, int col, int flags)
+static long MakeStringID(int row, int col)
 {
-	if (!label)
-		label = "NULL???";
-
-	bool asObject		= flags & kTextFlags_AsObject;
-	bool bounceUp		= flags & kTextFlags_BounceUp;
-	bool jitter			= flags & kTextFlags_Jitter;
-
-	GAME_ASSERT(asObject || !bounceUp);
-	GAME_ASSERT(col >= 0 && col < (int)(sizeof(kColumnX)/sizeof(kColumnX[0])));
-
-	int x = kColumnX[col];
-	int y = GetRowY(row);
-
-	for (const char* c = label; *c; c++)
-	{
-		unsigned char cc = *c;
-
-		if (cc == ' ')
-		{
-			x += kLetterWidths[' '];
-			continue;
-		}
-
-		Byte frameID = ASCIIToBigFont(cc);
-		if (frameID != 0)	// TODO: why do we have to decrement frameID to draw non-animated frames, but not for MakeNewShape?
-			frameID--;
-
-		const FrameHeader* fh = GetFrameHeader(GroupNum_BigFont, ObjType_BigFont, frameID, nil, nil);
-
-		int myWidth = 13;
-		int cancelXOff = -fh->x;
-		int cancelYOff = 0;
-
-		if (cc < sizeof(kLetterWidths) / sizeof(kLetterWidths[0]))
-		{
-			myWidth = kLetterWidths[cc];
-		}
-
-		if (cc >= 'a' && cc <= 'z')
-		{
-			cancelXOff = -fh->x;
-			cancelYOff = -fh->y - 9;
-		}
-		else if (cc >= 'A' && cc <= 'Z')
-		{
-			cancelXOff = 0;
-			cancelYOff = 0;
-		}
-
-		if (asObject)
-		{
-			ObjNode* newObj = MakeNewShape(
-					GroupNum_BigFont,
-					ObjType_BigFont,
-					ASCIIToBigFont(cc),
-					x + cancelXOff,
-					y + cancelYOff,
-					0x0080,
-					MoveText,
-					false);
-			GAME_ASSERT_MESSAGE(newObj, "Too many objects on screen!");
-
-			newObj->SpecialLetterMagic	= kSpecialLetterMagicValue;
-			newObj->SpecialLetterRow	= row;
-			newObj->SpecialLetterCol	= col;
-			newObj->SpecialLetterBaseY	= (y + cancelYOff) << 16;
-			newObj->FlagLetterJitter	= jitter;
-
-			if (bounceUp)
-			{
-				newObj->DY = -0x10000 * RandomRange(3, 6) / 2;
-			}
-		}
-		else
-		{
-			DrawFrameToBackground(x + cancelXOff, y + cancelYOff, GroupNum_BigFont, ObjType_BigFont, frameID);
-		}
-
-		x += myWidth + 1;
-	}
-
-	return x;
+	return (row << 8) | (col);
 }
 
-static void NukeText(int row, int col)
+static int MakeTextAtRowCol(const char* label, int row, int col, int flags)
 {
-	ObjNode* theNode = FirstNodePtr;
+	int x = kColumnX[col];
+	int y = gMenuRowYs[row];
+	return MakeText(label, x, y, flags, MakeStringID(row, col));
+}
 
-	while (theNode)
-	{
-		ObjNode* next = theNode->NextNode;
-
-		if (theNode->SpecialLetterMagic == kSpecialLetterMagicValue
-			&& theNode->SpecialLetterRow == row
-			&& theNode->SpecialLetterCol == col)
-		{
-			DeleteObject(theNode);
-		}
-
-		theNode = next;
-	}
+static void DeleteTextAtRowCol(int row, int col)
+{
+	DeleteText(MakeStringID(row, col));
 }
 
 /****************************/
@@ -663,8 +785,30 @@ static void NukeText(int row, int col)
 /****************************/
 #pragma mark - Page Layout
 
-static void LayOutSettingsPageBackground(void)
+static void LayOutMenu(MenuItem* menu)
 {
+	bool enteringNewMenu = menu != gMenu;
+
+	if (gMenu == gRootMenu)				// save position in root menu
+		gLastRowOnRootMenu = gMenuRow;
+
+	gMenu			= menu;
+	gExitMenu		= false;
+	gNumMenuEntries	= 0;
+
+	int textObjectFlags = kTextFlags_AsObject;
+
+	if (enteringNewMenu)
+	{
+		gMenuRow		= 2;
+		textObjectFlags |= kTextFlags_BounceUp;
+
+		if (menu == gRootMenu && gLastRowOnRootMenu >= 0)				// restore position in root menu
+			gMenuRow = gLastRowOnRootMenu;
+	}
+
+	//DeleteAllObjects();
+	DeleteAllText();
 	EraseBackgroundBuffer();
 
 #if 0
@@ -673,11 +817,85 @@ static void LayOutSettingsPageBackground(void)
 		memset(*gBackgroundHandle + y*OFFSCREEN_WIDTH, y%256, OFFSCREEN_WIDTH);
 #endif
 
-	LayOutText(" SETTINGS", -2, 0, 0);
+	int y = kRowY0;
 
-	// Draw dithering pattern
+	for (int row = 0; menu[row].type != kMenuItem_END_SENTINEL; row++)
+	{
+		if (menu[row + 1].type == kMenuItem_END_SENTINEL)
+			y = 480-kRowY0;
+		gMenuRowYs[row] = y;
+
+		MenuItem* entry = &menu[row];
+
+		switch (entry->type)
+		{
+			case kMenuItem_Separator:
+				break;
+
+			case kMenuItem_Label:
+				MakeTextAtRowCol(entry->label, row, 0, 0);
+				break;
+
+			case kMenuItem_Action:
+				MakeTextAtRowCol(entry->button.caption, row, 0, 0);
+				break;
+
+			case kMenuItem_Submenu:
+				MakeTextAtRowCol(entry->submenu.caption, row, 0, 0);
+				break;
+
+			case kMenuItem_Cycler:
+				MakeTextAtRowCol(entry->cycler.caption, row, 0, 0);
+				if (entry->cycler.numChoices > 0)
+				{
+					const char* choiceCaption = entry->cycler.choices[*entry->cycler.valuePtr];
+					MakeTextAtRowCol(choiceCaption, row, 1, textObjectFlags);
+				}
+				break;
+
+			case kMenuItem_KeyBinding:
+				MakeTextAtRowCol(kInputNeedCaptions[entry->kb], row, 0, 0);
+				for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
+				{
+					const char *name = ProcessScancodeName(gGamePrefs.keys[entry->kb].key[j]);
+					MakeTextAtRowCol(name, row, j + 1, textObjectFlags);
+				}
+				break;
+
+			case kMenuItem_PadBinding:
+				MakeTextAtRowCol(kInputNeedCaptions[entry->kb], row, 0, 0);
+				for (int j = 0; j < KEYBINDING_MAX_GAMEPAD_BUTTONS; j++)
+				{
+					const char *name = ProcessPadButtonName(gGamePrefs.keys[entry->kb].gamepadButton[j]);
+					MakeTextAtRowCol(name, row, j + 1, textObjectFlags);
+				}
+				break;
+
+			default:
+				DoFatalAlert("Unsupported menu item type");
+				break;
+		}
+
+		if (entry->type == kMenuItem_Separator)
+			y += kRowHeight / 2;
+		else
+			y += kRowHeight;
+
+		gNumMenuEntries++;
+		GAME_ASSERT(gNumMenuEntries < MAX_ENTRIES_PER_MENU);
+	}
+
+	if (gMenu == gVideoMenu)
+		DrawDitheringPattern();
+
+	ForceUpdateBackground();
+	DumpBackground();											// dump to playfield
+}
+
+static void DrawDitheringPattern(void)
+{
 	Ptr ditheringPatternPlot = *gBackgroundHandle;
-	ditheringPatternPlot += (gScreenYOffset + GetRowY(6) - kRowHeight/3) * OFFSCREEN_WIDTH;
+	ditheringPatternPlot += (gScreenYOffset + gMenuRowYs[6] - kRowHeight/3) * OFFSCREEN_WIDTH;
 	ditheringPatternPlot += gScreenXOffset + kColumnX[1];
 	for (int y = 0; y <= 2*kRowHeight/3; y++)
 	{
@@ -687,80 +905,6 @@ static void LayOutSettingsPageBackground(void)
 		}
 		ditheringPatternPlot += OFFSCREEN_WIDTH;
 	}
-
-	for (int i = 0; i < numSettingEntries; i++)
-	{
-		SettingEntry* entry = &gSettingEntries[i];
-
-		if (entry->label)
-		{
-			LayOutText(entry->label, i, 0, 0);
-		}
-	}
-
-	ForceUpdateBackground();
-	DumpBackground();											// dump to playfield
-}
-
-static void LayOutSettingsPageObjects(void)
-{
-	DeleteAllObjects();
-
-	for (int i = 0; i < numSettingEntries; i++)
-	{
-		SettingEntry* entry = &gSettingEntries[i];
-
-		if (entry->label && entry->numChoices > 0)
-		{
-			const char* choiceCaption = entry->choices[*entry->valuePtr];
-			LayOutText(choiceCaption, i, 1, kTextFlags_AsObject | kTextFlags_BounceUp);
-		}
-	}
-
-	// Make cursor
-	ObjNode* cursor = MakeNewShape(GROUP_AREA_SPECIFIC, ObjType_Spider, 1,
-			64, GetRowY(gSettingsRow), FARTHEST_Z, MoveCursor, 0);
-	cursor->AnimSpeed = 0x080;
-}
-
-static void LayOutSettingsPage(void)
-{
-	LayOutSettingsPageBackground();
-	LayOutSettingsPageObjects();
-}
-
-
-static void LayOutControlsPage(void)
-{
-	DeleteAllObjects();
-	EraseBackgroundBuffer();
-
-	LayOutText(" CONFIGURE   CONTROLS", -2, 0, 0);
-
-	for (int i = 0; i < NUM_REMAPPABLE_NEEDS; i++)
-	{
-		KeyBinding* kb = &gGamePrefs.keys[i];
-
-		LayOutText(kInputNeedCaptions[i], i, 0, 0);
-
-		for (int j = 0; j < 2; j++)
-		{
-			const char* name = ProcessScancodeName(kb->key[j]);
-
-			LayOutText(name, i+0, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
-		}
-	}
-
-	LayOutText("reset to defaults", NUM_REMAPPABLE_NEEDS+1, 0, 0);
-	LayOutText("done", NUM_REMAPPABLE_NEEDS+2, 0, 0);
-
-	ForceUpdateBackground();
-	DumpBackground();											// dump to playfield
-
-	// Make cursor
-	ObjNode* cursor = MakeNewShape(GROUP_AREA_SPECIFIC, ObjType_BadBattery, 1,
-			64, GetRowY(gControlsRow), FARTHEST_Z, MoveCursor, 0);
-	cursor->AnimSpeed = 0x080;
 }
 
 /****************************/
@@ -780,10 +924,17 @@ void DoSettingsScreen(void)
 
 						/* LETS DO IT */
 
-	LayOutSettingsPage();
+	gExitMenu		= false;
+	gMenuRow		= 0;
+	gMenu			= nil;			// LayOutMenu acts slightly different depending on current menu, so clear out gMenu
+	gNumMenuEntries	= 0;
 
+	LayOutMenu(gRootMenu);
 
-	gSettingsState = kSettingsState_MainPage;
+	// Make cursor
+	ObjNode* cursor = MakeNewShape(GROUP_AREA_SPECIFIC, ObjType_Spider, 1,
+								   64, gMenuRowYs[gMenuRow], FARTHEST_Z, MoveCursor, 0);
+	cursor->AnimSpeed = 0x080;
 
 	do
 	{
@@ -800,32 +951,19 @@ void DoSettingsScreen(void)
 
 		ReadKeyboard();
 
-		switch (gSettingsState)
-		{
-			case kSettingsState_MainPage:
-				NavigateSettingsPage();
-				break;
-
-			case kSettingsState_ControlsPage:
-				NavigateControlsPage();
-				break;
-
-			case kSettingsState_ControlsPage_AwaitingPress:
-				NavigateControlsPage_AwaitingPress();
-				break;
-
-			default:
-				break;
-		}
+		if (gAwaitingKeyPressForRebind)
+			OnAwaitingKeyPress();
+		else
+			NavigateMenu();
 
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-	} while (gSettingsState != kSettingsState_Off);
+	} while (!gExitMenu);
 
 	FadeOutGameCLUT();
 
 	SavePrefs();
-	
+
 	ZapShapeTable(GROUP_WIN);
 	ZapShapeTable(GROUP_AREA_SPECIFIC);
 }
@@ -836,3 +974,4 @@ void ApplyPrefs(void)
 	SetFullscreenMode();
 	OnChangeIntegerScaling();
 }
+

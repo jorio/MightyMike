@@ -71,6 +71,7 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Drivers/Shape.c
 	${GAME_SRCDIR}/Drivers/Sound.c
 	${GAME_SRCDIR}/Drivers/TGA.c
+	${GAME_SRCDIR}/Drivers/Font.c
 	${GAME_SRCDIR}/MeAndMo/Enemy.c
 	${GAME_SRCDIR}/MeAndMo/MyGuy.c
 	${GAME_SRCDIR}/MeAndMo/MyGuy2.c

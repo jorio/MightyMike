@@ -21,4 +21,3 @@ void	PrintNum(long, short, short, short);
 void	PrintBigNum(long, short);
 void	WriteLn(char *);
 void	PrintBigChar(char);
-Byte	ASCIIToBigFont(char);
