@@ -244,17 +244,30 @@ enum
 	NUM_CONTROL_NEEDS
 };
 
+enum
+{
+	kUnbound = 0,
+	kButton,
+	kAxisPlus,
+	kAxisMinus,
+};
+
 typedef struct KeyBinding
 {
-	int16_t		key[KEYBINDING_MAX_KEYS];
-	int16_t		mouseButton;
-	int16_t		mouseWheelDelta;
-	int16_t		gamepadButton[KEYBINDING_MAX_GAMEPAD_BUTTONS];
-	int16_t		gamepadAxis;
-	int16_t		gamepadAxisSign;
+	int16_t			key[KEYBINDING_MAX_KEYS];
+
+	struct
+	{
+		int8_t		type;
+		int8_t		id;
+	} mouse;
+
+	struct
+	{
+		int8_t		type;
+		int8_t		id;
+	} gamepad[KEYBINDING_MAX_GAMEPAD_BUTTONS];
 } KeyBinding;
-
-
 
 		/* SETTINGS */
 
@@ -272,11 +285,12 @@ struct PrefsType
 	Boolean		interpolateAudio;
 	Boolean		gameTitlePowerPete;
 	Boolean		thermometerScreen;
+	Boolean		debugInfoInTitleBar;
 	KeyBinding	keys[NUM_CONTROL_NEEDS];
 };
 typedef struct PrefsType PrefsType;
 
-#define PREFS_MAGIC "Mighty Mike Prefs v0"
+#define PREFS_MAGIC "Mighty Mike Prefs v1"
 
 #endif
 

@@ -25,6 +25,7 @@
 #include "input.h"
 #include "externs.h"
 #include "weapon.h"
+#include "font.h"
 
 static void DoDifficultyScreen(void);
 

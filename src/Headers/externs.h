@@ -44,6 +44,7 @@ extern	short					gNumLives;
 
 extern const KeyBinding			kDefaultKeyBindings[NUM_CONTROL_NEEDS];
 extern char						gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
+extern SDL_GameController*		gSDLController;
 
 #pragma mark - IO
 

@@ -465,18 +465,21 @@ void PresentIndexedFramebuffer(void)
 	uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
 	if (ticksElapsed >= kDebugTextUpdateInterval)
 	{
-		float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
-		snprintf(
-				gDebugTextBuffer, sizeof(gDebugTextBuffer),
-				"Mighty Mike %s - thr:%d - fps:%d - objs:%ld - x:%ld y:%ld",
-				PROJECT_VERSION,
-				gNumThreads,
-				(int)roundf(fps),
-				NumObjects,
-				gMyX,
-				gMyY
-		);
-		SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
+		if (gGamePrefs.debugInfoInTitleBar && !gGamePrefs.fullscreen)
+		{
+			float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
+			snprintf(
+					gDebugTextBuffer, sizeof(gDebugTextBuffer),
+					"Mighty Mike %s - thr:%d - fps:%d - objs:%ld - x:%ld y:%ld",
+					PROJECT_VERSION,
+					gNumThreads,
+					(int)roundf(fps),
+					NumObjects,
+					gMyX,
+					gMyY
+			);
+			SDL_SetWindowTitle(gSDLWindow, gDebugTextBuffer);
+		}
 		gDebugTextFrameAccumulator = 0;
 		gDebugTextLastUpdatedAt = ticksNow;
 	}

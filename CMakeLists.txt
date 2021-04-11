@@ -58,6 +58,7 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Heart/Filter.cpp
 	${GAME_SRCDIR}/Heart/Infobar.c
 	${GAME_SRCDIR}/Heart/input.c
+	${GAME_SRCDIR}/Heart/InputDefaults.c
 	${GAME_SRCDIR}/Heart/IO.c
 	${GAME_SRCDIR}/Heart/Misc.c
 	${GAME_SRCDIR}/Heart/Picture.c

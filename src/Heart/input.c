@@ -53,38 +53,6 @@ enum
 const int16_t kJoystickDeadZone		= (33 * 32767 / 100);
 const int16_t kJoystickDeadZone_UI	= (66 * 32767 / 100);
 
-#if __APPLE__
-#define DEFAULTKB2_NEXTWEAPON		SDL_SCANCODE_LGUI
-#define DEFAULTKB2_PREVWEAPON		SDL_SCANCODE_RGUI
-#else
-#define DEFAULTKB2_NEXTWEAPON		SDL_SCANCODE_LALT
-#define DEFAULTKB2_PREVWEAPON		SDL_SCANCODE_RALT
-#endif
-
-const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS] =
-{
-	//Need------------------    Keys--------------------------------------------- MouseBtn-------  MWheel-  GamepadButtons----------------------------------------------------------  GamepadAxis--------------  GamepadAxisSign
-	[kNeed_Up				] = {{SDL_SCANCODE_UP,		SDL_SCANCODE_W,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_UP,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		-1,		},
-	[kNeed_Down				] = {{SDL_SCANCODE_DOWN,	SDL_SCANCODE_S,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_DOWN,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		+1,		},
-	[kNeed_Left				] = {{SDL_SCANCODE_LEFT,	SDL_SCANCODE_A,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_LEFT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		-1,		},
-	[kNeed_Right			] = {{SDL_SCANCODE_RIGHT,	SDL_SCANCODE_D,			}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_RIGHT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		+1,		},
-	[kNeed_PrevWeapon		] = {{SDL_SCANCODE_RSHIFT,	DEFAULTKB2_PREVWEAPON,	}, 0,					+1, {SDL_CONTROLLER_BUTTON_LEFTSHOULDER, SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID, 	0,		},
-	[kNeed_NextWeapon		] = {{SDL_SCANCODE_LSHIFT,	DEFAULTKB2_NEXTWEAPON,	}, 0,					-1,	{SDL_CONTROLLER_BUTTON_B, 			SDL_CONTROLLER_BUTTON_RIGHTSHOULDER,}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_Attack			] = {{SDL_SCANCODE_SPACE,	SDL_SCANCODE_LCTRL,		}, SDL_BUTTON_LEFT,		0,	{SDL_CONTROLLER_BUTTON_X,			SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_TRIGGERRIGHT,+1,		},
-	[kNeed_Radar			] = {{SDL_SCANCODE_R,		SDL_SCANCODE_TAB,		}, SDL_BUTTON_MIDDLE,	0,	{SDL_CONTROLLER_BUTTON_Y,			SDL_CONTROLLER_BUTTON_BACK,			}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_UIUp				] = {{SDL_SCANCODE_UP,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_UP,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		-1,		},
-	[kNeed_UIDown			] = {{SDL_SCANCODE_DOWN,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_DOWN,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTY,		+1,		},
-	[kNeed_UILeft			] = {{SDL_SCANCODE_LEFT,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_LEFT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		-1,		},
-	[kNeed_UIRight			] = {{SDL_SCANCODE_RIGHT,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_DPAD_RIGHT,	SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_LEFTX,		+1,		},
-	[kNeed_UIConfirm		] = {{SDL_SCANCODE_RETURN,	SDL_SCANCODE_SPACE,		}, 0,					0,	{SDL_CONTROLLER_BUTTON_START,		SDL_CONTROLLER_BUTTON_A,			}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_UIBack			] = {{SDL_SCANCODE_ESCAPE,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_BACK,		SDL_CONTROLLER_BUTTON_B,			}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_UIPause			] = {{SDL_SCANCODE_ESCAPE,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_START,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_ToggleMusic		] = {{SDL_SCANCODE_M,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_ToggleFullscreen	] = {{SDL_SCANCODE_F11,		0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_RaiseVolume		] = {{SDL_SCANCODE_EQUALS,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-	[kNeed_LowerVolume		] = {{SDL_SCANCODE_MINUS,	0,						}, 0,					0,	{SDL_CONTROLLER_BUTTON_INVALID,		SDL_CONTROLLER_BUTTON_INVALID,		}, SDL_CONTROLLER_AXIS_INVALID,		0,		},
-};
-
 
 /**********************/
 /*     VARIABLES      */
@@ -239,27 +207,49 @@ void UpdateInput(void)
 			if (kb->key[j] && kb->key[j] < numkeys)
 				downNow |= 0 != keystate[kb->key[j]];
 
-		if (kb->mouseButton)
-			downNow |= 0 != (mouseButtons & SDL_BUTTON(kb->mouseButton));
+		switch (kb->mouse.type)
+		{
+			case kButton:
+				downNow |= 0 != (mouseButtons & SDL_BUTTON(kb->mouse.id));
+				break;
 
-		if ((kb->mouseWheelDelta > 0 && mouseWheelDelta > 0) || (kb->mouseWheelDelta < 0 && mouseWheelDelta < 0))
-			downNow |= true;
+			case kAxisPlus:
+				downNow |= mouseWheelDelta > 0;
+				break;
+
+			case kAxisMinus:
+				downNow |= mouseWheelDelta < 0;
+				break;
+
+			default:
+				break;
+		}
 
 		if (gSDLController)
 		{
+			int16_t deadZone = i >= NUM_REMAPPABLE_NEEDS
+								? kJoystickDeadZone_UI
+								: kJoystickDeadZone;
+
 			for (int j = 0; j < KEYBINDING_MAX_GAMEPAD_BUTTONS; j++)
-				if (kb->gamepadButton[j] != SDL_CONTROLLER_BUTTON_INVALID)
-					downNow |= 0 != SDL_GameControllerGetButton(gSDLController, kb->gamepadButton[j]);
-
-			if (kb->gamepadAxis != SDL_CONTROLLER_AXIS_INVALID)
 			{
-				int16_t deadZone = i >= NUM_REMAPPABLE_NEEDS
-						? kJoystickDeadZone_UI
-						: kJoystickDeadZone;
+				switch (kb->gamepad[j].type)
+				{
+					case kButton:
+						downNow |= 0 != SDL_GameControllerGetButton(gSDLController, kb->gamepad[j].id);
+						break;
 
-				int16_t rawValue = SDL_GameControllerGetAxis(gSDLController, kb->gamepadAxis);
-				downNow |= (kb->gamepadAxisSign > 0 && rawValue > deadZone)
-						|| (kb->gamepadAxisSign < 0 && rawValue < -deadZone);
+					case kAxisPlus:
+						downNow |= SDL_GameControllerGetAxis(gSDLController, kb->gamepad[j].id) > deadZone;
+						break;
+
+					case kAxisMinus:
+						downNow |= SDL_GameControllerGetAxis(gSDLController, kb->gamepad[j].id) < -deadZone;
+						break;
+
+					default:
+						break;
+				}
 			}
 		}
 

@@ -1237,6 +1237,8 @@ void OptimizeMemory(void)
 
 static void InitDefaultPrefs(void)
 {
+	_Static_assert(sizeof(PREFS_MAGIC) <= sizeof(gGamePrefs.magic), "PREFS_MAGIC won't fit!");
+
 	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
 	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
 	gGamePrefs.interlaceMode = false;
@@ -1254,6 +1256,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.interpolateAudio = true;
 	gGamePrefs.gameTitlePowerPete = false;
 	gGamePrefs.thermometerScreen = true;
+	gGamePrefs.debugInfoInTitleBar = false;
 	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
 }
 
@@ -1297,9 +1300,10 @@ PrefsType	prefs;
 	iErr = FSRead(refNum, &count,  (Ptr)&prefs);		// read data from file
 	FSClose(refNum);
 	if (iErr
-		|| count < (long)sizeof(PrefsType)
+		|| count != (long)sizeof(PrefsType)
 		|| 0 != strncmp(PREFS_MAGIC, prefs.magic, sizeof(prefs.magic)))
 	{
+		printf("prefs file appears to be corrupt\n");
 		return iErr;
 	}
 
@@ -1377,6 +1381,7 @@ void GameMain(void)
 	LoadHighScores();
 
 #if _DEBUG											// Source port TEMP: in debug mode, boot straight to game
+	DoSettingsScreen();
 	printf("WARNING: DEBUG MODE: Jumping straight to game\n");
 	gSceneNum = 0;	// 0...4
 	gAreaNum = 0;	// 0...2

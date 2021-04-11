@@ -77,9 +77,11 @@ typedef struct MenuItem
 
 static int MakeTextAtRowCol(const char* label, int row, int col, int flags);
 static void DeleteTextAtRowCol(int row, int col);
-static const char* ProcessScancodeName(int scancode);
+static const char* GetKeyBindingName(int row, int col);
+static const char* GetPadBindingName(int row, int col);
 static void OnDone(void);
 static void OnChangePlayfieldSizeViaSettings(void);
+static void OnChangeDebugInfoInTitleBar(void);
 static void OnResetKeys(void);
 static void OnResetGamepad(void);
 static void LayOutMenu(MenuItem* menu);
@@ -110,6 +112,10 @@ static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 static const int kColumnX[] = { 64, 300, 475, 550 };
 static const int kRowY0 = 90-24*2;
 static const int kRowHeight = 24;
+
+static const char* kUnboundCaption = "---";
+
+const int16_t kJoystickDeadZone_BindingThreshold	= (75 * 32767 / 100);
 
 /****************************/
 /*    MENU CONTENTS         */
@@ -229,6 +235,16 @@ static MenuItem gPresentationMenu[] =
 			.choices = { "none", "charging batteries" },
 		}
 	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "titlebar debug",
+			.callback = OnChangeDebugInfoInTitleBar,
+			.valuePtr = &gGamePrefs.debugInfoInTitleBar,
+			.numChoices = 2,
+			.choices = { "no", "yes" },
+		}
+	},
 	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
 	{ .type = kMenuItem_END_SENTINEL },
 };
@@ -242,8 +258,8 @@ static MenuItem gKeyboardMenu[] =
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Left },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Right },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Attack },
-	{ .type = kMenuItem_KeyBinding, .kb = kNeed_NextWeapon },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_PrevWeapon },
+	{ .type = kMenuItem_KeyBinding, .kb = kNeed_NextWeapon },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Radar },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleFullscreen },
@@ -261,11 +277,19 @@ static MenuItem gGamepadMenu[] =
 	{ .type = kMenuItem_Label, .label = " CONFIGURE   GAMEPAD" },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_PadBinding, .kb = kNeed_Attack },
-	{ .type = kMenuItem_PadBinding, .kb = kNeed_NextWeapon },
 	{ .type = kMenuItem_PadBinding, .kb = kNeed_PrevWeapon },
+	{ .type = kMenuItem_PadBinding, .kb = kNeed_NextWeapon },
 	{ .type = kMenuItem_PadBinding, .kb = kNeed_Radar },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Action, .button = { .caption = "reset to defaults", .callback = OnResetGamepad } },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Separator },
+	{ .type = kMenuItem_Label, .label = "  TIP:  try aiming with the" },
+	{ .type = kMenuItem_Label, .label = "                right analog stick!" },
+	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
 	{ .type = kMenuItem_END_SENTINEL },
 };
@@ -335,22 +359,24 @@ static void OnDone(void)
 		if (gMenu == gKeyboardMenu)
 		{
 			DeleteTextAtRowCol(gMenuRow, gKeyColumn + 1);
-			MakeTextAtRowCol(ProcessScancodeName(gGamePrefs.keys[gMenuRow].key[gKeyColumn]), gMenuRow, 1 + gKeyColumn, kTextFlags_AsObject | kTextFlags_BounceUp);
+			MakeTextAtRowCol(GetKeyBindingName(gMenuRow, gKeyColumn), gMenuRow, 1 + gKeyColumn, kTextFlags_AsObject | kTextFlags_BounceUp);
 		}
 		else if (gMenu == gGamepadMenu)
 		{
 			DeleteTextAtRowCol(gMenuRow, gPadColumn + 1);
-			MakeTextAtRowCol("TODO!!", gMenuRow, 1 + gPadColumn, kTextFlags_AsObject | kTextFlags_BounceUp);
+			MakeTextAtRowCol(GetPadBindingName(gMenuRow, gPadColumn), gMenuRow, 1 + gPadColumn, kTextFlags_AsObject | kTextFlags_BounceUp);
 		}
 		gAwaitingKeyPressForRebind = false;
 	}
 	else if (gMenu != gRootMenu)
 	{
 //		FadeOutGameCLUT();
+		PlaySound(SOUND_SQUEEK);
 		LayOutMenu(gRootMenu);
 	}
 	else
 	{
+		PlaySound(SOUND_SQUEEK);
 		FadeOutGameCLUT();
 		gExitMenu = true;
 	}
@@ -366,22 +392,31 @@ static void OnChangePlayfieldSizeViaSettings(void)
 	LayOutMenu(gMenu);//LayOutSettingsPageBackground();
 }
 
+static void OnChangeDebugInfoInTitleBar(void)
+{
+	SDL_SetWindowTitle(gSDLWindow, "Mighty Mike");
+}
+
 static void OnResetKeys(void)
 {
-	printf("TODO: reset keyboard only (not gamepad)\n");
-	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
-	_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
+	for (int i = 0; i < NUM_CONTROL_NEEDS; i++)
+	{
+		memcpy(gGamePrefs.keys[i].key, kDefaultKeyBindings[i].key, sizeof(gGamePrefs.keys[i].key));
+	}
+
 	PlaySound(SOUND_FIREHOLE);
-	LayOutMenu(gMenu);//LayOutControlsPage();
+	LayOutMenu(gMenu);
 }
 
 static void OnResetGamepad(void)
 {
-	printf("TODO: reset gamepad bindings only (not keyboard)\n");
-	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
-	_Static_assert(sizeof(kDefaultKeyBindings) == sizeof(gGamePrefs.keys), "size mismatch: default keybindings / prefs keybindings");
+	for (int i = 0; i < NUM_CONTROL_NEEDS; i++)
+	{
+		memcpy(gGamePrefs.keys[i].gamepad, kDefaultKeyBindings[i].gamepad, sizeof(gGamePrefs.keys[i].gamepad));
+	}
+
 	PlaySound(SOUND_FIREHOLE);
-	LayOutMenu(gMenu);//LayOutControlsPage();
+	LayOutMenu(gMenu);
 }
 
 /****************************/
@@ -453,11 +488,18 @@ static void MoveCursor(void)
 /****************************/
 #pragma mark - Scancode stuff
 
-static const char* ProcessScancodeName(int scancode)
+static KeyBinding* GetBindingAtRow(int row)
 {
+	return &gGamePrefs.keys[gMenu[row].kb];
+}
+
+static const char* GetKeyBindingName(int row, int col)
+{
+	int16_t scancode = GetBindingAtRow(row)->key[col];
+
 	switch (scancode)
 	{
-		case 0:							return "---";
+		case 0:							return kUnboundCaption;
 		case SDL_SCANCODE_SEMICOLON:	return "semicolon";
 		case SDL_SCANCODE_LEFTBRACKET:	return "l bracket";
 		case SDL_SCANCODE_RIGHTBRACKET:	return "r bracket";
@@ -498,24 +540,61 @@ static const char* ProcessScancodeName(int scancode)
 #undef kNameBufferLength
 }
 
-static const char* ProcessPadButtonName(int button)
+static const char* GetPadBindingName(int row, int col)
 {
-	switch (button)
+	KeyBinding* kb = GetBindingAtRow(row);
+
+	switch (kb->gamepad[col].type)
 	{
-		case SDL_CONTROLLER_BUTTON_INVALID:			return "---";
-		case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:	return "lb";
-		case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:	return "rb";
-		case SDL_CONTROLLER_BUTTON_LEFTSTICK:		return "ls";
-		case SDL_CONTROLLER_BUTTON_RIGHTSTICK:		return "rs";
+		case kUnbound:
+			return kUnboundCaption;
+
+		case kButton:
+			switch (kb->gamepad[col].id)
+			{
+				case SDL_CONTROLLER_BUTTON_INVALID:			return kUnboundCaption;
+				case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:	return "lb";
+				case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:	return "rb";
+				case SDL_CONTROLLER_BUTTON_LEFTSTICK:		return "ls";
+				case SDL_CONTROLLER_BUTTON_RIGHTSTICK:		return "rs";
+				default:
+					return SDL_GameControllerGetStringForButton(kb->gamepad[col].id);
+			}
+			break;
+
+		case kAxisPlus:
+			switch (kb->gamepad[col].id)
+			{
+				case SDL_CONTROLLER_AXIS_LEFTX:				return "ls right";
+				case SDL_CONTROLLER_AXIS_LEFTY:				return "ls down";
+				case SDL_CONTROLLER_AXIS_RIGHTX:			return "rs right";
+				case SDL_CONTROLLER_AXIS_RIGHTY:			return "rs down";
+				case SDL_CONTROLLER_AXIS_TRIGGERLEFT:		return "lt";
+				case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:		return "rt";
+				default:
+					return SDL_GameControllerGetStringForAxis(kb->gamepad[col].id);
+			}
+			break;
+
+		case kAxisMinus:
+			switch (kb->gamepad[col].id)
+			{
+				case SDL_CONTROLLER_AXIS_LEFTX:				return "ls left";
+				case SDL_CONTROLLER_AXIS_LEFTY:				return "ls up";
+				case SDL_CONTROLLER_AXIS_RIGHTX:			return "rs left";
+				case SDL_CONTROLLER_AXIS_RIGHTY:			return "rs up";
+				case SDL_CONTROLLER_AXIS_TRIGGERLEFT:		return "lt";
+				case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:		return "rt";
+				default:
+					return SDL_GameControllerGetStringForAxis(kb->gamepad[col].id);
+			}
+			break;
+
 		default:
-			return SDL_GameControllerGetStringForButton(button);
+			return "???";
 	}
 }
 
-static KeyBinding* GetBinding(int row)
-{
-	return &gGamePrefs.keys[gMenu[row].kb];
-}
 
 static void UnbindScancodeFromAllRemappableInputNeeds(int16_t sdlScancode)
 {
@@ -526,7 +605,7 @@ static void UnbindScancodeFromAllRemappableInputNeeds(int16_t sdlScancode)
 		if (entry->type != kMenuItem_KeyBinding)
 			continue;
 
-		KeyBinding* binding = GetBinding(row);
+		KeyBinding* binding = GetBindingAtRow(row);
 
 		for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
 		{
@@ -534,11 +613,36 @@ static void UnbindScancodeFromAllRemappableInputNeeds(int16_t sdlScancode)
 			{
 				binding->key[j] = 0;
 				DeleteTextAtRowCol(row, j+1);
-				MakeTextAtRowCol(ProcessScancodeName(0), row, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+				MakeTextAtRowCol(kUnboundCaption, row, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
 			}
 		}
 	}
 }
+
+static void UnbindPadButtonFromAllRemappableInputNeeds(int8_t type, int8_t id)
+{
+	for (int row = 0; row < gNumMenuEntries; row++)
+	{
+		MenuItem* entry = &gMenu[row];
+
+		if (entry->type != kMenuItem_PadBinding)
+			continue;
+
+		KeyBinding* binding = GetBindingAtRow(row);
+
+		for (int j = 0; j < KEYBINDING_MAX_GAMEPAD_BUTTONS; j++)
+		{
+			if (binding->gamepad[j].type == type && binding->gamepad[j].id == id)
+			{
+				binding->gamepad[j].type = kUnbound;
+				binding->gamepad[j].id = 0;
+				DeleteTextAtRowCol(row, j+1);
+				MakeTextAtRowCol(kUnboundCaption, row, j+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+			}
+		}
+	}
+}
+
 
 /****************************/
 /*    MENU NAVIGATION       */
@@ -563,9 +667,7 @@ static void NavigateButton(MenuItem* entry)
 {
 	if (GetNewNeedState(kNeed_UIConfirm))
 	{
-		if (entry->button.callback == OnDone)
-			PlaySound(SOUND_SQUEEK);
-		else
+		if (entry->button.callback != OnDone)
 			PlaySound(SOUND_GETPOW);
 
 		if (entry->button.callback)
@@ -577,8 +679,7 @@ static void NavigateSubmenuButton(MenuItem* entry)
 {
 	if (GetNewNeedState(kNeed_UIConfirm))
 	{
-		if (entry->button.callback == OnDone)
-			PlaySound(SOUND_GETPOW);
+		PlaySound(SOUND_FOOD);
 
 		ReadKeyboard();	// flush keypresses
 
@@ -637,12 +738,12 @@ static void NavigateKeyBinding(MenuItem* entry)
 
 	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
 	{
-		GetBinding(gMenuRow)->key[gKeyColumn] = 0;
+		GetBindingAtRow(gMenuRow)->key[gKeyColumn] = 0;
 		PlaySound(SOUND_PIESQUISH);
 		PlaySound(SOUND_POP);
 
 		DeleteTextAtRowCol(gMenuRow, gKeyColumn+1);
-		MakeTextAtRowCol(ProcessScancodeName(0), gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+		MakeTextAtRowCol(kUnboundCaption, gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
 		return;
 	}
 
@@ -673,17 +774,23 @@ static void NavigatePadBinding(MenuItem* entry)
 
 	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
 	{
-		GetBinding(gMenuRow)->gamepadButton[gPadColumn] = SDL_CONTROLLER_BUTTON_INVALID;
+		GetBindingAtRow(gMenuRow)->gamepad[gPadColumn].type = kUnbound;
 		PlaySound(SOUND_PIESQUISH);
 		PlaySound(SOUND_POP);
 
 		DeleteTextAtRowCol(gMenuRow, gPadColumn+1);
-		MakeTextAtRowCol(ProcessScancodeName(0), gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+		MakeTextAtRowCol(kUnboundCaption, gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
 		return;
 	}
 
-	if (GetNewSDLKeyState(SDL_SCANCODE_RETURN))
+	if (GetNewNeedState(kNeed_UIConfirm))
 	{
+		while (GetNeedState(kNeed_UIConfirm))
+		{
+			UpdateInput();
+			SDL_Delay(30);
+		}
+
 		gAwaitingKeyPressForRebind = true;
 		DeleteTextAtRowCol(gMenuRow, gPadColumn+1);
 		MakeTextAtRowCol("press button!", gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp | kTextFlags_Jitter);
@@ -734,25 +841,88 @@ static void NavigateMenu(void)
 
 static void OnAwaitingKeyPress(void)
 {
-	if (GetNewNeedState(kNeed_UIBack))
+	if (GetNewSDLKeyState(SDL_SCANCODE_ESCAPE))
 	{
 		OnDone();
 		return;
 	}
 
+	KeyBinding* kb = GetBindingAtRow(gMenuRow);
+
 	if (gMenu == gKeyboardMenu)
 	{
-		for (int i = 0; i < SDL_NUM_SCANCODES; i++)
+		for (int16_t scancode = 0; scancode < SDL_NUM_SCANCODES; scancode++)
 		{
-			if (GetNewSDLKeyState(i))
+			if (GetNewSDLKeyState(scancode))
 			{
-				UnbindScancodeFromAllRemappableInputNeeds(i);
-				GetBinding(gMenuRow)->key[gKeyColumn] = i;
+				UnbindScancodeFromAllRemappableInputNeeds(scancode);
+				kb->key[gKeyColumn] = scancode;
 				DeleteTextAtRowCol(gMenuRow, gKeyColumn+1);
-				MakeTextAtRowCol(ProcessScancodeName(i), gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+				MakeTextAtRowCol(GetKeyBindingName(gMenuRow, gKeyColumn), gMenuRow, gKeyColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
 				gAwaitingKeyPressForRebind = false;
 				PlaySound(SOUND_COINS);
-				break;
+				return;
+			}
+		}
+	}
+	else if (gMenu == gGamepadMenu)
+	{
+		if (gSDLController)
+		{
+			if (SDL_GameControllerGetButton(gSDLController, SDL_CONTROLLER_BUTTON_START))
+			{
+				OnDone();
+				return;
+			}
+
+			for (int8_t button = 0; button < SDL_CONTROLLER_BUTTON_MAX; button++)
+			{
+				switch (button)
+				{
+					case SDL_CONTROLLER_BUTTON_DPAD_UP:			// prevent binding those
+					case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+					case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
+					case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+						continue;
+				}
+
+				if (SDL_GameControllerGetButton(gSDLController, button))
+				{
+					UnbindPadButtonFromAllRemappableInputNeeds(kButton, button);
+					kb->gamepad[gPadColumn].type = kButton;
+					kb->gamepad[gPadColumn].id = button;
+					DeleteTextAtRowCol(gMenuRow, gPadColumn+1);
+					MakeTextAtRowCol(GetPadBindingName(gMenuRow, gPadColumn), gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+					gAwaitingKeyPressForRebind = false;
+					PlaySound(SOUND_COINS);
+					return;
+				}
+			}
+
+			for (int8_t axis = 0; axis < SDL_CONTROLLER_AXIS_MAX; axis++)
+			{
+				switch (axis)
+				{
+					case SDL_CONTROLLER_AXIS_LEFTX:				// prevent binding those
+					case SDL_CONTROLLER_AXIS_LEFTY:
+					case SDL_CONTROLLER_AXIS_RIGHTX:
+					case SDL_CONTROLLER_AXIS_RIGHTY:
+						continue;
+				}
+
+				int16_t axisValue = SDL_GameControllerGetAxis(gSDLController, axis);
+				if (abs(axisValue) > kJoystickDeadZone_BindingThreshold)
+				{
+					int axisType = axisValue < 0 ? kAxisMinus : kAxisPlus;
+					UnbindPadButtonFromAllRemappableInputNeeds(axisType, axis);
+					kb->gamepad[gPadColumn].type = axisType;
+					kb->gamepad[gPadColumn].id = axis;
+					DeleteTextAtRowCol(gMenuRow, gPadColumn+1);
+					MakeTextAtRowCol(GetPadBindingName(gMenuRow, gPadColumn), gMenuRow, gPadColumn+1, kTextFlags_AsObject | kTextFlags_BounceUp);
+					gAwaitingKeyPressForRebind = false;
+					PlaySound(SOUND_COINS);
+					return;
+				}
 			}
 		}
 	}
@@ -857,8 +1027,7 @@ static void LayOutMenu(MenuItem* menu)
 				MakeTextAtRowCol(kInputNeedCaptions[entry->kb], row, 0, 0);
 				for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
 				{
-					const char *name = ProcessScancodeName(gGamePrefs.keys[entry->kb].key[j]);
-					MakeTextAtRowCol(name, row, j + 1, textObjectFlags);
+					MakeTextAtRowCol(GetKeyBindingName(row, j), row, j + 1, textObjectFlags);
 				}
 				break;
 
@@ -866,8 +1035,7 @@ static void LayOutMenu(MenuItem* menu)
 				MakeTextAtRowCol(kInputNeedCaptions[entry->kb], row, 0, 0);
 				for (int j = 0; j < KEYBINDING_MAX_GAMEPAD_BUTTONS; j++)
 				{
-					const char *name = ProcessPadButtonName(gGamePrefs.keys[entry->kb].gamepadButton[j]);
-					MakeTextAtRowCol(name, row, j + 1, textObjectFlags);
+					MakeTextAtRowCol(GetPadBindingName(row, j), row, j + 1, textObjectFlags);
 				}
 				break;
 
