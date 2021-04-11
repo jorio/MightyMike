@@ -1248,11 +1248,7 @@ static void InitDefaultPrefs(void)
 	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
 	gGamePrefs.interlaceMode = false;
 	gGamePrefs.difficulty = DIFFICULTY_NORMAL;
-#if _DEBUG
-	gGamePrefs.fullscreen = false;
-#else
 	gGamePrefs.fullscreen = true;
-#endif
 	gGamePrefs.pfSize = PFSIZE_WIDE;
 	gGamePrefs.scalingType = kScaling_Stretch;
 	gGamePrefs.uncappedFramerate = true;
@@ -1385,8 +1381,7 @@ void GameMain(void)
 	SetMyRandomSeed(someLong);
 	LoadHighScores();
 
-#if _DEBUG											// Source port TEMP: in debug mode, boot straight to game
-	DoSettingsScreen();
+#if 0												// Source port TEMP: in debug mode, boot straight to game
 	printf("WARNING: DEBUG MODE: Jumping straight to game\n");
 	gSceneNum = 0;	// 0...4
 	gAreaNum = 0;	// 0...2

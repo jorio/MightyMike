@@ -115,17 +115,47 @@ set(GAME_SOURCES
 	${GAME_SRCDIR}/Main.cpp
 )
 
-#set(GAME_HEADERS
-#)
-
-#set(GAME_GLUE_SOURCES
-#	${GAME_SRCDIR}/Main.cpp
-#)
+set(GAME_HEADERS
+	${GAME_SRCDIR}/Headers/bonus.h
+	${GAME_SRCDIR}/Headers/cinema.h
+	${GAME_SRCDIR}/Headers/collision.h
+	${GAME_SRCDIR}/Headers/enemy.h
+	${GAME_SRCDIR}/Headers/enemy2.h
+	${GAME_SRCDIR}/Headers/enemy3.h
+	${GAME_SRCDIR}/Headers/enemy4.h
+	${GAME_SRCDIR}/Headers/enemy5.h
+	${GAME_SRCDIR}/Headers/equates.h
+	${GAME_SRCDIR}/Headers/externs.h
+	${GAME_SRCDIR}/Headers/font.h
+	${GAME_SRCDIR}/Headers/infobar.h
+	${GAME_SRCDIR}/Headers/input.h
+	${GAME_SRCDIR}/Headers/io.h
+	${GAME_SRCDIR}/Headers/main.h
+	${GAME_SRCDIR}/Headers/misc.h
+	${GAME_SRCDIR}/Headers/miscanims.h
+	${GAME_SRCDIR}/Headers/myglobals.h
+	${GAME_SRCDIR}/Headers/myguy.h
+	${GAME_SRCDIR}/Headers/myguy2.h
+	${GAME_SRCDIR}/Headers/object.h
+	${GAME_SRCDIR}/Headers/objecttypes.h
+	${GAME_SRCDIR}/Headers/picture.h
+	${GAME_SRCDIR}/Headers/playfield.h
+	${GAME_SRCDIR}/Headers/racecar.h
+	${GAME_SRCDIR}/Headers/shape.h
+	${GAME_SRCDIR}/Headers/sound2.h
+	${GAME_SRCDIR}/Headers/spin.h
+	${GAME_SRCDIR}/Headers/structures.h
+	${GAME_SRCDIR}/Headers/tga.h
+	${GAME_SRCDIR}/Headers/traps.h
+	${GAME_SRCDIR}/Headers/triggers.h
+	${GAME_SRCDIR}/Headers/version.h
+	${GAME_SRCDIR}/Headers/weapon.h
+	${GAME_SRCDIR}/Headers/window.h
+)
 
 set(GAME_ALL_SOURCES
-#	${GAME_GLUE_SOURCES}
 	${GAME_SOURCES}
-#	${GAME_HEADERS}
+	${GAME_HEADERS}
 )
 
 #------------------------------------------------------------------------------
@@ -208,7 +238,6 @@ if(NOT MSVC)
 		-Wno-unknown-pragmas
 		-Wno-unused-parameter
 		$<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>
-		-Werror=implicit-function-declaration
 		-Werror=return-type
 	)
 else()
@@ -293,3 +322,4 @@ add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md ${APP_PARENT_DIR}/License.txt
 	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/docs ${APP_PARENT_DIR}/Documentation
 )
+
