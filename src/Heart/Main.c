@@ -372,7 +372,12 @@ long	r;
 			DisplayBunnyRadar();
 
 		if (GetNewNeedState(kNeed_UIPause))				// see if abort game
+		{
+			Pomme_PauseAllChannels(true);
 			gAbortGameFlag = AskIfQuit();
+			if (!gAbortGameFlag)
+				Pomme_PauseAllChannels(false);
+		}
 
 		if (GetSDLKeyState(SDL_SCANCODE_PERIOD) && GetSDLKeyState(SDL_SCANCODE_N))	// see if skip to next level
 		{
