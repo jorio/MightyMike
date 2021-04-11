@@ -131,6 +131,27 @@ static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSm
 #undef COMMIT_STRIDE
 }
 
+static void DoublePixels(int firstRow, int numRows)
+{
+	const uint32_t* rgba		= ((uint32_t*)gRGBAFramebuffer) + firstRow * VISIBLE_WIDTH;
+	uint32_t* rgbaX2			= ((uint32_t*)gRGBAFramebufferX2) + firstRow * VISIBLE_WIDTH * 2 * 2;
+
+	for (int y = 0; y < numRows; y++)
+	{
+		uint32_t* x2RowStart = rgbaX2;
+
+		for (int x = 0; x < VISIBLE_WIDTH; x++)
+		{
+			uint32_t pixel = *(rgba++);
+			*(rgbaX2++) = pixel;
+			*(rgbaX2++) = pixel;
+		}
+
+		memcpy(rgbaX2, x2RowStart, sizeof(uint32_t) * VISIBLE_WIDTH * 2);
+		rgbaX2 += VISIBLE_WIDTH * 2;
+	}
+}
+
 // ----------------------------------------------------------------------------
 
 static void RaiseLatches()
@@ -189,6 +210,9 @@ static void ConverterThread(int threadNo, int firstRow, int numRows)
 			ConvertIndexedFramebufferToRGBA_FilterDithering(threadNo, firstRow, numRows);
 		else
 			ConvertIndexedFramebufferToRGBA_NoFilter(firstRow, numRows);
+
+		if (gGamePrefs.scalingType == kScaling_HQStretch)
+			DoublePixels(firstRow, numRows);
 
 		// Tell main thread we're ready (lower latch)
 		{

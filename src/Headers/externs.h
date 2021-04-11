@@ -216,6 +216,7 @@ extern	int						VISIBLE_WIDTH;
 extern	int						VISIBLE_HEIGHT;
 extern	uint8_t					*gIndexedFramebuffer;
 extern	uint8_t					*gRGBAFramebuffer;
+extern	uint8_t					*gRGBAFramebufferX2;
 extern	uint8_t					**gScreenLookUpTable;		// VISIBLE_HEIGHT elements
 extern	uint8_t					**gOffScreenLookUpTable;	// OFFSCREEN_HEIGHT elements
 extern	uint8_t					**gBackgroundLookUpTable;	// OFFSCREEN_HEIGHT elements

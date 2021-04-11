@@ -1254,7 +1254,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.fullscreen = true;
 #endif
 	gGamePrefs.pfSize = PFSIZE_WIDE;
-	gGamePrefs.integerScaling = false;
+	gGamePrefs.scalingType = kScaling_Stretch;
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.filterDithering = true;
 	gGamePrefs.music = true;

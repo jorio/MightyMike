@@ -118,7 +118,7 @@ void UpdateInput(void)
 				return;
 
 			case SDL_WINDOWEVENT_RESIZED:
-				if (gGamePrefs.integerScaling)
+				if (gGamePrefs.scalingType)
 				{
 					OnChangeIntegerScaling();
 				}

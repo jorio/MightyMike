@@ -43,6 +43,7 @@ int				VISIBLE_HEIGHT = 480;
 
 uint8_t*		gIndexedFramebuffer = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT]
 uint8_t*		gRGBAFramebuffer = nil;			// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4]
+uint8_t*		gRGBAFramebufferX2 = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4 * 4]
 
 uint8_t*		gRowDitherStrides = nil;		// for dithering filter
 
@@ -179,6 +180,7 @@ void InitScreenBuffers(void)
 {
 	CHECKED_DISPOSEPTR(gIndexedFramebuffer);
 	CHECKED_DISPOSEPTR(gRGBAFramebuffer);
+	CHECKED_DISPOSEPTR(gRGBAFramebufferX2);
 
 	CHECKED_DISPOSEHANDLE(gOffScreenHandle);
 	CHECKED_DISPOSEHANDLE(gBackgroundHandle);
@@ -207,6 +209,9 @@ void InitScreenBuffers(void)
 
 	gRGBAFramebuffer = (uint8_t*) NewPtrClear(VISIBLE_WIDTH * VISIBLE_HEIGHT * 4);
 	GAME_ASSERT(gRGBAFramebuffer);
+
+	gRGBAFramebufferX2 = (uint8_t*) NewPtrClear((VISIBLE_WIDTH*2) * (VISIBLE_HEIGHT*2) * 4);
+	GAME_ASSERT(gRGBAFramebufferX2);
 
 					/* MAKE OFFSCREEN DRAW BUFFER */
 
@@ -452,7 +457,10 @@ void PresentIndexedFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Update SDL texture and swap buffers
 
-	SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
+	if (gGamePrefs.scalingType == kScaling_HQStretch)
+		SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebufferX2, VISIBLE_WIDTH*4*2);
+	else
+		SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
 	SDL_RenderClear(gSDLRenderer);
 	SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
 	SDL_RenderPresent(gSDLRenderer);
@@ -492,12 +500,17 @@ void SetFullscreenMode(void)
 
 void OnChangeIntegerScaling(void)
 {
-	bool crisp;
+	bool crisp = true;
+	int multiplier = 1;
 
-	if (!gGamePrefs.integerScaling)
+	if (gGamePrefs.scalingType == kScaling_HQStretch || gGamePrefs.scalingType == kScaling_Stretch)
 	{
 		// Stretch: don't use nearest-neighbor
 		crisp = false;
+
+		// HQ stretch
+		if (gGamePrefs.scalingType == kScaling_HQStretch)
+			multiplier = 2;
 	}
 	else
 	{
@@ -528,7 +541,13 @@ void OnChangeIntegerScaling(void)
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, crisp ? "nearest" : "best");
 
 	// Recreate texture
-	gSDLTexture = SDL_CreateTexture(gSDLRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+	gSDLTexture = SDL_CreateTexture(
+			gSDLRenderer,
+			SDL_PIXELFORMAT_RGBA8888,
+			SDL_TEXTUREACCESS_STREAMING,
+			VISIBLE_WIDTH * multiplier,
+			VISIBLE_HEIGHT * multiplier
+			);
 	GAME_ASSERT(gSDLTexture);
 
 	// Set integer scaling setting

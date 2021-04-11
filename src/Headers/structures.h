@@ -278,7 +278,7 @@ struct PrefsType
 	Byte		difficulty;
 	Boolean		fullscreen;
 	Byte		pfSize;
-	Boolean		integerScaling;
+	Byte		scalingType;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
 	Boolean		music;

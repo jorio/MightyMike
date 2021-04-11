@@ -114,3 +114,10 @@ enum
 	PFSIZE_MEDIUM		= 1,
 	PFSIZE_WIDE			= 2,
 };
+
+enum
+{
+	kScaling_PixelPerfect	= 0,
+	kScaling_Stretch		= 1,
+	kScaling_HQStretch		= 2,
+};
