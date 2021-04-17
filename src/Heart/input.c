@@ -118,11 +118,11 @@ void UpdateInput(void)
 				return;
 
 			case SDL_WINDOWEVENT_RESIZED:
-				if (gGamePrefs.scalingType)
+				if (gGamePrefs.scalingType == kScaling_PixelPerfect)
 				{
 					OnChangeIntegerScaling();
 				}
-	
+
 				break;
 
 				/*
