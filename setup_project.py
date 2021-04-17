@@ -16,7 +16,7 @@ libs_dir = os.path.abspath('extern')
 cache_dir = os.path.abspath('cache')
 
 game_name = "MightyMike"
-game_ver = "3.0.0"
+game_ver = "3.0.1"
 sdl_ver = "2.0.14"
 
 #----------------------------------------------------------------

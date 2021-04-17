@@ -9,7 +9,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum macOS deployment v
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Target macOS architectures")
 
 project(MightyMike
-	VERSION 3.0.0
+	VERSION 3.0.1
 	LANGUAGES C CXX
 )
 
