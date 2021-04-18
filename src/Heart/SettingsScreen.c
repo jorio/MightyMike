@@ -690,17 +690,19 @@ static void NavigateSubmenuButton(MenuItem* entry)
 
 static void NavigateCycler(MenuItem* entry)
 {
-	bool wantConfirm	= GetNewNeedState(kNeed_UIConfirm);
-	bool wantLeft		= GetNewNeedState(kNeed_UILeft);
-	bool wantRight		= GetNewNeedState(kNeed_UIRight);
-	if (wantConfirm || wantLeft || wantRight)
+	int delta = 0;
+
+	if (GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev))
+		delta = -1;
+	else if (GetNewNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext) || GetNewNeedState(kNeed_UIConfirm))
+		delta = 1;
+
+	if (delta != 0)
 	{
 		if (entry->cycler.valuePtr == &gGamePrefs.interpolateAudio)
 			PlaySound(SOUND_COMEHERERODENT);
 		else
 			PlaySound(SOUND_GETPOW);
-
-		int delta = GetNewNeedState(kNeed_UILeft) ? -1 : 1;
 
 		if (entry->cycler.valuePtr)
 		{
@@ -722,14 +724,14 @@ static void NavigateCycler(MenuItem* entry)
 
 static void NavigateKeyBinding(MenuItem* entry)
 {
-	if (GetNewNeedState(kNeed_UILeft))
+	if (GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev))
 	{
 		gKeyColumn = PositiveModulo(gKeyColumn - 1, KEYBINDING_MAX_KEYS);
 		PlaySound(SOUND_SELECTCHIME);
 		return;
 	}
 
-	if (GetNewNeedState(kNeed_UIRight))
+	if (GetNewNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext))
 	{
 		gKeyColumn = PositiveModulo(gKeyColumn + 1, KEYBINDING_MAX_KEYS);
 		PlaySound(SOUND_SELECTCHIME);

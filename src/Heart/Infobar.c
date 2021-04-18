@@ -602,14 +602,14 @@ const int	quitY = gGamePrefs.pfSize == PFSIZE_SMALL ? 220 : ((VISIBLE_HEIGHT-64)
 
 					/* SEE IF RESUME */
 
-		if (GetNewNeedState(kNeed_UIRight) && (selection != 1))
+		if ((GetNewNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext)) && (selection != 1))
 		{
 			PlaySound(SOUND_SELECTCHIME);
 			selection = 1;
 		}
 					/* SEE IF QUIT */
 		else
-		if (GetNewNeedState(kNeed_UILeft) && (selection != 0))
+		if ((GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev)) && (selection != 0))
 		{
 			PlaySound(SOUND_SELECTCHIME);
 			selection = 0;

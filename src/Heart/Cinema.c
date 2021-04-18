@@ -206,7 +206,8 @@ re_enter:
 
 		if (gCursorMode != CURSOR_MODE_READY)
 			continue;
-		if (UserWantsOut())
+
+		if (GetNewNeedState(kNeed_UIConfirm))
 			break;
 
 	} while(true);
@@ -326,7 +327,7 @@ void MoveTitleCursor(void)
 
 	if (gCursorMode == CURSOR_MODE_READY)
 	{
-		if (GetNeedState(kNeed_UILeft))				// see if left key
+		if (GetNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev))		// see if left key
 		{
 			gDemoTimeout = TIME_TILL_DEMO;
 			if (gCursorSelection > 0)
@@ -340,7 +341,7 @@ void MoveTitleCursor(void)
 			}
 		}
 
-		if (GetNeedState(kNeed_UIRight))			// see if right key
+		if (GetNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext))		// see if right key
 		{
 			gDemoTimeout = TIME_TILL_DEMO;
 			if (gCursorSelection < 5)
@@ -823,7 +824,7 @@ long		restoreMode;
 
 		ReadKeyboard();
 
-		if (gCursorSelection && GetNeedState(kNeed_UILeft))
+		if (gCursorSelection && (GetNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev)))
 		{
 			DeactivateObjectDraw(batteryObj2);
 			batteryObj->X.Int = BATTERY_X1;
@@ -831,7 +832,7 @@ long		restoreMode;
 			PlaySound(SOUND_SELECTCHIME);
 		}
 		else
-		if (!gCursorSelection && GetNeedState(kNeed_UIRight))
+		if (!gCursorSelection && (GetNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext)))
 		{
 			batteryObj2->DrawFlag = true;
 			batteryObj->X.Int = BATTERY_X2;
@@ -887,7 +888,7 @@ long		restoreMode;
 
 		ReadKeyboard();
 
-		if ((GetNewNeedState(kNeed_UILeft)) && (restoreMode > 0))
+		if ((GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev)) && (restoreMode > 0))
 		{
 			restoreMode--;
 			cursorObj->X.Int = sgcursorx[restoreMode];
@@ -895,7 +896,7 @@ long		restoreMode;
 			SwitchAnim(cursorObj,restoreMode+1);
 		}
 		else
-		if ((GetNewNeedState(kNeed_UIRight)) && (restoreMode < 4))
+		if ((GetNewNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext)) && (restoreMode < 4))
 		{
 			restoreMode++;
 			cursorObj->X.Int = sgcursorx[restoreMode];
@@ -1488,7 +1489,7 @@ static	short	xCoords[] = {105,319,540};
 		ReadKeyboard();
 		DoSoundMaintenance(true);							// (must be after readkeyboard)
 
-		if (GetNewNeedState(kNeed_UIRight))	// see if go right
+		if (GetNewNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext))	// see if go right
 		{
 			if (mode < 2)
 			{
@@ -1503,7 +1504,7 @@ static	short	xCoords[] = {105,319,540};
 			}
 		}
 		else
-		if (GetNewNeedState(kNeed_UILeft))	// see if left
+		if (GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev))		// see if left
 		{
 			if (mode > 0)
 			{
@@ -1753,7 +1754,7 @@ short	selection;
 		if (GetNewNeedState(kNeed_UIConfirm))
 			break;
 
-		if (GetNewNeedState(kNeed_UILeft))	// see if go left
+		if (GetNewNeedState(kNeed_UILeft) || GetNewNeedState(kNeed_UIPrev))		// see if go left
 		{
 			if (selection > 0)
 			{
@@ -1762,7 +1763,7 @@ short	selection;
 			}
 		}
 
-		if (GetNewNeedState(kNeed_UIRight))	// see if go right
+		if (GetNewNeedState(kNeed_UIRight) || GetNewNeedState(kNeed_UINext))	// see if go right
 		{
 			if (selection < 4)
 			{

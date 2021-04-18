@@ -238,6 +238,8 @@ enum
 	kNeed_UIDown,
 	kNeed_UILeft,
 	kNeed_UIRight,
+	kNeed_UIPrev,
+	kNeed_UINext,
 	kNeed_UIConfirm,
 	kNeed_UIBack,
 	kNeed_UIPause,
