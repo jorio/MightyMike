@@ -179,7 +179,18 @@ static void TellMainThreadImReady(int threadNum)
 	}
 }
 
-static void ConverterThread(int threadNo, int firstRow, int numRows)
+static void Convert(int threadNum, int firstRow, int numRows)
+{
+	if (gGamePrefs.filterDithering)
+		ConvertIndexedFramebufferToRGBA_FilterDithering(threadNum, firstRow, numRows);
+	else
+		ConvertIndexedFramebufferToRGBA_NoFilter(firstRow, numRows);
+
+	if (gGamePrefs.scalingType == kScaling_HQStretch)
+		DoublePixels(firstRow, numRows);
+}
+
+static void ConverterThread(int threadNum, int firstRow, int numRows)
 {
 #if !_WIN32 && _GNU_SOURCE
 	char name[32];
@@ -190,7 +201,7 @@ static void ConverterThread(int threadNo, int firstRow, int numRows)
 	// Initial condition: tell main thread we're ready
 	{
 		std::scoped_lock lock(gMutex);
-		TellMainThreadImReady(threadNo);
+		TellMainThreadImReady(threadNum);
 	}
 
 	while (true)
@@ -199,29 +210,22 @@ static void ConverterThread(int threadNo, int firstRow, int numRows)
 		{
 			std::unique_lock lock(gMutex);
 
-			gMainToRenderers.wait(lock, [=] { return IsLatchRaised(threadNo); });
+			gMainToRenderers.wait(lock, [=] { return IsLatchRaised(threadNum); });
 
 			if (gQuitRenderThreads)
 				break;
 		}
 
 		// Do the work
-		if (gGamePrefs.filterDithering)
-			ConvertIndexedFramebufferToRGBA_FilterDithering(threadNo, firstRow, numRows);
-		else
-			ConvertIndexedFramebufferToRGBA_NoFilter(firstRow, numRows);
-
-		if (gGamePrefs.scalingType == kScaling_HQStretch)
-			DoublePixels(firstRow, numRows);
+		Convert(threadNum, firstRow, numRows);
 
 		// Tell main thread we're ready (lower latch)
 		{
 			std::scoped_lock lock(gMutex);
-			TellMainThreadImReady(threadNo);
+			TellMainThreadImReady(threadNum);
 		}
 	}
 }
-
 
 static void WaitForAllRenderThreadsReady()
 {
@@ -232,6 +236,11 @@ static void WaitForAllRenderThreadsReady()
 
 static void InitRenderThreadPool()
 {
+	if (gNumThreads <= 1)	// single-threaded rendering: don't create extra threads
+	{
+		return;
+	}
+
 	gQuitRenderThreads = false;
 	RaiseLatches();
 
@@ -261,6 +270,12 @@ static void InitRenderThreadPool()
 
 void ConvertFramebufferToRGBA(void)
 {
+	if (gNumThreads <= 1)	// single-threaded: do rendering on main thread
+	{
+		Convert(0, 0, VISIBLE_HEIGHT);
+		return;
+	}
+
 	if (gRenderThreadPool.empty())
 	{
 		InitRenderThreadPool();
