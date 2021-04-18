@@ -3,12 +3,12 @@
 #include <SDL.h>
 
 #if __APPLE__
-#define SC_PWEAPON2		SDL_SCANCODE_LGUI
-#define SC_NWEAPON2		SDL_SCANCODE_RGUI
+#define SC_NWEAPON2		SDL_SCANCODE_LGUI
+#define SC_PWEAPON2		SDL_SCANCODE_RGUI
 #define SC_ATTACK2		0						// on macos, ctrl+arrows is reserved by the OS by default
 #else
-#define SC_PWEAPON2		SDL_SCANCODE_LALT
-#define SC_NWEAPON2		SDL_SCANCODE_RALT
+#define SC_NWEAPON2		SDL_SCANCODE_LALT
+#define SC_PWEAPON2		SDL_SCANCODE_RALT
 #define SC_ATTACK2		SC(LCTRL)
 #endif
 
