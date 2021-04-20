@@ -37,8 +37,14 @@ with permission from Pangea Software, Inc.
 
 This software includes portions © 2021 Iliyas Jorio.
 
-## Other Pangea game ports
+## Related projects
 
-If you like Pangea Software, check out my ports of
-[Nanosaur](https://github.com/jorio/nanosaur)
-and [Bugdom](https://github.com/jorio/bugdom).
+Check out Christoph Leimbrock's Mighty Mike tools:
+
+- [Power Pete Cheater 1.4](https://github.com/cyco/power-pete-cheater)
+- [Mighty Resource Viewer](https://github.com/cyco/mighty-resource-parser)
+
+If you like games by Pangea Software, I have made other ports you might enjoy:
+
+- [Nanosaur](https://github.com/jorio/nanosaur)
+- [Bugdom](https://github.com/jorio/bugdom)
