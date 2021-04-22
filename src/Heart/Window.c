@@ -63,9 +63,9 @@ uint8_t**		gScreenLookUpTable = nil;		//[VISIBLE_HEIGHT]
 uint8_t**		gOffScreenLookUpTable = nil;	//[OFFSCREEN_HEIGHT]
 uint8_t**		gBackgroundLookUpTable = nil;	//[OFFSCREEN_HEIGHT]
 
-Ptr				*gPFLookUpTable = nil;
-Ptr				*gPFCopyLookUpTable = nil;
-Ptr				*gPFMaskLookUpTable = nil;
+uint8_t**		gPFLookUpTable = nil;
+uint8_t**		gPFCopyLookUpTable = nil;
+uint8_t**		gPFMaskLookUpTable = nil;
 
 static const uint32_t	kDebugTextUpdateInterval = 200;
 static uint32_t			gDebugTextFrameAccumulator = 0;
@@ -244,9 +244,9 @@ void InitScreenBuffers(void)
 
 					/* ALLOC MEM FOR PF LOOKUP TABLES */
 
-	gPFLookUpTable		= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFCopyLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
-	gPFMaskLookUpTable	= (Ptr*) NewPtrClear(PF_BUFFER_HEIGHT*sizeof(Ptr));
+	gPFLookUpTable		= (uint8_t**) NewPtrClear(PF_BUFFER_HEIGHT * sizeof(uint8_t*));
+	gPFCopyLookUpTable	= (uint8_t**) NewPtrClear(PF_BUFFER_HEIGHT * sizeof(uint8_t*));
+	gPFMaskLookUpTable	= (uint8_t**) NewPtrClear(PF_BUFFER_HEIGHT * sizeof(uint8_t*));
 
 					/* MAKE PLAYFIELD BUFFERS */
 
@@ -273,9 +273,9 @@ void InitScreenBuffers(void)
 
 	for (int i = 0; i < PF_BUFFER_HEIGHT; i++)
 	{
-		gPFLookUpTable[i]		= (*gPFBufferHandle)		+ (i * PF_BUFFER_WIDTH);
-		gPFCopyLookUpTable[i]	= (*gPFBufferCopyHandle)	+ (i * PF_BUFFER_WIDTH);
-		gPFMaskLookUpTable[i]	= (*gPFMaskBufferHandle)	+ (i * PF_BUFFER_WIDTH);
+		gPFLookUpTable[i]		= (uint8_t*)(*gPFBufferHandle)		+ (i * PF_BUFFER_WIDTH);
+		gPFCopyLookUpTable[i]	= (uint8_t*)(*gPFBufferCopyHandle)	+ (i * PF_BUFFER_WIDTH);
+		gPFMaskLookUpTable[i]	= (uint8_t*)(*gPFMaskBufferHandle)	+ (i * PF_BUFFER_WIDTH);
 	}
 
 					/* BUILD DITHERING FILTER BUFFER */

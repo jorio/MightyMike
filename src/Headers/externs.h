@@ -220,9 +220,9 @@ extern	uint8_t					*gRGBAFramebufferX2;
 extern	uint8_t					**gScreenLookUpTable;		// VISIBLE_HEIGHT elements
 extern	uint8_t					**gOffScreenLookUpTable;	// OFFSCREEN_HEIGHT elements
 extern	uint8_t					**gBackgroundLookUpTable;	// OFFSCREEN_HEIGHT elements
-extern	Ptr						*gPFLookUpTable;
-extern	Ptr						*gPFCopyLookUpTable;
-extern	Ptr						*gPFMaskLookUpTable;
+extern	uint8_t					**gPFLookUpTable;
+extern	uint8_t					**gPFCopyLookUpTable;
+extern	uint8_t					**gPFMaskLookUpTable;
 extern	long					gScreenXOffset;				// global centering offset applied to sprites
 extern	long					gScreenYOffset;				// global centering offset applied to sprites
 extern	Handle					gBackgroundHandle;

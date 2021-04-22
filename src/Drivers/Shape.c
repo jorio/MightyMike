@@ -328,19 +328,19 @@ static void DrawFrameToBuffer(
 	}
 	else
 	{
-		const uint32_t* srcPtr32	= (const uint32_t*) pixelData;
-		const uint32_t* maskPtr32	= (const uint32_t*) maskData;
+		const uint8_t* srcPtr	= pixelData;
+		const uint8_t* maskPtr	= maskData;
 
 		for (int row = fh->height; row; row--)
 		{
-			uint32_t* destPtr32 = (uint32_t*) destPtr;		// get line start ptr
+			uint8_t* destPtr2 = destPtr;			// get line start ptr
 
-			for (int col = fh->width >> 2; col; col--)
+			for (int col = fh->width; col; col--)
 			{
-				*destPtr32 = (*destPtr32 & *maskPtr32) | (*srcPtr32);
-				destPtr32++;
-				maskPtr32++;
-				srcPtr32++;
+				*destPtr2 = (*destPtr2 & *maskPtr) | (*srcPtr);
+				destPtr2++;
+				maskPtr++;
+				srcPtr++;
 			}
 
 			destPtr += destBufferWidth;			// next row
@@ -477,15 +477,15 @@ long	x2;
 void DrawASprite(ObjNode *theNodePtr)
 {
 int32_t	width;
-int32_t	*destPtr32;
-const int32_t*			maskPtr32;
-const int32_t*			srcPtr32;
 int32_t	height;
-int32_t	*destStartPtr32;
 int32_t	frameNum;
 int32_t	x,y,offset;
 Rect	oldBox;
 int32_t	shapeNum,groupNum;
+uint8_t*		destPtr;
+uint8_t*		destStartPtr;
+const uint8_t*	maskPtr;
+const uint8_t*	srcPtr;
 
 	if (theNodePtr->PFCoordsFlag)					// see if do special PF Draw code
 	{
@@ -505,11 +505,11 @@ int32_t	shapeNum,groupNum;
 			groupNum,
 			shapeNum,
 			frameNum,
-			(const uint8_t**) &srcPtr32,
-			(const uint8_t**) &maskPtr32
+			&srcPtr,
+			&maskPtr
 	);
 
-	width = fh->width >> 2;							// get word width
+	width = fh->width;								// get width
 	height = fh->height;							// get height
 
 	x += fh->x;										// use position offsets
@@ -521,7 +521,7 @@ int32_t	shapeNum,groupNum;
 	oldBox = theNodePtr->drawBox;						// remember old box
 
 	if ((x < gRegionClipLeft[theNodePtr->ClipNum]) ||		// see if out of bounds
-		((x+(width<<2)) >= gRegionClipRight[theNodePtr->ClipNum]) ||
+		((x+width) >= gRegionClipRight[theNodePtr->ClipNum]) ||
 		((y+height) <= gRegionClipTop[theNodePtr->ClipNum]) ||
 		(y >= gRegionClipBottom[theNodePtr->ClipNum]))
 			goto update;
@@ -534,8 +534,8 @@ int32_t	shapeNum,groupNum;
 		offset = gRegionClipTop[theNodePtr->ClipNum]-y;
 		y = gRegionClipTop[theNodePtr->ClipNum];
 		height -= offset;
-		srcPtr32 += offset*width;
-		maskPtr32 += offset*width;
+		srcPtr += offset*width;
+		maskPtr += offset*width;
 	}
 
 	if (theNodePtr->UpdateBoxFlag)						// see if using update regions
@@ -546,7 +546,7 @@ int32_t	shapeNum,groupNum;
 		theNodePtr->drawBox.bottom = y+height;
 	}
 
-	destStartPtr32 = (int32_t *)(gOffScreenLookUpTable[y]+x);	// calc draw addr
+	destStartPtr = gOffScreenLookUpTable[y] + x;		// calc draw addr
 
 						/* DO THE DRAW */
 	if (height <= 0)										// special check for illegal heights
@@ -554,17 +554,17 @@ int32_t	shapeNum,groupNum;
 
 	do
 	{
-		destPtr32 = destStartPtr32;								// get line start ptr
+		destPtr = destStartPtr;								// get line start ptr
 
 		for (int i = width; i; i--)
 		{
-			*destPtr32 = (*destPtr32 & *maskPtr32) | (*srcPtr32);
-			destPtr32++;
-			srcPtr32++;
-			maskPtr32++;
+			*destPtr = (*destPtr & *maskPtr) | (*srcPtr);
+			destPtr++;
+			srcPtr++;
+			maskPtr++;
 		}
 
-		destStartPtr32 += (OFFSCREEN_WIDTH>>2);				// next row
+		destStartPtr += OFFSCREEN_WIDTH;					// next row
 	} while(--height);
 
 
@@ -635,19 +635,17 @@ void EraseASprite(ObjNode *theNodePtr)
 
 static void DrawPFSprite(ObjNode *theNodePtr)
 {
-long	width,height,i;
-long	drawHeight;
-Ptr		destPtrB,srcPtrB,maskPtrB;
-int32_t	*destPtr,*srcPtr,*maskPtr;
-Ptr		tileMaskStartPtr;
-int32_t	*tileMaskPtr;
-Ptr		destStartPtr,srcStartPtr,originalSrcStartPtr;
-Ptr		originalMaskStartPtr,maskStartPtr;
+long	width,height;
+uint8_t*			destStartPtr;
+const uint8_t*		tileMaskStartPtr;
+const uint8_t*		srcStartPtr;
+const uint8_t*		originalSrcStartPtr;
+const uint8_t*		maskStartPtr;
+const uint8_t*		originalMaskStartPtr;
 long	frameNum;
 long	realWidth,originalY,topToClip,leftToClip;
 long	drawWidth,shapeNum,groupNum,numHSegs;
 Boolean	priorityFlag;
-Ptr		tmP;
 int32_t	x, y;
 
 	groupNum = theNodePtr->SpriteGroupNum;				// get shape group #
@@ -749,7 +747,7 @@ int32_t	x, y;
 	originalSrcStartPtr = srcStartPtr;	 						// get ptr to PIXEL_DATA
 	originalMaskStartPtr = maskStartPtr; 						// get ptr to MASK_DATA
 
-	destStartPtr = (Ptr)(gPFLookUpTable[y]+x);					// calc draw addr
+	destStartPtr = gPFLookUpTable[y] + x;						// calc draw addr
 
 						/* DO THE DRAW */
 
@@ -758,25 +756,17 @@ int32_t	x, y;
 	{
 		for (; numHSegs > 0; numHSegs--)
 		{
-			for (drawHeight = 0; drawHeight < height; drawHeight++)
+			for (int drawHeight = 0; drawHeight < height; drawHeight++)
 			{
-				destPtr = (int32_t *)destStartPtr;					// get line start ptr
-				srcPtr = (int32_t *)srcStartPtr;
-				maskPtr = (int32_t *)maskStartPtr;
-
-				for (i=(width>>2); i ; i--)					// draw longs
+				uint8_t*		destPtr		= destStartPtr;		// get line start ptr
+				const uint8_t*	srcPtr		= srcStartPtr;
+				const uint8_t*	maskPtr		= maskStartPtr;
+				for (int i = width; i; i--)
 				{
-					*destPtr = (*destPtr & (*maskPtr++)) | (*srcPtr++);
+					*destPtr = (*destPtr & *maskPtr) | *srcPtr;
 					destPtr++;
-				}
-
-				destPtrB = (Ptr)destPtr;
-				maskPtrB = (Ptr)maskPtr;
-				srcPtrB = (Ptr)srcPtr;
-				for (i=(width&0b11); i; i--)						// draw remaining pixels
-				{
-					*destPtrB = (*destPtrB & (*maskPtrB++)) | (*srcPtrB++);
-					destPtrB++;
+					maskPtr++;
+					srcPtr++;
 				}
 
 				srcStartPtr += realWidth;						// next sprite line
@@ -784,7 +774,7 @@ int32_t	x, y;
 
 				if (++y >=  PF_BUFFER_HEIGHT)					// see if wrap buffer vertically
 				{
-					destStartPtr = (Ptr)(gPFLookUpTable[0]+x);	// wrap to top
+					destStartPtr = gPFLookUpTable[0] + x;		// wrap to top
 					y = 0;
 				}
 				else
@@ -793,7 +783,7 @@ int32_t	x, y;
 
 			if (numHSegs == 2)
 			{
-				destStartPtr = (Ptr)gPFLookUpTable[y = originalY];	// set buff addr for segment #2
+				destStartPtr = gPFLookUpTable[y = originalY];	// set buff addr for segment #2
 				x = 0;
 				srcStartPtr = originalSrcStartPtr+width;
 				maskStartPtr = originalMaskStartPtr+width;
@@ -807,39 +797,25 @@ int32_t	x, y;
 					/* DRAW IT WITH TILE MASK */
 					/**************************/
 
-		tileMaskStartPtr = (Ptr)(gPFMaskLookUpTable[y]+x);			// calc tilemask addr
+		tileMaskStartPtr = gPFMaskLookUpTable[y] + x;			// calc tilemask addr
 
 		for (; numHSegs > 0; numHSegs--)
 		{
-			for (drawHeight = 0; drawHeight < height; drawHeight++)
+			for (int drawHeight = 0; drawHeight < height; drawHeight++)
 			{
-				destPtr = (int32_t *)destStartPtr;								// get line start ptr
-				srcPtr = (int32_t *)srcStartPtr;
-				maskPtr = (int32_t *)maskStartPtr;
-				tileMaskPtr = (int32_t *)tileMaskStartPtr;
+				uint8_t* destPtr			= destStartPtr;		// get line start ptr
+				const uint8_t* srcPtr		= srcStartPtr;
+				const uint8_t* maskPtr		= maskStartPtr;
+				const uint8_t* tileMaskPtr	= tileMaskStartPtr;
 
-				for (i=(width>>2); i ; i--)
+				for (int i = width; i; i--)						// draw remaining pixels
 				{
-					*destPtr =   (*destPtr & (*maskPtr | *tileMaskPtr)) |		// draw longs
-								 (*srcPtr & (*tileMaskPtr ^ 0xffffffffL));
+					*destPtr =  (*destPtr & (*maskPtr | *tileMaskPtr)) |
+								 (*srcPtr & (*tileMaskPtr ^ 0xff));
 					destPtr++;
-					tileMaskPtr++;
 					maskPtr++;
 					srcPtr++;
-				}
-
-				tmP = (Ptr)tileMaskPtr;
-				destPtrB = (Ptr)destPtr;
-				maskPtrB = (Ptr)maskPtr;
-				srcPtrB = (Ptr)srcPtr;
-				for (i=(width&0b11); i; i--)						// draw remaining pixels
-				{
-					*destPtrB =  (*destPtrB & (*maskPtrB | *tmP)) |
-								 (*srcPtrB & (*tmP ^ 0xff));
-					destPtrB++;
-					maskPtrB++;
-					srcPtrB++;
-					tmP++;
+					tileMaskPtr++;
 				}
 
 				srcStartPtr += realWidth;						// next sprite line
@@ -847,8 +823,8 @@ int32_t	x, y;
 
 				if (++y >=  PF_BUFFER_HEIGHT)					// see if wrap buffer vertically
 				{
-					destStartPtr = (Ptr)(gPFLookUpTable[0]+x);	// wrap to top
-					tileMaskStartPtr = (Ptr)(gPFMaskLookUpTable[0]+x);
+					destStartPtr = gPFLookUpTable[0] + x;	// wrap to top
+					tileMaskStartPtr = gPFMaskLookUpTable[0] + x;
 					y = 0;
 				}
 				else
@@ -860,8 +836,8 @@ int32_t	x, y;
 
 			if (numHSegs == 2)
 			{
-				destStartPtr = (Ptr)gPFLookUpTable[originalY];		// set buff addr for segment #2
-				tileMaskStartPtr = (Ptr)gPFMaskLookUpTable[y = originalY];
+				destStartPtr = gPFLookUpTable[originalY];		// set buff addr for segment #2
+				tileMaskStartPtr = gPFMaskLookUpTable[y = originalY];
 				x = 0;
 				srcStartPtr = originalSrcStartPtr+width;
 				maskStartPtr = originalMaskStartPtr+width;
@@ -876,15 +852,11 @@ int32_t	x, y;
 static void ErasePFSprite(ObjNode *theNodePtr)
 {
 long	width,height,drawWidth,y;
-long	i;
-uint64_t	*destPtr;
-const uint64_t *srcPtr;
-Ptr		destPtrB,srcPtrB;
-Ptr		destStartPtr;
-Ptr		srcStartPtr,originalSrcStartPtr;
+uint8_t*		destPtr;
+const uint8_t*	srcPtr;
 long	x;
 long	numHSegs;
-long	drawHeight,originalY;
+long	originalY;
 
 	x = theNodePtr->drawBox.left;					// remember area in the drawbox
 	drawWidth = width = theNodePtr->drawBox.right;	// right actually = width
@@ -903,46 +875,34 @@ long	drawHeight,originalY;
 		numHSegs = 1;
 
 
-	destStartPtr = (Ptr)(gPFLookUpTable[y]+x);				// calc draw addr
-	originalSrcStartPtr = srcStartPtr = (Ptr)(gPFCopyLookUpTable[y]+x);	// calc source addr
+	destPtr = gPFLookUpTable[y] + x;				// calc draw addr
+	srcPtr = gPFCopyLookUpTable[y] + x;				// calc source addr
 
 						/* DO THE ERASE */
 
 	for (; numHSegs > 0; numHSegs--)
 	{
-		for (drawHeight = 0; drawHeight < height; drawHeight++)
+		for (int drawHeight = 0; drawHeight < height; drawHeight++)
 		{
-			destPtr = (uint64_t *)destStartPtr;					// get line start ptr
-			srcPtr = (const uint64_t *)srcStartPtr;
+			memcpy(destPtr, srcPtr, width);			// erase segment
 
-			for (i=(width>>3); i ; i--)
-				*destPtr++ = *srcPtr++;							// erase doubles
-
-
-			destPtrB = (Ptr)destPtr;
-			srcPtrB = (Ptr)srcPtr;
-
-
-			for (i = (width & 0b111) - 1; i >= 0; i--)				// do remaining pixels
-				destPtrB[i] = srcPtrB[i];
-
-			if (++y >=  PF_BUFFER_HEIGHT)					// see if wrap buffer vertically
+			if (++y >=  PF_BUFFER_HEIGHT)			// see if wrap buffer vertically
 			{
-				destStartPtr = (Ptr)(gPFLookUpTable[0]+x);	// wrap to top
-				srcStartPtr = (Ptr)(gPFCopyLookUpTable[0]+x);
+				destPtr = gPFLookUpTable[0] + x;	// wrap to top
+				srcPtr = gPFCopyLookUpTable[0] + x;
 				y = 0;
 			}
 			else
 			{
-				destStartPtr += PF_BUFFER_WIDTH;			// next buffer line
-				srcStartPtr += PF_BUFFER_WIDTH;
+				destPtr += PF_BUFFER_WIDTH;			// next buffer line
+				srcPtr += PF_BUFFER_WIDTH;
 			}
 		}
 
 		if (numHSegs == 2)
 		{
-			destStartPtr = (Ptr)gPFLookUpTable[originalY];		// set buff addr for segment #2
-			srcStartPtr = (Ptr)gPFCopyLookUpTable[originalY];
+			destPtr = gPFLookUpTable[originalY];	// set buff addr for segment #2
+			srcPtr = gPFCopyLookUpTable[originalY];
 			y = originalY;
 			x = 0;
 			width = drawWidth-width;
