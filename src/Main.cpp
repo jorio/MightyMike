@@ -62,6 +62,9 @@ static fs::path FindGameData()
 
 int CommonMain(int argc, const char** argv)
 {
+	(void)argc;	// unused
+	(void)argv;	// unused
+
 	gNumThreads = (int) std::thread::hardware_concurrency();
 	if (gNumThreads >= 32)
 		gNumThreads = 32;

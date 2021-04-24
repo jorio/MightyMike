@@ -1252,6 +1252,7 @@ Byte	tile;
 
 Boolean NilAdd(ObjectEntryType *itemPtr)
 {
+	(void)itemPtr;	// unused
 	return(false);
 }
 

@@ -750,7 +750,7 @@ static void NavigateKeyBinding(MenuItem* entry)
 
 	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
 	{
-		GetBindingAtRow(gMenuRow)->key[gKeyColumn] = 0;
+		gGamePrefs.keys[entry->kb].key[gKeyColumn] = 0;
 		PlaySound(SOUND_PIESQUISH);
 		PlaySound(SOUND_POP);
 
@@ -786,7 +786,7 @@ static void NavigatePadBinding(MenuItem* entry)
 
 	if (GetNewSDLKeyState(SDL_SCANCODE_DELETE) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
 	{
-		GetBindingAtRow(gMenuRow)->gamepad[gPadColumn].type = kUnbound;
+		gGamePrefs.keys[entry->kb].gamepad[gPadColumn].type = kUnbound;
 		PlaySound(SOUND_PIESQUISH);
 		PlaySound(SOUND_POP);
 

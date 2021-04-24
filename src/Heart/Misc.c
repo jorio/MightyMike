@@ -596,7 +596,7 @@ void RegulateSpeed2(short speed)
 {
 static uint32_t gTick = 0;
 
-	while ((TickCount() - gTick) < speed)				// wait for 1 tick
+	while ((TickCount() - gTick) < (uint32_t)speed)	// wait for 1 tick
 		SDL_Delay(SPINLOCK_DELAY);
 	gTick = TickCount();							// remember current time
 	gFrames++;

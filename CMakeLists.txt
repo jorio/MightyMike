@@ -236,7 +236,6 @@ if(NOT MSVC)
 		-Wshadow
 		-Wno-multichar
 		-Wno-unknown-pragmas
-		-Wno-unused-parameter
 		$<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>
 		-Werror=return-type
 	)
