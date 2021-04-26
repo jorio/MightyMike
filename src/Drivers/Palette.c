@@ -8,12 +8,14 @@
 /***************/
 /* EXTERNALS   */
 /***************/
+#include "externs.h"
+#include "io.h"
 #include "myglobals.h"
 #include "misc.h"
 #include "window.h"
-#include <string.h>
 
-#include "io.h"
+#include <math.h>
+#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -28,7 +30,6 @@ static const int kFadeDurationMacTicks = 15;
 GamePalette				gGamePalette;
 static	GamePalette		gBackUpPalette;
 
-Boolean					gPaletteColorCorrectionFlag = true;
 Boolean					gScreenBlankedFlag = false;
 uint16_t				gAppleRGBToLinear[1 << 16];
 uint8_t					gLinearToSRGB[1 << 16];
@@ -200,9 +201,8 @@ static void ResetSinglePaletteColorCorrection(struct GamePalette_s *palette)
 	}
 }
 
-void SetPaletteColorCorrection(Boolean enabled)
+void SetPaletteColorCorrection(void)
 {
-	gPaletteColorCorrectionFlag = enabled;
 	ResetSinglePaletteColorCorrection(&gGamePalette);
 	ResetSinglePaletteColorCorrection(&gBackUpPalette);
 }
@@ -211,7 +211,7 @@ void SetPaletteColor(struct GamePalette_s *palette, int index, const RGBColor *c
 {
 	uint32_t rgba = 0;
 
-	if (gPaletteColorCorrectionFlag)
+	if (gGamePrefs.colorCorrection)
 	{
 		int32_t argbRed = gAppleRGBToLinear[color->red];
 		int32_t argbGreen = gAppleRGBToLinear[color->green];

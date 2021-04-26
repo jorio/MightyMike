@@ -545,6 +545,7 @@ void ShowLastScore(void)
 	EraseBackgroundBuffer();
 
 	EraseCLUT();
+	LoadBackground(":images:winbw.tga");					// just to load the palette
 	DumpBackground();										// dump to playfield
 	DumpGameWindow();										// show the whole thing
 	DumpUpdateRegions();

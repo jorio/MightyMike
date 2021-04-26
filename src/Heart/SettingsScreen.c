@@ -82,7 +82,6 @@ static const char* GetPadBindingName(int row, int col);
 static void OnDone(void);
 static void OnChangePlayfieldSizeViaSettings(void);
 static void OnChangeDebugInfoInTitleBar(void);
-static void OnChangeColorCorrection(void);
 static void OnResetKeys(void);
 static void OnResetGamepad(void);
 static void LayOutMenu(MenuItem* menu);
@@ -182,7 +181,7 @@ static MenuItem gVideoMenu[] =
 		.type = kMenuItem_Cycler, .cycler =
 		{
 			.caption = "color correction",
-			.callback = OnChangeColorCorrection,
+			.callback = SetPaletteColorCorrection,
 			.valuePtr = &gGamePrefs.colorCorrection,
 			.numChoices = 2,
 			.choices = { "no", "yes" },
@@ -401,11 +400,6 @@ static void OnChangePlayfieldSizeViaSettings(void)
 	InitClipRegions();
 	gScreenBlankedFlag = false;
 	LayOutMenu(gMenu);//LayOutSettingsPageBackground();
-}
-
-static void OnChangeColorCorrection(void)
-{
-	SetPaletteColorCorrection(gGamePrefs.colorCorrection);
 }
 
 static void OnChangeDebugInfoInTitleBar(void)
@@ -1159,6 +1153,6 @@ void ApplyPrefs(void)
 	OnChangePlayfieldSize();
 	SetFullscreenMode();
 	OnChangeIntegerScaling();
-	SetPaletteColorCorrection(gGamePrefs.colorCorrection);
+	SetPaletteColorCorrection();
 }
 

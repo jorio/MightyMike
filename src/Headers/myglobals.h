@@ -48,7 +48,7 @@ void	InitPaletteStuff(void);
 void	FadeInGameCLUT(void);
 void	EraseCLUT(void);
 void	FadeOutGameCLUT(void);
-void	SetPaletteColorCorrection(Boolean enabled);
+void	SetPaletteColorCorrection(void);
 void	SetPaletteColor(struct GamePalette_s *palette, int index, const RGBColor *color);
 
 			/* ANIMATION */
