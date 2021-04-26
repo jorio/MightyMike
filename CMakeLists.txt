@@ -208,6 +208,7 @@ target_link_libraries(${GAME_TARGET}
 	${CMAKE_THREAD_LIBS_INIT}
 	"$<$<BOOL:${APPLE}>:-framework Foundation>"		# Required for KillMacMouseAcceleration
 	"$<$<BOOL:${APPLE}>:-framework IOKit>"			# Required for KillMacMouseAcceleration
+	m
 )
 
 #------------------------------------------------------------------------------
