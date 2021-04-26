@@ -37,7 +37,7 @@ static void ConvertIndexedFramebufferToRGBA_NoFilter(int firstRow, int numRows)
 	{
 		for (int x = 0; x < VISIBLE_WIDTH; x++)
 		{
-			*(rgba++) = gGamePalette[*(indexed++)];
+			*(rgba++) = gGamePalette.finalColors[*(indexed++)];
 		}
 	}
 }
@@ -56,8 +56,8 @@ static void ConvertIndexedFramebufferToRGBA_FilterDithering(int threadNum, int f
 		{
 			if (smearFlags[x])
 			{
-				uint8_t* me		= (uint8_t*) &gGamePalette[*indexed];
-				uint8_t* next	= (uint8_t*) &gGamePalette[*(indexed+1)];
+				uint8_t* me		= (uint8_t*) &gGamePalette.finalColors[*indexed];
+				uint8_t* next	= (uint8_t*) &gGamePalette.finalColors[*(indexed+1)];
 				uint8_t* out	= (uint8_t*) rgba;
 				out[1] = (me[1] + next[1]) >> 1;
 				out[2] = (me[2] + next[2]) >> 1;
@@ -65,13 +65,13 @@ static void ConvertIndexedFramebufferToRGBA_FilterDithering(int threadNum, int f
 				smearFlags[x] = 0;			// clear for next row
 			}
 			else
-				*rgba = gGamePalette[*indexed];
+				*rgba = gGamePalette.finalColors[*indexed];
 
 			rgba++;
 			indexed++;
 		}
 
-		*rgba = gGamePalette[*indexed];		// last
+		*rgba = gGamePalette.finalColors[*indexed];		// last
 		rgba++;
 		indexed++;
 	}

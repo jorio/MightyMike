@@ -14,8 +14,11 @@
 #define	MAX_WEAPONS		50				// max weapons allowed in weapon list
 
 
-typedef uint32_t GamePalette[256];
-
+typedef struct GamePalette_s
+{
+	uint32_t finalColors[256];
+	uint16_t baseColors[256][3];
+} GamePalette;
 
 
 			/* PLAYFIELD ITEM RECORD */
@@ -288,11 +291,12 @@ struct PrefsType
 	Boolean		gameTitlePowerPete;
 	Boolean		thermometerScreen;
 	Boolean		debugInfoInTitleBar;
+	Boolean		colorCorrection;
 	KeyBinding	keys[NUM_CONTROL_NEEDS];
 };
 typedef struct PrefsType PrefsType;
 
-#define PREFS_MAGIC "Mighty Mike Prefs v1"
+#define PREFS_MAGIC "Mighty Mike Prefs v2"
 
 #endif
 

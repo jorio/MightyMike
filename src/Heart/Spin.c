@@ -276,7 +276,7 @@ short			i;
 	for (i=0; i<256; i++)
 	{
 		rgb = *rgbPtr++;								// get a color
-		gGamePalette[i] = RGBColorToU32(&rgb);			// set
+		SetPaletteColor(&gGamePalette, i, &rgb);		// set
 	}
 
 	gSpinPtr = (Ptr)rgbPtr;								// update file pointer

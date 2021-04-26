@@ -35,9 +35,9 @@ static inline RGBColor U32ToRGBColor(const uint32_t color)
 {
 	return (RGBColor)
 	{
-			((color >> 24) & 0xFF) << 8,
-			((color >> 16) & 0xFF) << 8,
-			((color >> 8) & 0xFF) << 8,
+			((color >> 24) & 0xFF) * 0x101,
+			((color >> 16) & 0xFF) * 0x101,
+			((color >> 8) & 0xFF) * 0x101,
 	};
 }
 
@@ -48,6 +48,8 @@ void	InitPaletteStuff(void);
 void	FadeInGameCLUT(void);
 void	EraseCLUT(void);
 void	FadeOutGameCLUT(void);
+void	SetPaletteColorCorrection(Boolean enabled);
+void	SetPaletteColor(struct GamePalette_s *palette, int index, const RGBColor *color);
 
 			/* ANIMATION */
 

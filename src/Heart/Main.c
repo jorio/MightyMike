@@ -1258,6 +1258,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.gameTitlePowerPete = false;
 	gGamePrefs.thermometerScreen = true;
 	gGamePrefs.debugInfoInTitleBar = false;
+	gGamePrefs.colorCorrection = true;
 	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
 }
 

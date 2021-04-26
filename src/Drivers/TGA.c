@@ -5,6 +5,7 @@
 #include "tga.h"
 #include "misc.h"
 #include "externs.h"
+#include "myglobals.h"
 
 static void DecompressRLE(short refNum, TGAHeader* header, Handle handle)
 {
@@ -162,10 +163,14 @@ Handle LoadTGA(
 				uint8_t red   = palette[i*3 + 2];
 				uint8_t green = palette[i*3 + 1];
 				uint8_t blue  = palette[i*3 + 0];
-				gGamePalette[i] = 0x000000FF
+				uint32_t combined = 0x000000FF
 								  | (red << 24)
 								  | (green << 16)
 								  | (blue << 8);
+
+
+				RGBColor rgbColor = U32ToRGBColor(combined);
+				SetPaletteColor(&gGamePalette, i, &rgbColor);
 			}
 
 			DisposePtr(palette);
