@@ -1,0 +1,34 @@
+#
+# appimage.yaml to build MightyMike in Open Build Service (OBS)
+#
+
+app: MightyMike
+
+# resources required at build time
+build:
+  packages:
+    - SDL2-devel
+    - cmake
+    - glibc >= 2.2.5
+    - pkgconfig
+    - pkgconfig(gl)
+    - pkgconfig(glu)
+    - gcc-c++
+
+script:
+  - cd $BUILD_SOURCE_DIR
+  - tar -xvzf MightyMike-3.0.1.tar.gz
+  - cd MightyMike-3.0.1
+  - mkdir build
+  - cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+  - cmake --build build-release
+  - mkdir -p $BUILD_APPDIR/usr/share/{pixmaps,applications/}
+  - mkdir -p $BUILD_APPDIR/usr/lib/MightyMike/
+  - mkdir -p $BUILD_APPDIR/usr/bin
+  - echo -e '#!/usr/bin/sh\n\ncd "$(dirname "$(readlink -f "$0")")"/../lib/MightyMike/;./MightyMike' > $BUILD_APPDIR/usr/bin/MightyMike.sh
+  - chmod +x $BUILD_APPDIR/usr/bin/MightyMike.sh
+  - mv build-release/{Data,MightyMike} $BUILD_APPDIR/usr/lib/MightyMike
+  - mv cmake/MightyMike32.png $BUILD_APPDIR/MightyMike.png
+  - cp $BUILD_APPDIR/MightyMike.png $BUILD_APPDIR/usr/share/pixmaps/MightyMike.png
+  - mv MightyMike.desktop $BUILD_APPDIR/MightyMike.desktop
+  - cp $BUILD_APPDIR/MightyMike.desktop $BUILD_APPDIR/usr/share/applications/MightyMike.desktop
