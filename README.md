@@ -8,7 +8,7 @@ It was initially published in 1995 under the name **Power Pete**.
 https://github.com/jorio/mightymike/releases
 
 **Get unoficial builds for Linux:**
-[here](https://lutris.net/games/mighty-mike/) [here](https://download.opensuse.org/repositories/home:/jpenguin/)
+[here](https://lutris.net/games/mighty-mike/) & [here](https://download.opensuse.org/repositories/home:/jpenguin/)
 
 ![Screenshot](docs/screenshot.png)
 
