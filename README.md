@@ -4,12 +4,10 @@ This is Pangea Software's **Mighty Mike** updated to run on modern systems.
 Set in a toy store, this top-down action game is a staple of 90's Macintosh games.
 It was initially published in 1995 under the name **Power Pete**.
 
-**Get builds for macOS and Windows here:**
-https://github.com/jorio/mightymike/releases
-
-**Get unoficial builds for Linux:**
-[here](https://lutris.net/games/mighty-mike/) & [here](https://download.opensuse.org/repositories/home:/jpenguin/)
-
+- **Get builds for macOS and Windows here:** https://github.com/jorio/mightymike/releases
+- Linux users: there are unofficial builds on [Lutris](https://lutris.net/games/mighty-mike/)
+and [OpenSUSE Build Service](https://download.opensuse.org/repositories/home:/jpenguin/).
+- For other systems: please read [BUILD.md](BUILD.md) to build the game yourself.
 ![Screenshot](docs/screenshot.png)
 
 ## About this update
