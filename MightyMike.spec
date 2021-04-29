@@ -20,9 +20,9 @@
 Name:           MightyMike
 Version:        3.0.1
 Release:        0
-Summary:        It's up to MightyMike to save the innocent fuzzy bunnies
+Summary:        It's up to Mighty Mike to save the innocent fuzzy bunnies
 License:        CC-BY-NC-SA-4.0
-Group:          Amusements/Games/3D/Other
+Group:          Amusements/Games/Action/Arcade
 URL:            https://github.com/jorio/MightyMike/
 Source:         MightyMike-%{version}.tar.gz
 BuildRequires:  SDL2-devel
