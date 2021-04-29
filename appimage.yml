@@ -28,7 +28,7 @@ script:
   - echo -e '#!/usr/bin/sh\n\ncd "$(dirname "$(readlink -f "$0")")"/../lib/MightyMike/;./MightyMike' > $BUILD_APPDIR/usr/bin/MightyMike.sh
   - chmod +x $BUILD_APPDIR/usr/bin/MightyMike.sh
   - mv build-release/{Data,MightyMike} $BUILD_APPDIR/usr/lib/MightyMike
-  - mv cmake/MightyMike32.png $BUILD_APPDIR/MightyMike.png
+  - mv packaging/MightyMike32.png $BUILD_APPDIR/MightyMike.png
   - cp $BUILD_APPDIR/MightyMike.png $BUILD_APPDIR/usr/share/pixmaps/MightyMike.png
   - mv packaging/MightyMike.desktop $BUILD_APPDIR/MightyMike.desktop
   - cp $BUILD_APPDIR/MightyMike.desktop $BUILD_APPDIR/usr/share/applications/MightyMike.desktop
