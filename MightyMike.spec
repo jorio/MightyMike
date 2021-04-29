@@ -1,7 +1,7 @@
 #
 # spec file for package MightyMike by <https://www.notabug.org/tux_peng>
 #
-# MightyMike is a registered trademark of Pangea Software, Inc.
+# Mighty Mike is a registered trademark of Pangea Software, Inc.
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
