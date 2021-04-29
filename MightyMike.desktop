@@ -1,7 +1,7 @@
 [Desktop Entry]
-Name=MightyMike
-GenericName=MightyMike
-Comment=It's up to MightyMike to save the innocent fuzzy bunnies
+Name=Mighty Mike
+GenericName=Mighty Mike
+Comment=It's up to Mighty Mike to save the innocent fuzzy bunnies
 Exec=MightyMike.sh
 Icon=MightyMike
 Terminal=false
