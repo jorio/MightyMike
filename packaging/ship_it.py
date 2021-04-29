@@ -7,6 +7,7 @@ import tempfile
 import sys
 import os
 import zipfile
+import re
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -14,10 +15,6 @@ from dataclasses import dataclass
 
 libs_dir = os.path.abspath('extern')
 cache_dir = os.path.abspath('cache')
-
-game_name = "MightyMike"
-game_ver = "3.0.1"
-sdl_ver = "2.0.14"
 
 #----------------------------------------------------------------
 
@@ -71,7 +68,25 @@ if not os.path.exists('src/Enemies/Jurassic/Enemy_CaveMan.c'):  # some file that
     print("\x1b[1;31mSTOP - Please run this script from the root of the game's source repo\x1b[0m")
     sys.exit(1)
 
+#----------------------------------------------------------------
+
 system = platform.system()
+
+# Find out project version
+with open('CMakeLists.txt') as cmakelists:
+    text = cmakelists.read()
+    match = re.search(r"project\s*\(\s*(\w+)\s+VERSION\s+(\d+(\.\d+)*)", text)
+    game_name = match.group(1)
+    game_ver = match.group(2)
+
+# Find out SDL version
+with open('cmake/FindSDL2.cmake') as findsdl2:
+    text = findsdl2.read()
+    match = re.search(r"set\s*\(\s*SDL2_VERSION\s+(2.0.14)\s*\)", text)
+    sdl_ver = match.group(1)
+
+print(F"==== Will prepare {game_name} {game_ver} for {system} with SDL {sdl_ver}")
+input("Press enter to proceed.")
 
 projects = []
 extra_build_args = []
