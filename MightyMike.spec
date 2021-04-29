@@ -35,7 +35,10 @@ BuildRequires:  gcc-c++
 
 %description
 
-When the lights of the Toy Mart go out, the adventure begins: it's up to MightyMike to save the innocent fuzzy bunnies from evil clowns, crazed robots and bone-hurling cavemen. Use an arsenal of weapons from suction cups to gum ball blasters to blaze your way through 15 levels of toy shop terror.
+When the lights of the Toy Mart go out, the adventure begins: it's up to Mighty
+Mike to save the innocent fuzzy bunnies from evil clowns, crazed robots and
+bone-hurling cavemen. Use an arsenal of weapons from suction cups to gum ball
+blasters to blaze your way through 15 levels of toy shop terror.
 
 
 %prep
