@@ -14,7 +14,7 @@ project(MightyMike
 )
 
 set(GAME_TARGET ${PROJECT_NAME})
-set(GAME_ICNS cmake/${GAME_TARGET}.icns)
+set(GAME_ICNS packaging/${GAME_TARGET}.icns)
 get_filename_component(GAME_ICNS_FILENAME ${GAME_ICNS} NAME)
 
 #------------------------------------------------------------------------------
@@ -178,20 +178,32 @@ endif()
 # EXECUTABLE TARGET
 #------------------------------------------------------------------------------
 
+set(GAME_LIBRARIES
+	Pomme
+	${SDL2_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
+)
+
 if(WIN32)
 	# "WIN32" here is equivalent to /SUBSYSTEM:WINDOWS for MSVC
 	add_executable(${GAME_TARGET} WIN32
         ${GAME_ALL_SOURCES}
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/WindowsResources.rc"
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/${GAME_TARGET}.exe.manifest"
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/${GAME_TARGET}.exe.rc"
+        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/${GAME_TARGET}.exe.manifest"
     )
 elseif(APPLE)
+	# Add required frameworks for KillMacMouseAcceleration
+	list(APPEND GAME_LIBRARIES -framework Foundation -framework IOKit)
+
 	add_executable(${GAME_TARGET} MACOSX_BUNDLE
 		${GAME_ALL_SOURCES}
 		${GAME_ICNS}
 		${SDL2_LIBRARIES}
 	)
 else()
+	# Math lib, explicitly required on some Linux systems
+	list(APPEND GAME_LIBRARIES m)
+
 	add_executable(${GAME_TARGET} ${GAME_ALL_SOURCES})
 endif()
 
@@ -202,14 +214,7 @@ target_include_directories(${GAME_TARGET} PRIVATE
 	${GAME_SRCDIR}/Headers
 )
 
-target_link_libraries(${GAME_TARGET}
-	Pomme
-	${SDL2_LIBRARIES}
-	${CMAKE_THREAD_LIBS_INIT}
-	"$<$<BOOL:${APPLE}>:-framework Foundation>"		# Required for KillMacMouseAcceleration
-	"$<$<BOOL:${APPLE}>:-framework IOKit>"			# Required for KillMacMouseAcceleration
-	m
-)
+target_link_libraries(${GAME_TARGET} ${GAME_LIBRARIES})
 
 #------------------------------------------------------------------------------
 # DEFINES
@@ -316,7 +321,7 @@ if(WIN32)
 endif()
 
 # Copy documentation to output folder
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/ReadMe.txt.in ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packaging/ReadMe.txt.in ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt)
 add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt ${APP_PARENT_DIR}/ReadMe.txt
 	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md ${APP_PARENT_DIR}/License.txt
