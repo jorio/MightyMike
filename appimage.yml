@@ -30,5 +30,5 @@ script:
   - mv build-release/{Data,MightyMike} $BUILD_APPDIR/usr/lib/MightyMike
   - mv cmake/MightyMike32.png $BUILD_APPDIR/MightyMike.png
   - cp $BUILD_APPDIR/MightyMike.png $BUILD_APPDIR/usr/share/pixmaps/MightyMike.png
-  - mv MightyMike.desktop $BUILD_APPDIR/MightyMike.desktop
+  - mv packaging/MightyMike.desktop $BUILD_APPDIR/MightyMike.desktop
   - cp $BUILD_APPDIR/MightyMike.desktop $BUILD_APPDIR/usr/share/applications/MightyMike.desktop
