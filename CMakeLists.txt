@@ -178,6 +178,12 @@ endif()
 # EXECUTABLE TARGET
 #------------------------------------------------------------------------------
 
+set(GAME_LIBRARIES
+	Pomme
+	${SDL2_LIBRARIES}
+	${CMAKE_THREAD_LIBS_INIT}
+)
+
 if(WIN32)
 	# "WIN32" here is equivalent to /SUBSYSTEM:WINDOWS for MSVC
 	add_executable(${GAME_TARGET} WIN32
@@ -186,12 +192,18 @@ if(WIN32)
         "${CMAKE_CURRENT_SOURCE_DIR}/packaging/${GAME_TARGET}.exe.manifest"
     )
 elseif(APPLE)
+	# Add required frameworks for KillMacMouseAcceleration
+	list(APPEND GAME_LIBRARIES -framework Foundation -framework IOKit)
+
 	add_executable(${GAME_TARGET} MACOSX_BUNDLE
 		${GAME_ALL_SOURCES}
 		${GAME_ICNS}
 		${SDL2_LIBRARIES}
 	)
 else()
+	# Math lib, explicitly required on some Linux systems
+	list(APPEND GAME_LIBRARIES m)
+
 	add_executable(${GAME_TARGET} ${GAME_ALL_SOURCES})
 endif()
 
@@ -202,14 +214,7 @@ target_include_directories(${GAME_TARGET} PRIVATE
 	${GAME_SRCDIR}/Headers
 )
 
-target_link_libraries(${GAME_TARGET}
-	Pomme
-	${SDL2_LIBRARIES}
-	${CMAKE_THREAD_LIBS_INIT}
-	"$<$<BOOL:${APPLE}>:-framework Foundation>"		# Required for KillMacMouseAcceleration
-	"$<$<BOOL:${APPLE}>:-framework IOKit>"			# Required for KillMacMouseAcceleration
-	m
-)
+target_link_libraries(${GAME_TARGET} ${GAME_LIBRARIES})
 
 #------------------------------------------------------------------------------
 # DEFINES
