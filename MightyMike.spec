@@ -26,7 +26,7 @@ Group:          Amusements/Games/3D/Other
 URL:            https://github.com/jorio/MightyMike/
 Source:         MightyMike-%{version}.tar.gz
 BuildRequires:  SDL2-devel
-BuildRequires:  cmake >= 3.3
+BuildRequires:  cmake >= 3.13
 BuildRequires:  glibc >= 2.2.5
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(gl)
