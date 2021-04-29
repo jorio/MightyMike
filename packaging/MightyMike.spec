@@ -1,5 +1,5 @@
 #
-# spec file for package MightyMike by <https://www.notabug.org/tux_peng>
+# spec file for package Mighty Mike by <https://www.notabug.org/tux_peng>
 #
 # Mighty Mike is a registered trademark of Pangea Software, Inc.
 #
@@ -24,7 +24,7 @@ Summary:        It's up to Mighty Mike to save the innocent fuzzy bunnies
 License:        CC-BY-NC-SA-4.0
 Group:          Amusements/Games/Action/Arcade
 URL:            https://github.com/jorio/MightyMike/
-Source:         MightyMike-%{version}.tar.gz
+Source:         %{name}-%{version}.tar.gz
 BuildRequires:  SDL2-devel
 BuildRequires:  cmake >= 3.13
 BuildRequires:  glibc >= 2.2.5
@@ -35,9 +35,9 @@ BuildRequires:  gcc-c++
 
 %description
 
-When the lights of the Toy Mart go out, the adventure begins: it's up to Mighty
-Mike to save the innocent fuzzy bunnies from evil clowns, crazed robots and
-bone-hurling cavemen. Use an arsenal of weapons from suction cups to gum ball
+When the lights of the Toy Mart go out, the adventure begins: it's up to Mighty 
+Mike to save the innocent fuzzy bunnies from evil clowns, crazed robots and 
+bone-hurling cavemen. Use an arsenal of weapons from suction cups to gum ball 
 blasters to blaze your way through 15 levels of toy shop terror.
 
 
@@ -46,9 +46,7 @@ blasters to blaze your way through 15 levels of toy shop terror.
 
 
 %build
-# FIXME: you should use the %%cmake macros
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
-# FIXME: you should use the %%cmake macros
 cmake --build build-release
 
 %install
@@ -59,10 +57,12 @@ echo -e '#!/usr/bin/sh\n\ncd %{_libdir}/%{name}/;./%{name}' > '%{buildroot}%{_bi
 chmod +x %{buildroot}%{_bindir}/%{name}.sh
 mv build-release/{Data,%{name}} %{buildroot}%{_libdir}/%{name}
 mv packaging/%{name}32.png %{buildroot}%{_datadir}/pixmaps/%{name}.png
-mv %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
+mv packaging/%{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 
 
 %files
+
+
 %license {LICENSE.md,docs,README.md}
 %{_bindir}/%{name}.sh
 %{_libdir}/%{name}/
