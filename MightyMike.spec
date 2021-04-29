@@ -58,7 +58,7 @@ mkdir -p %{buildroot}%{_datadir}/{pixmaps,applications/}
 echo -e '#!/usr/bin/sh\n\ncd %{_libdir}/%{name}/;./%{name}' > '%{buildroot}%{_bindir}/%{name}.sh'
 chmod +x %{buildroot}%{_bindir}/%{name}.sh
 mv build-release/{Data,%{name}} %{buildroot}%{_libdir}/%{name}
-mv cmake/%{name}32.png %{buildroot}%{_datadir}/pixmaps/%{name}.png
+mv packaging/%{name}32.png %{buildroot}%{_datadir}/pixmaps/%{name}.png
 mv %{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
 
 
