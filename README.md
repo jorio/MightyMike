@@ -6,7 +6,7 @@ It was initially published in 1995 under the name **Power Pete**.
 
 - **Get builds for macOS and Windows here:** https://github.com/jorio/mightymike/releases
 - Linux users: there are unofficial builds on [Lutris](https://lutris.net/games/mighty-mike/)
-and [OpenSUSE Build Service](https://download.opensuse.org/repositories/home:/jpenguin/).
+and [OpenSUSE Build Service](https://download.opensuse.org/repositories/home:/jpenguin:/Games/).
 - For other systems: please read [BUILD.md](BUILD.md) to build the game yourself.
 ![Screenshot](docs/screenshot.png)
 
