@@ -1,0 +1,55 @@
+#
+# appimage.yml to build MightyMike in Open Build Service by <https://www.notabug.org/tux_peng>
+#
+# Mighty Mike is a registered trademark of Pangea Software, Inc.
+#
+# All modifications and additions to the file contributed by third parties
+# remain the property of their copyright owners, unless otherwise agreed
+# upon. The license for this file, and modifications and additions to the
+# file, is the same license as for the pristine package itself (unless the
+# license for the pristine package is not an Open Source License, in which
+# case the license is the MIT License). An "Open Source License" is a
+# license that conforms to the Open Source Definition (Version 1.9)
+# published by the Open Source Initiative.
+
+# Please submit bugfixes or comments via https://github.com/jorio/MightyMike/issues
+#
+app: MightyMike
+
+# resources required at build time
+build:
+  packages:
+    - SDL2-devel
+    - cmake
+    - glibc >= 2.2.5
+    - pkgconfig
+    - pkgconfig(gl)
+    - pkgconfig(glu)
+    - gcc-c++
+  git:
+#    - https://github.com/jorio/MightyMike.git
+    
+script:
+  - cd $BUILD_SOURCE_DIR
+  - tar -xvzf MightyMike-3.0.1.tar.gz
+  - cd MightyMike-3.0.1
+  - mkdir build
+  - find -name '*~' -delete -print
+  - find -name '.git*' -type f -delete -print
+  - rm -rfv ./.github
+  - cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
+  - cmake --build build-release
+  - mkdir -p $BUILD_APPDIR/usr/share/{pixmaps,applications/}
+  - mkdir -p $BUILD_APPDIR/usr/lib/MightyMike/
+  - mkdir -p $BUILD_APPDIR/usr/bin
+  - mkdir -p $BUILD_APPDIR/usr/share/icons/hicolor/32x32/apps/
+  - mkdir -p $BUILD_APPDIR/usr/share/icons/hicolor/512x512/apps/
+  - echo -e '#!/usr/bin/sh\n\ncd "$(dirname "$(readlink -f "$0")")"/../lib/MightyMike/;./MightyMike' > $BUILD_APPDIR/usr/bin/MightyMike.sh
+  - chmod 0755 $BUILD_APPDIR/usr/bin/MightyMike.sh
+  - mv build-release/{Data,MightyMike} $BUILD_APPDIR/usr/lib/MightyMike
+  - cp packaging/MightyMike32.png $BUILD_APPDIR/usr/share/icons/hicolor/32x32/apps/MightyMike.png
+  - cp packaging/MightyMike512.png $BUILD_APPDIR/usr/share/icons/hicolor/512x512/apps/MightyMike.png
+  - cp packaging/MightyMike32.png $BUILD_APPDIR/MightyMike.png
+  - cp $BUILD_APPDIR/MightyMike.png $BUILD_APPDIR/usr/share/pixmaps/MightyMike.png
+  - mv packaging/MightyMike.desktop $BUILD_APPDIR/MightyMike.desktop
+  - cp $BUILD_APPDIR/MightyMike.desktop $BUILD_APPDIR/usr/share/applications/MightyMike.desktop

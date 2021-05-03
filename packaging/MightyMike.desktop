@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Mighty Mike
+GenericName=Mighty Mike
+Comment=It's up to Mighty Mike to save the innocent fuzzy bunnies
+Exec=MightyMike.sh
+Icon=MightyMike
+Terminal=false
+Type=Application
+Categories=Game;ArcadeGame;ActionGame;
+StartupNotify=false
