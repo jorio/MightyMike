@@ -25,6 +25,7 @@ License:        CC-BY-NC-SA-4.0
 Group:          Amusements/Games/Action/Arcade
 URL:            https://github.com/jorio/MightyMike/
 Source:         %{name}-%{version}.tar.gz
+BuildRequires:  hicolor-icon-theme
 BuildRequires:  SDL2-devel
 BuildRequires:  cmake >= 3.13
 BuildRequires:  glibc >= 2.2.5
@@ -43,7 +44,9 @@ blasters to blaze your way through 15 levels of toy shop terror.
 
 %prep
 %setup -q
-
+find -name '*~' -delete -print
+find -name '.git*' -type f -delete -print
+rm -rfv ./.github
 
 %build
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
@@ -53,19 +56,24 @@ cmake --build build-release
 mkdir -p %{buildroot}%{_bindir}
 mkdir -p %{buildroot}%{_libdir}/%{name}
 mkdir -p %{buildroot}%{_datadir}/{pixmaps,applications/}
+mkdir -p %{buildroot}%{_datadir}/icons/hicolor/{32x32,512x512}/apps
 echo -e '#!/usr/bin/sh\n\ncd %{_libdir}/%{name}/;./%{name}' > '%{buildroot}%{_bindir}/%{name}.sh'
 chmod +x %{buildroot}%{_bindir}/%{name}.sh
 mv build-release/{Data,%{name}} %{buildroot}%{_libdir}/%{name}
-mv packaging/%{name}32.png %{buildroot}%{_datadir}/pixmaps/%{name}.png
+cp packaging/%{name}32.png %{buildroot}%{_datadir}/pixmaps/%{name}.png
+cp packaging/%{name}32.png %{buildroot}%{_datadir}/icons/hicolor/32x32/apps/%{name}.png
+cp packaging/%{name}512.png %{buildroot}%{_datadir}/icons/hicolor/512x512/apps/%{name}.png
 mv packaging/%{name}.desktop %{buildroot}%{_datadir}/applications/%{name}.desktop
-
 
 %files
 
 
-%license {LICENSE.md,docs,README.md}
+%license LICENSE.md
+%doc {docs,README.md}
 %{_bindir}/%{name}.sh
 %{_libdir}/%{name}/
+%{_datadir}/icons/hicolor/32x32/apps/%{name}.png
+%{_datadir}/icons/hicolor/512x512/apps/%{name}.png
 %{_datadir}/pixmaps/%{name}.png
 %{_datadir}/applications/%{name}.desktop
 

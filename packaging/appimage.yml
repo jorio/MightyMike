@@ -34,15 +34,22 @@ script:
   - tar -xvzf MightyMike-3.0.1.tar.gz
   - cd MightyMike-3.0.1
   - mkdir build
+  - find -name '*~' -delete -print
+  - find -name '.git*' -type f -delete -print
+  - rm -rfv ./.github
   - cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
   - cmake --build build-release
   - mkdir -p $BUILD_APPDIR/usr/share/{pixmaps,applications/}
   - mkdir -p $BUILD_APPDIR/usr/lib/MightyMike/
   - mkdir -p $BUILD_APPDIR/usr/bin
+  - mkdir -p $BUILD_APPDIR/usr/share/icons/hicolor/32x32/apps/
+  - mkdir -p $BUILD_APPDIR/usr/share/icons/hicolor/512x512/apps/
   - echo -e '#!/usr/bin/sh\n\ncd "$(dirname "$(readlink -f "$0")")"/../lib/MightyMike/;./MightyMike' > $BUILD_APPDIR/usr/bin/MightyMike.sh
-  - chmod +x $BUILD_APPDIR/usr/bin/MightyMike.sh
+  - chmod 0755 $BUILD_APPDIR/usr/bin/MightyMike.sh
   - mv build-release/{Data,MightyMike} $BUILD_APPDIR/usr/lib/MightyMike
-  - mv packaging/MightyMike32.png $BUILD_APPDIR/MightyMike.png
+  - cp packaging/MightyMike32.png $BUILD_APPDIR/usr/share/icons/hicolor/32x32/apps/MightyMike.png
+  - cp packaging/MightyMike512.png $BUILD_APPDIR/usr/share/icons/hicolor/512x512/apps/MightyMike.png
+  - cp packaging/MightyMike32.png $BUILD_APPDIR/MightyMike.png
   - cp $BUILD_APPDIR/MightyMike.png $BUILD_APPDIR/usr/share/pixmaps/MightyMike.png
   - mv packaging/MightyMike.desktop $BUILD_APPDIR/MightyMike.desktop
   - cp $BUILD_APPDIR/MightyMike.desktop $BUILD_APPDIR/usr/share/applications/MightyMike.desktop
