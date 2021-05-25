@@ -49,7 +49,7 @@
 1. Install the prerequisites from your package manager:
     - Any C++20 compiler
     - CMake 3.13+
-    - SDL2 development library (e.g. "libsdl2-dev" on Debian/Ubuntu, "sdl2" on Arch)
+    - SDL2 development library (e.g. "libsdl2-dev" on Debian/Ubuntu, "sdl2" on Arch, "SDL2-devel" on Fedora)
 1. Clone the repo **recursively** (this is necessary to pull in the correct versions of the dependencies):
     ```
     git clone --recurse-submodules https://github.com/jorio/mightymike
