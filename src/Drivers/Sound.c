@@ -463,26 +463,6 @@ void DoSoundMaintenance(Boolean checkKeys)
 
 	if (GetNewNeedState(kNeed_ToggleMusic))
 		ToggleMusic();
-
-			/* SEE IF CHANGE VOLUME */
-
-	if (GetNewNeedState(kNeed_RaiseVolume))
-	{
-		if (gVolume < (255-4))
-		{
-			gVolume+=4;
-			SetVolume();
-		}
-	}
-	else
-	if (GetNewNeedState(kNeed_LowerVolume))
-	{
-		if (gVolume > 4)
-		{
-			gVolume -= 4;
-			SetVolume();
-		}
-	}
 }
 
 

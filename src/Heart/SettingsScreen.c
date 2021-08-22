@@ -105,8 +105,6 @@ static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 	[kNeed_Radar			] = "bunny radar",
 	[kNeed_ToggleMusic		] = "toggle music",
 	[kNeed_ToggleFullscreen	] = "toggle fullscreen",
-	[kNeed_RaiseVolume		] = "volume up",
-	[kNeed_LowerVolume		] = "volume down",
 };
 
 static const int kColumnX[] = { 64, 300, 475, 550 };
@@ -274,8 +272,6 @@ static MenuItem gKeyboardMenu[] =
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleFullscreen },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleMusic },
-	{ .type = kMenuItem_KeyBinding, .kb = kNeed_RaiseVolume },
-	{ .type = kMenuItem_KeyBinding, .kb = kNeed_LowerVolume },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Action, .button = { .caption = "reset to defaults", .callback = OnResetKeys } },
 	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },

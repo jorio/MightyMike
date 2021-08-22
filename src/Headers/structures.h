@@ -229,8 +229,6 @@ enum
 	kNeed_Radar,
 	kNeed_ToggleFullscreen,
 	kNeed_ToggleMusic,
-	kNeed_RaiseVolume,
-	kNeed_LowerVolume,
 	NUM_REMAPPABLE_NEEDS,
 
 	// ^^^ REMAPPABLE
