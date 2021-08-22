@@ -128,6 +128,17 @@ static MenuItem gVideoMenu[] =
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
+			.caption = "playfield size",
+			.callback = OnChangePlayfieldSizeViaSettings,
+			.valuePtr = &gGamePrefs.pfSize,
+			.numChoices = 3,
+			.choices = { "small: 68k original", "medium: ppc original", "large: widescreen" },
+		}
+	},
+	{ .type = kMenuItem_Separator },
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
 			.caption = "fullscreen",
 			.callback = SetFullscreenMode,
 			.valuePtr = &gGamePrefs.fullscreen,
@@ -138,11 +149,11 @@ static MenuItem gVideoMenu[] =
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
-			.caption = "playfield size",
+			.caption = "windowed zoom",
+			.valuePtr = &gGamePrefs.windowedZoom,
 			.callback = OnChangePlayfieldSizeViaSettings,
-			.valuePtr = &gGamePrefs.pfSize,
-			.numChoices = 3,
-			.choices = { "small: 68k original", "medium: ppc original", "large: widescreen" },
+			.numChoices = 5,
+			.choices = { "automatic", "1x", "up to 2x", "up to 3x", "up to 4x" },
 		}
 	},
 	{
@@ -1071,7 +1082,7 @@ static void LayOutMenu(MenuItem* menu)
 static void DrawDitheringPattern(void)
 {
 	Ptr ditheringPatternPlot = *gBackgroundHandle;
-	ditheringPatternPlot += (gScreenYOffset + gMenuRowYs[6] - kRowHeight/3) * OFFSCREEN_WIDTH;
+	ditheringPatternPlot += (gScreenYOffset + gMenuRowYs[8] - kRowHeight/3) * OFFSCREEN_WIDTH;
 	ditheringPatternPlot += gScreenXOffset + kColumnX[1];
 	for (int y = 0; y <= 2*kRowHeight/3; y++)
 	{

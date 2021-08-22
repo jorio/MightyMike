@@ -1249,6 +1249,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.interlaceMode = false;
 	gGamePrefs.difficulty = DIFFICULTY_NORMAL;
 	gGamePrefs.fullscreen = true;
+	gGamePrefs.windowedZoom = 0;	// automatic
 	gGamePrefs.pfSize = PFSIZE_WIDE;
 	gGamePrefs.scalingType = kScaling_Stretch;
 	gGamePrefs.uncappedFramerate = true;

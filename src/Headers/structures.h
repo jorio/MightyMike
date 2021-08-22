@@ -282,6 +282,7 @@ struct PrefsType
 	Boolean		fullscreen;
 	Byte		pfSize;
 	Byte		scalingType;
+	Byte		windowedZoom;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
 	Boolean		music;
