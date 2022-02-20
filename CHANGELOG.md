@@ -8,6 +8,8 @@
 
     - Fix window going black when smaller than 640x480 with "crisp" upscaling.
 
+    - macOS build is now notarized.
+
 
 - **3.0.0 (April 2021)**
 

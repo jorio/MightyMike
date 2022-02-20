@@ -1,21 +1,22 @@
 cmake_minimum_required(VERSION 3.13)
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+set(GAME_TARGET				"MightyMike")
+set(GAME_VERSION			"3.0.1")
+set(GAME_MAC_ICNS			"packaging/${GAME_TARGET}.icns")
+set(GAME_MAC_COPYRIGHT		"© 1995 Pangea Software, Inc.\n© 2022 Iliyas Jorio.")
+set(GAME_MAC_BUNDLE_ID		"io.jor.mightymike")
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_MODULE_PATH		"${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_C_STANDARD		17)
+set(CMAKE_CXX_STANDARD		20)
 
-# macOS options
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum macOS deployment version")
+set(CMAKE_OSX_DEPLOYMENT_TARGET "10.11" CACHE STRING "Minimum OS X deployment version")
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "Target macOS architectures")
 
-project(MightyMike
-	VERSION 3.0.1
+project(${GAME_TARGET}
+	VERSION ${GAME_VERSION}
 	LANGUAGES C CXX
 )
-
-set(GAME_TARGET ${PROJECT_NAME})
-set(GAME_ICNS packaging/${GAME_TARGET}.icns)
-get_filename_component(GAME_ICNS_FILENAME ${GAME_ICNS} NAME)
 
 #------------------------------------------------------------------------------
 # GLOBAL OPTIONS (BEFORE ADDING SUBDIRECTORIES)
@@ -32,6 +33,8 @@ endif()
 
 set(POMME_NO_VIDEO true)
 set(POMME_NO_QD3D true)
+set(POMME_NO_GRAPHICS true)
+set(POMME_NO_INPUT true)  # the game has its own input system
 
 #------------------------------------------------------------------------------
 # DEPENDENCIES
@@ -52,106 +55,9 @@ set(GAME_SRCDIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 # Write header file containing version info
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/cmake/version.h.in ${GAME_SRCDIR}/Headers/version.h)
 
-set(GAME_SOURCES
-	${GAME_SRCDIR}/Heart/Cinema.c
-	${GAME_SRCDIR}/Heart/Collision.c
-	${GAME_SRCDIR}/Heart/Filter.cpp
-	${GAME_SRCDIR}/Heart/Infobar.c
-	${GAME_SRCDIR}/Heart/input.c
-	${GAME_SRCDIR}/Heart/InputDefaults.c
-	${GAME_SRCDIR}/Heart/IO.c
-	${GAME_SRCDIR}/Heart/Misc.c
-	${GAME_SRCDIR}/Heart/Picture.c
-	${GAME_SRCDIR}/Heart/Spin.c
-	${GAME_SRCDIR}/Heart/Window.c
-	${GAME_SRCDIR}/Heart/Main.c
-	${GAME_SRCDIR}/Heart/SettingsScreen.c
-	${GAME_SRCDIR}/Drivers/Animation.c
-	${GAME_SRCDIR}/Drivers/ObjectManager.c
-	${GAME_SRCDIR}/Drivers/Palette.c
-	${GAME_SRCDIR}/Drivers/Shape.c
-	${GAME_SRCDIR}/Drivers/Sound.c
-	${GAME_SRCDIR}/Drivers/TGA.c
-	${GAME_SRCDIR}/Drivers/Font.c
-	${GAME_SRCDIR}/MeAndMo/Enemy.c
-	${GAME_SRCDIR}/MeAndMo/MyGuy.c
-	${GAME_SRCDIR}/MeAndMo/MyGuy2.c
-	${GAME_SRCDIR}/MeAndMo/Weapon.c
-	${GAME_SRCDIR}/MeAndMo/Weapon2.c
-	${GAME_SRCDIR}/Misc/Bonus.c
-	${GAME_SRCDIR}/Misc/MiscAnims.c
-	${GAME_SRCDIR}/Misc/Traps.c
-	${GAME_SRCDIR}/Misc/Triggers.c
-	${GAME_SRCDIR}/Playfield/Playfield.c
-	${GAME_SRCDIR}/Enemies/Bargain/Enemy_8Ball.c
-	${GAME_SRCDIR}/Enemies/Bargain/Enemy_Battery.c
-	${GAME_SRCDIR}/Enemies/Bargain/Enemy_doggy.c
-	${GAME_SRCDIR}/Enemies/Bargain/Enemy_Robot.c
-	${GAME_SRCDIR}/Enemies/Bargain/Enemy_Slinky.c
-	${GAME_SRCDIR}/Enemies/Bargain/Enemy_Top.c
-	${GAME_SRCDIR}/Enemies/Bargain/RaceCar.c
-	${GAME_SRCDIR}/Enemies/Candy/Enemy_Carmel.c
-	${GAME_SRCDIR}/Enemies/Candy/Enemy_ChocBunny.c
-	${GAME_SRCDIR}/Enemies/Candy/Enemy_GBread.c
-	${GAME_SRCDIR}/Enemies/Candy/Enemy_GummyBear.c
-	${GAME_SRCDIR}/Enemies/Candy/Enemy_LemonDrop.c
-	${GAME_SRCDIR}/Enemies/Candy/Enemy_Mint.c
-	${GAME_SRCDIR}/Enemies/Clown/Enemy_Clown.c
-	${GAME_SRCDIR}/Enemies/Clown/Enemy_ClownCar.c
-	${GAME_SRCDIR}/Enemies/Clown/Enemy_FlowerClown.c
-	${GAME_SRCDIR}/Enemies/Clown/Enemy_HatBunny.c
-	${GAME_SRCDIR}/Enemies/Fairy/Enemy_BBWolf.c
-	${GAME_SRCDIR}/Enemies/Fairy/Enemy_Dragon.c
-	${GAME_SRCDIR}/Enemies/Fairy/Enemy_Giant.c
-	${GAME_SRCDIR}/Enemies/Fairy/Enemy_Soldier.c
-	${GAME_SRCDIR}/Enemies/Fairy/Enemy_Spider.c
-	${GAME_SRCDIR}/Enemies/Fairy/Enemy_Witch.c
-	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_BabyDino.c
-	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_CaveMan.c
-	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_DinoEgg.c
-	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_Rex.c
-	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_Triceratops.c
-	${GAME_SRCDIR}/Enemies/Jurassic/Enemy_Turtle.c
-	${GAME_SRCDIR}/Main.cpp
-)
+file(GLOB_RECURSE GAME_SOURCES CONFIGURE_DEPENDS ${GAME_SRCDIR}/*.c ${GAME_SRCDIR}/*.cpp)
 
-set(GAME_HEADERS
-	${GAME_SRCDIR}/Headers/bonus.h
-	${GAME_SRCDIR}/Headers/cinema.h
-	${GAME_SRCDIR}/Headers/collision.h
-	${GAME_SRCDIR}/Headers/enemy.h
-	${GAME_SRCDIR}/Headers/enemy2.h
-	${GAME_SRCDIR}/Headers/enemy3.h
-	${GAME_SRCDIR}/Headers/enemy4.h
-	${GAME_SRCDIR}/Headers/enemy5.h
-	${GAME_SRCDIR}/Headers/equates.h
-	${GAME_SRCDIR}/Headers/externs.h
-	${GAME_SRCDIR}/Headers/font.h
-	${GAME_SRCDIR}/Headers/infobar.h
-	${GAME_SRCDIR}/Headers/input.h
-	${GAME_SRCDIR}/Headers/io.h
-	${GAME_SRCDIR}/Headers/main.h
-	${GAME_SRCDIR}/Headers/misc.h
-	${GAME_SRCDIR}/Headers/miscanims.h
-	${GAME_SRCDIR}/Headers/myglobals.h
-	${GAME_SRCDIR}/Headers/myguy.h
-	${GAME_SRCDIR}/Headers/myguy2.h
-	${GAME_SRCDIR}/Headers/object.h
-	${GAME_SRCDIR}/Headers/objecttypes.h
-	${GAME_SRCDIR}/Headers/picture.h
-	${GAME_SRCDIR}/Headers/playfield.h
-	${GAME_SRCDIR}/Headers/racecar.h
-	${GAME_SRCDIR}/Headers/shape.h
-	${GAME_SRCDIR}/Headers/sound2.h
-	${GAME_SRCDIR}/Headers/spin.h
-	${GAME_SRCDIR}/Headers/structures.h
-	${GAME_SRCDIR}/Headers/tga.h
-	${GAME_SRCDIR}/Headers/traps.h
-	${GAME_SRCDIR}/Headers/triggers.h
-	${GAME_SRCDIR}/Headers/version.h
-	${GAME_SRCDIR}/Headers/weapon.h
-	${GAME_SRCDIR}/Headers/window.h
-)
+file(GLOB_RECURSE GAME_HEADERS CONFIGURE_DEPENDS ${GAME_SRCDIR}/*.h)
 
 set(GAME_ALL_SOURCES
 	${GAME_SOURCES}
@@ -163,16 +69,6 @@ set(GAME_ALL_SOURCES
 #------------------------------------------------------------------------------
 
 source_group(TREE ${GAME_SRCDIR} PREFIX "" FILES ${GAME_ALL_SOURCES})
-
-#------------------------------------------------------------------------------
-# SOURCE FILE PROPERTIES
-#------------------------------------------------------------------------------
-
-if(NOT MSVC)
-	set_source_files_properties(${GAME_SOURCES} PROPERTIES COMPILE_FLAGS "-include Pomme.h")
-else()
-	set_source_files_properties(${GAME_SOURCES} PROPERTIES COMPILE_FLAGS /FIPomme.h)
-endif()
 
 #------------------------------------------------------------------------------
 # EXECUTABLE TARGET
@@ -187,17 +83,16 @@ set(GAME_LIBRARIES
 if(WIN32)
 	# "WIN32" here is equivalent to /SUBSYSTEM:WINDOWS for MSVC
 	add_executable(${GAME_TARGET} WIN32
-        ${GAME_ALL_SOURCES}
-        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/${GAME_TARGET}.exe.rc"
-        "${CMAKE_CURRENT_SOURCE_DIR}/packaging/${GAME_TARGET}.exe.manifest"
-    )
+		${GAME_ALL_SOURCES}
+		"${CMAKE_CURRENT_SOURCE_DIR}/packaging/${GAME_TARGET}.exe.rc"
+	)
 elseif(APPLE)
 	# Add required frameworks for KillMacMouseAcceleration
-	list(APPEND GAME_LIBRARIES -framework Foundation -framework IOKit)
+	list(APPEND GAME_LIBRARIES "-framework Foundation" "-framework IOKit")
 
 	add_executable(${GAME_TARGET} MACOSX_BUNDLE
 		${GAME_ALL_SOURCES}
-		${GAME_ICNS}
+		${GAME_MAC_ICNS}
 		${SDL2_LIBRARIES}
 	)
 else()
@@ -210,7 +105,6 @@ endif()
 target_include_directories(${GAME_TARGET} PRIVATE
 	${SDL2_INCLUDE_DIRS}
 	extern/Pomme/src
-	${GAME_SRCDIR}
 	${GAME_SRCDIR}/Headers
 )
 
@@ -227,7 +121,12 @@ add_compile_definitions(
 if(WIN32)
 	# On Win32, we need NOGDI and NOUSER to be able to define some Mac functions
 	# whose names are otherwise taken by Windows APIs.
-	target_compile_definitions(${GAME_TARGET} PRIVATE WIN32_LEAN_AND_MEAN NOGDI NOUSER)
+	target_compile_definitions(${GAME_TARGET} PRIVATE
+		WIN32_LEAN_AND_MEAN
+		NOGDI
+		NOUSER
+		_CRT_SECURE_NO_WARNINGS  # quit whining about snprintf_s
+	)
 endif()
 
 #------------------------------------------------------------------------------
@@ -240,10 +139,9 @@ if(NOT MSVC)
 		-Wall
 		-Wextra
 		-Wshadow
+		-Werror=return-type
 		-Wno-multichar
 		-Wno-unknown-pragmas
-		$<$<CXX_COMPILER_ID:GNU>:-Wno-unused-but-set-variable>
-		-Werror=return-type
 	)
 else()
 	# By default, MSVC may add /EHsc to CMAKE_CXX_FLAGS, which we don't want (we use /EHs below)
@@ -258,11 +156,12 @@ else()
 		/EHs	# synchronous exceptions; also, extern "C" functions may throw exceptions
 		/W4
 		/wd4068 # ignore unrecognized pragmas
-		/wd4100 # unreferenced formal parameters
 		/wd4200 # nonstandard extension: zero-sized array in struct
 		/wd4201 # nonstandard extension: nameless struct
 		/wd4244 # conversion from double to float
 		/wd4305 # truncation from double to float
+		/wd5105 # see https://developercommunity.visualstudio.com/t/1249671
+		/MP
 	)
 endif()
 
@@ -270,23 +169,66 @@ endif()
 # PLATFORM-SPECIFIC PACKAGING
 #------------------------------------------------------------------------------
 
+set_target_properties(${GAME_TARGET} PROPERTIES
+	#--------------------------------------------------------------------------
+	# MSVC/WIN32
+	#--------------------------------------------------------------------------
+
+	VS_DEBUGGER_WORKING_DIRECTORY		"${CMAKE_SOURCE_DIR}"
+	VS_DPI_AWARE						"PerMonitor"
+
+	#--------------------------------------------------------------------------
+	# APPLE
+	#--------------------------------------------------------------------------
+
+	# Set framework search path to (App bundle)/Contents/Frameworks so the game can use its embedded SDL2.framework
+	XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
+
+	# Explicitly turn off code signing, otherwise downloaded app will be quarantined forever
+	XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+
+	# Set up Info.plist values
+	MACOSX_BUNDLE_ICON_FILE				"${GAME_TARGET}.icns"	# CFBundleIconFile
+	MACOSX_BUNDLE_EXECUTABLE_NAME		${GAME_TARGET}			# CFBundleExecutable - executable name inside the bundle
+	MACOSX_BUNDLE_SHORT_VERSION_STRING	${PROJECT_VERSION}		# CFBundleShortVersionString
+	MACOSX_BUNDLE_COPYRIGHT				${GAME_MAC_COPYRIGHT}	# NSHumanReadableCopyright (supersedes CFBundleGetInfoString (MACOSX_BUNDLE_INFO_STRING))
+	MACOSX_BUNDLE_BUNDLE_NAME			${GAME_TARGET}			# CFBundleName - user-visible (where??) short name for the bundle, up to 15 characters
+	MACOSX_BUNDLE_GUI_IDENTIFIER		${GAME_MAC_BUNDLE_ID}	# CFBundleIdentifier - unique bundle ID in reverse-DNS format
+
+	# Bundle ID required for code signing - must match CFBundleIdentifier otherwise xcode will complain
+	XCODE_ATTRIBUTE_PRODUCT_BUNDLE_IDENTIFIER ${GAME_MAC_BUNDLE_ID}
+
+	# Don't bother with universal builds when we're working on the debug version
+	XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH[variant=Debug] "YES"
+
+	XCODE_EMBED_FRAMEWORKS							"${SDL2_LIBRARIES}"
+	XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY		"YES"		# frameworks must be signed by the same developer as the binary
+	XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY	"YES"		# not strictly necessary, but that's cleaner
+	XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME			"YES"		# required for notarization to pass
+)
+
 if(APPLE)
-	set_target_properties(${GAME_TARGET} PROPERTIES
-		# Set framework search path to (App bundle)/Contents/Frameworks so the game can use its embedded SDL2.framework
-		XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
+	# If we have a code signing identity (CODE_SIGN_IDENTITY environment variable),
+	# set up the release build for proper code signing
+	if(NOT "$ENV{CODE_SIGN_IDENTITY}" STREQUAL "")
+		set_target_properties(${GAME_TARGET} PROPERTIES
+			XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=Release] "$ENV{CODE_SIGN_IDENTITY}"
+			XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY[variant=RelWithDebInfo] "$ENV{CODE_SIGN_IDENTITY}"
+			XCODE_ATTRIBUTE_DEVELOPMENT_TEAM[variant=Release] "$ENV{CODE_SIGN_IDENTITY}"
+			XCODE_ATTRIBUTE_DEVELOPMENT_TEAM[variant=RelWithDebInfo] "$ENV{CODE_SIGN_IDENTITY}"
 
-		# Explicitly turn off code signing, otherwise downloaded app will be quarantined forever
-		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
-
-		RESOURCE ${GAME_ICNS}
-		MACOSX_BUNDLE_ICON_FILE ${GAME_ICNS_FILENAME}
-		MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
-		MACOSX_BUNDLE_COPYRIGHT "© 1995 Pangea Software, Inc."
-	)
+			# The following is to pass notarization requirements
+			XCODE_ATTRIBUTE_CODE_SIGN_INJECT_BASE_ENTITLEMENTS[variant=Release] "NO"
+			XCODE_ATTRIBUTE_CODE_SIGN_INJECT_BASE_ENTITLEMENTS[variant=RelWithDebInfo] "NO"
+			XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS[variant=Release] "--options=runtime --timestamp"
+			XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS[variant=RelWithDebInfo] "--options=runtime --timestamp"
+		)
+		message("Release build will be code signed!")
+	endif()
 
 	# Copy stuff to app bundle contents
-	set_source_files_properties(${GAME_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-	set_source_files_properties(${SDL2_LIBRARIES} PROPERTIES MACOSX_PACKAGE_LOCATION "Frameworks")
+	set_source_files_properties(${GAME_MAC_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+	#set_source_files_properties(${SDL2_LIBRARIES} PROPERTIES MACOSX_PACKAGE_LOCATION "Frameworks")
 
 	set(BUNDLE_CONTENTS_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/..")
 	set(APP_PARENT_DIR "${BUNDLE_CONTENTS_DIR}/../..")
@@ -294,10 +236,6 @@ if(APPLE)
 	add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 		# Copy assets to app bundle
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Data ${BUNDLE_CONTENTS_DIR}/Resources
-
-		# Nuke SDL headers in embedded framework
-		COMMAND rm -rf ${BUNDLE_CONTENTS_DIR}/Frameworks/SDL2.framework/Headers
-		COMMAND rm -rf ${BUNDLE_CONTENTS_DIR}/Frameworks/SDL2.framework/Versions/Current/Headers
 
 		# High-DPI support in Info.plist
 #		plutil -replace NSHighResolutionCapable -bool true ${BUNDLE_CONTENTS_DIR}/Info.plist
@@ -310,21 +248,17 @@ else()
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Data ${APP_PARENT_DIR}/Data)
 endif()
 
-# Copy SDL2 DLLs to output folder on Windows
+# Windows-specific libraries
 if(WIN32)
+	# Copy SDL2 DLLs to output folder on Windows for convenience
 	foreach(DLL ${SDL2_DLLS})
 		add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different ${DLL} ${APP_PARENT_DIR})
 	endforeach()
 
-	set_target_properties(${GAME_TARGET} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
+	# When installing (cmake --install), copy Visual Studio redistributable DLLs to install location
+	include(InstallRequiredSystemLibraries)
 endif()
 
 # Copy documentation to output folder
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/packaging/ReadMe.txt.in ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt)
-add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_BINARY_DIR}/ReadMe.txt ${APP_PARENT_DIR}/ReadMe.txt
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE.md ${APP_PARENT_DIR}/License.txt
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/docs ${APP_PARENT_DIR}/Documentation
-)
-

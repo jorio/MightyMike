@@ -1,16 +1,21 @@
-# How to build Mighty Mike
+# How to build the game
+
+## TL;DR: Automated build script
+
+Clone the repo **recursively**, then run `python3 build.py` to execute the build steps described in this document and package up the game.
+
+build.py is the script that is used by the CI setup to produce builds. If you want to build the game manually instead, read on.
 
 ## How to build the game on macOS
 
 1. Install the prerequisites:
     - Xcode 10+
     - [CMake](https://formulae.brew.sh/formula/cmake) 3.13+
-1. Clone the repo **recursively** (this is necessary to pull in the correct versions of the dependencies):
+1. Clone the repo recursively:
     ```
-    git clone --recurse-submodules https://github.com/jorio/mightymike
-    cd mightymike
+    git clone --recurse-submodules https://github.com/jorio/MightyMike
     ```
-1. Download [SDL2-2.0.14.dmg](http://libsdl.org/release/SDL2-2.0.14.dmg), open it, and copy **SDL2.framework** to the **extern** folder
+1. Download [SDL2-2.0.20.dmg](http://libsdl.org/release/SDL2-2.0.20.dmg), open it, and copy **SDL2.framework** to the **extern** folder
 1. Prep the Xcode project:
     ```
     cmake -G Xcode -S . -B build
@@ -26,15 +31,14 @@
 1. Install the prerequisites:
     - Visual Studio 2019 with the C++ toolchain
     - [CMake](https://cmake.org/download/) 3.13+
-1. Clone the repo **recursively** (this is necessary to pull in the correct versions of the dependencies):
+1. Clone the repo recursively:
     ```
-    git clone --recurse-submodules https://github.com/jorio/mightymike
-    cd mightymike
+    git clone --recurse-submodules https://github.com/jorio/MightyMike
     ```
-1. Download [SDL2-devel-2.0.14-VC.zip](http://libsdl.org/release/SDL2-devel-2.0.14-VC.zip) and extract the contents into the **extern** folder
+1. Download [SDL2-devel-2.0.20-VC.zip](http://libsdl.org/release/SDL2-devel-2.0.20-VC.zip) and extract the contents into the **extern** folder
 1. Prep the Visual Studio solution:
     ```
-    cmake -G "Visual Studio 16 2019" -A x64 -S . -B build
+    cmake -G "Visual Studio 17 2022" -A x64 -S . -B build
     ```
 1. Now you can open `build/MightyMike.sln` in Visual Studio, or you can just go ahead and build the game:
     ```
@@ -42,18 +46,16 @@
     ```
 1. The game gets built in `build/Release/MightyMike.exe`. Enjoy!
 
-**Note:** if you have installed CMake support for VS2019, you may want to skip step 4 & 5, and open CMakeLists.txt directly with Visual Studio.  
-
 ## How to build the game on Linux et al.
 
 1. Install the prerequisites from your package manager:
     - Any C++20 compiler
     - CMake 3.13+
     - SDL2 development library (e.g. "libsdl2-dev" on Debian/Ubuntu, "sdl2" on Arch)
-1. Clone the repo **recursively** (this is necessary to pull in the correct versions of the dependencies):
+    - OpenGL development libraries (e.g. "libgl1-mesa-dev" on Ubuntu)
+1. Clone the repo recursively:
     ```
-    git clone --recurse-submodules https://github.com/jorio/mightymike
-    cd mightymike
+    git clone --recurse-submodules https://github.com/jorio/MightyMike
     ```
 1. Build the game:
     ```

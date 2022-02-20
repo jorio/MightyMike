@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Mighty Mike
+Comment=
+Icon=mightymike-desktopicon
+Exec=MightyMike
+Terminal=false
+Categories=Game;
