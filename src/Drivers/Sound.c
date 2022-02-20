@@ -14,6 +14,7 @@
 #include "io.h"
 #include "input.h"
 #include "externs.h"
+#include <stdio.h>  // snprintf
 
 /****************************/
 /*    CONSTANTS             */
@@ -22,13 +23,71 @@
 #define		DEFAULT_VOLUME			100				// default volume of channels
 #define		MAX_CHANNELS			6
 
+static const char* kSongNames[SONG_ID_MAX] =
+{
+	[SONG_ID_JURASSIC]		= "PrehistoricPlaza",
+	[SONG_ID_CARNIVAL]		= "ClowningAround",
+	[SONG_ID_CANDY]			= "CandyCaneLane",
+	[SONG_ID_FAIRY]			= "FairyTaleTrail",
+	[SONG_ID_BARGAIN]		= "GamesGallery",
+	[SONG_ID_RACE]			= "CarShopCartRace",
+	[SONG_ID_CANDY_INTRO]	= "IntroToCandyCane",
+	[SONG_ID_CLOWN_INTRO]	= "IntroToClowning",
+	[SONG_ID_WORLD_INTRO]	= "IntroToEnteringWorlds",
+	[SONG_ID_FAIRY_INTRO]	= "IntroToFairyTale",
+	[SONG_ID_BARGAIN_INTRO]	= "IntroToGamesGallery",
+	[SONG_ID_PANGEA]		= "PangeaIntro",
+	[SONG_ID_JURASSIC_INTRO]= "IntroToPrehistoric",
+	[SONG_ID_LOSEGAME]		= "LoseGame",
+	[SONG_ID_TITLE]			= "MainTitleTheme",
+	[SONG_ID_WINGAME]		= "WinGame",
+	[SONG_ID_WINLEVEL]		= "MikeFinishLevel",
+	[SONG_ID_WINGAMELOOP]	= "WinGameLoop",
+	[SONG_ID_WINHUM]		= "WinHum",
+};
+
+static const char* kEffectNames[NUM_DEFAULT_EFFECTS] =
+{
+	[SOUND_POP]				= "Pop",
+	[SOUND_COINS]			= "GetCoin",
+	[SOUND_CRUNCH]			= "EnemyExplode",
+	[SOUND_SQUEEK]			= "Squeek",
+	[SOUND_ILLSAVE]			= "IllSaveYou",
+	[SOUND_COMEHERERODENT]	= "ComeHereRodent",
+	[SOUND_RADAR]			= "RadarEnter",
+	[SOUND_TAKETHAT]		= "TakeThat",
+	[SOUND_EATMYDUST]		= "EatMyDust",
+	[SOUND_SELECTCHIME]		= "SelectChime",
+	[SOUND_BADHIT]			= "BadHit",
+	[SOUND_DEATHSCREAM]		= "DeathScream",
+	[SOUND_RUBBERGUN]		= "RubberGun",
+	[SOUND_HEATSEEK]		= "HeatSeekBeew",
+	[SOUND_PIESQUISH]		= "Pie",
+	[SOUND_SUCKPOP]			= "SuctionCupPop",
+	[SOUND_MISSLELAUNCH]	= "MissleLaunch",
+	[SOUND_RIFLESHOT]		= "RifleShot",
+	[SOUND_TRACERSHOT]		= "TracerShot",
+	[SOUND_MACHINEGUN]		= "MachineGun",
+	[SOUND_HEALTHDING]		= "Heart",
+	[SOUND_FOOD]			= "Food",
+	[SOUND_GETWEAPON]		= "WeaponPickup",
+	[SOUND_NUKE]			= "Nuke",
+	[SOUND_MIKEHURT]		= "Ouch",
+	[SOUND_GETPOW]			= "GetPOW",
+	[SOUND_PIXIEDUST]		= "PixieDust",
+	[SOUND_SPLASH]			= "Splash",
+	[SOUND_FREEDUDE]		= "FreeDude",
+	[SOUND_GETKEY]			= "GetKey",
+	[SOUND_NICEGUY]			= "NoMoreNiceGuy",
+	[SOUND_FIREHOLE]		= "FireInTheHole",
+};
+
 
 /**********************/
 /*     VARIABLES      */
 /**********************/
 
 static	SndListHandle	EffectHandles[MAX_EFFECTS];							// handles to ALL sounds, default AND added
-static	SndListHandle	AddedHandles[MAX_EFFECTS-NUM_DEFAULT_EFFECTS];		// handle to only sound which were added / not default
 static	SndListHandle	SoundHand_Music = nil;
 
 static	SndChannelPtr	gSndChannel[MAX_CHANNELS];
@@ -42,7 +101,7 @@ static	Boolean			gEffectsOnFlag = true;
 
 static	unsigned char	gVolume = DEFAULT_VOLUME;
 
-static	short			gNumEffectsLoaded,gNumAddedSounds;
+static	short			gNumEffectsLoaded;
 
 														// ADDED SOUND NUMS
 
@@ -72,13 +131,10 @@ void InitSoundTools(void)
 {
 OSErr		iErr;
 
-
-	OpenMikeRezFile(":audio:music");	// open music rez file
-
-
 	gMaxChannels = 0;
 	gNumEffectsLoaded = 0;
-	gNumAddedSounds = 0;
+
+	memset(EffectHandles, 0, sizeof(EffectHandles));
 
 	const long initBits = GetSoundChannelInitializationParameters();
 
@@ -115,6 +171,41 @@ void OnChangeAudioInterpolation(void)
 	}
 }
 
+
+
+static SndListHandle LoadAIFF(const char* bankName, const char* effectName)
+{
+SndListHandle effectHandle;
+char path[256];
+FSSpec spec;
+short refNum;
+OSErr err;
+
+	snprintf(path, sizeof(path), ":Audio:%s:%s.aiff", bankName, effectName);
+
+	err = FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, path, &spec);
+	GAME_ASSERT_MESSAGE(err == noErr, path);
+
+	err = FSpOpenDF(&spec, fsRdPerm, &refNum);
+	GAME_ASSERT_MESSAGE(err == noErr, path);
+
+	effectHandle = Pomme_SndLoadFileAsResource(refNum);
+	GAME_ASSERT_MESSAGE(effectHandle, path);
+
+	FSClose(refNum);
+
+				/* GET OFFSET INTO IT */
+
+	long offset;
+	GetSoundHeaderOffset(effectHandle, &offset);
+
+				/* DECOMPRESS IT AHEAD OF TIME */
+
+	Pomme_DecompressSoundResource(&effectHandle, &offset);
+
+	return effectHandle;
+}
+
 /************************** LOAD DEFAULT SOUNDS ************************/
 //
 // Loads the standard default effect sounds
@@ -122,43 +213,15 @@ void OnChangeAudioInterpolation(void)
 
 void LoadDefaultSounds(void)
 {
-OSErr		iErr;
-short			i;
-short			srcFile1,srcFile2;
-
 	gNumEffectsLoaded = 0;
-
-						/* OPEN SOUNDS RESOURCE */
-
-	srcFile1 = OpenMikeRezFile(":audio:general.sounds");	// open sound resource fork
-	UseResFile( srcFile1 );
-	srcFile2 = OpenMikeRezFile(":audio:weapon.sounds");
-	UseResFile( srcFile2 );
 
 					/* LOAD ALL EFFECTS */
 
-	for (i=0; i<NUM_DEFAULT_EFFECTS; i++)
+	for (int i = 0; i < NUM_DEFAULT_EFFECTS; i++)
 	{
-		EffectHandles[i] = (SndListResource **) GetResource('snd ',BASE_EFFECT_RESOURCE+i);
-		GAME_ASSERT(EffectHandles[i]);
-
-		DetachResource((Handle) EffectHandles[i]);					// detach resource from rez file & make a normal Handle
-		iErr = ResError();
-		if (iErr)
-			ShowSystemErr(iErr);
-
+		EffectHandles[i] = LoadAIFF("Default", kEffectNames[i]);
 		gNumEffectsLoaded++;
-
-					/* PRE-DECOMPRESS IT (Source port addition) */
-
-		long offset;
-		GetSoundHeaderOffset(EffectHandles[i], &offset);
-		Pomme_DecompressSoundResource(&EffectHandles[i], &offset);
 	}
-
-	CloseResFile(srcFile1);
-	CloseResFile(srcFile2);
-	UseResFile(gMainAppRezFile);
 }
 
 
@@ -247,35 +310,20 @@ short		i;
 
 /******************** PLAY SONG ***********************/
 
-void PlaySong(short songNum)
+void PlaySong(short songID)
 {
-short	srcFile;
-OSErr 		iErr;
-
 	KillSong();											// see if zap existing song
 
-						/* OPEN MUSIC RESOURCE */
+			/* RESOLVE SONG FILENAME */
 
-	srcFile = OpenMikeRezFile(":audio:music");
-	UseResFile( srcFile );
+	GAME_ASSERT(songID >= 0);
+	GAME_ASSERT((size_t)songID < sizeof(kSongNames)/sizeof(kSongNames[0]));
 
-	SoundHand_Music = (SndListResource**) GetResource('snd ',songNum);		// load the song
-	if (SoundHand_Music == nil)
-		return;						// (if err, just don't play anything)
-//		DoFatalAlert("Couldnt find Music Resource.");
-	DetachResource((Handle) SoundHand_Music);			// detach resource from rez file & make a normal Handle
-	iErr = ResError();
-	if (iErr)
-		ShowSystemErr(iErr);
+	const char* songName = kSongNames[songID];
 
-	CloseResFile(srcFile);
-	UseResFile(gMainAppRezFile);
+			/* LOAD MUSIC FILE */
 
-			/* PRE-DECOMPRESS IT (Source port addition) */
-
-	long offset;
-	GetSoundHeaderOffset(SoundHand_Music, &offset);
-	Pomme_DecompressSoundResource(&SoundHand_Music, &offset);
+	SoundHand_Music = LoadAIFF("Music", songName);
 
 			/* GET IT GOING */
 
@@ -466,45 +514,15 @@ void DoSoundMaintenance(Boolean checkKeys)
 
 
 /******************* ADD EFFECT *******************/
-//
-// INPUT: rezFile = pathname of resource file to get sound from
-//        rezNum = rezID # of sound
-//		  freq = freq to play sound
-//
-// OUTPUT: sound #
-//
 
-short AddEffect(const char* rezFile, short rezNum)
+
+static short AddEffect(const char* bankName, const char* effectName)
 {
-short			srcFile;
-
-						/* OPEN SOUNDS RESOURCE */
-
-	srcFile = OpenMikeRezFile(rezFile);	// open sound resource fork
-	UseResFile( srcFile );
-
-					/* LOAD IT */
-
-	short addedID = gNumAddedSounds;
 	short effectID = gNumEffectsLoaded;
 
-	AddedHandles[addedID] = (SndListHandle) GetResource('snd ',rezNum);
-	GAME_ASSERT(AddedHandles[addedID]);
-	DetachResource((Handle) AddedHandles[addedID]);
-
-			/* PRE-DECOMPRESS IT (Source port addition) */
-
-	long offset;
-	GetSoundHeaderOffset(AddedHandles[addedID], &offset);
-	Pomme_DecompressSoundResource(&AddedHandles[addedID], &offset);
-
-	EffectHandles[effectID] = AddedHandles[addedID];
+	EffectHandles[effectID] = LoadAIFF(bankName, effectName);
 
 	gNumEffectsLoaded++;
-	gNumAddedSounds++;
-
-	CloseResFile(srcFile);
-	UseResFile(gMainAppRezFile);
 
 	return effectID;
 }
@@ -517,19 +535,35 @@ short			srcFile;
 
 void ZapAllAddedSounds(void)
 {
-short		i;
-
 	StopAllSound();
 
-	gNumEffectsLoaded = NUM_DEFAULT_EFFECTS; 		// reset this to default value
-
-	for (i = 0; i < gNumAddedSounds; i++)
+	for (int i = NUM_DEFAULT_EFFECTS; i < gNumEffectsLoaded; i++)
 	{
-		DisposeHandle((Handle) AddedHandles[i]);
+		if (EffectHandles[i])
+		{
+			DisposeHandle((Handle) EffectHandles[i]);
+			EffectHandles[i] = nil;
+		}
 	}
-	gNumAddedSounds = 0;
+
+	gNumEffectsLoaded = NUM_DEFAULT_EFFECTS; 		// reset this to default value
 }
 
+void ZapAllSounds(void)
+{
+	StopAllSound();
+
+	for (int i = 0; i < gNumEffectsLoaded; i++)
+	{
+		if (EffectHandles[i])
+		{
+			DisposeHandle((Handle) EffectHandles[i]);
+			EffectHandles[i] = nil;
+		}
+	}
+
+	gNumEffectsLoaded = 0;
+}
 
 /*************** PLAY AREA MUSIC ****************/
 
@@ -563,51 +597,45 @@ void PlayAreaMusic(void)
 
 void LoadAreaSound(void)
 {
-static const char*	jurassic	= ":audio:jurassic.sounds";
-static const char*	candy		= ":audio:candy.sounds";
-static const char*	clown		= ":audio:clown.sounds";
-static const char*	fairy		= ":audio:fairy.sounds";
-static const char*	bargain		= ":audio:bargain.sounds";
-
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
-				gSoundNum_UngaBunga = AddEffect(jurassic,BASE_EFFECT_RESOURCE);
-				gSoundNum_DinoBoom = AddEffect(jurassic,BASE_EFFECT_RESOURCE+1);
-				gSoundNum_BarneyJump = AddEffect(jurassic,BASE_EFFECT_RESOURCE+2);
-				gSoundNum_DoorOpen = AddEffect(jurassic,BASE_EFFECT_RESOURCE+3);
+				gSoundNum_UngaBunga		= AddEffect("jurassic", "ungabunga");
+				gSoundNum_DinoBoom		= AddEffect("jurassic", "dinoboom");
+				gSoundNum_BarneyJump	= AddEffect("jurassic", "barneybounce");
+				gSoundNum_DoorOpen		= AddEffect("jurassic", "dooropen");
 				break;
 
 		case	SCENE_CANDY:
-				gSoundNum_ChocoBunny = AddEffect(candy,BASE_EFFECT_RESOURCE);
-				gSoundNum_Carmel = AddEffect(candy,BASE_EFFECT_RESOURCE+1);
-				gSoundNum_GummyHaha = AddEffect(candy,BASE_EFFECT_RESOURCE+2);
+				gSoundNum_ChocoBunny	= AddEffect("candy", "bunnyhop");
+				gSoundNum_Carmel		= AddEffect("candy", "carmelmonster");
+				gSoundNum_GummyHaha		= AddEffect("candy", "hehehe");
 				break;
 
 		case	SCENE_CLOWN:
-				gSoundNum_JackInTheBox = AddEffect(clown,BASE_EFFECT_RESOURCE);
-				gSoundNum_Skid = AddEffect(clown,BASE_EFFECT_RESOURCE+1);
-				gSoundNum_DoorOpen = AddEffect(clown,BASE_EFFECT_RESOURCE+2);
-				gSoundNum_ClownLaugh = AddEffect(clown,BASE_EFFECT_RESOURCE+3);
+				gSoundNum_JackInTheBox	= AddEffect("clown", "jackinthebox");
+				gSoundNum_Skid			= AddEffect("clown", "tireskid");
+				gSoundNum_DoorOpen		= AddEffect("clown", "dooropen");
+				gSoundNum_ClownLaugh	= AddEffect("clown", "clownlaugh");
 				break;
 
 		case	SCENE_FAIRY:
-				gSoundNum_WitchHaha = AddEffect(fairy,BASE_EFFECT_RESOURCE+0);
-				gSoundNum_Shriek = AddEffect(fairy,BASE_EFFECT_RESOURCE+1);
-				gSoundNum_DoorOpen = AddEffect(fairy,BASE_EFFECT_RESOURCE+2);
-				gSoundNum_Frog = AddEffect(fairy,BASE_EFFECT_RESOURCE+3);
-				gSoundNum_BarneyJump = AddEffect(jurassic,BASE_EFFECT_RESOURCE+2);
-				gSoundNum_DinoBoom = AddEffect(jurassic,BASE_EFFECT_RESOURCE+1);
+				gSoundNum_WitchHaha		= AddEffect("fairy", "witch");
+				gSoundNum_Shriek		= AddEffect("fairy", "shriek");
+				gSoundNum_DoorOpen		= AddEffect("fairy", "dooropen");
+				gSoundNum_Frog			= AddEffect("fairy", "frog");
+				gSoundNum_BarneyJump	= AddEffect("jurassic", "barneybounce");
+				gSoundNum_DinoBoom		= AddEffect("jurassic", "dinoboom");
 				break;
 
 		case	SCENE_BARGAIN:
-				gSoundNum_Ship = AddEffect(bargain,BASE_EFFECT_RESOURCE+0);
-				gSoundNum_ExitShip = AddEffect(bargain,BASE_EFFECT_RESOURCE+1);
-				gSoundNum_DoorOpen = AddEffect(bargain,BASE_EFFECT_RESOURCE+2);
-				gSoundNum_DogRoar = AddEffect(bargain,BASE_EFFECT_RESOURCE+3);
-				gSoundNum_RobotDanger = AddEffect(bargain,BASE_EFFECT_RESOURCE+4);
+				gSoundNum_Ship			= AddEffect("bargain", "spaceship");
+				gSoundNum_ExitShip		= AddEffect("bargain", "exitship");
+				gSoundNum_DoorOpen		= AddEffect("bargain", "dooropen");
+				gSoundNum_DogRoar		= AddEffect("bargain", "dogroar");
+				gSoundNum_RobotDanger	= AddEffect("bargain", "robotdanger");
 				break;
- 	}
+	}
 }
 
 

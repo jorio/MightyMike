@@ -32,7 +32,6 @@ void	VerifySystem(void);
 void	InitThermometer(void);
 void	FillThermometer(short);
 short	OpenMikeFile(const char* filename);
-short	OpenMikeRezFile(const char* filename);
 unsigned long	MyRandomLong(void);
 unsigned short	MyRandomShort(void);
 void	SetMyRandomSeed(unsigned long);

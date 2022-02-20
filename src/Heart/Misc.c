@@ -765,29 +765,6 @@ short		fRefNum;
 }
 
 
-/**************** OPEN MIKE REZ FILE **********************/
-
-short OpenMikeRezFile(const char* filename)
-{
-short		srcFile;
-OSErr		iErr;
-FSSpec		spec;
-
-	iErr = FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
-	GAME_ASSERT(iErr == noErr);
-
-	srcFile = FSpOpenResFile(&spec, fsRdPerm);			// try to open
-	if (srcFile == -1)									// see if error
-	{
-		DoFatalAlert2("Cannot open resource file", filename);
-		return -1;
-	}
-
-	UseResFile(srcFile);
-	return srcFile;
-}
-
-
 /******************** MY RANDOM LONG **********************/
 //
 // My own random number generator that returns a LONG
