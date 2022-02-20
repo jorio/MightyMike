@@ -163,7 +163,7 @@ static MenuItem gVideoMenu[] =
 			.callback = OnChangeIntegerScaling,
 			.valuePtr = &gGamePrefs.scalingType,
 			.numChoices = 3,
-			.choices = { "crisp", "fast stretch", "hq stretch" },
+			.choices = { "integer scaling", "fast stretch", "hq stretch" },
 		}
 	},
 	{

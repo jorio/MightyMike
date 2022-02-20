@@ -1249,7 +1249,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.fullscreen = true;
 	gGamePrefs.windowedZoom = 0;	// automatic
 	gGamePrefs.pfSize = PFSIZE_WIDE;
-	gGamePrefs.scalingType = kScaling_Stretch;
+	gGamePrefs.scalingType = kScaling_HQStretch;
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.filterDithering = true;
 	gGamePrefs.music = true;
