@@ -503,8 +503,6 @@ void MoveMe_Die(void)
 
 void MoveMe_Liftoff(void)
 {
-ObjNode	*newObj;
-
 	gMyNodePtr->DrawFlag = true;
 
 	StopScrollingPlayfield();
@@ -517,7 +515,7 @@ ObjNode	*newObj;
 
 						/* ATTACK FLAME */
 
-			newObj = MakeNewShape(GroupNum_MyGuy,ObjType_MyGuy,MY_ANIMBASE_FLAME,
+			MakeNewShape(GroupNum_MyGuy,ObjType_MyGuy,MY_ANIMBASE_FLAME,
 								gMyNodePtr->X.Int,gMyNodePtr->Y.Int,
 								gMyNodePtr->Z-1,MoveMyFlame,PLAYFIELD_RELATIVE);
 

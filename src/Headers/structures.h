@@ -6,6 +6,9 @@
 #define __STRUCT__
 
 
+#include <Pomme.h>
+
+
 #define	SF_HEADER__SHAPE_LIST	4
 #define	SHAPE_HEADER_ANIM_LIST	6
 

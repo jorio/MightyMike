@@ -71,10 +71,9 @@ static long GetSoundChannelInitializationParameters(void)
 void InitSoundTools(void)
 {
 OSErr		iErr;
-short	srcFile;
 
 
-	srcFile = OpenMikeRezFile(":audio:music");	// open music rez file
+	OpenMikeRezFile(":audio:music");	// open music rez file
 
 
 	gMaxChannels = 0;
@@ -405,9 +404,8 @@ got_chan:
 void SetVolume(void)
 {
 short	i;
-static	SndChannelPtr	chanPtr;
-static	SndCommand 	mySndCmd;
-static 	OSErr		iErr;
+SndChannelPtr	chanPtr;
+SndCommand		mySndCmd;
 
 	for (i=0; i<gMaxChannels; i++)
 	{
@@ -416,7 +414,7 @@ static 	OSErr		iErr;
 		mySndCmd.cmd = ampCmd;
 		mySndCmd.param1 = gVolume;
 		mySndCmd.param2 = 0;
-		iErr = SndDoImmediate(chanPtr, &mySndCmd);
+		SndDoImmediate(chanPtr, &mySndCmd);
 	}
 }
 

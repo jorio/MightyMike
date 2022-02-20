@@ -95,7 +95,6 @@ static	ObjNode		*icons[10];
 
 void DoTitleScreen(void)
 {
-register	ObjNode		*newObj;
 Boolean		songFlag;
 short		i,startSelection;
 
@@ -126,7 +125,7 @@ re_enter:
 
 					/* CREATE CURSOR */
 
-	newObj = MakeNewShape(GroupNum_MeTitle,ObjType_MeTitle,4,cX[startSelection],CURSOR_Y,
+	MakeNewShape(GroupNum_MeTitle,ObjType_MeTitle,4,cX[startSelection],CURSOR_Y,
 						100,MoveTitleCursor,SCREEN_RELATIVE);
 
 	gCursorSelection = startSelection;						// start cursor on 1st item
@@ -618,11 +617,10 @@ ObjNode		*nameObj;
 				HighScoreNames[n][i] = '\0';
 				gHtab = NAME_HTAB;						// set coords of name
 				gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
-				SetRect(&eraseRect,
-					gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT - 30,
-					gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP - 20,
-					gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT + 350,
-					gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP + 20);
+				eraseRect.left		= gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT - 30;
+				eraseRect.top		= gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP - 20;
+				eraseRect.right		= gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT + 350;
+				eraseRect.bottom	= gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP + 20;
 				AddUpdateRegion(eraseRect,0);				// erase existing name
 				DumpUpdateRegions_DontPresentFramebuffer();	// commit erased regions; don't present framebuffer yet to avoid flashing
 				WriteLn(HighScoreNames[n]);					// print it (will present framebuffer)
@@ -644,11 +642,10 @@ ObjNode		*nameObj;
 			i++;
 			gHtab = NAME_HTAB;						// set coords of name
 			gVtab = TOP_SCORE_VTAB+(n*SCORE_LINE_GAP);
-			SetRect(&eraseRect,
-				gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT - 30,
-				gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP - 20,
-				OFFSCREEN_WINDOW_RIGHT,
-				gScreenYOffset + gVtab+OFFSCREEN_WINDOW_TOP + 20);
+			eraseRect.left		= gScreenXOffset + gHtab + OFFSCREEN_WINDOW_LEFT - 30;
+			eraseRect.top		= gScreenYOffset + gVtab + OFFSCREEN_WINDOW_TOP - 20;
+			eraseRect.right		= OFFSCREEN_WINDOW_RIGHT;
+			eraseRect.bottom	= gScreenYOffset + gVtab+OFFSCREEN_WINDOW_TOP + 20;
 
 			AddUpdateRegion(eraseRect,0);				// erase area of cursor
 			DumpUpdateRegions_DontPresentFramebuffer();	// commit erased regions; don't present framebuffer yet to avoid flashing
@@ -656,11 +653,10 @@ ObjNode		*nameObj;
 			WriteLn(HighScoreNames[n]);					// print whole word (will present framebuffer)
 			nameObj->X.Int = (gHtab+OFFSCREEN_WINDOW_LEFT);	// set cursor
 			nameObj->Y.Int = (gVtab+OFFSCREEN_WINDOW_TOP);
-			nameObj->drawBox.left = nameObj->X.Int;
-			nameObj->drawBox.right = nameObj->X.Int;
-			nameObj->drawBox.top = nameObj->Y.Int;
-			nameObj->drawBox.bottom = nameObj->Y.Int;
-			OffsetRect(&nameObj->drawBox, gScreenXOffset, gScreenYOffset);
+			nameObj->drawBox.left	= nameObj->X.Int + gScreenXOffset;
+			nameObj->drawBox.right	= nameObj->X.Int + gScreenXOffset;
+			nameObj->drawBox.top	= nameObj->Y.Int + gScreenYOffset;
+			nameObj->drawBox.bottom	= nameObj->Y.Int + gScreenYOffset;
 		}
 
 		MoveObjects();

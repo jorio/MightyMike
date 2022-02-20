@@ -80,11 +80,10 @@ int32_t	offset;
 	}
 	else
 	{
-		newSpritePtr->drawBox.left = x-2;
-		newSpritePtr->drawBox.right = x+2;
-		newSpritePtr->drawBox.top = y-2;
-		newSpritePtr->drawBox.bottom = y+2;
-		OffsetRect(&newSpritePtr->drawBox, gScreenXOffset, gScreenYOffset);
+		newSpritePtr->drawBox.left		= x-2 + gScreenXOffset;
+		newSpritePtr->drawBox.right		= x+2 + gScreenXOffset;
+		newSpritePtr->drawBox.top		= y-2 + gScreenYOffset;
+		newSpritePtr->drawBox.bottom	= y+2 + gScreenYOffset;
 	}
 
 	newSpritePtr->AnimSpeed = 								// init animation stuff

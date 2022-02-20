@@ -2,6 +2,7 @@
 // (C) 2021 Iliyas Jorio
 // This file is part of Mighty Mike. https://github.com/jorio/mightymike
 
+#include <Pomme.h>
 #include <thread>
 #include <mutex>
 #include <vector>

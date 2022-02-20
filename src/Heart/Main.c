@@ -348,9 +348,7 @@ static void UpdateSimAndRenderTweenedFrames(void)
 
 void PlayArea(void)
 {
-long	r;
-
-	r = MyRandomLong();
+	MyRandomLong();
 
 	gTimeSinceSim = GAME_SPEED_SDL;						// force simulation to run once when we enter this function
 
@@ -1374,7 +1372,7 @@ void GameMain(void)
 	MakeGameWindow();	// now called by ApplyPrefs
 
 	InitInput();                                    // init ISp
-	HideCursor();
+	SDL_ShowCursor(0);
 	InitPaletteStuff();
 	CreatePlayfieldPermanentMemory();				// init permanent playfield stuff
 	InitObjectManager();							// call this just to allocate memory

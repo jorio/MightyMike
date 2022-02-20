@@ -74,9 +74,6 @@ int CommonMain(int argc, const char** argv)
 	// Start our "machine"
 	Pomme::Init();
 
-	// Uncomment to dump the game's resources to a temporary directory.
-//	Pomme_StartDumpingResources("/tmp/MikeRezDump");
-
 	// Initialize SDL video subsystem
 	if (0 != SDL_Init(SDL_INIT_VIDEO))
 		throw std::runtime_error("Couldn't initialize SDL video subsystem.");
@@ -101,7 +98,7 @@ int CommonMain(int argc, const char** argv)
 
 	fs::path dataPath = FindGameData();
 #if !(__APPLE__)
-	Pomme::Graphics::SetWindowIconFromIcl8Resource(gSDLWindow, 400);
+//	Pomme::Graphics::SetWindowIconFromIcl8Resource(gSDLWindow, 400);
 #endif
 
 	// Init joystick subsystem

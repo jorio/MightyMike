@@ -167,7 +167,10 @@ void BlankEntireScreenArea(void)
 {
 Rect	r;
 
-	SetRect(&r,0,0,VISIBLE_WIDTH,VISIBLE_HEIGHT);
+	r.left		= 0;
+	r.top		= 0;
+	r.right		= VISIBLE_WIDTH;
+	r.bottom	= VISIBLE_HEIGHT;
 	BlankScreenArea(r);
 }
 

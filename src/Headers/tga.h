@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Pomme.h>
+
 typedef struct
 {
 	uint8_t		idFieldLength;

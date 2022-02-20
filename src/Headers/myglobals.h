@@ -4,6 +4,7 @@
 /*   By Brian Greenstone    */
 /****************************/
 
+#include <Pomme.h>
 #include "equates.h"
 #include "structures.h"
 
