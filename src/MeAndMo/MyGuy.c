@@ -943,8 +943,7 @@ register unsigned short	bits;
 
 
 	tileAttribs = GetFullMapTileAttribs(gX.Int,gY.Int);		// get attribs of center tile
-	GAME_ASSERT(tileAttribs);
-	bits = tileAttribs->bits;
+	bits = tileAttribs? tileAttribs->bits: 0;
 
 					/* SEE IF ON STAIRS */
 

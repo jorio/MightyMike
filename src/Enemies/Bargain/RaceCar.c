@@ -488,6 +488,7 @@ TileAttribType	*newTile;
 	newObj->BaseY = newObj->Y.Int&0b1111111111100000;
 
 	newTile = GetFullMapTileAttribs(newObj->BaseX,newObj->BaseY);	// use attribs to determine start
+	GAME_ASSERT(newTile);
 	GAME_ASSERT_MESSAGE(newTile->bits & TILE_ATTRIB_TRACK, "A RaceCar is not starting on a valid track piece! - fix it!");
 	GAME_ASSERT_MESSAGE(newTile->parm0 >= 0 && newTile->parm0 < kNumTrackSegments, "Tile Track # out of range");
 

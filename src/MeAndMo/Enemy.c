@@ -58,21 +58,26 @@ void InitEnemies(void)
 // Returns true if was killed during this collision check.
 //
 
+static inline Boolean IsTileImpassable(unsigned short x, unsigned short y)
+{
+	const TileAttribType* tileAttribs = GetFullMapTileAttribs(x, y);	// get attribs of center tile
+	uint16_t bits = tileAttribs ? tileAttribs->bits : 0;
+	return bits & (TILE_ATTRIB_WATER | TILE_ATTRIB_DEATH);				// if water or death, then move to old coords
+}
+
 Boolean DoEnemyCollisionDetect(unsigned long CType)
 {
-register	short	i,originalX,originalY,offset;
-register	TileAttribType *tileAttribs;
-register	unsigned short	bits;
+int16_t offset;
 
 	gSumDX = gDX;											// set sum deltas
 	gSumDY = gDY;
 	CalcObjectBox();										// calc newest box
 	CollisionDetect(gThisNodePtr,CType);					// get collision info
 
-	originalX = gX.Int;										// remember starting coords
-	originalY = gY.Int;
+	int16_t originalX = gX.Int;								// remember starting coords
+	int16_t originalY = gY.Int;
 
-	for (i=0; i < gNumCollisions; i++)						// handle all collisions
+	for (int i = 0; i < gNumCollisions; i++)				// handle all collisions
 	{
 		if (gCollisionList[i].type == COLLISION_TYPE_TILE)
 		{
@@ -161,61 +166,17 @@ register	unsigned short	bits;
 					/* CHECK IMPASSABLE AREA */
 					/*************************/
 
-						/* CHECK TOP */
-
-	tileAttribs = GetFullMapTileAttribs(gX.Int,gY.Int-16);		// get attribs of center tile
-	GAME_ASSERT(tileAttribs);
-	bits = tileAttribs->bits;
-
-	if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
+	if (   IsTileImpassable(gX.Int, gY.Int - 16)					// top
+		|| IsTileImpassable(gX.Int, gY.Int + 16)					// bottom
+		|| IsTileImpassable(gX.Int - 16, gY.Int)					// left
+		|| IsTileImpassable(gX.Int + 16, gY.Int))					// right
 	{
+		// if water or death, then move to old coords
 		gX = gThisNodePtr->OldX;
 		gY = gThisNodePtr->OldY;
 	}
-	else
-	{
-							/* CHECK BOTTOM */
 
-		tileAttribs = GetFullMapTileAttribs(gX.Int,gY.Int+16);		// get attribs of center tile
-		GAME_ASSERT(tileAttribs);
-		bits = tileAttribs->bits;
-
-		if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
-		{
-			gX = gThisNodePtr->OldX;
-			gY = gThisNodePtr->OldY;
-		}
-		else
-		{
-								/* CHECK LEFT */
-
-			tileAttribs = GetFullMapTileAttribs(gX.Int-16,gY.Int);		// get attribs of center tile
-			GAME_ASSERT(tileAttribs);
-			bits = tileAttribs->bits;
-
-			if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
-			{
-				gX = gThisNodePtr->OldX;
-				gY = gThisNodePtr->OldY;
-			}
-			else
-			{
-									/* CHECK RIGHT */
-
-				tileAttribs = GetFullMapTileAttribs(gX.Int+16,gY.Int);		// get attribs of center tile
-				GAME_ASSERT(tileAttribs);
-				bits = tileAttribs->bits;
-
-				if (bits & (TILE_ATTRIB_WATER|TILE_ATTRIB_DEATH))			// if water or death, then move to old coords
-				{
-					gX = gThisNodePtr->OldX;
-					gY = gThisNodePtr->OldY;
-				}
-			}
-		}
-	}
-
-	return(false);
+	return false;
 }
 
 

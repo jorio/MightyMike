@@ -1147,7 +1147,7 @@ Boolean TrackItem(void)
 // Returns the alternate tile # at the given coordinates
 //
 
-Byte GetAlternateTileInfo(unsigned short x, unsigned short y)
+Byte GetAlternateTileInfo(uint16_t x, uint16_t y)
 {
 	if ((y >= gPlayfieldHeight) || (x >= gPlayfieldWidth))		// check for bounds error (automatically checks for <0)
 		return 0;
@@ -1161,7 +1161,7 @@ Byte GetAlternateTileInfo(unsigned short x, unsigned short y)
 // Returns the attrib bits of the tile @ x,y
 //
 
-unsigned short GetMapTileAttribs(unsigned short x, unsigned short y)
+uint16_t GetMapTileAttribs(uint16_t x, uint16_t y)
 {
 	if ((y >= gPlayfieldHeight) || (x >= gPlayfieldWidth))		// check for bounds error  (automatically checks for <0)
 		return(0);
@@ -1176,7 +1176,7 @@ unsigned short GetMapTileAttribs(unsigned short x, unsigned short y)
 //
 //
 
-TileAttribType *GetFullMapTileAttribs(unsigned short x, unsigned short y)
+const TileAttribType *GetFullMapTileAttribs(uint16_t x, uint16_t y)
 {
 	if ((y >= gPlayfieldHeight) || (x >= gPlayfieldWidth))		// check for bounds error  (automatically checks for <0)
 		return(nil);
