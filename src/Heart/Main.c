@@ -259,6 +259,8 @@ void LoadAreaArt(void)
 
 static void UpdateSimAndRenderFixedFrame(void)
 {
+	static uint32_t oldTick = 0;
+
 	gTweenFrameFactor.L			= 0x00010000;				// reset frame interpolation (factor=1: force new coordinates)
 	gOneMinusTweenFrameFactor.L	= 0x00000000;
 
@@ -275,7 +277,15 @@ static void UpdateSimAndRenderFixedFrame(void)
 	UpdateInfoBar();
 	EraseObjects();
 	PresentIndexedFramebuffer();
-	RegulateSpeed(GAME_SPEED_MICROSECONDS);
+
+	// Regulate speed
+	uint32_t tick = SDL_GetTicks();
+	while ((tick - oldTick) < GAME_SPEED_SDL)
+	{
+		SDL_Delay(2);
+		tick = SDL_GetTicks();
+	}
+	oldTick = tick;
 }
 
 
