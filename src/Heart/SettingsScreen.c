@@ -362,6 +362,52 @@ static void ForceUpdateBackground(void)
 	AddUpdateRegion(r, CLIP_REGION_PLAYFIELD);
 }
 
+static void RemapRedToGray(int row)
+{
+	static bool remapTableReady = false;
+	static uint8_t r[256];
+
+	if (!remapTableReady)
+	{
+		for (int i = 0; i < 256; i++)
+		{
+			r[i] = i;
+		}
+
+		r[  7] = 246;
+		r[ 14] = 245;
+		r[ 21] = 246;
+		r[ 28] = 247;
+		r[ 35] = 247;
+		r[107] = 250;
+		r[143] = 253;
+		r[179] = 253;
+		r[215] = 248;
+		r[216] = 248;
+		r[217] = 249;
+		r[218] = 250;
+		r[219] = 251;
+		r[220] = 252;
+		r[221] = 253;
+		r[222] = 253;
+		r[223] = 254;
+		r[224] = 254;
+		remapTableReady = true;
+	}
+
+	uint8_t* pixels = (uint8_t*) *gBackgroundHandle;
+	pixels += (gMenuRowYs[row] - 10) * OFFSCREEN_WIDTH;
+
+	int maxRow = row + 24;
+
+	for (; row < maxRow; row++)
+		for (int x = 0; x < OFFSCREEN_WIDTH; x++)
+		{
+			*pixels = r[*pixels];
+			pixels++;
+		}
+}
+
 /****************************/
 /*    CALLBACKS             */
 /****************************/
@@ -1024,6 +1070,8 @@ static void LayOutMenu(MenuItem* menu)
 
 			case kMenuItem_Label:
 				MakeTextAtRowCol(entry->label, row, 0, 0);
+				if (row != 0)
+					RemapRedToGray(row);
 				break;
 
 			case kMenuItem_Action:
@@ -1036,6 +1084,7 @@ static void LayOutMenu(MenuItem* menu)
 
 			case kMenuItem_Cycler:
 				MakeTextAtRowCol(entry->cycler.caption, row, 0, 0);
+				RemapRedToGray(row);
 				if (entry->cycler.numChoices > 0)
 				{
 					const char* choiceCaption = entry->cycler.choices[*entry->cycler.valuePtr];
@@ -1045,6 +1094,7 @@ static void LayOutMenu(MenuItem* menu)
 
 			case kMenuItem_KeyBinding:
 				MakeTextAtRowCol(kInputNeedCaptions[entry->kb], row, 0, 0);
+				RemapRedToGray(row);
 				for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
 				{
 					MakeTextAtRowCol(GetKeyBindingName(row, j), row, j + 1, textObjectFlags);
@@ -1053,6 +1103,7 @@ static void LayOutMenu(MenuItem* menu)
 
 			case kMenuItem_PadBinding:
 				MakeTextAtRowCol(kInputNeedCaptions[entry->kb], row, 0, 0);
+				RemapRedToGray(row);
 				for (int j = 0; j < KEYBINDING_MAX_GAMEPAD_BUTTONS; j++)
 				{
 					MakeTextAtRowCol(GetPadBindingName(row, j), row, j + 1, textObjectFlags);
@@ -1082,7 +1133,7 @@ static void LayOutMenu(MenuItem* menu)
 
 static void DrawDitheringPattern(void)
 {
-	Ptr ditheringPatternPlot = *gBackgroundHandle;
+	uint8_t* ditheringPatternPlot = (uint8_t*) *gBackgroundHandle;
 	ditheringPatternPlot += (gScreenYOffset + gMenuRowYs[8] - kRowHeight/3) * OFFSCREEN_WIDTH;
 	ditheringPatternPlot += gScreenXOffset + kColumnX[1];
 	for (int y = 0; y <= 2*kRowHeight/3; y++)

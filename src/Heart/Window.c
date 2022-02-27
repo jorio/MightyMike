@@ -464,11 +464,13 @@ void PresentIndexedFramebuffer(void)
 		return;
 	}
 
+#if _DEBUG
 	// Check screenshot key
-//	if (CheckNewKeyDown2(kVK_F12, &kdScreenshot))
-//	{
-//		SaveIndexedScreenshot();
-//	}
+	if (GetNewSDLKeyState(SDL_SCANCODE_F12))
+	{
+		SaveIndexedScreenshot();
+	}
+#endif
 
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
