@@ -564,6 +564,8 @@ void SetFullscreenMode(bool enforceDisplayPref)
 
 	SetOptimalWindowSize();
 	OnChangeIntegerScaling();
+
+	SDL_ShowCursor(gGamePrefs.displayMode == kDisplayMode_Windowed? 1: 0);
 }
 
 int GetMaxIntegerZoom(void)

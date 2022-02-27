@@ -596,8 +596,8 @@ const int	quitY = gGamePrefs.pfSize == PFSIZE_SMALL ? 220 : ((VISIBLE_HEIGHT-64)
 
 		if (GetNewNeedState(kNeed_UIBack) || GetNewNeedState(kNeed_UIPause))		// see if resume via ESC
 		{
-			EraseStore();
-			return false;
+			selection = 1;
+			break;
 		}
 
 					/* SEE IF RESUME */
@@ -615,6 +615,7 @@ const int	quitY = gGamePrefs.pfSize == PFSIZE_SMALL ? 220 : ((VISIBLE_HEIGHT-64)
 			selection = 0;
 		}
 	}
+
 	EraseStore();
 
 	return(!selection);

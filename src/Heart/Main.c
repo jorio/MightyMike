@@ -1382,7 +1382,6 @@ void GameMain(void)
 	MakeGameWindow();	// now called by ApplyPrefs
 
 	InitInput();                                    // init ISp
-	SDL_ShowCursor(0);
 	InitPaletteStuff();
 	CreatePlayfieldPermanentMemory();				// init permanent playfield stuff
 	InitObjectManager();							// call this just to allocate memory
