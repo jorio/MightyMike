@@ -21,6 +21,7 @@
 #include "objecttypes.h"
 #include "cinema.h"
 #include "externs.h"
+#include "main.h"
 
 /****************************/
 /*    PROTOTYPES             */
@@ -149,6 +150,8 @@ static Boolean beenHereFlag = false;
 	if (beenHereFlag)								// see if already been called
 		goto	exit;
 
+	CleanMemory();
+	ZapAllSounds();
 	CleanupDisplay();								// unloads Draw Sprocket
 
 exit:

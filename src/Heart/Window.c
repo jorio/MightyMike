@@ -25,6 +25,7 @@
 /*    PROTOTYPES            */
 /****************************/
 
+static void DisposeScreenBuffers(void);
 static void InitScreenBuffers(void);
 
 
@@ -174,12 +175,9 @@ Rect	r;
 	BlankScreenArea(r);
 }
 
-/********************* INIT SCREEN BUFFERS ***********************/
-//
-// Create the Offscreen & Background buffers with xlate tables
-//
+/********************* DISPOSE SCREEN BUFFERS ***********************/
 
-void InitScreenBuffers(void)
+static void DisposeScreenBuffers(void)
 {
 	CHECKED_DISPOSEPTR(gIndexedFramebuffer);
 	CHECKED_DISPOSEPTR(gRGBAFramebuffer);
@@ -190,6 +188,8 @@ void InitScreenBuffers(void)
 	CHECKED_DISPOSEPTR(gOffScreenLookUpTable);
 	CHECKED_DISPOSEPTR(gBackgroundLookUpTable);
 
+	CHECKED_DISPOSEPTR(gScreenLookUpTable);
+
 	CHECKED_DISPOSEPTR(gPFLookUpTable);
 	CHECKED_DISPOSEPTR(gPFCopyLookUpTable);
 	CHECKED_DISPOSEPTR(gPFMaskLookUpTable);
@@ -199,6 +199,17 @@ void InitScreenBuffers(void)
 	CHECKED_DISPOSEHANDLE(gPFMaskBufferHandle);
 
 	CHECKED_DISPOSEPTR(gRowDitherStrides);
+}
+
+/********************* INIT SCREEN BUFFERS ***********************/
+//
+// Create the Offscreen & Background buffers with xlate tables
+//
+//
+
+static void InitScreenBuffers(void)
+{
+	DisposeScreenBuffers();
 
 					/* MAKE INDEXED FRAMEBUFFER */
 
@@ -267,6 +278,7 @@ void InitScreenBuffers(void)
 					/* BUILD SCREEN LOOKUP TABLE */
 
 	gScreenLookUpTable = (uint8_t**) NewPtrClear(sizeof(uint8_t*) * VISIBLE_HEIGHT);
+	GAME_ASSERT(gScreenLookUpTable);
 	for (int i = 0; i < VISIBLE_HEIGHT; i++)
 	{
 		gScreenLookUpTable[i] = gIndexedFramebuffer + (VISIBLE_WIDTH * i);
@@ -379,11 +391,12 @@ void SetScreenOffsetFor640x480(void)
 void CleanupDisplay(void)
 {
 	ShutdownRenderThreads();
+	DisposeScreenBuffers();
 
-	if (gRowDitherStrides != nil)
+	if (gSDLTexture)
 	{
-		DisposePtr((Ptr) gRowDitherStrides);
-		gRowDitherStrides = nil;
+		SDL_DestroyTexture(gSDLTexture);
+		gSDLTexture = NULL;
 	}
 }
 

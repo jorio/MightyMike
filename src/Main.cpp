@@ -127,6 +127,18 @@ int CommonMain(int argc, const char** argv)
 	// Clean up
 	Pomme::Shutdown();
 
+	if (gSDLRenderer)
+	{
+		SDL_DestroyRenderer(gSDLRenderer);
+		gSDLRenderer = nullptr;
+	}
+
+	if (gSDLWindow)
+	{
+		SDL_DestroyWindow(gSDLWindow);
+		gSDLWindow = nullptr;
+	}
+
 	return 0;
 }
 
