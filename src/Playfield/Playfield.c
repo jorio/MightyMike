@@ -216,36 +216,7 @@ void OnChangePlayfieldSize(void)
 
 	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
 
-	Uint32 windowFlags = SDL_GetWindowFlags(gSDLWindow);
-	SDL_RestoreWindow(gSDLWindow);
-
-	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
-	SDL_Rect displayBounds = {.x=0, .y=0, .w=640, .h=480};
-	SDL_GetDisplayUsableBounds(currentDisplay, &displayBounds);
-
-	int maxZoomX = displayBounds.w / VISIBLE_WIDTH;
-	int maxZoomY = displayBounds.h / VISIBLE_HEIGHT;
-	int maxZoom = maxZoomX < maxZoomY ? maxZoomX : maxZoomY;
-	if (maxZoom <= 0)
-		maxZoom = 1;
-
-	int zoom;
-	int wantedZoom = gGamePrefs.windowedZoom;
-	if (wantedZoom == 0)	// automatic
-	{
-		zoom = maxZoom;
-	}
-	else
-	{
-		zoom = maxZoom < wantedZoom ? maxZoom : wantedZoom;
-	}
-
-	SDL_SetWindowSize(gSDLWindow, VISIBLE_WIDTH * zoom, VISIBLE_HEIGHT * zoom);
-	SDL_SetWindowPosition(gSDLWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	if (windowFlags & SDL_WINDOW_MAXIMIZED)
-	{
-		SDL_MaximizeWindow(gSDLWindow);
-	}
+	SetOptimalWindowSize();
 
 	MakeGameWindow();
 

@@ -97,8 +97,6 @@ void UpdateInput(void)
 	/* DO SDL MAINTENANCE */
 	/**********************/
 
-//	MouseSmoothing_StartFrame();
-
 	int mouseWheelDelta = 0;
 
 	SDL_PumpEvents();
@@ -119,29 +117,8 @@ void UpdateInput(void)
 				return;
 
 			case SDL_WINDOWEVENT_RESIZED:
-				if (gGamePrefs.scalingType == kScaling_PixelPerfect)
-				{
-					OnChangeIntegerScaling();
-				}
-
+				OnChangeIntegerScaling();
 				break;
-
-				/*
-									case SDL_WINDOWEVENT_FOCUS_LOST:
-				#if __APPLE__
-										// On Mac, always restore system mouse accel if cmd-tabbing away from the game
-										RestoreMacMouseAcceleration();
-				#endif
-										break;
-
-									case SDL_WINDOWEVENT_FOCUS_GAINED:
-				#if __APPLE__
-										// On Mac, kill mouse accel when focus is regained only if the game has captured the mouse
-										if (SDL_GetRelativeMouseMode())
-											KillMacMouseAcceleration();
-				#endif
-										break;
-				*/
 			}
 			break;
 
@@ -149,15 +126,6 @@ void UpdateInput(void)
 			memcpy(gTextInput, event.text.text, sizeof(gTextInput));
 			_Static_assert(sizeof(gTextInput) == sizeof(event.text.text), "size mismatch: gTextInput / event.text.text");
 			break;
-
-			/*
-						case SDL_MOUSEMOTION:
-							if (!gEatMouse)
-							{
-								MouseSmoothing_OnMouseMotion(&event.motion);
-							}
-							break;
-			*/
 
 		case SDL_JOYDEVICEADDED:	 // event.jdevice.which is the joy's INDEX (not an instance id!)
 			TryOpenController(false);

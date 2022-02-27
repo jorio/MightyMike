@@ -187,7 +187,7 @@ static void Convert(int threadNum, int firstRow, int numRows)
 	else
 		ConvertIndexedFramebufferToRGBA_NoFilter(firstRow, numRows);
 
-	if (gGamePrefs.scalingType == kScaling_HQStretch)
+	if (gEffectiveScalingType == kScaling_HQStretch)
 		DoublePixels(firstRow, numRows);
 }
 

@@ -33,6 +33,9 @@ static void InitScreenBuffers(void);
 /*    CONSTANTS             */
 /****************************/
 
+#define kHQStretchMinZoom 1.66f
+#define kWiggleRoomCloseEnoughToIntScaling 16
+
 
 /**********************/
 /*     VARIABLES      */
@@ -45,6 +48,8 @@ int				VISIBLE_HEIGHT = 480;
 uint8_t*		gIndexedFramebuffer = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT]
 uint8_t*		gRGBAFramebuffer = nil;			// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4]
 uint8_t*		gRGBAFramebufferX2 = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4 * 4]
+
+int				gEffectiveScalingType = kScaling_Stretch;
 
 uint8_t*		gRowDitherStrides = nil;		// for dithering filter
 
@@ -473,7 +478,7 @@ void PresentIndexedFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Update SDL texture and swap buffers
 
-	if (gGamePrefs.scalingType == kScaling_HQStretch)
+	if (gEffectiveScalingType == kScaling_HQStretch)
 		SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebufferX2, VISIBLE_WIDTH*4*2);
 	else
 		SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
@@ -494,8 +499,9 @@ void PresentIndexedFramebuffer(void)
 			float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 			snprintf(
 					gDebugTextBuffer, sizeof(gDebugTextBuffer),
-					"Mighty Mike %s - thr:%d - fps:%d - objs:%ld - x:%ld y:%ld",
+					"Mighty Mike %s - scale:%c thr:%d fps:%d objs:%ld x:%ld y:%ld",
 					PROJECT_VERSION,
+					'A' + gEffectiveScalingType,
 					gNumThreads,
 					(int)roundf(fps),
 					NumObjects,
@@ -512,39 +518,102 @@ void PresentIndexedFramebuffer(void)
 void SetFullscreenMode(void)
 {
 	SDL_SetWindowFullscreen(gSDLWindow, gGamePrefs.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	SetOptimalWindowSize();
+}
+
+void SetOptimalWindowSize(void)
+{
+	Uint32 windowFlags = SDL_GetWindowFlags(gSDLWindow);
+	SDL_RestoreWindow(gSDLWindow);
+
+	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+	SDL_Rect displayBounds = {.x=0, .y=0, .w=640, .h=480};
+	SDL_GetDisplayUsableBounds(currentDisplay, &displayBounds);
+
+	int maxZoomX = displayBounds.w / VISIBLE_WIDTH;
+	int maxZoomY = displayBounds.h / VISIBLE_HEIGHT;
+	int maxZoom = maxZoomX < maxZoomY ? maxZoomX : maxZoomY;
+	if (maxZoom <= 0)
+	{
+		maxZoom = 1;
+	}
+
+	int zoom;
+	int wantedZoom = gGamePrefs.windowedZoom;
+	if (wantedZoom == 0)	// automatic
+	{
+		zoom = maxZoom;
+	}
+	else
+	{
+		zoom = maxZoom < wantedZoom ? maxZoom : wantedZoom;
+		windowFlags &= ~SDL_WINDOW_MAXIMIZED;
+	}
+
+	SDL_SetWindowSize(gSDLWindow, VISIBLE_WIDTH * zoom, VISIBLE_HEIGHT * zoom);
+	SDL_SetWindowPosition(gSDLWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+
+	if (windowFlags & SDL_WINDOW_MAXIMIZED)
+	{
+		SDL_MaximizeWindow(gSDLWindow);
+	}
+}
+
+static int GetEffectiveScalingType(void)
+{
+	int windowWidth = VISIBLE_WIDTH;
+	int windowHeight = VISIBLE_HEIGHT;
+	SDL_GetWindowSize(gSDLWindow, &windowWidth, &windowHeight);
+
+	if (windowWidth < VISIBLE_WIDTH || windowHeight < VISIBLE_HEIGHT)
+	{
+		// If the window is smaller than the logical size,
+		// SDL_RenderSetIntegerScale will cause the window to go black.
+		return kScaling_Stretch;
+	}
+	else if (gGamePrefs.scalingType == kScaling_HQStretch)
+	{
+		float zoomX = windowWidth / (float)VISIBLE_WIDTH;
+		float zoomY = windowHeight / (float)VISIBLE_HEIGHT;
+		float uniformZoom = 0;
+		float distanceToIntegerZoom = 0;
+
+		if (zoomX < zoomY)
+		{
+			uniformZoom = zoomX;
+			distanceToIntegerZoom = windowWidth - ((int)zoomX * VISIBLE_WIDTH);
+		}
+		else
+		{
+			uniformZoom = zoomY;
+			distanceToIntegerZoom = windowHeight - ((int)zoomY * VISIBLE_HEIGHT);
+		}
+
+		if (distanceToIntegerZoom >= 0 && distanceToIntegerZoom <= kWiggleRoomCloseEnoughToIntScaling)
+		{
+			return kScaling_PixelPerfect;
+		}
+		else if (uniformZoom <= kHQStretchMinZoom)  // HQStretch doesn't look to good at 1x-1.5x zoom levels
+		{
+			return kScaling_Stretch;
+		}
+		else
+		{
+			return kScaling_HQStretch;
+		}
+	}
+	else
+	{
+		return gGamePrefs.scalingType;
+	}
 }
 
 void OnChangeIntegerScaling(void)
 {
-	bool crisp = true;
-	int multiplier = 1;
+	gEffectiveScalingType = GetEffectiveScalingType();
 
-	if (gGamePrefs.scalingType == kScaling_HQStretch || gGamePrefs.scalingType == kScaling_Stretch)
-	{
-		// Stretch: don't use nearest-neighbor
-		crisp = false;
-
-		// HQ stretch
-		if (gGamePrefs.scalingType == kScaling_HQStretch)
-			multiplier = 2;
-	}
-	else
-	{
-		int windowWidth = VISIBLE_WIDTH;
-		int windowHeight = VISIBLE_HEIGHT;
-		SDL_GetWindowSize(gSDLWindow, &windowWidth, &windowHeight);
-
-		if (windowWidth < VISIBLE_WIDTH || windowHeight < VISIBLE_HEIGHT)
-		{
-			// If the window is smaller than the logical size,
-			// SDL_RenderSetIntegerScale will cause the window to go black.
-			crisp = false;
-		}
-		else
-		{
-			crisp = true;
-		}
-	}
+	bool crisp = (gEffectiveScalingType == kScaling_PixelPerfect);
+	int textureSizeMultiplier = (gEffectiveScalingType == kScaling_HQStretch) ? 2 : 1;
 
 	// Nuke old texture
 	if (gSDLTexture)
@@ -561,9 +630,8 @@ void OnChangeIntegerScaling(void)
 			gSDLRenderer,
 			SDL_PIXELFORMAT_RGBA8888,
 			SDL_TEXTUREACCESS_STREAMING,
-			VISIBLE_WIDTH * multiplier,
-			VISIBLE_HEIGHT * multiplier
-			);
+			VISIBLE_WIDTH * textureSizeMultiplier,
+			VISIBLE_HEIGHT * textureSizeMultiplier);
 	GAME_ASSERT(gSDLTexture);
 
 	// Set integer scaling setting
