@@ -931,7 +931,7 @@ ignore_solid:
 
 void HandleMyCenter(void)
 {
-register TileAttribType *tileAttribs;
+const TileAttribType* tileAttribs;
 register unsigned short	bits;
 
 	if (gMyNodePtr->MPlatform)								// ignore center info if on mplatform

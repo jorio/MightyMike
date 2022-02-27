@@ -457,7 +457,7 @@ Byte	gCarSpeeds[] = {12,4,6,8,10,12,14,16,18,20,22,24,26,28};
 Boolean AddRaceCar(ObjectEntryType *itemPtr)
 {
 register	ObjNode		*newObj;
-TileAttribType	*newTile;
+const TileAttribType	*newTile;
 
 
 	newObj = MakeNewShape(GroupNum_RaceCar,ObjType_RaceCar,0,
@@ -505,10 +505,10 @@ void MoveRaceCar(void)
 {
 short	trackIndex,currentTrack,oldAim,newAim;
 short	xOff,yOff,oldX,oldY;
-static	int nextOffsetsY[8] = {-TILE_SIZE,-TILE_SIZE,0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE};
-static	int nextOffsetsX[8] = {0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE,-TILE_SIZE,-TILE_SIZE};
-TileAttribType	*newTile;
-static	int aimXlate[16] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
+const TileAttribType* newTile;
+static const int nextOffsetsY[8] = {-TILE_SIZE,-TILE_SIZE,0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE};
+static const int nextOffsetsX[8] = {0,TILE_SIZE,TILE_SIZE,TILE_SIZE,0,-TILE_SIZE,-TILE_SIZE,-TILE_SIZE};
+static const int aimXlate[16] = {8,9,10,11,12,13,14,15,0,1,2,3,4,5,6,7};
 
 
 
