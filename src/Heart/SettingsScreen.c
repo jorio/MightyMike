@@ -27,6 +27,9 @@
 #include <ctype.h>
 #include <string.h>
 
+#define MAX_CHOICES 16
+#define MAX_ENTRIES_PER_MENU 25
+
 /****************************/
 /*    PROTOTYPES            */
 /****************************/
@@ -69,7 +72,7 @@ typedef struct MenuItem
 			void			(*callback)(void);
 			Byte*			valuePtr;
 			unsigned int	numChoices;
-			const char*		choices[8];
+			const char*		choices[MAX_CHOICES];
 		} cycler;
 
 		int 				kb;
@@ -91,8 +94,6 @@ static void DrawDitheringPattern(void);
 /****************************/
 /*    CONSTANTS             */
 /****************************/
-
-#define MAX_ENTRIES_PER_MENU 25
 
 static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 {
@@ -164,7 +165,7 @@ static MenuItem gVideoMenu[] =
 			.valuePtr = &gGamePrefs.windowedZoom,
 			.callback = OnChangePlayfieldSizeViaSettings,
 			.numChoices = 5,
-			.choices = { "automatic", "1x", "2x", "3x", "4x" },
+			.choices = { "automatic", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x", "11x", "12x", "13x", "14x", "15x" },
 		}
 	},
 	{ .type = kMenuItem_Separator },
@@ -353,6 +354,25 @@ static void ForceUpdateBackground(void)
 	AddUpdateRegion(r, CLIP_REGION_PLAYFIELD);
 }
 
+static int FindRowControlling(Byte* valuePtr)
+{
+	for (int i = 0; i < MAX_ENTRIES_PER_MENU; i++)
+	{
+		const MenuItem* m = &gMenu[i];
+
+		if (m->type == kMenuItem_END_SENTINEL)
+		{
+			return -1;
+		}
+		else if (m->type == kMenuItem_Cycler && m->cycler.valuePtr == valuePtr)
+		{
+			return i;
+		}
+	}
+
+	return -1;
+}
+
 static void RemapRedToGray(int row)
 {
 	static bool remapTableReady = false;
@@ -397,6 +417,20 @@ static void RemapRedToGray(int row)
 			*pixels = r[*pixels];
 			pixels++;
 		}
+}
+
+static void OnMenuEntered(void)
+{
+	if (gMenu == gVideoMenu)
+	{
+		int windowedZoomRow = FindRowControlling(&gGamePrefs.windowedZoom);
+		GAME_ASSERT(windowedZoomRow >= 0);
+
+		int numChoices = 1 + GetMaxIntegerZoom();
+		if (numChoices > MAX_CHOICES)
+			numChoices = MAX_CHOICES;
+		gMenu[windowedZoomRow].cycler.numChoices = numChoices;
+	}
 }
 
 /****************************/
@@ -1044,6 +1078,8 @@ static void LayOutMenu(MenuItem* menu)
 		memset(*gBackgroundHandle + y*OFFSCREEN_WIDTH, y%256, OFFSCREEN_WIDTH);
 #endif
 
+	OnMenuEntered();
+
 	int y = kRowY0;
 
 	for (int row = 0; menu[row].type != kMenuItem_END_SENTINEL; row++)
@@ -1124,8 +1160,11 @@ static void LayOutMenu(MenuItem* menu)
 
 static void DrawDitheringPattern(void)
 {
+	int row = FindRowControlling(&gGamePrefs.filterDithering);
+	GAME_ASSERT(row >= 0);
+
 	uint8_t* ditheringPatternPlot = (uint8_t*) *gBackgroundHandle;
-	ditheringPatternPlot += (gScreenYOffset + gMenuRowYs[8] - kRowHeight/3) * OFFSCREEN_WIDTH;
+	ditheringPatternPlot += (gScreenYOffset + gMenuRowYs[row] - kRowHeight/3) * OFFSCREEN_WIDTH;
 	ditheringPatternPlot += gScreenXOffset + kColumnX[1];
 	for (int y = 0; y <= 2*kRowHeight/3; y++)
 	{
