@@ -22,6 +22,7 @@
 #include "version.h"
 #include "externs.h"
 #include "font.h"
+#include "version.h"
 #include <SDL.h>
 #include <ctype.h>
 #include <string.h>
@@ -411,7 +412,7 @@ static void OnChangePlayfieldSizeViaSettings(void)
 
 static void OnChangeDebugInfoInTitleBar(void)
 {
-	SDL_SetWindowTitle(gSDLWindow, "Mighty Mike");
+	SDL_SetWindowTitle(gSDLWindow, "Mighty Mike " PROJECT_VERSION);
 }
 
 static void OnResetKeys(void)

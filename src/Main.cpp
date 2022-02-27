@@ -12,6 +12,8 @@
 #include <unistd.h>
 #endif
 
+#include "version.h"
+
 extern "C"
 {
 	// Satisfy externs in game code
@@ -80,7 +82,7 @@ int CommonMain(int argc, const char** argv)
 
 	// Create window
 	gSDLWindow = SDL_CreateWindow(
-			"Mighty Mike",
+			"Mighty Mike " PROJECT_VERSION,
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
 			640,
