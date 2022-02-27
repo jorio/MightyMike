@@ -820,7 +820,7 @@ SaveGameFile	saveGame;
 		area = gAreaNum;
 		scene = gSceneNum;
 	}
-	
+
 					/*************************/
 					/* PREPARE DATA TO WRITE */
 					/*************************/
@@ -946,9 +946,9 @@ SaveGameFile	saveGame;
 
 	if (0 != strncmp(saveGame.magic, SAVEGAMEFILE_MAGIC, sizeof(saveGame.magic)))
 		GAME_ASSERT_MESSAGE(false, "Save File has incorrect magic header.");
-	
+
 	_Static_assert(sizeof(gMyWeapons) == sizeof(saveGame.myWeapons), "size mismatch: weapons on disk vs in memory");
-	
+
 	memcpy(gMyWeapons, saveGame.myWeapons, sizeof(saveGame.myWeapons));
 	gScore					= saveGame.score;
 	gNumCoins				= saveGame.numCoins;
@@ -962,7 +962,7 @@ SaveGameFile	saveGame;
 	gMyMaxHealth			= saveGame.myMaxHealth;
 	gDifficultySetting		= saveGame.difficultySetting;
 
-	
+
 	gIsASavedGame[gCurrentPlayer] = true;					// it exists
 
 	if (gAreaNum >= 3)
@@ -1256,10 +1256,9 @@ static void InitDefaultPrefs(void)
 	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
 	gGamePrefs.interlaceMode = false;
 	gGamePrefs.difficulty = DIFFICULTY_NORMAL;
-	gGamePrefs.fullscreen = true;
-	gGamePrefs.windowedZoom = 0;	// automatic
 	gGamePrefs.pfSize = PFSIZE_WIDE;
-	gGamePrefs.scalingType = kScaling_HQStretch;
+	gGamePrefs.displayMode = kDisplayMode_FullscreenStretched;
+	gGamePrefs.windowedZoom = 0;	// automatic
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.filterDithering = true;
 	gGamePrefs.music = true;
@@ -1283,13 +1282,13 @@ short		refNum;
 FSSpec		file;
 long		count;
 PrefsType	prefs;
-				
+
 				/*************/
 				/* READ FILE */
 				/*************/
-					
+
 	FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID, ":MightyMike:Prefs", &file);
-	iErr = FSpOpenDF(&file, fsRdPerm, &refNum);	
+	iErr = FSpOpenDF(&file, fsRdPerm, &refNum);
 	if (iErr)
 		return iErr;
 
@@ -1326,7 +1325,7 @@ PrefsType	prefs;
 	);
 
 	gGamePrefs = prefs;
-	
+
 	return noErr;
 }
 
@@ -1349,7 +1348,7 @@ long				count;
 		return;
 
 				/* OPEN FILE */
-					
+
 	iErr = FSpOpenDF(&file, fsRdWrPerm, &refNum);
 	if (iErr)
 	{

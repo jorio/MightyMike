@@ -282,9 +282,8 @@ struct PrefsType
 	char		magic[32];
 	Boolean		interlaceMode;
 	Byte		difficulty;
-	Boolean		fullscreen;
 	Byte		pfSize;
-	Byte		scalingType;
+	Byte		displayMode;
 	Byte		windowedZoom;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
@@ -298,7 +297,7 @@ struct PrefsType
 };
 typedef struct PrefsType PrefsType;
 
-#define PREFS_MAGIC "Mighty Mike Prefs v2"
+#define PREFS_MAGIC "Mighty Mike Prefs v3"
 
 #endif
 

@@ -496,7 +496,7 @@ void PresentIndexedFramebuffer(void)
 	uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
 	if (ticksElapsed >= kDebugTextUpdateInterval)
 	{
-		if (gGamePrefs.debugInfoInTitleBar && !gGamePrefs.fullscreen)
+		if (gGamePrefs.debugInfoInTitleBar && gGamePrefs.displayMode == kDisplayMode_Windowed)
 		{
 			float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 			snprintf(
@@ -519,8 +519,9 @@ void PresentIndexedFramebuffer(void)
 
 void SetFullscreenMode(void)
 {
-	SDL_SetWindowFullscreen(gSDLWindow, gGamePrefs.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0);
+	SDL_SetWindowFullscreen(gSDLWindow, gGamePrefs.displayMode == kDisplayMode_Windowed ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
 	SetOptimalWindowSize();
+	OnChangeIntegerScaling();
 }
 
 void SetOptimalWindowSize(void)
@@ -540,16 +541,15 @@ void SetOptimalWindowSize(void)
 		maxZoom = 1;
 	}
 
-	int zoom;
-	int wantedZoom = gGamePrefs.windowedZoom;
-	if (wantedZoom == 0)	// automatic
+	int zoom = maxZoom;
+	if (gGamePrefs.displayMode == kDisplayMode_Windowed)
 	{
-		zoom = maxZoom;
-	}
-	else
-	{
-		zoom = maxZoom < wantedZoom ? maxZoom : wantedZoom;
-		windowFlags &= ~SDL_WINDOW_MAXIMIZED;
+		int wantedZoom = gGamePrefs.windowedZoom;
+		if (wantedZoom != 0)	// 0 is automatic
+		{
+			zoom = maxZoom < wantedZoom ? maxZoom : wantedZoom;
+			windowFlags &= ~SDL_WINDOW_MAXIMIZED;  // don't restore maximized state if a hard zoom limit is set
+		}
 	}
 
 	SDL_SetWindowSize(gSDLWindow, VISIBLE_WIDTH * zoom, VISIBLE_HEIGHT * zoom);
@@ -573,7 +573,11 @@ static int GetEffectiveScalingType(void)
 		// SDL_RenderSetIntegerScale will cause the window to go black.
 		return kScaling_Stretch;
 	}
-	else if (gGamePrefs.scalingType == kScaling_HQStretch)
+	else if (gGamePrefs.displayMode == kDisplayMode_FullscreenCrisp)
+	{
+		return kScaling_PixelPerfect;
+	}
+	else
 	{
 		float zoomX = windowWidth / (float)VISIBLE_WIDTH;
 		float zoomY = windowHeight / (float)VISIBLE_HEIGHT;
@@ -603,10 +607,6 @@ static int GetEffectiveScalingType(void)
 		{
 			return kScaling_HQStretch;
 		}
-	}
-	else
-	{
-		return gGamePrefs.scalingType;
 	}
 }
 

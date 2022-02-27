@@ -225,10 +225,25 @@ void UpdateInput(void)
 		UpdateKeyState(&gNeedStates[i], downNow);
 	}
 
-
 	if (GetNewNeedState(kNeed_ToggleFullscreen))
 	{
-		gGamePrefs.fullscreen = gGamePrefs.fullscreen ? 0 : 1;
+#if 0
+		gGamePrefs.displayMode++;
+		gGamePrefs.displayMode %= kDisplayMode_COUNT;
+#else
+		static int previousFullscreenSetting = kDisplayMode_FullscreenStretched;
+
+		if (gGamePrefs.displayMode == kDisplayMode_Windowed)
+		{
+			gGamePrefs.displayMode = previousFullscreenSetting;
+		}
+		else
+		{
+			previousFullscreenSetting = gGamePrefs.displayMode;
+			gGamePrefs.displayMode = kDisplayMode_Windowed;
+		}
+#endif
+
 		SetFullscreenMode();
 	}
 }

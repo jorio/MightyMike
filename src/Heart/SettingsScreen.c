@@ -133,38 +133,7 @@ static MenuItem gVideoMenu[] =
 			.callback = OnChangePlayfieldSizeViaSettings,
 			.valuePtr = &gGamePrefs.pfSize,
 			.numChoices = 3,
-			.choices = { "small: 68k original", "medium: ppc original", "large: widescreen" },
-		}
-	},
-	{ .type = kMenuItem_Separator },
-	{
-		.type = kMenuItem_Cycler, .cycler =
-		{
-			.caption = "fullscreen",
-			.callback = SetFullscreenMode,
-			.valuePtr = &gGamePrefs.fullscreen,
-			.numChoices = 2,
-			.choices = {"no", "yes"},
-		},
-	},
-	{
-		.type = kMenuItem_Cycler, .cycler =
-		{
-			.caption = "windowed zoom",
-			.valuePtr = &gGamePrefs.windowedZoom,
-			.callback = OnChangePlayfieldSizeViaSettings,
-			.numChoices = 5,
-			.choices = { "automatic", "1x", "up to 2x", "up to 3x", "up to 4x" },
-		}
-	},
-	{
-		.type = kMenuItem_Cycler, .cycler =
-		{
-			.caption = "upscaling",
-			.callback = OnChangeIntegerScaling,
-			.valuePtr = &gGamePrefs.scalingType,
-			.numChoices = 3,
-			.choices = { "integer scaling", "fast stretch", "hq stretch" },
+			.choices = { "small, 68k original", "medium, ppc original", "extended, widescreen" },
 		}
 	},
 	{
@@ -174,9 +143,31 @@ static MenuItem gVideoMenu[] =
 			.callback = nil,
 			.valuePtr = &gGamePrefs.uncappedFramerate,
 			.numChoices = 2,
-			.choices = { "32 fps original", "uncapped" },
+			.choices = { "32 fps, like original", "smooth" },
 		}
 	},
+	{ .type = kMenuItem_Separator },
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "display mode",
+			.callback = SetFullscreenMode,
+			.valuePtr = &gGamePrefs.displayMode,
+			.numChoices = 3,
+			.choices = {"windowed", "fullscreen, stretched", "fullscreen, pixel perfect"},
+		},
+	},
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "windowed zoom",
+			.valuePtr = &gGamePrefs.windowedZoom,
+			.callback = OnChangePlayfieldSizeViaSettings,
+			.numChoices = 5,
+			.choices = { "automatic", "1x", "2x", "3x", "4x" },
+		}
+	},
+	{ .type = kMenuItem_Separator },
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
@@ -252,7 +243,7 @@ static MenuItem gPresentationMenu[] =
 			.callback = nil,
 			.valuePtr = &gGamePrefs.thermometerScreen,
 			.numChoices = 2,
-			.choices = { "none", "charging batteries" },
+			.choices = { "instantaneous", "charging batteries" },
 		}
 	},
 	{
