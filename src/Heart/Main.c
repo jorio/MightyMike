@@ -1258,7 +1258,8 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.difficulty = DIFFICULTY_NORMAL;
 	gGamePrefs.pfSize = PFSIZE_WIDE;
 	gGamePrefs.displayMode = kDisplayMode_FullscreenStretched;
-	gGamePrefs.windowedZoom = 0;	// automatic
+	gGamePrefs.windowedZoom = 0;	// 0 == automatic
+	gGamePrefs.preferredDisplay = 0;
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.filterDithering = true;
 	gGamePrefs.music = true;

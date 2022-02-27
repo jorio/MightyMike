@@ -517,9 +517,51 @@ void PresentIndexedFramebuffer(void)
 	}
 }
 
-void SetFullscreenMode(void)
+static void MoveToPreferredDisplay(void)
 {
-	SDL_SetWindowFullscreen(gSDLWindow, gGamePrefs.displayMode == kDisplayMode_Windowed ? 0 : SDL_WINDOW_FULLSCREEN_DESKTOP);
+#if !(__APPLE__)
+	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+
+	if (currentDisplay != gGamePrefs.preferredDisplay)
+	{
+		SDL_SetWindowPosition(
+				gSDLWindow,
+				SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay),
+				SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay));
+	}
+#endif
+}
+
+void SetFullscreenMode(bool enforceDisplayPref)
+{
+	if (gGamePrefs.displayMode == kDisplayMode_Windowed)
+	{
+		SDL_SetWindowFullscreen(gSDLWindow, 0);
+		if (enforceDisplayPref)
+		{
+			MoveToPreferredDisplay();
+		}
+	}
+	else
+	{
+#if !(__APPLE__)
+		if (enforceDisplayPref)
+		{
+			int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+
+			if (currentDisplay != gGamePrefs.preferredDisplay)
+			{
+				// We must switch back to windowed mode for the preferred monitor to take effect
+				SDL_SetWindowFullscreen(gSDLWindow, 0);
+				MoveToPreferredDisplay();
+			}
+		}
+#endif
+
+		// Enter fullscreen mode
+		SDL_SetWindowFullscreen(gSDLWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+	}
+
 	SetOptimalWindowSize();
 	OnChangeIntegerScaling();
 }
@@ -527,6 +569,13 @@ void SetFullscreenMode(void)
 int GetMaxIntegerZoom(void)
 {
 	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+
+#if !(__APPLE__)
+	int numDisplays = SDL_GetNumVideoDisplays();
+	if (gGamePrefs.preferredDisplay < numDisplays)
+		currentDisplay = gGamePrefs.preferredDisplay;
+#endif
+
 	SDL_Rect displayBounds = {.x=0, .y=0, .w=VISIBLE_WIDTH, .h=VISIBLE_HEIGHT};
 	SDL_GetDisplayUsableBounds(currentDisplay, &displayBounds);
 
@@ -555,7 +604,10 @@ void SetOptimalWindowSize(void)
 	}
 
 	SDL_SetWindowSize(gSDLWindow, VISIBLE_WIDTH * zoom, VISIBLE_HEIGHT * zoom);
-	SDL_SetWindowPosition(gSDLWindow, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
+	SDL_SetWindowPosition(
+			gSDLWindow,
+			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay),
+			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay));
 
 	if (windowFlags & SDL_WINDOW_MAXIMIZED)
 	{

@@ -2,8 +2,7 @@
 // Structures.h
 //
 
-#ifndef __STRUCT__
-#define __STRUCT__
+#pragma once
 
 
 #include <Pomme.h>
@@ -285,6 +284,7 @@ struct PrefsType
 	Byte		pfSize;
 	Byte		displayMode;
 	Byte		windowedZoom;
+	Byte		preferredDisplay;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
 	Boolean		music;
@@ -298,6 +298,4 @@ struct PrefsType
 typedef struct PrefsType PrefsType;
 
 #define PREFS_MAGIC "Mighty Mike Prefs v3"
-
-#endif
 

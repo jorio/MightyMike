@@ -84,6 +84,7 @@ static void DeleteTextAtRowCol(int row, int col);
 static const char* GetKeyBindingName(int row, int col);
 static const char* GetPadBindingName(int row, int col);
 static void OnDone(void);
+static void OnChangeFullscreenMode(void);
 static void OnChangePlayfieldSizeViaSettings(void);
 static void OnChangeDebugInfoInTitleBar(void);
 static void OnResetKeys(void);
@@ -152,23 +153,75 @@ static MenuItem gVideoMenu[] =
 		.type = kMenuItem_Cycler, .cycler =
 		{
 			.caption = "display mode",
-			.callback = SetFullscreenMode,
+			.callback = OnChangeFullscreenMode,
 			.valuePtr = &gGamePrefs.displayMode,
 			.numChoices = 3,
 			.choices = {"windowed", "fullscreen, stretched", "fullscreen, pixel perfect"},
 		},
 	},
+
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
 			.caption = "windowed zoom",
 			.valuePtr = &gGamePrefs.windowedZoom,
 			.callback = OnChangePlayfieldSizeViaSettings,
-			.numChoices = 5,
-			.choices = { "automatic", "1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x", "9x", "10x", "11x", "12x", "13x", "14x", "15x" },
+			.numChoices = 3,  // set dynamically
+			.choices =
+			{
+				"automatic",
+				"1x",
+				"2x",
+				"3x",
+				"4x",
+				"5x",
+				"6x",
+				"7x",
+				"8x",
+				"9x",
+				"10x",
+				"11x",
+				"12x",
+				"13x",
+				"14x",
+				"15x"
+			},
 		}
 	},
+
+#if !(__APPLE__)
+	{
+		.type = kMenuItem_Cycler, .cycler =
+		{
+			.caption = "monitor",
+			.valuePtr = &gGamePrefs.preferredDisplay,
+			.callback = OnChangeFullscreenMode,
+			.numChoices = 1,  // set dynamically
+			.choices =
+			{
+				"monitor 1",
+				"monitor 2",
+				"monitor 3",
+				"monitor 4",
+				"monitor 5",
+				"monitor 6",
+				"monitor 7",
+				"monitor 8",
+				"monitor 9",
+				"monitor 10",
+				"monitor 11",
+				"monitor 12",
+				"monitor 13",
+				"monitor 14",
+				"monitor 15",
+				"monitor 16",
+			},
+		}
+	},
+#endif
+
 	{ .type = kMenuItem_Separator },
+
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
@@ -179,6 +232,7 @@ static MenuItem gVideoMenu[] =
 			.choices = { "   raw", "   filtered" },
 		}
 	},
+
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
@@ -189,7 +243,9 @@ static MenuItem gVideoMenu[] =
 			.choices = { "no", "yes" },
 		}
 	},
+
 	{ .type = kMenuItem_Action, .button = { .caption = "done", .callback = OnDone } },
+
 	{ .type = kMenuItem_END_SENTINEL },
 };
 
@@ -423,13 +479,27 @@ static void OnMenuEntered(void)
 {
 	if (gMenu == gVideoMenu)
 	{
-		int windowedZoomRow = FindRowControlling(&gGamePrefs.windowedZoom);
-		GAME_ASSERT(windowedZoomRow >= 0);
+		{
+			int row = FindRowControlling(&gGamePrefs.windowedZoom);
+			GAME_ASSERT(row >= 0);
 
-		int numChoices = 1 + GetMaxIntegerZoom();
-		if (numChoices > MAX_CHOICES)
-			numChoices = MAX_CHOICES;
-		gMenu[windowedZoomRow].cycler.numChoices = numChoices;
+			int numChoices = 1 + GetMaxIntegerZoom();
+			if (numChoices > MAX_CHOICES)
+				numChoices = MAX_CHOICES;
+			gMenu[row].cycler.numChoices = numChoices;
+		}
+
+#if !(__APPLE__)
+		{
+			int row = FindRowControlling(&gGamePrefs.preferredDisplay);
+			GAME_ASSERT(row >= 0);
+
+			int numDisplays = SDL_GetNumVideoDisplays();
+			if (numDisplays > MAX_CHOICES)
+				numDisplays = MAX_CHOICES;
+			gMenu[row].cycler.numChoices = numDisplays;
+		}
+#endif
 	}
 }
 
@@ -469,6 +539,11 @@ static void OnDone(void)
 		FadeOutGameCLUT();
 		gExitMenu = true;
 	}
+}
+
+static void OnChangeFullscreenMode(void)
+{
+	SetFullscreenMode(true);
 }
 
 static void OnChangePlayfieldSizeViaSettings(void)
@@ -1114,7 +1189,12 @@ static void LayOutMenu(MenuItem* menu)
 				RemapRedToGray(row);
 				if (entry->cycler.numChoices > 0)
 				{
-					const char* choiceCaption = entry->cycler.choices[*entry->cycler.valuePtr];
+					Byte index = *entry->cycler.valuePtr;
+					const char* choiceCaption = NULL;
+					if (index < MAX_CHOICES)
+						choiceCaption = entry->cycler.choices[index];
+					else
+						choiceCaption = "???";
 					MakeTextAtRowCol(choiceCaption, row, 1, textObjectFlags);
 				}
 				break;
@@ -1240,7 +1320,7 @@ void DoSettingsScreen(void)
 void ApplyPrefs(void)
 {
 	OnChangePlayfieldSize();
-	SetFullscreenMode();
+	SetFullscreenMode(true);
 	OnChangeIntegerScaling();
 	SetPaletteColorCorrection();
 }

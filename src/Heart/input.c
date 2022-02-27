@@ -244,7 +244,7 @@ void UpdateInput(void)
 		}
 #endif
 
-		SetFullscreenMode();
+		SetFullscreenMode(false);
 	}
 }
 
