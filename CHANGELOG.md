@@ -6,12 +6,18 @@
       (i.e. what the game was developed for) to sRGB (i.e. what it's more likely to be running on).
       (Contributed by @elasota, thanks!)
 
-    - Fix window going black when smaller than 640x480 with "crisp" upscaling.
+    - Fixed rare crash when enemy gets close to playfield boundaries (#10).
+
+    - Fixed incorrect weapon firing rate in fixed-framerate mode.
+
+    - Fixed window going black when smaller than 640x480 with pixel-perfect upscaling.
+
+    - Added maximum windowed zoom setting.
 
     - macOS build is now notarized.
 
 
-- **3.0.0 (April 2021)**
+- **3.0.0 (Apr. 12, 2021)**
 
     - Major update so the game works on modern systems. 
 

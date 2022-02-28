@@ -4,8 +4,7 @@ This is Pangea Software's **Mighty Mike** updated to run on modern systems.
 Set in a toy store, this top-down action game is a staple of 90's Macintosh games.
 It was initially published in 1995 under the name **Power Pete**.
 
-**Get builds for macOS and Windows here:**
-https://github.com/jorio/mightymike/releases
+**Download the game for macOS, Windows or Linux here:** https://github.com/jorio/MightyMike/releases
 
 ![Screenshot](docs/screenshot.png)
 
@@ -15,7 +14,7 @@ Gameplay and graphics wise, this update aims to be as faithful to the original a
 It does bring a few enhancements, such as:
 
 - Widescreen mode
-- Framerate cap removal
+- Framerate cap removal (with movement interpolation)
 - Twin-stick gamepad controls
 
 ## Documentation
@@ -24,6 +23,7 @@ It does bring a few enhancements, such as:
 - [CHANGELOG.md](CHANGELOG.md) — Mighty Mike version history.
 - [LICENSE.md](LICENSE.md) — Licensing information (see also below).
 - [Instructions.pdf](docs/Instructions.pdf) — Mighty Mike 2.0 instruction manual.
+- [Power Pete Survival Guide](docs/SurvivalGuide.pdf)
 - [Mighty Mike Game Engine Information](docs/MightyMikeGameEngineInformation.md) (1997)
 - Power Pete scans: [CD-ROM](docs/DiscArt.jpg), jewel case: [front](docs/DiscCaseFront.jpg), [back](docs/DiscCaseBack.jpg), [inside](docs/DiscCaseInsideLeft.jpg)
 
@@ -46,5 +46,6 @@ Check out Christoph Leimbrock's Mighty Mike tools:
 
 If you like games by Pangea Software, I have made other ports you might enjoy:
 
-- [Nanosaur](https://github.com/jorio/nanosaur)
-- [Bugdom](https://github.com/jorio/bugdom)
+- [Nanosaur](https://github.com/jorio/Nanosaur)
+- [Bugdom](https://github.com/jorio/Bugdom)
+- [Otto Matic](https://github.com/jorio/OttoMatic)
