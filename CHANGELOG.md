@@ -1,6 +1,6 @@
 # Mighty Mike changelog
 
-- **3.0.1 (WORK IN PROGRESS)**
+- **3.0.1 (Apr. 26, 2022)**
 
     - Color correction setting which remaps display colors from Apple RGB profile
       (i.e. what the game was developed for) to sRGB (i.e. what it's more likely to be running on).
@@ -12,10 +12,11 @@
 
     - Fixed window going black when smaller than 640x480 with pixel-perfect upscaling.
 
-    - Added maximum windowed zoom setting.
+    - Added maximum windowed zoom setting (#2).
 
-    - macOS build is now notarized.
+    - macOS build is now notarized (#8).
 
+    - Updated to SDL 2.0.22, which fixes issues with some controllers on macOS.
 
 - **3.0.0 (Apr. 12, 2021)**
 
