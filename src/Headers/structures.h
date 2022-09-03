@@ -34,7 +34,11 @@ typedef struct ObjectEntryType
 	int32_t			y;
 	int16_t			type;
 	Byte			parm[4];
-}ObjectEntryType;
+}
+#if OSXPPC				// for some reason I can't get old GCC to honor #pragma pack on PPC
+__attribute__((packed))
+#endif
+ObjectEntryType;
 
 #pragma pack(pop)		// Stop tight packing of structs
 

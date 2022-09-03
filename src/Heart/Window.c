@@ -579,7 +579,11 @@ int GetMaxIntegerZoom(void)
 #endif
 
 	SDL_Rect displayBounds = {.x=0, .y=0, .w=VISIBLE_WIDTH, .h=VISIBLE_HEIGHT};
+#if SDL_VERSION_ATLEAST(2,0,5)
 	SDL_GetDisplayUsableBounds(currentDisplay, &displayBounds);
+#else
+	SDL_GetDisplayBounds(currentDisplay, &displayBounds);
+#endif
 
 	int maxZoomX = displayBounds.w / VISIBLE_WIDTH;
 	int maxZoomY = displayBounds.h / VISIBLE_HEIGHT;
@@ -655,6 +659,7 @@ static int GetEffectiveScalingType(void)
 		{
 			return kScaling_PixelPerfect;
 		}
+#if !(OSXPPC)
 		else if (uniformZoom <= kHQStretchMinZoom)  // HQStretch doesn't look to good at 1x-1.5x zoom levels
 		{
 			return kScaling_Stretch;
@@ -663,6 +668,10 @@ static int GetEffectiveScalingType(void)
 		{
 			return kScaling_HQStretch;
 		}
+#else
+		(void) uniformZoom;
+		return kScaling_Stretch;
+#endif  // OSXPPC
 	}
 }
 
@@ -693,6 +702,8 @@ void OnChangeIntegerScaling(void)
 	GAME_ASSERT(gSDLTexture);
 
 	// Set integer scaling setting
+#if SDL_VERSION_ATLEAST(2,0,5)
 	SDL_RenderSetIntegerScale(gSDLRenderer, crisp);
+#endif
 }
 

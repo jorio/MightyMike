@@ -30,6 +30,12 @@
 #define MAX_CHOICES 16
 #define MAX_ENTRIES_PER_MENU 25
 
+#if !(OSXPPC)
+#define EXPOSE_DITHERING 1
+#else
+#define EXPOSE_DITHERING 0
+#endif
+
 /****************************/
 /*    PROTOTYPES            */
 /****************************/
@@ -222,6 +228,7 @@ static MenuItem gVideoMenu[] =
 
 	{ .type = kMenuItem_Separator },
 
+#if EXPOSE_DITHERING
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
@@ -232,6 +239,7 @@ static MenuItem gVideoMenu[] =
 			.choices = { "   raw", "   filtered" },
 		}
 	},
+#endif
 
 	{
 		.type = kMenuItem_Cycler, .cycler =
@@ -1233,8 +1241,10 @@ static void LayOutMenu(MenuItem* menu)
 		GAME_ASSERT(gNumMenuEntries < MAX_ENTRIES_PER_MENU);
 	}
 
+#if EXPOSE_DITHERING
 	if (gMenu == gVideoMenu)
 		DrawDitheringPattern();
+#endif
 
 	ForceUpdateBackground();
 	DumpBackground();											// dump to playfield
