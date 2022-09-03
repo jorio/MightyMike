@@ -365,7 +365,9 @@ static MenuItem gRootMenu[] =
 	{ .type = kMenuItem_Label, .label = " SETTINGS", },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "configure keyboard",	.menu = gKeyboardMenu} },
+#if !(NOJOYSTICK)
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "configure gamepad",	.menu = gGamepadMenu} },
+#endif
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "video",				.menu = gVideoMenu} },
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "audio",				.menu = gAudioMenu} },
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "presentation",			.menu = gPresentationMenu} },

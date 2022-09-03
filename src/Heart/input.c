@@ -305,6 +305,10 @@ bool GetNewNeedState(int needID)
 
 SDL_GameController* TryOpenController(bool showMessage)
 {
+#if NOJOYSTICK
+	(void) showMessage;
+	return NULL;
+#else
 	if (gSDLController)
 	{
 		printf("Already have a valid controller.\n");
@@ -353,10 +357,14 @@ SDL_GameController* TryOpenController(bool showMessage)
 	}
 
 	return gSDLController;
+#endif
 }
 
 static void OnJoystickRemoved(SDL_JoystickID which)
 {
+#if NOJOYSTICK
+	(void) which;
+#else
 	if (NULL == gSDLController)		// don't care, I didn't open any controller
 		return;
 
@@ -379,10 +387,14 @@ static void OnJoystickRemoved(SDL_JoystickID which)
 
 	// Try to open another joystick if any is connected.
 	TryOpenController(false);
+#endif
 }
 
 int32_t GetLeftStickMagnitude_Fix32(void)
 {
+#if NOJOYSTICK
+	return 0;
+#else
 	if (!gSDLController)
 	{
 		return 0;
@@ -399,10 +411,14 @@ int32_t GetLeftStickMagnitude_Fix32(void)
 	}
 
 	return (int32_t)(0x10000 * sqrtf(dxRaw * dxRaw + dyRaw * dyRaw) / 32767.0f);
+#endif
 }
 
 short GetRightStick8WayAim(void)
 {
+#if NOJOYSTICK
+	return -1;
+#else
 	int dxRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTX);
 	int dyRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTY);
 
@@ -429,4 +445,5 @@ short GetRightStick8WayAim(void)
 		else if (left)	return AIM_LEFT;
 		else			return -1;
 	}
+#endif
 }

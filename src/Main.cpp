@@ -123,6 +123,7 @@ static void Boot(const char* executablePath)
 //	Pomme::Graphics::SetWindowIconFromIcl8Resource(gSDLWindow, 400);
 #endif
 
+#if !(NOJOYSTICK)
 	// Init joystick subsystem
 	SDL_Init(SDL_INIT_JOYSTICK);
 	SDL_Init(SDL_INIT_HAPTIC);
@@ -133,6 +134,7 @@ static void Boot(const char* executablePath)
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Mighty Mike", "Couldn't load gamecontrollerdb.txt!", gSDLWindow);
 		}
 	}
+#endif
 }
 
 static void Shutdown()
