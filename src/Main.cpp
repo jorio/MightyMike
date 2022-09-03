@@ -7,11 +7,6 @@
 #include <iostream>
 #include <thread>
 
-#if __APPLE__
-#include <libproc.h>
-#include <unistd.h>
-#endif
-
 #include "version.h"
 
 extern "C"
@@ -29,49 +24,74 @@ extern "C"
 	int gNumThreads = 0;
 }
 
-static fs::path FindGameData()
+static fs::path FindGameData(const char* executablePath)
 {
 	fs::path dataPath;
 
-#if __APPLE__
-	char pathbuf[PROC_PIDPATHINFO_MAXSIZE];
+	int attemptNum = 0;
 
-	pid_t pid = getpid();
-	int ret = proc_pidpath(pid, pathbuf, sizeof(pathbuf));
-	if (ret <= 0)
+#if !(__APPLE__)
+	attemptNum++;		// skip macOS special case #0
+#endif
+
+	if (!executablePath)
+		attemptNum = 2;
+
+tryAgain:
+	switch (attemptNum)
 	{
-		throw std::runtime_error(std::string(__func__) + ": proc_pidpath failed: " + std::string(strerror(errno)));
+		case 0:			// special case for macOS app bundles
+			dataPath = executablePath;
+			dataPath = dataPath.parent_path().parent_path() / "Resources";
+			break;
+
+		case 1:
+			dataPath = executablePath;
+			dataPath = dataPath.parent_path() / "Data";
+			break;
+
+		case 2:
+			dataPath = "Data";
+			break;
+
+		default:
+			throw std::runtime_error("Couldn't find the Data folder.");
 	}
 
-	dataPath = pathbuf;
-	dataPath = dataPath.parent_path().parent_path() / "Resources";
-#else
-	dataPath = "Data";
-#endif
+	attemptNum++;
 
 	dataPath = dataPath.lexically_normal();
 
-	// Set data spec
+	// Set data spec -- Lets the game know where to find its asset files
 	gDataSpec = Pomme::Files::HostPathToFSSpec(dataPath / "Shapes");
 
 	// Use application resource file
 	auto applicationSpec = Pomme::Files::HostPathToFSSpec(dataPath / "System" / "Application");
 	short resFileRefNum = FSpOpenResFile(&applicationSpec, fsRdPerm);
+
+	if (resFileRefNum == -1)
+	{
+		goto tryAgain;
+	}
+
 	UseResFile(resFileRefNum);
 
 	return dataPath;
 }
 
-int CommonMain(int argc, const char** argv)
+static void Boot(const char* executablePath)
 {
-	(void)argc;	// unused
-	(void)argv;	// unused
+	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 
+#if OSXPPC
+	gNumThreads = 1;
+#else
 	gNumThreads = (int) std::thread::hardware_concurrency();
 	if (gNumThreads >= 32)
 		gNumThreads = 32;
 	else if (gNumThreads <= 0)
 		gNumThreads = 1;
+#endif
 
 	// Start our "machine"
 	Pomme::Init();
@@ -98,7 +118,7 @@ int CommonMain(int argc, const char** argv)
 
 	SDL_RenderSetLogicalSize(gSDLRenderer, 640, 480);
 
-	fs::path dataPath = FindGameData();
+	fs::path dataPath = FindGameData(executablePath);
 #if !(__APPLE__)
 //	Pomme::Graphics::SetWindowIconFromIcl8Resource(gSDLWindow, 400);
 #endif
@@ -113,18 +133,10 @@ int CommonMain(int argc, const char** argv)
 			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Mighty Mike", "Couldn't load gamecontrollerdb.txt!", gSDLWindow);
 		}
 	}
+}
 
-	// Start the game
-	try
-	{
-		GameMain();
-	}
-	catch (Pomme::QuitRequest&)
-	{
-		// no-op, the game may throw this exception to shut us down cleanly
-	}
-
-	// Clean up
+static void Shutdown()
+{
 	Pomme::Shutdown();
 
 	if (gSDLRenderer)
@@ -138,8 +150,8 @@ int CommonMain(int argc, const char** argv)
 		SDL_DestroyWindow(gSDLWindow);
 		gSDLWindow = nullptr;
 	}
-
-	return 0;
+	
+	SDL_Quit();
 }
 
 int main(int argc, char** argv)
@@ -148,17 +160,21 @@ int main(int argc, char** argv)
 	std::string		finalErrorMessage		= "";
 	bool			showFinalErrorMessage	= false;
 
-#if _DEBUG
-	// In debug builds, if CommonMain throws, don't catch.
-	// This way, it's easier to get a clean stack trace.
-	returnCode = CommonMain(argc, const_cast<const char**>(argv));
-#else
-	// In release builds, catch anything that might be thrown by CommonMain
-	// so we can show an error dialog to the user.
+	const char* executablePath = argc > 0 ? argv[0] : NULL;
+
+	// Start the game
 	try
 	{
-		returnCode = CommonMain(argc, const_cast<const char**>(argv));
+		Boot(executablePath);
+		GameMain();
 	}
+	catch (Pomme::QuitRequest&)
+	{
+		// no-op, the game may throw this exception to shut us down cleanly
+	}
+#if !(_DEBUG)
+	// In release builds, catch anything that might be thrown by CommonMain
+	// so we can show an error dialog to the user.
 	catch (std::exception& ex)		// Last-resort catch
 	{
 		returnCode = 1;
@@ -173,11 +189,8 @@ int main(int argc, char** argv)
 	}
 #endif
 
-#if __APPLE__
-	// Whether we failed or succeeded, always restore the user's mouse acceleration before exiting.
-	// (NOTE: in debug builds, we might not get here because we don't catch what CommonMain throws.)
-//	RestoreMacMouseAcceleration();
-#endif
+	// Clean up!
+	Shutdown();
 
 	if (showFinalErrorMessage)
 	{
