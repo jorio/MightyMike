@@ -218,9 +218,9 @@ void GetSpinHeader(void)
 	{
 		case	SPIN_COMMAND_HEADER:
 				// WARNING: shorts are not aligned to 16-bit boundaries
-				gSpinHeader.width	= Byteswap16(gSpinPtr+0);	// get WIDTH
-				gSpinHeader.height	= Byteswap16(gSpinPtr+2);	// get HEIGHT
-				gSpinHeader.fps		= Byteswap16(gSpinPtr+4);	// get FPS
+				gSpinHeader.width	= UnpackI16BE(gSpinPtr+0);	// get WIDTH
+				gSpinHeader.height	= UnpackI16BE(gSpinPtr+2);	// get HEIGHT
+				gSpinHeader.fps		= UnpackI16BE(gSpinPtr+4);	// get FPS
 				gSpinPtr += 6;				// skip header
 				gDoublePix = false;
 				break;
@@ -230,7 +230,7 @@ void GetSpinHeader(void)
 #if 0
 				intPtr = (short *)gSpinPtr;
 				intPtr++;										// skip versNo
-				ByteswapInts(2, 3, gSpinPtr);					// byteswap the next 3 shorts
+				UnpackIntsBE(2, 3, gSpinPtr);					// byteswap the next 3 shorts
 				gSpinHeader.width = *intPtr++;					// get WIDTH
 				gSpinHeader.height = *intPtr++;					// get HEIGHT
 				gSpinHeader.fps	= *intPtr++;					// get FPS
@@ -301,7 +301,7 @@ Ptr		framePtrBase;
 		DoFatalAlert("Not Pointing to SPIN Frame command!");
 
 	srcPtr += 4;										// skip packed size
-	frameSize = Byteswap32(srcPtr);						// get unpacked size
+	frameSize = UnpackI32BE(srcPtr);					// get unpacked size
 	srcPtr += 4;
 
 					/* GET MEMORY FOR FRAME */
@@ -358,7 +358,7 @@ void DrawSpinFrame(Ptr srcPtr)
 {
 	GAME_ASSERT_MESSAGE(!gDoublePix, "draw doubled was removed");	// see if draw doubled
 
-	short numChunks = Byteswap16(srcPtr);					// get # chunks to update
+	short numChunks = UnpackI16BE(srcPtr);							// get # chunks to update
 	srcPtr += 2;
 
 	if (numChunks == 0)
@@ -367,7 +367,7 @@ void DrawSpinFrame(Ptr srcPtr)
 	do
 	{
 		int x = *srcPtr;				srcPtr += 1;		// get X coord (in longs)
-		int y = Byteswap16(srcPtr);		srcPtr += 2;		// get Y coord
+		int y = UnpackI16BE(srcPtr);	srcPtr += 2;		// get Y coord
 		int size = *srcPtr;				srcPtr += 1;		// get SIZE (# longs)
 
 		x *= 4;												// X and size were given in longs to pre-optimize

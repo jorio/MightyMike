@@ -130,9 +130,9 @@ void LoadShapeTable(const char* fileName, long groupNum)
 
 	Ptr shapeTablePtr = *gShapeTableHandle[groupNum];						// get ptr to shape table
 
-	int32_t offsetToColorTable = Byteswap32SignedRW(shapeTablePtr);			// get Color Table offset
+	int32_t offsetToColorTable = UnpackI32BEInPlace(shapeTablePtr);			// get Color Table offset
 
-	int16_t colorListSize = Byteswap16SignedRW(shapeTablePtr + offsetToColorTable);	// # entries in color list
+	int16_t colorListSize = UnpackI16BEInPlace(shapeTablePtr + offsetToColorTable);	// # entries in color list
 	GAME_ASSERT(colorListSize >= 0 && colorListSize <= 256);
 
 #if 0
@@ -170,15 +170,15 @@ void LoadShapeTable(const char* fileName, long groupNum)
 	// This is called whenever a shape table is moved in memory or loaded
 	//
 
-	int32_t offsetToShapeList = Byteswap32SignedRW(shapeTablePtr + SF_HEADER__SHAPE_LIST);		// get ptr to offset to SHAPE_LIST
+	int32_t offsetToShapeList = UnpackI32BEInPlace(shapeTablePtr + SF_HEADER__SHAPE_LIST);		// get ptr to offset to SHAPE_LIST
 
 	Ptr shapeList = shapeTablePtr + offsetToShapeList;				// get ptr to SHAPE_LIST
 
-	gNumShapesInFile[groupNum] = Byteswap16SignedRW(shapeList);		// get # shapes in the file
+	gNumShapesInFile[groupNum] = UnpackI16BEInPlace(shapeList);		// get # shapes in the file
 	shapeList += 2;
 
 	int32_t* offsetsToShapeHeaders = (int32_t*) shapeList;			// get offset to SHAPE_HEADER_n
-	ByteswapInts(4, gNumShapesInFile[groupNum], offsetsToShapeHeaders);
+	UnpackIntsBE(4, gNumShapesInFile[groupNum], offsetsToShapeHeaders);
 
 	for (int i = 0; i < gNumShapesInFile[groupNum]; i++)
 	{
@@ -186,22 +186,22 @@ void LoadShapeTable(const char* fileName, long groupNum)
 
 		gSHAPE_HEADER_Ptrs[groupNum][i] = shapeBase;	// save ptr to SHAPE_HEADER
 
-		int32_t offsetToFrameList	= Byteswap32SignedRW(shapeBase + 2);
-		int16_t numFrames			= Byteswap16SignedRW(shapeBase + offsetToFrameList);
+		int32_t offsetToFrameList	= UnpackI32BEInPlace(shapeBase + 2);
+		int16_t numFrames			= UnpackI16BEInPlace(shapeBase + offsetToFrameList);
 		int32_t* offsetsToFrameData	= (int32_t*) (shapeBase + offsetToFrameList + 2);
-		ByteswapInts(4, numFrames, offsetsToFrameData);
+		UnpackIntsBE(4, numFrames, offsetsToFrameData);
 
 		for (int f = 0; f < numFrames; f++)
 		{
 			Ptr frameBase = shapeBase + offsetsToFrameData[f];
 
-			ByteswapStructs("hhhhll", 16, 1, frameBase);		// See struct FrameHeader
+			UnpackStructs(">hhhhll", 16, 1, frameBase);	// See struct FrameHeader
 		}
 
-		int32_t offsetToAnimList	= Byteswap32SignedRW(shapeBase + 6);  // base+SHAPE_HEADER_ANIM_LIST
-		int16_t numAnims			= Byteswap16SignedRW(shapeBase + offsetToAnimList);
+		int32_t offsetToAnimList	= UnpackI32BEInPlace(shapeBase + 6);  // base+SHAPE_HEADER_ANIM_LIST
+		int16_t numAnims			= UnpackI16BEInPlace(shapeBase + offsetToAnimList);
 		int32_t* offsetsToAnimData	= (int32_t*) (shapeBase + offsetToAnimList + 2);
-		ByteswapInts(4, numAnims, offsetsToAnimData);
+		UnpackIntsBE(4, numAnims, offsetsToAnimData);
 
 		for (int a = 0; a < numAnims; a++)
 		{
@@ -209,7 +209,7 @@ void LoadShapeTable(const char* fileName, long groupNum)
 
 			uint8_t numCommands = animBase[0];		// aka "AnimLine"
 
-			ByteswapInts(2, numCommands*2, animBase+1);
+			UnpackIntsBE(2, numCommands*2, animBase+1);
 			/*
 			for (int cmd = 0; cmd < numCommands; cmd++)
 			{

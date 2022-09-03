@@ -313,7 +313,7 @@ int32_t		decompType;
 	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompSize);			// read 4 byte length
 	GAME_ASSERT_MESSAGE(iErr == noErr, "Error reading Packed data!");
 	GAME_ASSERT(numToRead == 4);
-	ByteswapInts(numToRead, 1, &decompSize);
+	UnpackIntsBE(numToRead, 1, &decompSize);
 	fileSize -= numToRead;
 
 					/*	READ DECOMP TYPE */
@@ -322,7 +322,7 @@ int32_t		decompType;
 	iErr = FSRead(fRefNum,&numToRead,(Ptr)&decompType);			// read compression type
 	GAME_ASSERT_MESSAGE(iErr == noErr, "Error reading Packed data Header!");
 	GAME_ASSERT(numToRead == 4);
-	ByteswapInts(numToRead, 1, &decompType);
+	UnpackIntsBE(numToRead, 1, &decompType);
 	fileSize -= numToRead;
 
 					/* GET MEMORY FOR UNPACKED DATA */
@@ -577,7 +577,7 @@ static	UnsignedWide oldTick = {0,0};
 		if (tick.hi != oldTick.hi)              // if hi value is diff then just skip a beat and bail
 		    break;
 
-        if ((tick.lo - oldTick.lo) >= speed)    // see if enough time has passed
+        if ((tick.lo - oldTick.lo) >= (unsigned long) speed)    // see if enough time has passed
             break;
 
 		SDL_Delay(SPINLOCK_DELAY);

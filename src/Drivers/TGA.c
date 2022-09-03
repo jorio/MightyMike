@@ -116,6 +116,10 @@ Handle LoadTGA(
 		return nil;
 	}
 
+	// Byteswap the header (effective for big-endian systems only,
+	// it's a no-op on little-endian machines)
+	UnpackStructs(STRUCTFORMAT_TGAHeader, sizeof(TGAHeader), 1, &header);
+
 	// Make sure we support the format
 	switch (header.imageType)
 	{

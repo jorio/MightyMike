@@ -262,11 +262,11 @@ int16_t* tileXparentList		= nil;
 
 			/* GET OFFSETS */
 
-	int offsetToTileDefinitions			= Byteswap32SignedRW(tileSetPtr+6)+2;		// base + offset + 2 (skip # tiles word)
-	int offsetToXlateTable				= Byteswap32SignedRW(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
-	int offsetToTileAttributes			= Byteswap32SignedRW(tileSetPtr+14)+2;	// base + offset + 2 (skip # entries word)
-	int offsetToTileAnimList			= Byteswap32SignedRW(tileSetPtr+22)+2;
-	int offsetToTileXparentColorList	= Byteswap32SignedRW(tileSetPtr+26)+2;
+	int offsetToTileDefinitions			= UnpackI32BEInPlace(tileSetPtr+6)+2;		// base + offset + 2 (skip # tiles word)
+	int offsetToXlateTable				= UnpackI32BEInPlace(tileSetPtr+10)+2;	// base + offset + 2 (skip # entries word)
+	int offsetToTileAttributes			= UnpackI32BEInPlace(tileSetPtr+14)+2;	// base + offset + 2 (skip # entries word)
+	int offsetToTileAnimList			= UnpackI32BEInPlace(tileSetPtr+22)+2;
+	int offsetToTileXparentColorList	= UnpackI32BEInPlace(tileSetPtr+26)+2;
 
 	GAME_ASSERT(offsetToTileDefinitions	< offsetToXlateTable);
 	GAME_ASSERT(offsetToXlateTable		< offsetToTileAttributes);
@@ -275,11 +275,11 @@ int16_t* tileXparentList		= nil;
 
 			/* GET ENTRY COUNTS */
 
-	/*int numTileDefinitions		=*/   Byteswap16SignedRW(tileSetPtr + offsetToTileDefinitions			- 2	);
-	int numXlateEntries					= Byteswap16SignedRW(tileSetPtr + offsetToXlateTable				- 2	);
-	int numTileAttributeEntries			= Byteswap16SignedRW(tileSetPtr + offsetToTileAttributes			- 2	);
-	gNumTileAnims						= Byteswap16SignedRW(tileSetPtr + offsetToTileAnimList			- 2	);
-	int numTileXparentColors			= Byteswap16SignedRW(tileSetPtr + offsetToTileXparentColorList	- 2	);
+	/*int numTileDefinitions		=*/   UnpackI16BEInPlace(tileSetPtr + offsetToTileDefinitions			- 2	);
+	int numXlateEntries					= UnpackI16BEInPlace(tileSetPtr + offsetToXlateTable				- 2	);
+	int numTileAttributeEntries			= UnpackI16BEInPlace(tileSetPtr + offsetToTileAttributes			- 2	);
+	gNumTileAnims						= UnpackI16BEInPlace(tileSetPtr + offsetToTileAnimList			- 2	);
+	int numTileXparentColors			= UnpackI16BEInPlace(tileSetPtr + offsetToTileXparentColorList	- 2	);
 
 			/* GET POINTERS TO TABLES */
 
@@ -292,13 +292,13 @@ int16_t* tileXparentList		= nil;
 			/* BYTESWAP STUFF */
 
 	// Byteswap gTileXlatePtr
-	ByteswapInts(2, numXlateEntries, gTileXlatePtr);
+	UnpackIntsBE(2, numXlateEntries, gTileXlatePtr);
 
 	// Byteswap gTileAttributes
-	ByteswapStructs("Hh4b", sizeof(TileAttribType), numTileAttributeEntries, gTileAttributes);
+	UnpackStructs(">Hh4b", sizeof(TileAttribType), numTileAttributeEntries, gTileAttributes);
 
 	// Byteswap tileXparentList
-	ByteswapInts(2, numTileXparentColors, tileXparentList);
+	UnpackIntsBE(2, numTileXparentColors, tileXparentList);
 
 	/***************** PREPARE TILE ANIMS ***********************/
 	//
@@ -323,8 +323,8 @@ int16_t* tileXparentList		= nil;
 #endif
 
 		TileAnimDefType* tileAnimDef = (TileAnimDefType*) (currentTileAnimData + 16);
-		ByteswapInts(2, 3, tileAnimDef);										// byteswap speed, baseTile, numFrames
-		ByteswapInts(2, tileAnimDef->numFrames, tileAnimDef->tileNums);			// byteswap tileNums array
+		UnpackIntsBE(2, 3, tileAnimDef);										// byteswap speed, baseTile, numFrames
+		UnpackIntsBE(2, tileAnimDef->numFrames, tileAnimDef->tileNums);			// byteswap tileNums array
 
 #if _DEBUG
 //		printf("PrepareTileAnims #%d: \"%s\", %d frames\n", i, name, tileAnimDef->numFrames);
@@ -410,13 +410,13 @@ Ptr		bytePtr,pfPtr;
 	pfPtr = *gPlayfieldHandle;										// get fixed ptr
 
 
-	int32_t offsetToMapImage		= Byteswap32SignedRW(pfPtr + 2);
-	int32_t offsetToAltMap			= Byteswap32SignedRW(pfPtr + 10);
+	int32_t offsetToMapImage		= UnpackI32BEInPlace(pfPtr + 2);
+	int32_t offsetToAltMap			= UnpackI32BEInPlace(pfPtr + 10);
 
 				/* BUILD MAP ARRAY */
 
 	tempPtr = (uint16_t *)(pfPtr + offsetToMapImage);				// point to MAP_IMAGE
-	ByteswapInts(2, 2, tempPtr);									// byteswap width/height
+	UnpackIntsBE(2, 2, tempPtr);									// byteswap width/height
 	gPlayfieldTileWidth = *(tempPtr++);								// get dimensions
 	gPlayfieldTileHeight = *(tempPtr++);
 	gPlayfieldWidth = gPlayfieldTileWidth<<TILE_SIZE_SH;
@@ -426,7 +426,7 @@ Ptr		bytePtr,pfPtr;
 	GAME_ASSERT(gPlayfield);
 	for (i = 0; i < gPlayfieldTileHeight; i++)						// build 1st dimension of matrix
 	{
-		ByteswapInts(2, gPlayfieldTileWidth, tempPtr);				// byteswap row
+		UnpackIntsBE(2, gPlayfieldTileWidth, tempPtr);				// byteswap row
 		gPlayfield[i]= (unsigned short *)tempPtr;					// set pointer to row
 		tempPtr += gPlayfieldTileWidth;								// next row
 	}
@@ -575,8 +575,8 @@ ObjectEntryType *lastPtr;
 
 					/* GET BASIC INFO */
 
-	offset = Byteswap32Signed(*gPlayfieldHandle + 6);						// get offset to OBJECT_LIST
-	gNumItems = Byteswap16Signed(*gPlayfieldHandle + offset);				// get # items in file
+	offset = UnpackI32BE(*gPlayfieldHandle + 6);				// get offset to OBJECT_LIST
+	gNumItems = UnpackI16BE(*gPlayfieldHandle + offset);		// get # items in file
 	if (gNumItems == 0)
 		return;
 	gMasterItemList = (ObjectEntryType *)(*gPlayfieldHandle+offset+2);	// point to items in file
@@ -586,7 +586,7 @@ ObjectEntryType *lastPtr;
 	// Ensure the in-memory representation of the struct is tightly-packed to match the struct's layout on disk
 	_Static_assert(sizeof(struct ObjectEntryType) == 4+4+2+4, "ObjectEntryType has incorrect size!");
 
-	ByteswapStructs("2ih4b", sizeof(ObjectEntryType), gNumItems, gMasterItemList);
+	UnpackStructs(">2ih4b", sizeof(ObjectEntryType), gNumItems, gMasterItemList);
 
 				/* BUILD HORIZ LOOKUP TABLE */
 

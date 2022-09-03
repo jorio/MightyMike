@@ -45,8 +45,13 @@ typedef union MikeFixed
 	int32_t			L;
 	struct
 	{
+#if __BIG_ENDIAN__
+		int16_t		Int;
+		int16_t		Frac;
+#else
 		int16_t		Frac;
 		int16_t		Int;
+#endif
 	};
 } MikeFixed;
 
