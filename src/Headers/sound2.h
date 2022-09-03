@@ -91,3 +91,6 @@ void ZapAllSounds(void);
 void	PlayAreaMusic(void);
 void	LoadAreaSound(void);
 Boolean	IsMusicPlaying(void);
+void	PauseAllChannels(Boolean pause);
+
+

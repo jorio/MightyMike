@@ -655,3 +655,22 @@ SCStatus	theStatus;
 	return (theStatus.scChannelBusy);								// see if channel busy
 }
 
+
+
+/*************** PAUSE ALL SOUND CHANNELS **************/
+
+void PauseAllChannels(Boolean pause)
+{
+	SndCommand cmd = { .cmd = pause ? pommePausePlaybackCmd : pommeResumePlaybackCmd };
+
+	for (int c = 1; c < gMaxChannels; c++)
+	{
+		SndDoImmediate(gSndChannel[c], &cmd);
+	}
+
+	if (gSongPlayingFlag)
+	{
+		SndDoImmediate(gSndChannel[0], &cmd);
+	}
+}
+
