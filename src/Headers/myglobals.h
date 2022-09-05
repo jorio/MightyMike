@@ -23,6 +23,12 @@
 
 /**************** PROTOTYPES *****************/
 
+static inline uint32_t RGBColorToU16_565(const RGBColor* color)
+{
+	return	  ((color->red   >> 11) << 11)
+			| ((color->green >> 10) << 5)
+			|  (color->blue  >> 11);
+}
 
 static inline uint32_t RGBColorToU32(const RGBColor* color)
 {

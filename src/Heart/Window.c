@@ -442,9 +442,9 @@ void DumpIndexedTGA(const char* hostPath, int width, int height, const char* dat
 	// write palette
 	for (int i = 0; i < 256; i++)
 	{
-		fputc((gGamePalette.finalColors[i]>>8)&0xFF, tga);
-		fputc((gGamePalette.finalColors[i]>>16)&0xFF, tga);
-		fputc((gGamePalette.finalColors[i]>>24)&0xFF, tga);
+		fputc((gGamePalette.finalColors32[i]>>8)&0xFF, tga);
+		fputc((gGamePalette.finalColors32[i]>>16)&0xFF, tga);
+		fputc((gGamePalette.finalColors32[i]>>24)&0xFF, tga);
 	}
 
 	// write framebuffer

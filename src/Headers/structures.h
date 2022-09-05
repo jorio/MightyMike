@@ -18,8 +18,9 @@
 
 typedef struct GamePalette_s
 {
-	uint32_t finalColors[256];
-	uint16_t baseColors[256][3];
+	uint32_t finalColors32[256];	// RGBA 8-8-8-8
+	uint16_t finalColors16[256];	// RGB 5-6-5
+	RGBColor baseColors[256];		// Mac RGB 16-16-16
 } GamePalette;
 
 

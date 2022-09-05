@@ -38,15 +38,15 @@ uint8_t					gLinearToSRGB[1 << 16];
 
 void InitPaletteStuff(void)
 {
+	// Init all colors to black
 	for (int i = 0; i < 256; i++)
 	{
-		for (int ch = 0; ch < 3; ch++)
-		{
-			gGamePalette.baseColors[i][ch]		= 0;
-			gBackUpPalette.baseColors[i][ch]	= 0;
-		}
-		gGamePalette.finalColors[i]		= 0x000000FF;	// black
-		gBackUpPalette.finalColors[i]	= 0x000000FF;
+		gGamePalette.baseColors[i]		= (RGBColor) {0,0,0};
+		gGamePalette.finalColors32[i]	= 0x000000FF;
+		gGamePalette.finalColors16[i]	= 0x0000;
+		gBackUpPalette.baseColors[i]	= (RGBColor) {0,0,0};
+		gBackUpPalette.finalColors32[i]	= 0x000000FF;
+		gBackUpPalette.finalColors16[i]	= 0x0000;
 	}
 
 	for (int i = 0; i < (1 << 16); i++)
@@ -105,8 +105,7 @@ void FadeInGameCLUT(void)
 		
 		for (int i = 0; i < 255; i++)
 		{
-			const uint16_t *baseColor = gBackUpPalette.baseColors[i];
-			RGBColor rgbColor = { baseColor[0], baseColor[1], baseColor[2] };	// get color from palette
+			RGBColor rgbColor = gBackUpPalette.baseColors[i]; // get color from palette
 			rgbColor.red	= (short)((int32_t)rgbColor.red		* brightness /100);
 			rgbColor.green	= (short)((int32_t)rgbColor.green	* brightness /100);
 			rgbColor.blue	= (short)((int32_t)rgbColor.blue	* brightness /100);
@@ -129,15 +128,16 @@ void FadeInGameCLUT(void)
 void EraseCLUT(void)
 {
 	RGBColor rgbColor = {0, 0, 0};
-	uint32_t color = RGBColorToU32(&rgbColor);
+	uint32_t color32 = RGBColorToU32(&rgbColor);
+	uint16_t color16 = RGBColorToU16_565(&rgbColor);
 
 			/* ZAP 0..254 */
 
 	for (int i = 0; i < 255; i++)
 	{
-		gGamePalette.finalColors[i] = color;				// assign color
-		for (int ch = 0; ch < 3; ch++)
-			gGamePalette.baseColors[i][ch] = 0;
+		gGamePalette.baseColors[i] = rgbColor;
+		gGamePalette.finalColors32[i] = color32;
+		gGamePalette.finalColors16[i] = color16;
 	}
 
 	gScreenBlankedFlag = true;
@@ -171,8 +171,7 @@ void FadeOutGameCLUT(void)
 		
 		for (int i = 0; i < 255; i++)
 		{
-			const uint16_t *baseColor = gBackUpPalette.baseColors[i];
-			RGBColor rgbColor = { baseColor[0], baseColor[1], baseColor[2] };	// get color from palette
+			RGBColor rgbColor = gBackUpPalette.baseColors[i]; // get color from palette
 			rgbColor.red	= (short)((int32_t)rgbColor.red		* brightness /100);
 			rgbColor.green	= (short)((int32_t)rgbColor.green	* brightness /100);
 			rgbColor.blue	= (short)((int32_t)rgbColor.blue	* brightness /100);
@@ -195,9 +194,7 @@ static void ResetSinglePaletteColorCorrection(struct GamePalette_s *palette)
 {
 	for (int i = 0; i < 256; i++)
 	{
-		const uint16_t *baseColor = palette->baseColors[i];
-		RGBColor rgb = { baseColor[0], baseColor[1], baseColor[2] };
-		SetPaletteColor(palette, i, &rgb);
+		SetPaletteColor(palette, i, &palette->baseColors[i]);
 	}
 }
 
@@ -209,7 +206,8 @@ void SetPaletteColorCorrection(void)
 
 void SetPaletteColor(struct GamePalette_s *palette, int index, const RGBColor *color)
 {
-	uint32_t rgba = 0;
+	uint32_t color32;
+	uint16_t color16;
 
 	if (gGamePrefs.colorCorrection)
 	{
@@ -235,16 +233,22 @@ void SetPaletteColor(struct GamePalette_s *palette, int index, const RGBColor *c
 		uint8_t green = gLinearToSRGB[srgbGreen];
 		uint8_t blue = gLinearToSRGB[srgbBlue];
 
-		rgba = 0x000000FF
+		color32 = 0x000000FF
 				| (red << 24)
 				| (green << 16)
 				| (blue << 8);
+		
+		color16 = ((red >> 3) << 11)
+				| ((green >> 2) << 5)
+				| (blue >> 3);
 	}
 	else
-		rgba = RGBColorToU32(color);
+	{
+		color32 = RGBColorToU32(color);
+		color16 = RGBColorToU16_565(color);
+	}
 
-	palette->baseColors[index][0] = color->red;
-	palette->baseColors[index][1] = color->green;
-	palette->baseColors[index][2] = color->blue;
-	palette->finalColors[index] = rgba;
+	palette->baseColors[index] = *color;
+	palette->finalColors32[index] = color32;
+	palette->finalColors16[index] = color16;
 }
