@@ -47,8 +47,6 @@ int				VISIBLE_WIDTH = 640;			// dimensions of visible area (MULTIPLE OF 4!!!)
 int				VISIBLE_HEIGHT = 480;
 
 uint8_t*		gIndexedFramebuffer = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT]
-uint8_t*		gRGBAFramebuffer = nil;			// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4]
-uint8_t*		gRGBAFramebufferX2 = nil;		// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4 * 4]
 
 int				gEffectiveScalingType = kScaling_Stretch;
 
@@ -189,8 +187,6 @@ Rect	r;
 static void DisposeScreenBuffers(void)
 {
 	CHECKED_DISPOSEPTR(gIndexedFramebuffer);
-	CHECKED_DISPOSEPTR(gRGBAFramebuffer);
-	CHECKED_DISPOSEPTR(gRGBAFramebufferX2);
 
 	CHECKED_DISPOSEHANDLE(gOffScreenHandle);
 	CHECKED_DISPOSEHANDLE(gBackgroundHandle);
@@ -227,14 +223,6 @@ static void InitScreenBuffers(void)
 
 	// Clear to black
 	memset(gIndexedFramebuffer, 0xFF, VISIBLE_WIDTH * VISIBLE_HEIGHT);
-
-					/* MAKE RGBA FRAMEBUFFER */
-
-	gRGBAFramebuffer = (uint8_t*) NewPtrClear(VISIBLE_WIDTH * VISIBLE_HEIGHT * 4);
-	GAME_ASSERT(gRGBAFramebuffer);
-
-	gRGBAFramebufferX2 = (uint8_t*) NewPtrClear((VISIBLE_WIDTH*2) * (VISIBLE_HEIGHT*2) * 4);
-	GAME_ASSERT(gRGBAFramebufferX2);
 
 					/* MAKE OFFSCREEN DRAW BUFFER */
 
@@ -477,12 +465,7 @@ void PresentIndexedFramebuffer(void)
 #endif
 
 	//-------------------------------------------------------------------------
-	// Convert indexed to RGBA, with optional post-processing
-
-	ConvertFramebufferToRGBA();
-
-	//-------------------------------------------------------------------------
-	// Update SDL texture and swap buffers
+	// Present framebuffer
 
 #if GLRENDER
 	GLRender_PresentFramebuffer();

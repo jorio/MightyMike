@@ -214,10 +214,6 @@ void OnChangePlayfieldSize(void)
 	GAME_ASSERT(VISIBLE_WIDTH >= 640);
 	GAME_ASSERT(VISIBLE_HEIGHT >= 480);
 
-#if !(GLRENDER)
-	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
-#endif
-
 	SetOptimalWindowSize();
 
 	MakeGameWindow();
