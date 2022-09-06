@@ -553,7 +553,16 @@ void SetFullscreenMode(bool enforceDisplayPref)
 	SDL_ShowCursor(gGamePrefs.displayMode == kDisplayMode_Windowed? 1: 0);
 }
 
-int GetMaxIntegerZoom(void)
+int GetMaxIntegerZoom(int displayWidth, int displayHeight)
+{
+	int maxZoomX = displayWidth / VISIBLE_WIDTH;
+	int maxZoomY = displayHeight / VISIBLE_HEIGHT;
+	int maxZoom = maxZoomX < maxZoomY ? maxZoomX : maxZoomY;
+
+	return maxZoom <= 0? 1: maxZoom;
+}
+
+int GetMaxIntegerZoomForPreferredDisplay(void)
 {
 	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
 
@@ -570,11 +579,7 @@ int GetMaxIntegerZoom(void)
 	SDL_GetDisplayBounds(currentDisplay, &displayBounds);
 #endif
 
-	int maxZoomX = displayBounds.w / VISIBLE_WIDTH;
-	int maxZoomY = displayBounds.h / VISIBLE_HEIGHT;
-	int maxZoom = maxZoomX < maxZoomY ? maxZoomX : maxZoomY;
-
-	return maxZoom <= 0? 1: maxZoom;
+	return GetMaxIntegerZoom(displayBounds.w, displayBounds.h);
 }
 
 void SetOptimalWindowSize(void)
@@ -582,7 +587,7 @@ void SetOptimalWindowSize(void)
 	Uint32 windowFlags = SDL_GetWindowFlags(gSDLWindow);
 	SDL_RestoreWindow(gSDLWindow);
 
-	int maxZoom = GetMaxIntegerZoom();
+	int maxZoom = GetMaxIntegerZoomForPreferredDisplay();
 	int zoom = maxZoom;
 	if (gGamePrefs.displayMode == kDisplayMode_Windowed)
 	{

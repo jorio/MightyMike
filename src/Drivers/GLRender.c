@@ -73,6 +73,25 @@ static void DoFatalGLError(GLenum error, const char* file, int line)
 #define CHECK_GL_ERROR() do {} while(0)
 #endif
 
+SDL_Point FitRectKeepAR(
+		int logicalWidth,
+		int logicalHeight,
+		int displayWidth,
+		int displayHeight)
+{
+	float displayAR = (float)displayWidth / (float)displayHeight;
+	float logicalAR = (float)logicalWidth / (float)logicalHeight;
+
+	if (displayAR >= logicalAR)
+	{
+		return (SDL_Point) { displayHeight * logicalAR, displayHeight };
+	}
+	else
+	{
+		return (SDL_Point) { displayWidth, displayWidth / logicalAR };
+	}
+}
+
 static void GLRender_InitMatrices(void)
 {
 	glMatrixMode(GL_PROJECTION);
@@ -238,10 +257,21 @@ void GLRender_PresentFramebuffer(void)
 	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
 	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
 
-	int ww = 0;
-	int wh = 0;
-	SDL_GetWindowSize(gSDLWindow, &ww, &wh);
-	glViewport(0, 0, ww, wh);
+	int dw = 0;
+	int dh = 0;
+	SDL_GL_GetDrawableSize(gSDLWindow, &dw, &dh);	// DON'T use SDL_GetWindowSize as it returns fake scaled pixels in HiDPI displays
+
+	SDL_Point size;
+	if (gEffectiveScalingType == kScaling_PixelPerfect)
+	{
+		int zoom = GetMaxIntegerZoom(dw, dh);
+		size = (SDL_Point) { zoom*vw, zoom*vh };
+	}
+	else
+	{
+		size = FitRectKeepAR(vw, vh, dw, dh);
+	}
+	glViewport((dw-size.x) / 2, (dh-size.y) / 2, size.x, size.y);
 
 	GLRender_InitMatrices();
 
@@ -275,8 +305,8 @@ void GLRender_PresentFramebuffer(void)
 	glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
 	CHECK_GL_ERROR();
 
-//	glClearColor(0, 1, 0, 1);
-//	glClear(GL_COLOR_BUFFER_BIT);
+	// TODO: measure how expensive this is this on a G4
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(   0, vmax); glVertex3f( 0, vh, 0);

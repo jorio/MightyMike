@@ -493,7 +493,7 @@ static void OnMenuEntered(void)
 			int row = FindRowControlling(&gGamePrefs.windowedZoom);
 			GAME_ASSERT(row >= 0);
 
-			int numChoices = 1 + GetMaxIntegerZoom();
+			int numChoices = 1 + GetMaxIntegerZoomForPreferredDisplay();
 			if (numChoices > MAX_CHOICES)
 				numChoices = MAX_CHOICES;
 			gMenu[row].cycler.numChoices = numChoices;

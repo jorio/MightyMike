@@ -37,7 +37,8 @@ void	SetScreenOffsetFor640x480(void);
 void PresentIndexedFramebuffer(void);
 void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data);
 void SetFullscreenMode(bool enforceDisplayPref);
-int GetMaxIntegerZoom(void);
+int GetMaxIntegerZoom(int displayWidth, int displayHeight);
+int GetMaxIntegerZoomForPreferredDisplay(void);
 void SetOptimalWindowSize(void);
 void OnChangeIntegerScaling(void);
 
