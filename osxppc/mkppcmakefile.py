@@ -130,7 +130,7 @@ pomme_lib.add_source_tree("../extern/Pomme/src")
 
 game_lib = Lib("game")
 game_lib.add_flags(f"-I{SOURCE_DIR}/Headers")
-game_lib.add_flags("-DNOJOYSTICK -DOSXPPC")
+game_lib.add_flags("-DNOJOYSTICK -DOSXPPC -DGLRENDER")
 if not args.vsync:
 	game_lib.add_flags("-DNOVSYNC")
 game_lib.add_source_tree("../src")

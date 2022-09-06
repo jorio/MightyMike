@@ -30,7 +30,7 @@
 #define MAX_CHOICES 16
 #define MAX_ENTRIES_PER_MENU 25
 
-#if !(OSXPPC)
+#if !(OSXPPC) && !(GLRENDER)
 #define EXPOSE_DITHERING 1
 #else
 #define EXPOSE_DITHERING 0

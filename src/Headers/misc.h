@@ -2,6 +2,8 @@
 // MISC.H
 //
 
+#pragma once
+
 #define gGlobFlag_MeDoneDead	gGlobalFlagList[0]		// flag set when I'm done with death anim
 
 #if _MSC_VER

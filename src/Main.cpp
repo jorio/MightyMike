@@ -7,14 +7,14 @@
 #include <iostream>
 #include <thread>
 
-#include "version.h"
-
 extern "C"
 {
+	#include "renderdrivers.h"
+	#include "externs.h"
+	#include "version.h"
+
 	// Satisfy externs in game code
 	SDL_Window*			gSDLWindow		= nullptr;
-	SDL_Renderer*		gSDLRenderer	= nullptr;
-	SDL_Texture*		gSDLTexture		= nullptr;
 
 	// Lets the game know where to find its asset files
 	FSSpec gDataSpec;
@@ -100,23 +100,35 @@ static void Boot(const char* executablePath)
 	if (0 != SDL_Init(SDL_INIT_VIDEO))
 		throw std::runtime_error("Couldn't initialize SDL video subsystem.");
 
+#if GLRENDER
+#if !(OSXPPC)
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+#endif // OSXPPC
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif // GLRENDER
+
 	// Create window
+	int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+#if GLRENDER
+	windowFlags |= SDL_WINDOW_OPENGL;
+#endif
 	gSDLWindow = SDL_CreateWindow(
 			"Mighty Mike " PROJECT_VERSION,
 			SDL_WINDOWPOS_UNDEFINED,
 			SDL_WINDOWPOS_UNDEFINED,
-			640,
-			480,
-			SDL_WINDOW_RESIZABLE | SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI);
+			VISIBLE_WIDTH,
+			VISIBLE_HEIGHT,
+			windowFlags);
 	if (!gSDLWindow)
 		throw std::runtime_error("Couldn't create SDL window.");
 
-	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if (!gSDLRenderer)
+#if GLRENDER
+	GLRender_Init();
+#else
+	if (!SDLRender_Init())
 		throw std::runtime_error("Couldn't create SDL renderer.");
-	// The texture bound to the renderer is created in-game after loading the prefs.
-
-	SDL_RenderSetLogicalSize(gSDLRenderer, 640, 480);
+#endif // GLRENDER
 
 	fs::path dataPath = FindGameData(executablePath);
 #if !(__APPLE__)
@@ -140,12 +152,6 @@ static void Boot(const char* executablePath)
 static void Shutdown()
 {
 	Pomme::Shutdown();
-
-	if (gSDLRenderer)
-	{
-		SDL_DestroyRenderer(gSDLRenderer);
-		gSDLRenderer = nullptr;
-	}
 
 	if (gSDLWindow)
 	{

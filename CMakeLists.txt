@@ -49,7 +49,7 @@ set(POMME_NO_INPUT true)  # the game has its own input system
 add_subdirectory(extern/Pomme)
 
 find_package(SDL2 REQUIRED COMPONENTS main)
-
+find_package(OpenGL REQUIRED)  # only actually required if we want to force GLRENDER
 find_package(Threads REQUIRED)
 
 #------------------------------------------------------------------------------
@@ -81,6 +81,7 @@ set(GAME_LIBRARIES
 	Pomme
 	${SDL2_LIBRARIES}
 	${CMAKE_THREAD_LIBS_INIT}
+	OpenGL::GL
 )
 
 if(WIN32)
@@ -107,6 +108,7 @@ endif()
 
 target_include_directories(${GAME_TARGET} PRIVATE
 	${SDL2_INCLUDE_DIRS}
+	${OPENGL_INCLUDE_DIR}
 	extern/Pomme/src
 	${GAME_SRCDIR}/Headers
 )
@@ -119,6 +121,8 @@ target_link_libraries(${GAME_TARGET} ${GAME_LIBRARIES})
 
 add_compile_definitions(
 	"$<$<CONFIG:DEBUG>:_DEBUG>"
+	#GLRENDER
+	#NOVSYNC
 )
 
 if(NOT MSVC)

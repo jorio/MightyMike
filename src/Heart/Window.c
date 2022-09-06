@@ -8,6 +8,10 @@
 /***************/
 /* EXTERNALS   */
 /***************/
+#include <SDL.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "myglobals.h"
 #include "window.h"
 #include "playfield.h"
@@ -15,11 +19,8 @@
 #include "misc.h"
 #include "input.h"
 #include "externs.h"
-#include <version.h>
-
-#include <SDL.h>
-#include <stdio.h>
-#include <string.h>
+#include "renderdrivers.h"
+#include "version.h"
 
 /****************************/
 /*    PROTOTYPES            */
@@ -73,7 +74,7 @@ uint8_t**		gPFLookUpTable = nil;
 uint8_t**		gPFCopyLookUpTable = nil;
 uint8_t**		gPFMaskLookUpTable = nil;
 
-static const uint32_t	kDebugTextUpdateInterval = 200;
+static const uint32_t	kDebugTextUpdateInterval = 1000;
 static uint32_t			gDebugTextFrameAccumulator = 0;
 static uint32_t			gDebugTextLastUpdatedAt = 0;
 static char				gDebugTextBuffer[1024];
@@ -97,6 +98,9 @@ void MakeGameWindow(void)
 	InitScreenBuffers();
 
 	DumpGameWindow();
+
+	OnChangeIntegerScaling();		// initial texture creation
+
 	PresentIndexedFramebuffer();
 }
 
@@ -398,11 +402,11 @@ void CleanupDisplay(void)
 	ShutdownRenderThreads();
 	DisposeScreenBuffers();
 
-	if (gSDLTexture)
-	{
-		SDL_DestroyTexture(gSDLTexture);
-		gSDLTexture = NULL;
-	}
+#if GLRENDER
+	GLRender_Shutdown();
+#else
+	SDLRender_Shutdown();
+#endif
 }
 
 /****************** PRESENT FRAMEBUFFER *************************/
@@ -480,13 +484,11 @@ void PresentIndexedFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Update SDL texture and swap buffers
 
-	if (gEffectiveScalingType == kScaling_HQStretch)
-		SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebufferX2, VISIBLE_WIDTH*4*2);
-	else
-		SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
-	SDL_RenderClear(gSDLRenderer);
-	SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
-	SDL_RenderPresent(gSDLRenderer);
+#if GLRENDER
+	GLRender_PresentFramebuffer();
+#else
+	SDLRender_PresentFramebuffer();
+#endif
 
 	//-------------------------------------------------------------------------
 	// Update debug info
@@ -659,7 +661,7 @@ static int GetEffectiveScalingType(void)
 		{
 			return kScaling_PixelPerfect;
 		}
-#if !(OSXPPC)
+#if !(GLRENDER)
 		else if (uniformZoom <= kHQStretchMinZoom)  // HQStretch doesn't look to good at 1x-1.5x zoom levels
 		{
 			return kScaling_Stretch;
@@ -671,7 +673,7 @@ static int GetEffectiveScalingType(void)
 #else
 		(void) uniformZoom;
 		return kScaling_Stretch;
-#endif  // OSXPPC
+#endif  // GLRENDER
 	}
 }
 
@@ -679,31 +681,8 @@ void OnChangeIntegerScaling(void)
 {
 	gEffectiveScalingType = GetEffectiveScalingType();
 
-	bool crisp = (gEffectiveScalingType == kScaling_PixelPerfect);
-	int textureSizeMultiplier = (gEffectiveScalingType == kScaling_HQStretch) ? 2 : 1;
-
-	// Nuke old texture
-	if (gSDLTexture)
-	{
-		SDL_DestroyTexture(gSDLTexture);
-		gSDLTexture = NULL;
-	}
-
-	// Set scaling quality before creating texture
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, crisp ? "nearest" : "best");
-
-	// Recreate texture
-	gSDLTexture = SDL_CreateTexture(
-			gSDLRenderer,
-			SDL_PIXELFORMAT_RGBA8888,
-			SDL_TEXTUREACCESS_STREAMING,
-			VISIBLE_WIDTH * textureSizeMultiplier,
-			VISIBLE_HEIGHT * textureSizeMultiplier);
-	GAME_ASSERT(gSDLTexture);
-
-	// Set integer scaling setting
-#if SDL_VERSION_ATLEAST(2,0,5)
-	SDL_RenderSetIntegerScale(gSDLRenderer, crisp);
+#if !(GLRENDER)
+	SDLRender_InitTexture();
 #endif
 }
 
