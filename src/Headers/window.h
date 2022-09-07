@@ -41,6 +41,3 @@ int GetMaxIntegerZoom(int displayWidth, int displayHeight);
 int GetMaxIntegerZoomForPreferredDisplay(void);
 void SetOptimalWindowSize(void);
 void OnChangeIntegerScaling(void);
-
-void ConvertFramebufferToRGBA(void);
-void ShutdownRenderThreads(void);

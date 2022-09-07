@@ -1,8 +1,11 @@
+#if !(GLRENDER)
+
 #include <SDL.h>
 #include "myglobals.h"
 #include "externs.h"
 #include "misc.h"
 #include "renderdrivers.h"
+#include "framebufferfilter.h"
 
 #if _DEBUG
 #define CHECK_SDL_ERROR(err)											\
@@ -23,8 +26,8 @@ static void DoFatalSDLError(int error, const char* file, int line)
 
 static SDL_Renderer*	gSDLRenderer		= NULL;
 static SDL_Texture*		gSDLTexture			= NULL;
-uint8_t*				gRGBAFramebuffer	= NULL;			// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4]
-uint8_t*				gRGBAFramebufferX2	= NULL;			// [VISIBLE_WIDTH * VISIBLE_HEIGHT * 4 * 4]
+static color_t*			gRGBAFramebufferX2	= NULL;
+const char*				gRendererName		= "NULL";
 
 Boolean SDLRender_Init(void)
 {
@@ -37,6 +40,14 @@ Boolean SDLRender_Init(void)
 		return false;
 	// The texture bound to the renderer is created in-game after loading the prefs.
 
+	SDL_RendererInfo rendererInfo;
+	if (0 == SDL_GetRendererInfo(gSDLRenderer, &rendererInfo))
+	{
+		static char rendererName[32];
+		snprintf(rendererName, sizeof(rendererName), "SDL/%s", rendererInfo.name);
+		gRendererName = rendererName;
+	}
+
 	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
 
 	return true;
@@ -44,12 +55,6 @@ Boolean SDLRender_Init(void)
 
 static void SDLRender_NukeTextureAndBuffers(void)
 {
-	if (gRGBAFramebuffer)
-	{
-		DisposePtr((Ptr) gRGBAFramebuffer);
-		gRGBAFramebuffer = NULL;
-	}
-
 	if (gRGBAFramebufferX2)
 	{
 		DisposePtr((Ptr) gRGBAFramebufferX2);
@@ -65,6 +70,8 @@ static void SDLRender_NukeTextureAndBuffers(void)
 
 void SDLRender_Shutdown(void)
 {
+	ShutdownRenderThreads();
+
 	SDLRender_NukeTextureAndBuffers();
 
 	if (gSDLRenderer)
@@ -82,11 +89,8 @@ void SDLRender_InitTexture(void)
 	bool crisp = (gEffectiveScalingType == kScaling_PixelPerfect);
 	int textureSizeMultiplier = (gEffectiveScalingType == kScaling_HQStretch) ? 2 : 1;
 
-	// Allocate buffers
-	gRGBAFramebuffer = (uint8_t*) NewPtrClear(VISIBLE_WIDTH * VISIBLE_HEIGHT * 4);
-	GAME_ASSERT(gRGBAFramebuffer);
-
-	gRGBAFramebufferX2 = (uint8_t*) NewPtrClear((VISIBLE_WIDTH*2) * (VISIBLE_HEIGHT*2) * 4);
+	// Allocate buffer
+	gRGBAFramebufferX2 = (color_t*) NewPtrClear((VISIBLE_WIDTH*2) * (VISIBLE_HEIGHT*2) * 4);
 	GAME_ASSERT(gRGBAFramebufferX2);
 
 	// Set scaling quality before creating texture
@@ -117,15 +121,17 @@ void SDLRender_PresentFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
 
-	ConvertFramebufferToRGBA();
+	ConvertFramebufferMT(gRGBAFramebufferX2);
 
 	//-------------------------------------------------------------------------
 	// Update SDL texture
 
+	int effectiveSize = VISIBLE_WIDTH * 4;
+
 	if (gEffectiveScalingType == kScaling_HQStretch)
-		err = SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebufferX2, VISIBLE_WIDTH*4*2);
-	else
-		err = SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebuffer, VISIBLE_WIDTH*4);
+		effectiveSize *= 2;
+
+	err = SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebufferX2, effectiveSize);
 	CHECK_SDL_ERROR(err);
 
 	//-------------------------------------------------------------------------
@@ -136,3 +142,5 @@ void SDLRender_PresentFramebuffer(void)
 	CHECK_SDL_ERROR(err);
 	SDL_RenderPresent(gSDLRenderer);
 }
+
+#endif

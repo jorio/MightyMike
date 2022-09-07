@@ -13,6 +13,7 @@
 #include "externs.h"
 #include "misc.h"
 #include "renderdrivers.h"
+#include "framebufferfilter.h"
 
 #if __APPLE__
 #include <OpenGL/gl.h>
@@ -54,6 +55,8 @@ PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
 static SDL_GLContext gGLContext = NULL;
 static GLuint gFrameTexture = 0;
 static GLuint gFramePBO = 0;
+
+const char* gRendererName = "NULL";
 
 #if _DEBUG
 #define CHECK_GL_ERROR()												\
@@ -111,6 +114,8 @@ do { \
 void GLRender_Init(void)
 {
 	puts("Using special PPC renderer!");
+
+	gRendererName = "PPCGL";
 
 	gGLContext = SDL_GL_CreateContext(gSDLWindow);
 	GAME_ASSERT(gGLContext);
@@ -203,46 +208,14 @@ void GLRender_Init(void)
 
 void GLRender_Shutdown(void)
 {
+	ShutdownRenderThreads();
+
 	if (gGLContext)
 	{
 		SDL_GL_DeleteContext(gGLContext);
 		gGLContext = NULL;
 	}
 }
-
-#if (kFrameBytesPerPixel == 4)
-static void ConvertIndexedFrameTo32(uint32_t* rgba32)
-{
-	const int yOffset			= 0;
-	const uint8_t* indexed		= gIndexedFramebuffer + yOffset * VISIBLE_WIDTH;
-
-	int numRows = VISIBLE_HEIGHT - yOffset;
-
-	for (int y = 0; y < numRows; y++)
-	{
-		for (int x = 0; x < VISIBLE_WIDTH; x++)
-		{
-			*(rgba32++) = gGamePalette.finalColors32[*(indexed++)];
-		}
-	}
-}
-#else
-static void ConvertIndexedFrameTo16(uint16_t* rgb16)
-{
-	const int yOffset			= 0;
-	const uint8_t* indexed		= gIndexedFramebuffer + yOffset * VISIBLE_WIDTH;
-
-	int numRows = VISIBLE_HEIGHT - yOffset;
-
-	for (int y = 0; y < numRows; y++)
-	{
-		for (int x = 0; x < VISIBLE_WIDTH; x++)
-		{
-			*(rgb16++) = gGamePalette.finalColors16[*(indexed++)];
-		}
-	}
-}
-#endif
 
 void GLRender_PresentFramebuffer(void)
 {
@@ -284,7 +257,7 @@ void GLRender_PresentFramebuffer(void)
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vwPrevious, vhPrevious, kFramePixelFormat, kFramePixelType, NULL);
 	CHECK_GL_ERROR();
 
-	// perhaps we don't need to do this everytime?
+	// get new PBO
 	int numBytes = vw * vh * kFrameBytesPerPixel;
 	glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, numBytes, NULL, GL_STREAM_DRAW);
 	CHECK_GL_ERROR();
@@ -296,11 +269,7 @@ void GLRender_PresentFramebuffer(void)
 	GAME_ASSERT(mappedBuffer);
 
 	// now write data into the buffer, possibly in another thread
-#if (kFrameBytesPerPixel == 2)
-	ConvertIndexedFrameTo16(mappedBuffer);
-#else
-	ConvertIndexedFrameTo32(mappedBuffer);
-#endif
+	ConvertFramebufferMT(mappedBuffer);
 
 	glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
 	CHECK_GL_ERROR();

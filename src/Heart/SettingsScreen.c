@@ -33,7 +33,7 @@
 #if !(OSXPPC) && !(GLRENDER)
 #define EXPOSE_DITHERING 1
 #else
-#define EXPOSE_DITHERING 0
+#define EXPOSE_DITHERING 1
 #endif
 
 /****************************/

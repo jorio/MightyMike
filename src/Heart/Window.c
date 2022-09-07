@@ -387,14 +387,13 @@ void SetScreenOffsetFor640x480(void)
 
 void CleanupDisplay(void)
 {
-	ShutdownRenderThreads();
-	DisposeScreenBuffers();
-
 #if GLRENDER
 	GLRender_Shutdown();
 #else
 	SDLRender_Shutdown();
 #endif
+
+	DisposeScreenBuffers();
 }
 
 /****************** PRESENT FRAMEBUFFER *************************/
@@ -486,8 +485,9 @@ void PresentIndexedFramebuffer(void)
 			float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 			snprintf(
 					gDebugTextBuffer, sizeof(gDebugTextBuffer),
-					"Mighty Mike %s - scale:%c thr:%d fps:%d objs:%ld x:%ld y:%ld",
+					"Mighty Mike %s - drv:%s scl:%c thr:%d fps:%d obj:%ld x:%ld y:%ld",
 					PROJECT_VERSION,
+					gRendererName,
 					'A' + gEffectiveScalingType,
 					gNumThreads,
 					(int)roundf(fps),
@@ -649,7 +649,7 @@ static int GetEffectiveScalingType(void)
 		{
 			return kScaling_PixelPerfect;
 		}
-#if !(GLRENDER)
+#if !(GLRENDER)		// PPC/GL renderer doesn't support HQStretch (pixel-doubled texture)
 		else if (uniformZoom <= kHQStretchMinZoom)  // HQStretch doesn't look to good at 1x-1.5x zoom levels
 		{
 			return kScaling_Stretch;

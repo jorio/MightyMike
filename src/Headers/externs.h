@@ -214,8 +214,6 @@ extern	long					gLastPixieTime;
 extern	int						VISIBLE_WIDTH;
 extern	int						VISIBLE_HEIGHT;
 extern	uint8_t					*gIndexedFramebuffer;
-extern	uint8_t					*gRGBAFramebuffer;
-extern	uint8_t					*gRGBAFramebufferX2;
 extern	int						gEffectiveScalingType;
 extern	uint8_t					**gScreenLookUpTable;		// VISIBLE_HEIGHT elements
 extern	uint8_t					**gOffScreenLookUpTable;	// OFFSCREEN_HEIGHT elements
@@ -229,3 +227,4 @@ extern	Handle					gBackgroundHandle;
 extern	Handle					gOffScreenHandle;
 extern	Handle					gPFBufferHandle;
 extern	uint8_t					*gRowDitherStrides;			// for dithering filter
+extern	const char				*gRendererName;
