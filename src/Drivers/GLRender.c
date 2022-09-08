@@ -217,18 +217,10 @@ void GLRender_Shutdown(void)
 	}
 }
 
-void GLRender_PresentFramebuffer(void)
+static SDL_Rect GetViewportSize(void)
 {
-	static int vwPrevious = 0;
-	static int vhPrevious = 0;
-
 	const int vw = VISIBLE_WIDTH;
 	const int vh = VISIBLE_HEIGHT;
-	const float umax = vw * (1.0f / kFrameTextureWidth);
-	const float vmax = vh * (1.0f / kFrameTextureHeight);
-
-	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
-	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
 
 	int dw = 0;
 	int dh = 0;
@@ -244,7 +236,42 @@ void GLRender_PresentFramebuffer(void)
 	{
 		size = FitRectKeepAR(vw, vh, dw, dh);
 	}
-	glViewport((dw-size.x) / 2, (dh-size.y) / 2, size.x, size.y);
+
+	return (SDL_Rect)
+	{
+		.x = (dw-size.x) / 2,
+		.y = (dh-size.y) / 2,
+		.w = size.x,
+		.h = size.y
+	};
+}
+
+void GLRender_PresentFramebuffer(void)
+{
+	static int vwPrevious = 0;
+	static int vhPrevious = 0;
+	static SDL_Rect previousViewportRect = {0};
+	static int needClear = 60;
+
+	const int vw = VISIBLE_WIDTH;
+	const int vh = VISIBLE_HEIGHT;
+	const float umax = vw * (1.0f / kFrameTextureWidth);
+	const float vmax = vh * (1.0f / kFrameTextureHeight);
+
+	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
+	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
+
+	int dw = 0;
+	int dh = 0;
+	SDL_GL_GetDrawableSize(gSDLWindow, &dw, &dh);	// DON'T use SDL_GetWindowSize as it returns fake scaled pixels in HiDPI displays
+
+	SDL_Rect viewportRect = GetViewportSize();
+	if (!SDL_RectEquals(&viewportRect, &previousViewportRect))
+	{
+		previousViewportRect = viewportRect;
+		glViewport(viewportRect.x, viewportRect.y, viewportRect.w, viewportRect.h);
+		needClear = 60;
+	}
 
 	GLRender_InitMatrices();
 
@@ -274,8 +301,18 @@ void GLRender_PresentFramebuffer(void)
 	glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
 	CHECK_GL_ERROR();
 
-	// TODO: measure how expensive this is this on a G4
-	glClear(GL_COLOR_BUFFER_BIT);
+	// On a Mini G4, NOT clearing the screen increases the framerate by 8%
+	// so don't do it unless the viewport rectangle has recently changed.
+	if (needClear > 0)
+	{
+		needClear--;
+		glClearColor(0,0,0,1);
+#if _DEBUG
+		if (needClear > 4)
+			glClearColor(0,0,1,1);
+#endif
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
 
 	glBegin(GL_QUADS);
 	glTexCoord2f(   0, vmax); glVertex3f( 0, vh, 0);
