@@ -277,6 +277,9 @@ void GLRender_PresentFramebuffer(void)
 
 	glBindTexture(GL_TEXTURE_2D, gFrameTexture);
 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+					gEffectiveScalingType == kScaling_PixelPerfect ? GL_NEAREST : GL_LINEAR);
+
 	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, gFramePBO);
 	CHECK_GL_ERROR();
 
