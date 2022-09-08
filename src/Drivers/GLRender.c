@@ -9,6 +9,7 @@
 #if GLRENDER
 
 #include <SDL.h>
+#include <stdio.h>
 #include "myglobals.h"
 #include "externs.h"
 #include "misc.h"
@@ -22,11 +23,15 @@
 #include <SDL_opengl.h>
 #include <SDL_opengl_glext.h>
 PFNGLGENBUFFERSARBPROC glGenBuffersARB;
+PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 PFNGLBINDBUFFERARBPROC glBindBufferARB;
 PFNGLMAPBUFFERARBPROC glMapBufferARB;
 PFNGLBUFFERDATAARBPROC glBufferDataARB;
 PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
 #endif
+
+// Marginal FPS increase at the cost of 1 frame of latency
+#define DEFERRED_TEX_UPDATE 0
 
 // RGB 5-6-5 appears to be the fastest format for streaming textures
 // on graphics cards that ship with ancient PPC hardware
@@ -55,8 +60,10 @@ PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
 static SDL_GLContext gGLContext = NULL;
 static GLuint gFrameTexture = 0;
 static GLuint gFramePBO = 0;
+static GLint gMaxTextureSize = 0;
 
 const char* gRendererName = "NULL";
+Boolean gCanDoHQStretch = true;
 
 #if _DEBUG
 #define CHECK_GL_ERROR()												\
@@ -107,9 +114,66 @@ static void GLRender_InitMatrices(void)
 
 #define GL_GET_PROC_ADDRESS(t, proc) \
 do { \
-    (proc) = SDL_GL_GetProcAddress(#proc); \
+    (proc) = (t) SDL_GL_GetProcAddress(#proc); \
     GAME_ASSERT_MESSAGE((proc), "Missing OpenGL procedure " #proc); \
 } while(0)
+
+static void InitTextureAndPBO(int pixelZoom)
+{
+	glGenTextures(1, &gFrameTexture);
+	CHECK_GL_ERROR();
+
+	glGenBuffersARB(1, &gFramePBO);
+	CHECK_GL_ERROR();
+
+#if 0
+	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, gFramePBO);
+	// perhaps we don't need to do this everytime?
+	glBufferDataARB(
+		GL_PIXEL_UNPACK_BUFFER_ARB,
+		kFrameTextureWidth * kFrameTextureHeight * kFrameBytesPerPixel * (pixelZoom*pixelZoom),
+		NULL,
+		GL_STREAM_DRAW);
+	CHECK_GL_ERROR();
+#endif
+
+	glBindTexture(GL_TEXTURE_2D, gFrameTexture);
+	CHECK_GL_ERROR();
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	glTexImage2D(
+			GL_TEXTURE_2D,
+			0,
+			kFrameInternalFormat,
+			kFrameTextureWidth * pixelZoom,
+			kFrameTextureHeight * pixelZoom,
+			0,
+			kFramePixelFormat,
+			kFramePixelType,
+			NULL // need initial call with NULL so glTexSubImage2D works later on
+	);
+	CHECK_GL_ERROR();
+}
+
+static void DeleteTextureAndPBO(void)
+{
+	if (gFrameTexture != 0)
+	{
+		glDeleteTextures(1, &gFrameTexture);
+		gFrameTexture = 0;
+	}
+
+	if (gFramePBO != 0)
+	{
+		glDeleteBuffersARB(1, &gFramePBO);
+		gFramePBO = 0;
+	}
+}
 
 void GLRender_Init(void)
 {
@@ -123,19 +187,25 @@ void GLRender_Init(void)
 	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
 	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
 
-	GLint maxTextureSize = 0;
-	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
-	printf("Max texture size: %d\n", maxTextureSize);
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &gMaxTextureSize);
+	printf("Max texture size: %d\n", (int) gMaxTextureSize);
 
-	if (maxTextureSize < kFrameTextureWidth)
+	if (gMaxTextureSize < kFrameTextureWidth)
 	{
 		char message[128];
-		snprintf(message, sizeof(message), "Your graphics card's max texture size (%d)\nis below the game's requirements (%d).", maxTextureSize, kFrameTextureWidth);
+		snprintf(message, sizeof(message), "Your graphics card's max texture size (%d)\nis below the game's requirements (%d).", (int) gMaxTextureSize, kFrameTextureWidth);
 		DoAlert(message);
 	}
 
+#if OSXPPC
+	gCanDoHQStretch = false;
+#else
+	gCanDoHQStretch = gMaxTextureSize >= 2*kFrameTextureWidth;
+#endif
+
 #if !__APPLE__
 	GL_GET_PROC_ADDRESS(PFNGLGENBUFFERSARBPROC, glGenBuffersARB);
+	GL_GET_PROC_ADDRESS(PFNGLDELETEBUFFERSARBPROC, glDeleteBuffersARB);
 	GL_GET_PROC_ADDRESS(PFNGLBINDBUFFERARBPROC, glBindBufferARB);
 	GL_GET_PROC_ADDRESS(PFNGLUNMAPBUFFERPROC, glUnmapBufferARB);
 	GL_GET_PROC_ADDRESS(PFNGLMAPBUFFERARBPROC, glMapBufferARB);
@@ -167,48 +237,14 @@ void GLRender_Init(void)
 	glClear(GL_COLOR_BUFFER_BIT);
 	CHECK_GL_ERROR();
 
-	glGenTextures(1, &gFrameTexture);
-	CHECK_GL_ERROR();
-
-	glGenBuffersARB(1, &gFramePBO);
-	CHECK_GL_ERROR();
-	puts("PBO enabled!");
-
-	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, gFramePBO);
-	// perhaps we don't need to do this everytime?
-	glBufferDataARB(
-		GL_PIXEL_UNPACK_BUFFER_ARB,
-		kFrameTextureWidth * kFrameTextureHeight * kFrameBytesPerPixel,
-		NULL,
-		GL_STREAM_DRAW);
-	CHECK_GL_ERROR();
-
-	glBindTexture(GL_TEXTURE_2D, gFrameTexture);
-	CHECK_GL_ERROR();
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		kFrameInternalFormat,
-		kFrameTextureWidth,
-		kFrameTextureHeight,
-		0,
-		kFramePixelFormat,
-		kFramePixelType,
-		NULL // need initial call with NULL so glTexSubImage2D works later on
-	);
-	CHECK_GL_ERROR();
+	InitTextureAndPBO(1);
 }
 
 void GLRender_Shutdown(void)
 {
 	ShutdownRenderThreads();
+
+	DeleteTextureAndPBO();
 
 	if (gGLContext)
 	{
@@ -248,18 +284,18 @@ static SDL_Rect GetViewportSize(void)
 
 void GLRender_PresentFramebuffer(void)
 {
-	static int vwPrevious = 0;
-	static int vhPrevious = 0;
 	static SDL_Rect previousViewportRect = {0};
+	static int previousEffectiveScalingType = kScaling_Unspecified;
 	static int needClear = 60;
 
 	const int vw = VISIBLE_WIDTH;
 	const int vh = VISIBLE_HEIGHT;
-	const float umax = vw * (1.0f / kFrameTextureWidth);
-	const float vmax = vh * (1.0f / kFrameTextureHeight);
 
 	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
 	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
+
+	//-------------------------------------------------------------------------
+	// Update dimensions
 
 	int dw = 0;
 	int dh = 0;
@@ -273,26 +309,28 @@ void GLRender_PresentFramebuffer(void)
 		needClear = 60;
 	}
 
-	GLRender_InitMatrices();
+	bool isHQ = gEffectiveScalingType == kScaling_HQStretch;
+	bool wasHQ = previousEffectiveScalingType == kScaling_HQStretch;
+	if (wasHQ ^ isHQ)
+	{
+		DeleteTextureAndPBO();
+		InitTextureAndPBO(isHQ? 2: 1);
+	}
+	previousEffectiveScalingType = gEffectiveScalingType;
 
-	glBindTexture(GL_TEXTURE_2D, gFrameTexture);
+	int zvw = (isHQ ? 2 : 1) * vw;
+	int zvh = (isHQ ? 2 : 1) * vh;
 
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-					gEffectiveScalingType == kScaling_PixelPerfect ? GL_NEAREST : GL_LINEAR);
+	//-------------------------------------------------------------------------
+	// Update PBO
 
 	glBindBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, gFramePBO);
 	CHECK_GL_ERROR();
 
-	// copy pixels from pbo to texture object
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vwPrevious, vhPrevious, kFramePixelFormat, kFramePixelType, NULL);
-	CHECK_GL_ERROR();
-
 	// get new PBO
-	int numBytes = vw * vh * kFrameBytesPerPixel;
+	int numBytes = zvw * zvh * kFrameBytesPerPixel;
 	glBufferDataARB(GL_PIXEL_UNPACK_BUFFER_ARB, numBytes, NULL, GL_STREAM_DRAW);
 	CHECK_GL_ERROR();
-	vwPrevious = vw;  // we must remember the PBO's current size until we call glTexSubImage2D in the next iteration
-	vhPrevious = vh;  // in case we're changing the size of the texture (user adjusted viewport size in game settings)
 
 	void* mappedBuffer = glMapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB, GL_WRITE_ONLY);
 	CHECK_GL_ERROR();
@@ -303,6 +341,9 @@ void GLRender_PresentFramebuffer(void)
 
 	glUnmapBufferARB(GL_PIXEL_UNPACK_BUFFER_ARB);
 	CHECK_GL_ERROR();
+
+	//-------------------------------------------------------------------------
+	// Draw the quad
 
 	// On a Mini G4, NOT clearing the screen increases the framerate by 8%
 	// so don't do it unless the viewport rectangle has recently changed.
@@ -317,6 +358,22 @@ void GLRender_PresentFramebuffer(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
+	glBindTexture(GL_TEXTURE_2D, gFrameTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+					gEffectiveScalingType == kScaling_PixelPerfect ? GL_NEAREST : GL_LINEAR);
+
+#if !DEFERRED_TEX_UPDATE
+	// Update the texture
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, zvw, zvh, kFramePixelFormat, kFramePixelType, NULL);
+	CHECK_GL_ERROR();
+#endif
+
+	const float umax = vw * (1.0f / kFrameTextureWidth);
+	const float vmax = vh * (1.0f / kFrameTextureHeight);
+
+	GLRender_InitMatrices();
+
 	glBegin(GL_QUADS);
 	glTexCoord2f(   0, vmax); glVertex3f( 0, vh, 0);
 	glTexCoord2f(umax, vmax); glVertex3f(vw, vh, 0);
@@ -326,6 +383,14 @@ void GLRender_PresentFramebuffer(void)
 	CHECK_GL_ERROR();
 
 	SDL_GL_SwapWindow(gSDLWindow);
+
+#if DEFERRED_TEX_UPDATE
+	//-------------------------------------------------------------------------
+	// Update texture
+
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, zvw, zvh, kFramePixelFormat, kFramePixelType, NULL);
+	CHECK_GL_ERROR();
+#endif
 }
 
 #endif // OSXPPC

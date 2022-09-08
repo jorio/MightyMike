@@ -1,6 +1,7 @@
 #if !(GLRENDER)
 
 #include <SDL.h>
+#include <stdio.h>
 #include "myglobals.h"
 #include "externs.h"
 #include "misc.h"
@@ -28,6 +29,7 @@ static SDL_Renderer*	gSDLRenderer		= NULL;
 static SDL_Texture*		gSDLTexture			= NULL;
 static color_t*			gRGBAFramebufferX2	= NULL;
 const char*				gRendererName		= "NULL";
+Boolean					gCanDoHQStretch		= true;
 
 Boolean SDLRender_Init(void)
 {

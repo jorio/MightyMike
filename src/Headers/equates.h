@@ -125,6 +125,7 @@ enum
 
 enum
 {
+	kScaling_Unspecified	= -1,
 	kScaling_PixelPerfect	= 0,
 	kScaling_Stretch		= 1,
 	kScaling_HQStretch		= 2,

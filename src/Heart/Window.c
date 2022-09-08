@@ -649,19 +649,14 @@ static int GetEffectiveScalingType(void)
 		{
 			return kScaling_PixelPerfect;
 		}
-#if !(GLRENDER)		// PPC/GL renderer doesn't support HQStretch (pixel-doubled texture)
 		else if (uniformZoom <= kHQStretchMinZoom)  // HQStretch doesn't look to good at 1x-1.5x zoom levels
 		{
 			return kScaling_Stretch;
 		}
 		else
 		{
-			return kScaling_HQStretch;
+			return gCanDoHQStretch ? kScaling_HQStretch : kScaling_Stretch;
 		}
-#else
-		(void) uniformZoom;
-		return kScaling_Stretch;
-#endif  // GLRENDER
 	}
 }
 
