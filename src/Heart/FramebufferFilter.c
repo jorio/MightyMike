@@ -36,12 +36,23 @@ void IndexedFramebufferToColor_FilterDithering(color_t* color, int threadNum, in
 		{
 			if (smearFlags[x])
 			{
-				PackedColor* me		= (PackedColor*) &gGamePalette.finalColorsXX[*indexed];
-				PackedColor* next	= (PackedColor*) &gGamePalette.finalColorsXX[*(indexed+1)];
-				PackedColor* out	= (PackedColor*) color;
-				out->r = (me->r + next->r) >> 1;
-				out->g = (me->g + next->g) >> 1;
-				out->b = (me->b + next->b) >> 1;
+				uint8_t* left32		= (uint8_t*) &gGamePalette.finalColors32[indexed[0]];
+				uint8_t* right32	= (uint8_t*) &gGamePalette.finalColors32[indexed[1]];
+
+				uint16_t rmix8 = (left32[1] + right32[1]) >> 1;
+				uint16_t gmix8 = (left32[2] + right32[2]) >> 1;
+				uint16_t bmix8 = (left32[3] + right32[3]) >> 1;
+
+#if FRAMEBUFFER_COLOR_DEPTH == 16
+				*color = (rmix8 >> 3) | ((gmix8 >> 2) << 5) | ((bmix8 >> 3) << 11);
+#elif FRAMEBUFFER_COLOR_DEPTH == 32
+				((uint8_t*)color)[1] = rmix8;
+				((uint8_t*)color)[2] = gmix8;
+				((uint8_t*)color)[3] = bmix8;
+#else
+				_Static_assert(false, "unsupported framebuffer color depth");
+#endif
+
 				smearFlags[x] = 0;			// clear for next row
 			}
 			else

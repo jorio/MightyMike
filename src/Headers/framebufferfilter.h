@@ -11,24 +11,9 @@
 #if FRAMEBUFFER_COLOR_DEPTH == 32
 	typedef uint32_t color_t;
 	#define finalColorsXX finalColors32
-
-	typedef struct
-	{
-		uint8_t a;
-		uint8_t r;
-		uint8_t g;
-		uint8_t b;
-	} PackedColor;
 #elif FRAMEBUFFER_COLOR_DEPTH == 16
 	typedef uint16_t color_t;
 	#define finalColorsXX finalColors16
-
-	typedef struct
-	{
-		uint16_t r : 5;
-		uint16_t g : 6;
-		uint16_t b : 5;
-	} PackedColor;
 #else
 	_Static_assert(false, "unsupported framebuffer color depth!");
 #endif
