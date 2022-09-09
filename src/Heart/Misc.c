@@ -10,6 +10,7 @@
 
 #include <SDL.h>
 #include <stdio.h>
+#include <string.h>
 #include "myglobals.h"
 #include "window.h"
 #include "io.h"
@@ -753,7 +754,7 @@ short OpenMikeFile(const char* filename)
 {
 OSErr		iErr;
 FSSpec		spec;
-short		fRefNum;
+short		fRefNum = -1;
 
 	FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, filename, &spec);
 
@@ -761,7 +762,6 @@ short		fRefNum;
 	if (iErr != noErr)
 	{
 		DoFatalAlert2("Cannot open data file", filename);
-		return -1;
 	}
 
 	return fRefNum;

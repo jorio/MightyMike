@@ -3,8 +3,8 @@
 // This file is part of Mighty Mike. https://github.com/jorio/mightymike
 
 #include "externs.h"
-//#include "window.h"
 #include "framebufferfilter.h"
+#include <string.h>
 
 static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags);
 

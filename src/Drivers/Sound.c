@@ -15,6 +15,7 @@
 #include "input.h"
 #include "externs.h"
 #include <stdio.h>  // snprintf
+#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
