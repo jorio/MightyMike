@@ -232,7 +232,7 @@ static MenuItem gVideoMenu[] =
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
-			.caption = "dithering",
+			.caption = "shadow dithering",
 			.callback = nil,
 			.valuePtr = &gGamePrefs.filterDithering,
 			.numChoices = 2,
@@ -338,7 +338,9 @@ static MenuItem gKeyboardMenu[] =
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_NextWeapon },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Radar },
 	{ .type = kMenuItem_Separator },
+#if !OSXPPC
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleFullscreen },
+#endif
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleMusic },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Action, .button = { .caption = "reset to defaults", .callback = OnResetKeys } },
@@ -553,7 +555,15 @@ static void OnDone(void)
 
 static void OnChangeFullscreenMode(void)
 {
+#if !OSXPPC
 	SetFullscreenMode(true);
+#else
+	int y = 340;
+	MakeText("  N O T E: the new display mode will", kColumnX[0], y, 0, 0);
+	MakeText("apply after restarting the game",    kColumnX[0], y+24, 0, 0);
+	ForceUpdateBackground();
+	DumpBackground();
+#endif
 }
 
 static void OnChangePlayfieldSizeViaSettings(void)

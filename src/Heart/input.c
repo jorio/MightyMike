@@ -225,6 +225,7 @@ void UpdateInput(void)
 		UpdateKeyState(&gNeedStates[i], downNow);
 	}
 
+#if !OSXPPC	// on OSXPPC, hot-switching fullscreen mode is flaky
 	if (GetNewNeedState(kNeed_ToggleFullscreen))
 	{
 #if 0
@@ -246,6 +247,7 @@ void UpdateInput(void)
 
 		SetFullscreenMode(false);
 	}
+#endif
 }
 
 void ClearInput(void)
