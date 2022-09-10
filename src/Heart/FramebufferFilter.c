@@ -28,6 +28,12 @@ void IndexedFramebufferToColor_FilterDithering(color_t* color, int threadNum, in
 	const uint8_t* indexed		= gIndexedFramebuffer + firstRow * VISIBLE_WIDTH;
 	uint8_t* smearFlags			= gRowDitherStrides + threadNum * VISIBLE_WIDTH;
 
+#if __BIG_ENDIAN__
+	static const int RI = 0, GI = 1, BI = 2;
+#else
+	static const int RI = 3, GI = 2, BI = 1;
+#endif
+
 	for (int y = 0; y < numRows; y++)
 	{
 		FilterDithering_Row(indexed, smearFlags);
@@ -39,16 +45,16 @@ void IndexedFramebufferToColor_FilterDithering(color_t* color, int threadNum, in
 				uint8_t* left32		= (uint8_t*) &gGamePalette.finalColors32[indexed[0]];
 				uint8_t* right32	= (uint8_t*) &gGamePalette.finalColors32[indexed[1]];
 
-				uint16_t rmix8 = (left32[1] + right32[1]) >> 1;
-				uint16_t gmix8 = (left32[2] + right32[2]) >> 1;
-				uint16_t bmix8 = (left32[3] + right32[3]) >> 1;
+				uint16_t rmix8 = (left32[RI] + right32[RI]) >> 1;
+				uint16_t gmix8 = (left32[GI] + right32[GI]) >> 1;
+				uint16_t bmix8 = (left32[BI] + right32[BI]) >> 1;
 
 #if FRAMEBUFFER_COLOR_DEPTH == 16
-				*color = (rmix8 >> 3) | ((gmix8 >> 2) << 5) | ((bmix8 >> 3) << 11);
+				*color = (bmix8 >> 3) | ((gmix8 >> 2) << 5) | ((rmix8 >> 3) << 11);
 #elif FRAMEBUFFER_COLOR_DEPTH == 32
-				((uint8_t*)color)[1] = rmix8;
-				((uint8_t*)color)[2] = gmix8;
-				((uint8_t*)color)[3] = bmix8;
+				((uint8_t*)color)[RI] = rmix8;
+				((uint8_t*)color)[GI] = gmix8;
+				((uint8_t*)color)[BI] = bmix8;
 #else
 				_Static_assert(false, "unsupported framebuffer color depth");
 #endif
