@@ -179,7 +179,13 @@ void GLRender_Init(void)
 {
 	puts("Using special PPC renderer!");
 
-	gRendererName = "PPCGL";
+#if FRAMEBUFFER_COLOR_DEPTH == 32
+	gRendererName = "fastgl32";
+#elif FRAMEBUFFER_COLOR_DEPTH == 16
+	gRendererName = "fastgl16";
+#else
+	gRendererName = "gl??";
+#endif
 
 	gGLContext = SDL_GL_CreateContext(gSDLWindow);
 	GAME_ASSERT(gGLContext);

@@ -27,7 +27,7 @@ static void DoFatalSDLError(int error, const char* file, int line)
 
 static SDL_Renderer*	gSDLRenderer		= NULL;
 static SDL_Texture*		gSDLTexture			= NULL;
-static color_t*			gRGBAFramebufferX2	= NULL;
+static color_t*			gFinalFramebuffer	= NULL;
 const char*				gRendererName		= "NULL";
 Boolean					gCanDoHQStretch		= true;
 
@@ -46,7 +46,7 @@ Boolean SDLRender_Init(void)
 	if (0 == SDL_GetRendererInfo(gSDLRenderer, &rendererInfo))
 	{
 		static char rendererName[32];
-		snprintf(rendererName, sizeof(rendererName), "SDL/%s", rendererInfo.name);
+		snprintf(rendererName, sizeof(rendererName), "sdl-%s-%d", rendererInfo.name, (int) sizeof(color_t) * 8);
 		gRendererName = rendererName;
 	}
 
@@ -57,10 +57,10 @@ Boolean SDLRender_Init(void)
 
 static void SDLRender_NukeTextureAndBuffers(void)
 {
-	if (gRGBAFramebufferX2)
+	if (gFinalFramebuffer)
 	{
-		DisposePtr((Ptr) gRGBAFramebufferX2);
-		gRGBAFramebufferX2 = NULL;
+		DisposePtr((Ptr) gFinalFramebuffer);
+		gFinalFramebuffer = NULL;
 	}
 
 	if (gSDLTexture)
@@ -92,8 +92,8 @@ void SDLRender_InitTexture(void)
 	int textureSizeMultiplier = (gEffectiveScalingType == kScaling_HQStretch) ? 2 : 1;
 
 	// Allocate buffer
-	gRGBAFramebufferX2 = (color_t*) NewPtrClear((VISIBLE_WIDTH*2) * (VISIBLE_HEIGHT*2) * 4);
-	GAME_ASSERT(gRGBAFramebufferX2);
+	gFinalFramebuffer = (color_t*) NewPtrClear((VISIBLE_WIDTH * 2) * (VISIBLE_HEIGHT * 2) * (int) sizeof(color_t));
+	GAME_ASSERT(gFinalFramebuffer);
 
 	// Set scaling quality before creating texture
 	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, crisp ? "nearest" : "best");
@@ -101,7 +101,11 @@ void SDLRender_InitTexture(void)
 	// Recreate texture
 	gSDLTexture = SDL_CreateTexture(
 			gSDLRenderer,
+#if FRAMEBUFFER_COLOR_DEPTH == 16
+			SDL_PIXELFORMAT_RGB565,
+#else
 			SDL_PIXELFORMAT_RGBA8888,
+#endif
 			SDL_TEXTUREACCESS_STREAMING,
 			VISIBLE_WIDTH * textureSizeMultiplier,
 			VISIBLE_HEIGHT * textureSizeMultiplier);
@@ -123,17 +127,17 @@ void SDLRender_PresentFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
 
-	ConvertFramebufferMT(gRGBAFramebufferX2);
+	ConvertFramebufferMT(gFinalFramebuffer);
 
 	//-------------------------------------------------------------------------
 	// Update SDL texture
 
-	int effectiveSize = VISIBLE_WIDTH * 4;
+	int pitch = VISIBLE_WIDTH * (int) sizeof(color_t);
 
 	if (gEffectiveScalingType == kScaling_HQStretch)
-		effectiveSize *= 2;
+		pitch *= 2;
 
-	err = SDL_UpdateTexture(gSDLTexture, NULL, gRGBAFramebufferX2, effectiveSize);
+	err = SDL_UpdateTexture(gSDLTexture, NULL, gFinalFramebuffer, pitch);
 	CHECK_SDL_ERROR(err);
 
 	//-------------------------------------------------------------------------

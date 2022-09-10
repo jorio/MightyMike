@@ -485,7 +485,7 @@ void PresentIndexedFramebuffer(void)
 			float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
 			snprintf(
 					gDebugTextBuffer, sizeof(gDebugTextBuffer),
-					"Mighty Mike %s - drv:%s scl:%c thr:%d fps:%d obj:%ld x:%ld y:%ld",
+					"Mike%s %s scl:%c thr:%d fps:%d obj:%ld x:%ld y:%ld",
 					PROJECT_VERSION,
 					gRendererName,
 					'A' + gEffectiveScalingType,
