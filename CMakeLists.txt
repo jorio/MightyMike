@@ -125,7 +125,7 @@ target_link_libraries(${GAME_TARGET} ${GAME_LIBRARIES})
 
 add_compile_definitions(
 	"$<$<CONFIG:DEBUG>:_DEBUG>"
-	#GLRENDER
+	GLRENDER    # comment out to use SDL's 2D renderer
 	#NOVSYNC
 )
 
