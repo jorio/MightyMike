@@ -307,5 +307,5 @@ struct PrefsType
 };
 typedef struct PrefsType PrefsType;
 
-#define PREFS_MAGIC "Mighty Mike Prefs v3"
+#define PREFS_MAGIC "Mighty Mike Prefs v4"
 

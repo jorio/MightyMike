@@ -140,7 +140,11 @@ static MenuItem gVideoMenu[] =
 			.caption = "playfield size",
 			.callback = OnChangePlayfieldSizeViaSettings,
 			.valuePtr = &gGamePrefs.pfSize,
+#if OSXPPC
+			.numChoices = 2,		// don't expose extended
+#else
 			.numChoices = 3,
+#endif
 			.choices = { "small, 68k original", "medium, ppc original", "extended, widescreen" },
 		}
 	},
@@ -161,8 +165,13 @@ static MenuItem gVideoMenu[] =
 			.caption = "display mode",
 			.callback = OnChangeFullscreenMode,
 			.valuePtr = &gGamePrefs.displayMode,
+#if OSXPPC
+			.numChoices = 2,
+			.choices = {"windowed", "fullscreen"},
+#else
 			.numChoices = 3,
 			.choices = {"windowed", "fullscreen, stretched", "fullscreen, pixel perfect"},
+#endif
 		},
 	},
 

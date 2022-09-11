@@ -118,8 +118,8 @@ enum
 enum
 {
 	kDisplayMode_Windowed				= 0,
-	kDisplayMode_FullscreenStretched	= 1,
-	kDisplayMode_FullscreenCrisp		= 2,
+	kDisplayMode_FullscreenCrisp		= 1,
+	kDisplayMode_FullscreenStretched	= 2,
 	kDisplayMode_COUNT
 };
 
