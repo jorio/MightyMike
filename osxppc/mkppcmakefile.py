@@ -14,7 +14,7 @@ SOURCE_DIR = "../src"
 
 INCLUDE_DIRS = [
 	"../extern/Pomme/src",
-	"../../panther_sdl2_builtforg4/include",
+	"sdl-2.0.3/include",
 ]
 
 EXCLUDE_ROOTS = [
