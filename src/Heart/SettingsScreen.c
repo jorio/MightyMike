@@ -170,7 +170,7 @@ static MenuItem gVideoMenu[] =
 			.choices = {"windowed", "fullscreen"},
 #else
 			.numChoices = 3,
-			.choices = {"windowed", "fullscreen, stretched", "fullscreen, pixel perfect"},
+			.choices = {"windowed", "fullscreen, crisp", "fullscreen, stretched"},
 #endif
 		},
 	},

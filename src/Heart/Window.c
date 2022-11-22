@@ -630,7 +630,12 @@ static int GetEffectiveScalingType(void)
 {
 	int windowWidth = VISIBLE_WIDTH;
 	int windowHeight = VISIBLE_HEIGHT;
+
+#if SDL_VERSION_ATLEAST(2,26,0)
+	SDL_GetWindowSizeInPixels(gSDLWindow, &windowWidth, &windowHeight);
+#else
 	SDL_GetWindowSize(gSDLWindow, &windowWidth, &windowHeight);
+#endif
 
 	if (windowWidth < VISIBLE_WIDTH || windowHeight < VISIBLE_HEIGHT)
 	{

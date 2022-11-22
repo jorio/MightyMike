@@ -5,6 +5,14 @@
 // On PowerPC Macs, SDL 2.0.3's 2D renderer doesn't produce very fast results,
 // especially if Altivec isn't available (G3 CPUs).
 // So, on PPC, we bypass their renderer and use our own.
+//
+// Newer platforms may also benefit from this renderer
+// as it is typically more performant than SDL's default renderer
+// (e.g. up to 3x the framerate as SDL's metal renderer on M1 MBA, SDL 2.26)
+//
+// Additionally, people have reported issues with SDL's renderer with decent
+// hardware on Windows (https://github.com/jorio/MightyMike/issues/13).
+// The custom GL renderer has solved their issue.
 
 #if GLRENDER
 
@@ -303,10 +311,6 @@ void GLRender_PresentFramebuffer(void)
 	//-------------------------------------------------------------------------
 	// Update dimensions
 
-	int dw = 0;
-	int dh = 0;
-	SDL_GL_GetDrawableSize(gSDLWindow, &dw, &dh);	// DON'T use SDL_GetWindowSize as it returns fake scaled pixels in HiDPI displays
-
 	SDL_Rect viewportRect = GetViewportSize();
 	if (!SDL_RectEquals(&viewportRect, &previousViewportRect))
 	{
@@ -399,5 +403,5 @@ void GLRender_PresentFramebuffer(void)
 #endif
 }
 
-#endif // OSXPPC
+#endif // GLRENDER
 
