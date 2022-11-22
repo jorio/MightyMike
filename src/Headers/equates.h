@@ -87,6 +87,7 @@ enum
 
 enum
 {
+	AIM_NONE = -1,
 	AIM_UP = 0,
 	AIM_UP_RIGHT,
 	AIM_RIGHT,
@@ -94,7 +95,7 @@ enum
 	AIM_DOWN,
 	AIM_DOWN_LEFT,
 	AIM_LEFT,
-	AIM_UP_LEFT
+	AIM_UP_LEFT,
 };
 
 

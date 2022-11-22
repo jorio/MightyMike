@@ -421,6 +421,11 @@ short GetRightStick8WayAim(void)
 #if NOJOYSTICK
 	return -1;
 #else
+	if (!gSDLController)
+	{
+		return AIM_NONE;
+	}
+
 	int dxRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTX);
 	int dyRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTY);
 
@@ -445,7 +450,7 @@ short GetRightStick8WayAim(void)
 	{
 		if (right)		return AIM_RIGHT;
 		else if (left)	return AIM_LEFT;
-		else			return -1;
+		else			return AIM_NONE;
 	}
 #endif
 }
