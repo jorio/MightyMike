@@ -46,6 +46,7 @@
 PrefsType	gGamePrefs;
 
 Boolean		gAbortGameFlag,gWinFlag,gFinishedArea;
+Boolean		gIsInGame = false;
 
 long		gFrames=0;				// # frames tick counter
 Byte		gSceneNum,gAreaNum;
@@ -360,6 +361,8 @@ void PlayArea(void)
 {
 	MyRandomLong();
 
+	gIsInGame = true;
+
 	gTimeSinceSim = GAME_SPEED_SDL;						// force simulation to run once when we enter this function
 
 	do
@@ -379,7 +382,7 @@ void PlayArea(void)
 		if (GetNewNeedState(kNeed_Radar))				// see if show radar
 			DisplayBunnyRadar();
 
-		if (GetNewNeedState(kNeed_UIPause))				// see if abort game
+		if (GetNewNeedState(kNeed_UIPause) || IsCmdQPressed())				// see if abort game
 		{
 			PauseAllChannels(true);
 			gAbortGameFlag = AskIfQuit();
@@ -405,6 +408,8 @@ void PlayArea(void)
 #endif
 
 	} while (!gGlobFlag_MeDoneDead && !gAbortGameFlag && !gFinishedArea && !gAbortDemoFlag);
+
+	gIsInGame = false;
 }
 
 

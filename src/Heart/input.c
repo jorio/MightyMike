@@ -248,6 +248,11 @@ void UpdateInput(void)
 		SetFullscreenMode(false);
 	}
 #endif
+
+	if ((!gIsInGame || gIsGamePaused) && IsCmdQPressed())
+	{
+		CleanQuit();
+	}
 }
 
 void ClearInput(void)
@@ -298,6 +303,17 @@ bool GetNewNeedState(int needID)
 {
 	GAME_ASSERT(needID < NUM_CONTROL_NEEDS);
 	return gNeedStates[needID] == KEYSTATE_PRESSED;
+}
+
+bool IsCmdQPressed(void)
+{
+#if __APPLE__
+	return (GetSDLKeyState(SDL_SCANCODE_LGUI) || GetSDLKeyState(SDL_SCANCODE_RGUI))
+		&& GetNewSDLKeyState(SDL_GetScancodeFromKey(SDLK_q));
+#else
+	// on non-mac systems, alt-f4 is handled by the system
+	return false;
+#endif
 }
 
 

@@ -40,6 +40,7 @@ extern	short					gMyHealth;
 extern	short					gMyMaxHealth;
 extern	long					gNumCoins;
 extern	short					gNumLives;
+extern	Boolean					gIsGamePaused;
 
 #pragma mark - Input
 
@@ -80,6 +81,7 @@ extern	short					gMainAppRezFile;
 extern	long					someLong;
 extern	Boolean					gFinishedArea;
 extern	Boolean					gScreenScrollFlag;
+extern	Boolean					gIsInGame;
 
 #pragma mark - Main.cpp
 

@@ -100,6 +100,7 @@
 /**********************/
 
 static	Boolean		gUpdateScore,gUpdateCoins,gUpdateLives;
+Boolean		gIsGamePaused;
 long		gScore;
 
 short		gNumLives;
@@ -544,10 +545,14 @@ void ShowPaused(void)
 			DrawFrameToScreen_NoMask(240,220,GroupNum_Paused,ObjType_Paused,0);
 	}
 
+	gIsGamePaused = true;
+
 	while (GetNeedState(kNeed_UIPause));
 	while (!GetNeedState(kNeed_UIPause));
 	while (GetNeedState(kNeed_UIPause));
 	EraseStore();
+
+	gIsGamePaused = false;
 }
 
 
@@ -573,6 +578,8 @@ const int	quitY = gGamePrefs.pfSize == PFSIZE_SMALL ? 220 : ((VISIBLE_HEIGHT-64)
 	selection = 1;		// start on "resume"
 
 	UpdateInput();
+
+	gIsGamePaused = true;
 
 	while (!GetNewNeedState(kNeed_UIConfirm))
 	{
@@ -616,10 +623,11 @@ const int	quitY = gGamePrefs.pfSize == PFSIZE_SMALL ? 220 : ((VISIBLE_HEIGHT-64)
 		}
 	}
 
+	gIsGamePaused = false;
+
 	EraseStore();
 
 	return(!selection);
 }
-
 
 
