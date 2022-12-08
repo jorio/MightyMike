@@ -12,7 +12,7 @@ VERSION = "3.0.1"
 DOMAIN = "io.jor.mightymike"
 COPYRIGHT = f"Mighty Mike version {VERSION}, © 1995-2000 Pangea Software, Inc., © 2022 Iliyas Jorio"
 APPDIR = f"{EXE}.app"
-ICNS = "game.icns"
+ICNS = "../packaging/MightyMike.icns"
 
 plist_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -27,7 +27,7 @@ plist_xml = f"""<?xml version="1.0" encoding="UTF-8"?>
 	<key>CFBundleVersion</key>
 	<string>{VERSION}</string>
 	<key>CFBundleIconFile</key>
-	<string>game.icns</string>
+	<string>MightyMike.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>{DOMAIN}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
