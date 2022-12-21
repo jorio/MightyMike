@@ -239,7 +239,6 @@ enum
 	kNeed_NextWeapon,
 	kNeed_PrevWeapon,
 	kNeed_Radar,
-	kNeed_ToggleFullscreen,
 	kNeed_ToggleMusic,
 	NUM_REMAPPABLE_NEEDS,
 

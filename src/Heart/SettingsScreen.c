@@ -113,7 +113,6 @@ static const char* kInputNeedCaptions[NUM_REMAPPABLE_NEEDS] =
 	[kNeed_PrevWeapon		] = "prev weapon",
 	[kNeed_Radar			] = "bunny radar",
 	[kNeed_ToggleMusic		] = "toggle music",
-	[kNeed_ToggleFullscreen	] = "toggle fullscreen",
 };
 
 static const int kColumnX[] = { 64, 300, 475, 550 };
@@ -346,10 +345,6 @@ static MenuItem gKeyboardMenu[] =
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_PrevWeapon },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_NextWeapon },
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_Radar },
-	{ .type = kMenuItem_Separator },
-#if !OSXPPC
-	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleFullscreen },
-#endif
 	{ .type = kMenuItem_KeyBinding, .kb = kNeed_ToggleMusic },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Action, .button = { .caption = "reset to defaults", .callback = OnResetKeys } },

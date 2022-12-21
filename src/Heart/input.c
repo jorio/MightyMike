@@ -1,7 +1,8 @@
 /****************************/
 /*   	  INPUT.C	   	    */
-/* (c)1997-99 Pangea Software  */
 /* By Brian Greenstone      */
+/* (c)1997-99 Pangea Software  */
+/* (c)2022 Iliyas Jorio     */
 /****************************/
 
 
@@ -29,11 +30,11 @@ SDL_JoystickID		gSDLJoystickInstanceID = -1;		// ID of the joystick bound to gSD
 SDL_Haptic*			gSDLHaptic = NULL;
 
 Byte				gRawKeyboardState[SDL_NUM_SCANCODES];
-bool				gAnyNewKeysPressed = false;
 char				gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
 
 Byte				gNeedStates[NUM_CONTROL_NEEDS];
 
+static void ParseAltEnter(void);
 static void OnJoystickRemoved(SDL_JoystickID which);
 
 /****************************/
@@ -42,13 +43,15 @@ static void OnJoystickRemoved(SDL_JoystickID which);
 
 enum
 {
-	KEYSTATE_OFF		= 0b00,
-	KEYSTATE_UP			= 0b01,
+	KEYSTATE_ACTIVE_BIT		= 0b001,
+	KEYSTATE_CHANGE_BIT		= 0b010,
+	KEYSTATE_IGNORE_BIT		= 0b100,
 
-	KEYSTATE_PRESSED	= 0b10,
-	KEYSTATE_HELD		= 0b11,
-
-	KEYSTATE_ACTIVE_BIT	= 0b10,
+	KEYSTATE_OFF			= 0b000,
+	KEYSTATE_DOWN			= KEYSTATE_ACTIVE_BIT | KEYSTATE_CHANGE_BIT,
+	KEYSTATE_HELD			= KEYSTATE_ACTIVE_BIT,
+	KEYSTATE_UP				= KEYSTATE_OFF | KEYSTATE_CHANGE_BIT,
+	KEYSTATE_IGNOREHELD		= KEYSTATE_OFF | KEYSTATE_IGNORE_BIT,
 };
 
 const int16_t kJoystickDeadZone		= (33 * 32767 / 100);
@@ -68,15 +71,20 @@ static inline void UpdateKeyState(Byte* state, bool downNow)
 {
 	switch (*state)	// look at prev state
 	{
-	case KEYSTATE_HELD:
-	case KEYSTATE_PRESSED:
-		*state = downNow ? KEYSTATE_HELD : KEYSTATE_UP;
-		break;
-	case KEYSTATE_OFF:
-	case KEYSTATE_UP:
-	default:
-		*state = downNow ? KEYSTATE_PRESSED : KEYSTATE_OFF;
-		break;
+		case KEYSTATE_HELD:
+		case KEYSTATE_DOWN:
+			*state = downNow ? KEYSTATE_HELD : KEYSTATE_UP;
+			break;
+
+		case KEYSTATE_OFF:
+		case KEYSTATE_UP:
+		default:
+			*state = downNow ? KEYSTATE_DOWN : KEYSTATE_OFF;
+			break;
+
+		case KEYSTATE_IGNOREHELD:
+			*state = downNow ? KEYSTATE_IGNOREHELD : KEYSTATE_OFF;
+			break;
 	}
 }
 
@@ -142,11 +150,12 @@ void UpdateInput(void)
 		}
 	}
 
+	// --------------------------------------------
+	// Update raw keyboard state
+
 	int numkeys = 0;
 	const UInt8* keystate = SDL_GetKeyboardState(&numkeys);
 	uint32_t mouseButtons = SDL_GetMouseState(NULL, NULL);
-
-	gAnyNewKeysPressed = false;
 
 	{
 		int minNumKeys = numkeys < SDL_NUM_SCANCODES ? numkeys : SDL_NUM_SCANCODES;
@@ -154,17 +163,29 @@ void UpdateInput(void)
 		for (int i = 0; i < minNumKeys; i++)
 		{
 			UpdateKeyState(&gRawKeyboardState[i], keystate[i]);
-			if (gRawKeyboardState[i] == KEYSTATE_PRESSED)
-				gAnyNewKeysPressed = true;
 		}
 
 		// fill out the rest
 		for (int i = minNumKeys; i < SDL_NUM_SCANCODES; i++)
+		{
 			UpdateKeyState(&gRawKeyboardState[i], false);
+		}
 	}
 
 	// --------------------------------------------
+	// Parse system key chords
 
+#if !OSXPPC	// on OSXPPC, hot-switching fullscreen mode is flaky
+	ParseAltEnter();
+#endif
+
+	if ((!gIsInGame || gIsGamePaused) && IsCmdQPressed())
+	{
+		CleanQuit();
+	}
+
+	// --------------------------------------------
+	// Update needs
 
 	for (int i = 0; i < NUM_CONTROL_NEEDS; i++)
 	{
@@ -174,12 +195,12 @@ void UpdateInput(void)
 
 		for (int j = 0; j < KEYBINDING_MAX_KEYS; j++)
 			if (kb->key[j] && kb->key[j] < numkeys)
-				downNow |= 0 != keystate[kb->key[j]];
+				downNow |= KEYSTATE_ACTIVE_BIT & gRawKeyboardState[kb->key[j]];
 
 		switch (kb->mouse.type)
 		{
 			case kButton:
-				downNow |= 0 != (mouseButtons & SDL_BUTTON(kb->mouse.id));
+				downNow |= KEYSTATE_ACTIVE_BIT & (mouseButtons & SDL_BUTTON(kb->mouse.id));
 				break;
 
 			case kAxisPlus:
@@ -205,7 +226,7 @@ void UpdateInput(void)
 				switch (kb->gamepad[j].type)
 				{
 					case kButton:
-						downNow |= 0 != SDL_GameControllerGetButton(gSDLController, kb->gamepad[j].id);
+						downNow |= KEYSTATE_ACTIVE_BIT & SDL_GameControllerGetButton(gSDLController, kb->gamepad[j].id);
 						break;
 
 					case kAxisPlus:
@@ -224,10 +245,25 @@ void UpdateInput(void)
 
 		UpdateKeyState(&gNeedStates[i], downNow);
 	}
+}
 
-#if !OSXPPC	// on OSXPPC, hot-switching fullscreen mode is flaky
-	if (GetNewNeedState(kNeed_ToggleFullscreen))
+void ClearInput(void)
+{
+	memset(gRawKeyboardState, KEYSTATE_HELD, sizeof(gRawKeyboardState));
+	memset(gNeedStates, KEYSTATE_HELD, sizeof(gNeedStates));
+//	ClearMouseState();
+//	EatMouseEvents();
+}
+
+static void ParseAltEnter(void)
+{
+	if ((GetSDLKeyState(SDL_SCANCODE_LALT) || GetSDLKeyState(SDL_SCANCODE_RALT))
+		&& GetNewSDLKeyState(SDL_SCANCODE_RETURN))
 	{
+		gRawKeyboardState[SDL_SCANCODE_LALT] = KEYSTATE_IGNOREHELD;
+		gRawKeyboardState[SDL_SCANCODE_RALT] = KEYSTATE_IGNOREHELD;
+		gRawKeyboardState[SDL_SCANCODE_RETURN] = KEYSTATE_IGNOREHELD;
+
 #if 0
 		gGamePrefs.displayMode++;
 		gGamePrefs.displayMode %= kDisplayMode_COUNT;
@@ -247,20 +283,6 @@ void UpdateInput(void)
 
 		SetFullscreenMode(false);
 	}
-#endif
-
-	if ((!gIsInGame || gIsGamePaused) && IsCmdQPressed())
-	{
-		CleanQuit();
-	}
-}
-
-void ClearInput(void)
-{
-	memset(gRawKeyboardState, KEYSTATE_HELD, sizeof(gRawKeyboardState));
-	memset(gNeedStates, KEYSTATE_HELD, sizeof(gNeedStates));
-//	ClearMouseState();
-//	EatMouseEvents();
 }
 
 /************************ GET SKIP KEY STATE ***************************/
@@ -280,17 +302,12 @@ bool UserWantsOutContinuous(void)
 
 bool GetNewSDLKeyState(unsigned short sdlScanCode)
 {
-	return gRawKeyboardState[sdlScanCode] == KEYSTATE_PRESSED;
+	return gRawKeyboardState[sdlScanCode] == KEYSTATE_DOWN;
 }
 
 bool GetSDLKeyState(unsigned short sdlScanCode)
 {
-	return gRawKeyboardState[sdlScanCode] == KEYSTATE_PRESSED || gRawKeyboardState[sdlScanCode] == KEYSTATE_HELD;
-}
-
-bool AreAnyNewKeysPressed(void)
-{
-	return gAnyNewKeysPressed;
+	return gRawKeyboardState[sdlScanCode] == KEYSTATE_DOWN || gRawKeyboardState[sdlScanCode] == KEYSTATE_HELD;
 }
 
 bool GetNeedState(int needID)
@@ -302,7 +319,7 @@ bool GetNeedState(int needID)
 bool GetNewNeedState(int needID)
 {
 	GAME_ASSERT(needID < NUM_CONTROL_NEEDS);
-	return gNeedStates[needID] == KEYSTATE_PRESSED;
+	return gNeedStates[needID] == KEYSTATE_DOWN;
 }
 
 bool IsCmdQPressed(void)

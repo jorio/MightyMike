@@ -39,7 +39,6 @@ const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS] =
 [kNeed_Attack			] = { { SC(SPACE)	, SC_ATTACK2	}, MB(LEFT)		, { CAPLUS(TRIGGERRIGHT), CB(X)					} },
 [kNeed_Radar			] = { { SC(R)		, SC(TAB)		}, MB(MIDDLE)	, { CB(BACK)			, CB(Y)					} },
 [kNeed_ToggleMusic		] = { { SC(M)		, 0				}, MBNULL()		, { CBNULL()			, CBNULL()				} },
-[kNeed_ToggleFullscreen	] = { { SC(F11)		, 0				}, MBNULL()		, { CBNULL()			, CBNULL()				} },
 [kNeed_UIUp				] = { { SC(UP)		, 0				}, MBNULL()		, { CB(DPAD_UP)			, CAMINUS(LEFTY)		} },
 [kNeed_UIDown			] = { { SC(DOWN)	, 0				}, MBNULL()		, { CB(DPAD_DOWN)		, CAPLUS(LEFTY)			} },
 [kNeed_UILeft			] = { { SC(LEFT)	, 0				}, MBNULL()		, { CB(DPAD_LEFT)		, CAMINUS(LEFTX)		} },
@@ -47,6 +46,6 @@ const KeyBinding kDefaultKeyBindings[NUM_CONTROL_NEEDS] =
 [kNeed_UIPrev			] = { { 0			, 0				}, MBNULL()		, { CB(LEFTSHOULDER)	, CBNULL()				} },
 [kNeed_UINext			] = { { 0			, 0				}, MBNULL()		, { CB(RIGHTSHOULDER)	, CBNULL()				} },
 [kNeed_UIConfirm		] = { { SC(RETURN)	, SC(SPACE)		}, MBNULL()		, { CB(START)			, CB(A)					} },
-[kNeed_UIBack			] = { { SC(ESCAPE)	, 0				}, MBNULL()		, { CB(BACK)			, CB(B)					} },
+[kNeed_UIBack			] = { { SC(ESCAPE)	, SC(BACKSPACE) }, MBNULL()		, { CB(BACK)			, CB(B)					} },
 [kNeed_UIPause			] = { { SC(ESCAPE)	, 0				}, MBNULL()		, { CB(START)			, CBNULL()				} },
 };
