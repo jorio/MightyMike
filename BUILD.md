@@ -59,7 +59,7 @@ If you want to build the game **manually** instead, the rest of this document de
 1. Install the prerequisites from your package manager:
     - Any C++20 compiler
     - CMake 3.16+
-    - SDL2 development library (e.g. "libsdl2-dev" on Ubuntu, "sdl2" on Arch, "SDL-devel" on Fedora)
+    - SDL2 development library (e.g. "libsdl2-dev" on Ubuntu, "sdl2" on Arch, "SDL2-devel" on Fedora)
     - OpenGL development libraries (e.g. "libgl1-mesa-dev" on Ubuntu)
 1. Clone the repo **recursively**:
     ```
