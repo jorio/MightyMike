@@ -1,8 +1,26 @@
 name: Full Compile Check
 
-on: [push, workflow_dispatch]
+on: [workflow_dispatch]
 
 jobs:
+  full-compile-check-aarch64:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - uses: uraimo/run-on-arch-action@v2
+        with:
+          arch: aarch64
+          distro: ubuntu20.04
+          githubToken: ${{ github.token }}
+          install: |
+            apt update -y
+            apt install -y build-essential libsdl2-dev cmake
+          run: |
+            python3 build.py --dependencies --configure --build --system-sdl
+
   full-compile-check:
     name: ${{ matrix.platform.name }}
     runs-on: ${{ matrix.platform.os }}
@@ -13,8 +31,8 @@ jobs:
       matrix:
         platform:
           - { name: Linux/GCC (ancient), os: ubuntu-18.04, extraflags: "--system-sdl" }
-          - { name: Linux/GCC, os: ubuntu-latest, extraflags: "--system-sdl" }
-          - { name: Linux/Clang, os: ubuntu-latest, extraflags: "--system-sdl", prefix: "CC=clang CXX=clang++"}
+          - { name: Linux/GCC, os: ubuntu-22.04, extraflags: "--system-sdl" }
+          - { name: Linux/Clang, os: ubuntu-22.04, extraflags: "--system-sdl", prefix: "CC=clang CXX=clang++"}
           - { name: Windows/VS2022, os: windows-2022, extraflags: "-G 'Visual Studio 17 2022'" }
           - { name: Mac, os: macos-11 }
 
@@ -25,8 +43,8 @@ jobs:
           sudo apt update
           sudo apt install libsdl2-dev
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           submodules: 'recursive'
-
+          
       - run: ${{matrix.platform.prefix}} python3 build.py --dependencies --configure --build ${{matrix.platform.extraflags}}

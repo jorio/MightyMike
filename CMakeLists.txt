@@ -2,9 +2,11 @@ cmake_minimum_required(VERSION 3.16)
 
 set(GAME_TARGET				"MightyMike")
 set(GAME_VERSION			"3.0.2")
+
 set(GAME_MAC_ICNS			"packaging/${GAME_TARGET}.icns")
 set(GAME_MAC_COPYRIGHT		"© 1995 Pangea Software, Inc.\n© 2022 Iliyas Jorio.")
 set(GAME_MAC_BUNDLE_ID		"io.jor.mightymike")
+set(GAME_MAC_BUNDLE_NAME	"Mighty Mike")
 
 set(CMAKE_MODULE_PATH		"${CMAKE_SOURCE_DIR}/cmake")
 
@@ -24,6 +26,14 @@ project(${GAME_TARGET}
 	LANGUAGES C CXX
 )
 
+option(SANITIZE "Build with asan/ubsan" OFF)
+
+if(SANITIZE)
+	message("Sanitizers enabled")
+else()
+	message("Sanitizers disabled (pass -DSANITIZE=1 to enable)")
+endif()
+
 #------------------------------------------------------------------------------
 # GLOBAL OPTIONS (BEFORE ADDING SUBDIRECTORIES)
 #------------------------------------------------------------------------------
@@ -42,9 +52,10 @@ elseif(APPLE)
 endif()
 
 set(POMME_NO_VIDEO true)
-set(POMME_NO_QD3D true)
+set(POMME_NO_INPUT true)
 set(POMME_NO_GRAPHICS true)
-set(POMME_NO_INPUT true)  # the game has its own input system
+set(POMME_NO_QD3D true)
+set(POMME_NO_MP3 true)
 
 #------------------------------------------------------------------------------
 # DEPENDENCIES
@@ -117,7 +128,6 @@ target_include_directories(${GAME_TARGET} PRIVATE
 	${GAME_SRCDIR}/Headers
 )
 
-target_link_libraries(${GAME_TARGET} ${GAME_LIBRARIES})
 
 #------------------------------------------------------------------------------
 # COMPILER/LINKER OPTIONS
@@ -128,6 +138,9 @@ add_compile_definitions(
 	GLRENDER    # comment out to use SDL's 2D renderer
 	#NOVSYNC
 )
+
+target_compile_definitions(${GAME_TARGET} PRIVATE
+	GL_SILENCE_DEPRECATION)
 
 if(NOT MSVC)
 	target_compile_options(${GAME_TARGET} PRIVATE
@@ -140,7 +153,22 @@ if(NOT MSVC)
 		-Wno-unknown-pragmas
 		-Wstrict-aliasing=2
 	)
+
+	# Sanitizers in debug mode (Linux only)
+	# When using a debugger, you should export LSAN_OPTIONS=detect_leaks=0
+	if(SANITIZE)
+		list(INSERT GAME_LIBRARIES 0 asan ubsan)
+		target_compile_options(${GAME_TARGET} PRIVATE
+			-fsanitize=alignment
+			-fsanitize=address
+			-fsanitize=leak
+			-fsanitize=undefined
+			-fno-omit-frame-pointer
+		)
+	endif()
 else()
+	# On Win32, we need NOGDI and NOUSER to be able to define some Mac functions
+	# whose names are otherwise taken by Windows APIs.
 	target_compile_definitions(${GAME_TARGET} PRIVATE
 		WIN32_LEAN_AND_MEAN
 		NOGDI						# avoid name clashes with Mac functions
@@ -152,7 +180,7 @@ else()
 		/EHs	# synchronous exceptions; also, extern "C" functions may throw exceptions
 		/W4
 		/wd4068 # ignore unrecognized pragmas
-		/wd4200 # nonstandard extension: zero-sized array in struct
+		/wd4100 # unreferenced formal parameters
 		/wd4201 # nonstandard extension (nameless struct)
 		/wd4244 # conversion from double to float
 		/wd4305 # truncation from double to float
@@ -168,6 +196,8 @@ else()
 	set_target_properties(${GAME_TARGET} PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
 	set_target_properties(${GAME_TARGET} PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
 endif()
+
+target_link_libraries(${GAME_TARGET} ${GAME_LIBRARIES})
 
 #------------------------------------------------------------------------------
 # PLATFORM-SPECIFIC PACKAGING
@@ -196,7 +226,7 @@ set_target_properties(${GAME_TARGET} PROPERTIES
 	MACOSX_BUNDLE_EXECUTABLE_NAME		${GAME_TARGET}			# CFBundleExecutable - executable name inside the bundle
 	MACOSX_BUNDLE_SHORT_VERSION_STRING	${PROJECT_VERSION}		# CFBundleShortVersionString
 	MACOSX_BUNDLE_COPYRIGHT				${GAME_MAC_COPYRIGHT}	# NSHumanReadableCopyright (supersedes CFBundleGetInfoString (MACOSX_BUNDLE_INFO_STRING))
-	MACOSX_BUNDLE_BUNDLE_NAME			${GAME_TARGET}			# CFBundleName - user-visible (where??) short name for the bundle, up to 15 characters
+	MACOSX_BUNDLE_BUNDLE_NAME			${GAME_MAC_BUNDLE_NAME}	# CFBundleName - user-visible short name for the bundle, up to 15 characters
 	MACOSX_BUNDLE_GUI_IDENTIFIER		${GAME_MAC_BUNDLE_ID}	# CFBundleIdentifier - unique bundle ID in reverse-DNS format
 
 	# Bundle ID required for code signing - must match CFBundleIdentifier otherwise xcode will complain
@@ -208,6 +238,7 @@ set_target_properties(${GAME_TARGET} PROPERTIES
 	XCODE_EMBED_FRAMEWORKS							"${SDL2_LIBRARIES}"
 	XCODE_EMBED_FRAMEWORKS_CODE_SIGN_ON_COPY		"YES"		# frameworks must be signed by the same developer as the binary
 	XCODE_EMBED_FRAMEWORKS_REMOVE_HEADERS_ON_COPY	"YES"		# not strictly necessary, but that's cleaner
+	XCODE_ATTRIBUTE_COPY_PHASE_STRIP[variant=Debug]	"NO"		# avoid "skipping copy phase strip" warning while working on Debug config
 	XCODE_ATTRIBUTE_ENABLE_HARDENED_RUNTIME			"YES"		# required for notarization to pass
 )
 
@@ -232,7 +263,6 @@ if(APPLE)
 
 	# Copy stuff to app bundle contents
 	set_source_files_properties(${GAME_MAC_ICNS} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-	#set_source_files_properties(${SDL2_LIBRARIES} PROPERTIES MACOSX_PACKAGE_LOCATION "Frameworks")
 
 	set(BUNDLE_CONTENTS_DIR "$<TARGET_FILE_DIR:${PROJECT_NAME}>/..")
 	set(APP_PARENT_DIR "${BUNDLE_CONTENTS_DIR}/../..")
@@ -240,9 +270,13 @@ if(APPLE)
 	add_custom_command(TARGET ${GAME_TARGET} POST_BUILD
 		# Copy assets to app bundle
 		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Data ${BUNDLE_CONTENTS_DIR}/Resources
+		COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/packaging/mainmenu.nib ${BUNDLE_CONTENTS_DIR}/Resources/mainmenu.nib
 
 		# High-DPI support in Info.plist
 		COMMAND plutil -replace NSHighResolutionCapable -bool true ${BUNDLE_CONTENTS_DIR}/Info.plist
+
+		# Make it honor mainmenu.nib (use -replace instead of -insert so it doesn't fail on subsequent builds)
+		COMMAND plutil -replace NSMainNibFile -string "mainmenu" ${BUNDLE_CONTENTS_DIR}/Info.plist
 	)
 else()
 	set(APP_PARENT_DIR "$<TARGET_FILE_DIR:${GAME_TARGET}>")
