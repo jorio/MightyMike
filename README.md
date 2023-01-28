@@ -44,8 +44,14 @@ Check out Christoph Leimbrock's Mighty Mike tools:
 - [Power Pete Cheater 1.4](https://github.com/cyco/power-pete-cheater)
 - [Mighty Resource Viewer](https://github.com/cyco/mighty-resource-parser)
 
-If you like games by Pangea Software, I have made other ports you might enjoy:
+Check out my ports of other Pangea classics:
 
-- [Nanosaur](https://github.com/jorio/Nanosaur)
+- [Billy Frontier](https://github.com/jorio/BillyFrontier)
 - [Bugdom](https://github.com/jorio/Bugdom)
+- [Cro-Mag Rally](https://github.com/jorio/CroMagRally)
+- [Mighty Mike (Power Pete)](https://github.com/jorio/MightyMike)
+- [Nanosaur 1](https://github.com/jorio/Nanosaur)
+- [Nanosaur 2](https://github.com/jorio/Nanosaur2)
 - [Otto Matic](https://github.com/jorio/OttoMatic)
+
+All ports are provided free of charge! If you’d like to support the development of Pangea game ports, feel free to visit https://jorio.itch.io and name your own price for any of the games there. Much appreciated! 😊

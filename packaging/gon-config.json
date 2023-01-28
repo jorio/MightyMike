@@ -1,6 +1,6 @@
 {
     "notarize": [{
-        "path": "./dist/MightyMike-3.0.1-mac.dmg",
+        "path": "./dist/MightyMike-3.0.2-mac.dmg",
         "bundle_id": "io.jor.mightymike",
         "staple": true
     }]

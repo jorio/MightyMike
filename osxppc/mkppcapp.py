@@ -8,7 +8,7 @@ args = parser.parse_args()
 
 GAME = "Mighty Mike"
 EXE = args.exe
-VERSION = "3.0.1"
+VERSION = "3.0.2"
 DOMAIN = "io.jor.mightymike"
 COPYRIGHT = f"Mighty Mike version {VERSION}, © 1995-2000 Pangea Software, Inc., © 2022 Iliyas Jorio"
 APPDIR = f"{EXE}.app"

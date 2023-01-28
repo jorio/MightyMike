@@ -1,5 +1,19 @@
 # Mighty Mike changelog
 
+- **3.0.2 (Jan. 28, 2023)**
+
+    - Custom OpenGL-based framebuffer renderer. Better performance and hardware
+      compatibility than the previous renderer. Fixes the game booting to a black
+      screen on certain hardware combinations on Windows. (#13)
+
+    - macOS: Don't quit on ⌘W; prevent accidental quitting on ⌘Q
+
+    - Updated to SDL 2.26.2
+
+    - Stability fixes
+
+    - New build targets: Linux aarch64 (ARM64) and Mac OS X Tiger (PowerPC)
+
 - **3.0.1 (Apr. 26, 2022)**
 
     - Color correction setting which remaps display colors from Apple RGB profile

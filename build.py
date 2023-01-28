@@ -24,7 +24,7 @@ dist_dir = os.path.abspath("dist")
 
 game_name           = "MightyMike"  # no spaces
 game_name_human     = "Mighty Mike"  # spaces and other special characters allowed
-game_ver            = "3.0.1"
+game_ver            = "3.0.2"
 
 source_check        = "src/Enemies/Candy/Enemy_ChocBunny.c"  # some file that's likely to be from the game's source tree
 
