@@ -2,8 +2,8 @@
 Type=Application
 Version=1.0
 Name=Mighty Mike
-Comment=
-Icon=mightymike-desktopicon
+Comment=High-Powered Action Rescue in a Toy Store Gone Mad!
+Icon=io.jor.mightymike
 Exec=MightyMike
 Terminal=false
 Categories=Game;
