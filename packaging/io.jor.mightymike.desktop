@@ -3,6 +3,7 @@ Type=Application
 Version=1.0
 Name=Mighty Mike
 Comment=High-Powered Action Rescue in a Toy Store Gone Mad!
+Comment[fr]=Opération de sauvetage musclée dans un magasin de jouets toqués !
 Icon=io.jor.mightymike
 Exec=MightyMike
 Terminal=false
