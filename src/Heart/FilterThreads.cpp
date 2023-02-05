@@ -33,7 +33,9 @@ static color_t* gFinalColor = NULL;
 
 static void RaiseLatches()
 {
-	gLatchMask = (1ul << gRenderThreadPool.size()) - 1ul;
+	static_assert(MAX_RENDER_THREADS <= 32, "Review this if MAX_RENDER_THREADS exceeds 32!");
+
+	gLatchMask = (uint32_t) (((uint64_t)1 << gRenderThreadPool.size()) - 1);
 }
 
 static bool IsLatchRaised(int threadNum)

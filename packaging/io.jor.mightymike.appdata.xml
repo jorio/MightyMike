@@ -73,7 +73,7 @@
       <description>
         <p>Changes since version 3.0.1:</p>
         <ul>
-          <li>Custom OpenGL-based framebuffer renderer. Better performance and hardware compatibility than the previous renderer.</li>
+          <li>Custom OpenGL-based framebuffer renderer. Better performance and power efficiency than the previous renderer.</li>
           <li>Toggle fullscreen with Alt+Enter</li>
           <li>Stability fixes</li>
         </ul>

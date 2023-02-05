@@ -2,6 +2,8 @@
 
 #include <stdint.h>
 
+#define MAX_RENDER_THREADS	32
+
 #if GLRENDER
 	#define FRAMEBUFFER_COLOR_DEPTH 16
 #else

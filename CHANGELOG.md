@@ -1,10 +1,14 @@
 # Mighty Mike changelog
 
+- **3.0.2 hotfix for Windows only (Feb. 5, 2023)**
+
+    - Fix Windows version stuck on black screen if CPU has 32 threads or more.
+      Mac and Linux versions aren't affected, so the hotfix was only issued for Windows. (#13)
+
 - **3.0.2 (Jan. 28, 2023)**
 
-    - Custom OpenGL-based framebuffer renderer. Better performance and hardware
-      compatibility than the previous renderer. Fixes the game booting to a black
-      screen on certain hardware combinations on Windows. (#13)
+    - Custom OpenGL-based framebuffer renderer. Better performance/power efficiency
+      than the previous renderer.
 
     - macOS: Don't quit on ⌘W; prevent accidental quitting on ⌘Q
 

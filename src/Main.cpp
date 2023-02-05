@@ -10,6 +10,7 @@
 extern "C"
 {
 	#include "renderdrivers.h"
+	#include "framebufferfilter.h"
 	#include "externs.h"
 	#include "version.h"
 
@@ -87,8 +88,8 @@ static void Boot(const char* executablePath)
 	gNumThreads = 1;
 #else
 	gNumThreads = (int) std::thread::hardware_concurrency();
-	if (gNumThreads >= 32)
-		gNumThreads = 32;
+	if (gNumThreads >= MAX_RENDER_THREADS)
+		gNumThreads = MAX_RENDER_THREADS;
 	else if (gNumThreads <= 0)
 		gNumThreads = 1;
 #endif
