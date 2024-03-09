@@ -607,6 +607,12 @@ ObjNode		*nameObj;
 		if (GetNewSDLKeyState(SDL_SCANCODE_RETURN) || GetNewSDLKeyState(SDL_SCANCODE_KP_ENTER))			// see if done
 			goto exit;
 
+		if (gSDLController)
+		{
+			if (SDL_GameControllerGetButton(gSDLController, SDL_CONTROLLER_BUTTON_START))
+				goto exit;
+		} 
+
 					/*  SEE IF BACK CHAR */
 
 		if (GetNewSDLKeyState(SDL_SCANCODE_LEFT) || GetNewSDLKeyState(SDL_SCANCODE_BACKSPACE))
