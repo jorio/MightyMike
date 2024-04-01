@@ -1275,6 +1275,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.preferredDisplay = 0;
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.music = true;
+	gGamePrefs.soundEffects = true;
 	gGamePrefs.interpolateAudio = true;
 	gGamePrefs.gameTitlePowerPete = false;
 	gGamePrefs.thermometerScreen = true;
