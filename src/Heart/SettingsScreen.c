@@ -270,12 +270,22 @@ static MenuItem gAudioMenu[] =
 	{ .type = kMenuItem_Label, .label = " AUDIO   SETTINGS" },
 	{ .type = kMenuItem_Separator },
 	{
-			kMenuItem_Cycler,
+		kMenuItem_Cycler,
 		.cycler =
 		{
 			.caption = "music",
 			.callback = OnToggleMusic,
 			.valuePtr = &gGamePrefs.music,
+			.numChoices = 2,
+			.choices = { "no", "yes" },
+		}
+	},
+	{
+		kMenuItem_Cycler,
+		.cycler =
+		{
+			.caption = "sound effects",
+			.valuePtr = &gGamePrefs.soundEffects,
 			.numChoices = 2,
 			.choices = { "no", "yes" },
 		}
@@ -887,11 +897,6 @@ static void NavigateCycler(MenuItem* entry)
 
 	if (delta != 0)
 	{
-		if (entry->cycler.valuePtr == &gGamePrefs.interpolateAudio)
-			PlaySound(SOUND_COMEHERERODENT);
-		else
-			PlaySound(SOUND_GETPOW);
-
 		if (entry->cycler.valuePtr)
 		{
 			unsigned int value = (unsigned int)*entry->cycler.valuePtr;
@@ -901,6 +906,11 @@ static void NavigateCycler(MenuItem* entry)
 
 		if (entry->cycler.callback)
 			entry->cycler.callback();
+
+		if (entry->cycler.valuePtr == &gGamePrefs.interpolateAudio)
+			PlaySound(SOUND_COMEHERERODENT);
+		else
+			PlaySound(SOUND_GETPOW);
 
 		if (entry->cycler.numChoices > 0)
 		{

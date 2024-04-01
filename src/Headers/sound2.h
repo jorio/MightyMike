@@ -84,7 +84,6 @@ short	PlaySound(short);
 void	SetVolume(void);
 void	OnToggleMusic(void);
 void	ToggleMusic(void);
-void	ToggleEffects(void);
 void DoSoundMaintenance(Boolean checkKeys);
 void	ZapAllAddedSounds(void);
 void ZapAllSounds(void);

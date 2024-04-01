@@ -297,6 +297,7 @@ struct PrefsType
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
 	Boolean		music;
+	Boolean		soundEffects;
 	Boolean		interpolateAudio;
 	Boolean		gameTitlePowerPete;
 	Boolean		thermometerScreen;
@@ -306,5 +307,5 @@ struct PrefsType
 };
 typedef struct PrefsType PrefsType;
 
-#define PREFS_MAGIC "Mighty Mike Prefs v4"
+#define PREFS_MAGIC "Mighty Mike Prefs v5"
 

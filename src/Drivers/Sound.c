@@ -98,8 +98,6 @@ static  short			gSndEffectLastPlayedInChannel[MAX_EFFECTS];
 
 static	short			gMaxChannels;
 
-static	Boolean			gEffectsOnFlag = true;
-
 static	unsigned char	gVolume = DEFAULT_VOLUME;
 
 static	short			gNumEffectsLoaded;
@@ -361,7 +359,7 @@ SCStatus				theStatus;
 long	offset;
 OSErr	myErr;
 
-	if (!gEffectsOnFlag)								// see if effects activated
+	if (!gGamePrefs.soundEffects)								// see if effects activated
 		return(-1);
 
 	GAME_ASSERT_MESSAGE(soundNum < gNumEffectsLoaded, "Illegal sound number!");		// see if illegal sound #
@@ -485,14 +483,6 @@ void ToggleMusic(void)
 {
 	gGamePrefs.music = !gGamePrefs.music;
 	OnToggleMusic();
-}
-
-
-/********************* TOGGLE EFFECTS *****************/
-
-void ToggleEffects(void)
-{
-	gEffectsOnFlag = gEffectsOnFlag^1;
 }
 
 
