@@ -28,13 +28,13 @@ game_ver            = "3.0.2"
 
 source_check        = "src/Enemies/Candy/Enemy_ChocBunny.c"  # some file that's likely to be from the game's source tree
 
-sdl_ver             = "2.26.2"
+sdl_ver             = "2.30.1"
 appimagetool_ver    = "13"
 
 lib_hashes = {  # sha-256
-    "SDL2-2.26.2.dmg":               "f56a95714c54d89b5d67e08a0362a5b53d4a8d405f7d63ec1bee0f57dc13c69c",
-    "SDL2-2.26.2.tar.gz":            "95d39bc3de037fbdfa722623737340648de4f180a601b0afad27645d150b99e0",
-    "SDL2-devel-2.26.2-VC.zip":      "8fcc6c2fbfabeddbf7872f994022aa40826ed82324e5a8671dfd4166c62c7e27",
+    f"SDL2-{sdl_ver}.dmg":           "318651f693fbae08df6b5d933cc157a16971871d9d3a8e38cdf4fafedc0d4517",
+    f"SDL2-{sdl_ver}.tar.gz":        "01215ffbc8cfc4ad165ba7573750f15ddda1f971d5a66e9dcaffd37c587f473a",
+    f"SDL2-devel-{sdl_ver}-VC.zip":  "6bbc1c1f691695f0e0756efa8ed9be95dfc50bc62f9e8ac2f9d8a6240ec9fee3",
     "appimagetool-x86_64.AppImage":  "df3baf5ca5facbecfc2f3fa6713c29ab9cefa8fd8c1eac5d283b79cab33e4acb", # appimagetool v13
     "appimagetool-aarch64.AppImage": "334e77beb67fc1e71856c29d5f3f324ca77b0fde7a840fdd14bd3b88c25c341f",
 }
