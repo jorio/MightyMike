@@ -591,40 +591,40 @@ void LoadAreaSound(void)
 	switch(gSceneNum)
 	{
 		case	SCENE_JURASSIC:
-				gSoundNum_UngaBunga		= AddEffect("jurassic", "ungabunga");
-				gSoundNum_DinoBoom		= AddEffect("jurassic", "dinoboom");
-				gSoundNum_BarneyJump	= AddEffect("jurassic", "barneybounce");
-				gSoundNum_DoorOpen		= AddEffect("jurassic", "dooropen");
+				gSoundNum_UngaBunga		= AddEffect("Jurassic", "UngaBunga");
+				gSoundNum_DinoBoom		= AddEffect("Jurassic", "DinoBoom");
+				gSoundNum_BarneyJump	= AddEffect("Jurassic", "BarneyBounce");
+				gSoundNum_DoorOpen		= AddEffect("Jurassic", "DoorOpen");
 				break;
 
 		case	SCENE_CANDY:
-				gSoundNum_ChocoBunny	= AddEffect("candy", "bunnyhop");
-				gSoundNum_Carmel		= AddEffect("candy", "carmelmonster");
-				gSoundNum_GummyHaha		= AddEffect("candy", "hehehe");
+				gSoundNum_ChocoBunny	= AddEffect("Candy", "BunnyHop");
+				gSoundNum_Carmel		= AddEffect("Candy", "CarmelMonster");
+				gSoundNum_GummyHaha		= AddEffect("Candy", "Hehehe");
 				break;
 
 		case	SCENE_CLOWN:
-				gSoundNum_JackInTheBox	= AddEffect("clown", "jackinthebox");
-				gSoundNum_Skid			= AddEffect("clown", "tireskid");
-				gSoundNum_DoorOpen		= AddEffect("clown", "dooropen");
-				gSoundNum_ClownLaugh	= AddEffect("clown", "clownlaugh");
+				gSoundNum_JackInTheBox	= AddEffect("Clown", "JackInTheBox");
+				gSoundNum_Skid			= AddEffect("Clown", "TireSkid");
+				gSoundNum_DoorOpen		= AddEffect("Clown", "DoorOpen");
+				gSoundNum_ClownLaugh	= AddEffect("Clown", "ClownLaugh");
 				break;
 
 		case	SCENE_FAIRY:
-				gSoundNum_WitchHaha		= AddEffect("fairy", "witch");
-				gSoundNum_Shriek		= AddEffect("fairy", "shriek");
-				gSoundNum_DoorOpen		= AddEffect("fairy", "dooropen");
-				gSoundNum_Frog			= AddEffect("fairy", "frog");
-				gSoundNum_BarneyJump	= AddEffect("jurassic", "barneybounce");
-				gSoundNum_DinoBoom		= AddEffect("jurassic", "dinoboom");
+				gSoundNum_WitchHaha		= AddEffect("Fairy", "Witch");
+				gSoundNum_Shriek		= AddEffect("Fairy", "Shriek");
+				gSoundNum_DoorOpen		= AddEffect("Fairy", "DoorOpen");
+				gSoundNum_Frog			= AddEffect("Fairy", "Frog");
+				gSoundNum_BarneyJump	= AddEffect("Jurassic", "BarneyBounce");
+				gSoundNum_DinoBoom		= AddEffect("Jurassic", "DinoBoom");
 				break;
 
 		case	SCENE_BARGAIN:
-				gSoundNum_Ship			= AddEffect("bargain", "spaceship");
-				gSoundNum_ExitShip		= AddEffect("bargain", "exitship");
-				gSoundNum_DoorOpen		= AddEffect("bargain", "dooropen");
-				gSoundNum_DogRoar		= AddEffect("bargain", "dogroar");
-				gSoundNum_RobotDanger	= AddEffect("bargain", "robotdanger");
+				gSoundNum_Ship			= AddEffect("Bargain", "SpaceShip");
+				gSoundNum_ExitShip		= AddEffect("Bargain", "ExitShip");
+				gSoundNum_DoorOpen		= AddEffect("Bargain", "DoorOpen");
+				gSoundNum_DogRoar		= AddEffect("Bargain", "DogRoar");
+				gSoundNum_RobotDanger	= AddEffect("Bargain", "RobotDanger");
 				break;
 	}
 }

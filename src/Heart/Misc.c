@@ -721,7 +721,7 @@ void FillThermometer(short percent)
 				/* INIT THERMOMETER */
 
 		gScreenBlankedFlag = false;
-		LoadImage(":images:charging.tga", LOADIMAGE_FADEIN);
+		LoadImage(":Images:charging.tga", LOADIMAGE_FADEIN);
 
 																			// draw thermometer box
 		memset(gScreenLookUpTable[top] + left, borderColor, width);			// top line

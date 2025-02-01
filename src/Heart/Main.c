@@ -137,12 +137,12 @@ void InitGame(void)
 				/* LOAD ART WHICH IS ALWAYS WITH US */
 
 	if (gGamePrefs.pfSize != PFSIZE_SMALL)
-		LoadShapeTable(":shapes:infobar2.shapes", GROUP_INFOBAR);
+		LoadShapeTable(":Shapes:infobar2.shapes", GROUP_INFOBAR);
 	else
-		LoadShapeTable(":shapes:infobar.shapes", GROUP_INFOBAR);
+		LoadShapeTable(":Shapes:infobar.shapes", GROUP_INFOBAR);
 
-	LoadShapeTable(":shapes:weapon.shapes", GROUP_WEAPONS);
-	LoadShapeTable(":shapes:main.shapes", GROUP_MAIN);
+	LoadShapeTable(":Shapes:weapon.shapes", GROUP_WEAPONS);
+	LoadShapeTable(":Shapes:main.shapes", GROUP_MAIN);
 
 				/* HACK: GET RID OF WHITE LINE AT RIGHT EDGE OF QUIT/RESUME GRAPHICS */
 
@@ -233,20 +233,20 @@ void LoadAreaArt(void)
 			GAME_ASSERT_MESSAGE(false, "Unsupported scene ID!");
 	}
 
-	snprintf(path, sizeof(path), ":maps:%s.tileset", sceneName);
+	SDL_snprintf(path, sizeof(path), ":Maps:%s.tileset", sceneName);
 	LoadTileSet(path);
 	FillThermometer(20);
 
-	snprintf(path, sizeof(path), ":shapes:%s1.shapes", sceneName);
+	SDL_snprintf(path, sizeof(path), ":Shapes:%s1.shapes", sceneName);
 	LoadShapeTable(path, GROUP_AREA_SPECIFIC);
 	FillThermometer(40);
 
-	snprintf(path, sizeof(path), ":shapes:%s2.shapes", sceneName);
+	SDL_snprintf(path, sizeof(path), ":Shapes:%s2.shapes", sceneName);
 	LoadShapeTable(path, GROUP_AREA_SPECIFIC2);
 	FillThermometer(60);
 
 	GAME_ASSERT(gAreaNum < 3);
-	snprintf(path, sizeof(path), ":maps:%s.map-%d", sceneName, gAreaNum + 1);
+	SDL_snprintf(path, sizeof(path), ":Maps:%s.map-%d", sceneName, gAreaNum + 1);
 	LoadPlayfield(path);
 	FillThermometer(80);
 }

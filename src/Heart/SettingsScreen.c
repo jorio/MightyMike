@@ -1303,9 +1303,9 @@ void DoSettingsScreen(void)
 
 	FadeOutGameCLUT();
 	InitObjectManager();
-	LoadShapeTable(":shapes:highscore.shapes", GROUP_WIN);
-	LoadShapeTable(":shapes:fairy2.shapes", GROUP_AREA_SPECIFIC);		// cursor
-	LoadBackground(":images:winbw.tga");								// just to load the palette
+	LoadShapeTable(":Shapes:highscore.shapes", GROUP_WIN);
+	LoadShapeTable(":Shapes:fairy2.shapes", GROUP_AREA_SPECIFIC);		// cursor
+	LoadBackground(":Images:winbw.tga");								// just to load the palette
 
 						/* LETS DO IT */
 

@@ -294,7 +294,7 @@ const int	radarCenterY = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_Y : ((
 
 						/* DRAW RADAR BACKGROUND */
 
-	Handle imageHandle = LoadTGA(":images:radarmap.tga", false, &width, &height);
+	Handle imageHandle = LoadTGA(":Images:radarmap.tga", false, &width, &height);
 	GAME_ASSERT(imageHandle);
 
 	PlaySound(SOUND_RADAR);
