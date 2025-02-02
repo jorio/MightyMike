@@ -1276,7 +1276,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.soundEffects = true;
 	gGamePrefs.interpolateAudio = true;
 	gGamePrefs.gameTitlePowerPete = false;
-	gGamePrefs.thermometerScreen = true;
+	gGamePrefs.thermometerScreen = false;
 	gGamePrefs.debugInfoInTitleBar = false;
 	gGamePrefs.colorCorrection = true;
 	SDL_memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
