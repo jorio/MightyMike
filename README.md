@@ -48,6 +48,7 @@ Check out my ports of other Pangea classics:
 
 - [Billy Frontier](https://github.com/jorio/BillyFrontier)
 - [Bugdom](https://github.com/jorio/Bugdom)
+- [Bugdom 2](https://github.com/jorio/Bugdom2)
 - [Cro-Mag Rally](https://github.com/jorio/CroMagRally)
 - [Mighty Mike (Power Pete)](https://github.com/jorio/MightyMike)
 - [Nanosaur 1](https://github.com/jorio/Nanosaur)

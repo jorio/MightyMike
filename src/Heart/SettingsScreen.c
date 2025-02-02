@@ -6,7 +6,6 @@
 /*    EXTERNALS             */
 /****************************/
 
-#include <stdio.h>
 #include "myglobals.h"
 #include "objecttypes.h"
 #include "window.h"
@@ -23,18 +22,12 @@
 #include "externs.h"
 #include "font.h"
 #include "version.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <ctype.h>
-#include <string.h>
 
 #define MAX_CHOICES 16
 #define MAX_ENTRIES_PER_MENU 25
-
-#if !(OSXPPC) && !(GLRENDER)
 #define EXPOSE_DITHERING 1
-#else
-#define EXPOSE_DITHERING 1
-#endif
 
 /****************************/
 /*    PROTOTYPES            */
@@ -203,12 +196,11 @@ static MenuItem gVideoMenu[] =
 		}
 	},
 
-#if !(__APPLE__)
 	{
 		.type = kMenuItem_Cycler, .cycler =
 		{
 			.caption = "monitor",
-			.valuePtr = &gGamePrefs.preferredDisplay,
+			.valuePtr = &gGamePrefs.preferredDisplayMinus1,
 			.callback = OnChangeFullscreenMode,
 			.numChoices = 1,  // set dynamically
 			.choices =
@@ -232,7 +224,6 @@ static MenuItem gVideoMenu[] =
 			},
 		}
 	},
-#endif
 
 	{ .type = kMenuItem_Separator },
 
@@ -389,9 +380,7 @@ static MenuItem gRootMenu[] =
 	{ .type = kMenuItem_Label, .label = " SETTINGS", },
 	{ .type = kMenuItem_Separator },
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "configure keyboard",	.menu = gKeyboardMenu} },
-#if !(NOJOYSTICK)
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "configure gamepad",	.menu = gGamepadMenu} },
-#endif
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "video",				.menu = gVideoMenu} },
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "audio",				.menu = gAudioMenu} },
 	{ .type = kMenuItem_Submenu, .submenu = {.caption = "presentation",			.menu = gPresentationMenu} },
@@ -515,17 +504,15 @@ static void OnMenuEntered(void)
 			gMenu[row].cycler.numChoices = numChoices;
 		}
 
-#if !(__APPLE__)
 		{
-			int row = FindRowControlling(&gGamePrefs.preferredDisplay);
+			int row = FindRowControlling(&gGamePrefs.preferredDisplayMinus1);
 			GAME_ASSERT(row >= 0);
 
-			int numDisplays = SDL_GetNumVideoDisplays();
+			int numDisplays = GetNumDisplays();
 			if (numDisplays > MAX_CHOICES)
 				numDisplays = MAX_CHOICES;
 			gMenu[row].cycler.numChoices = numDisplays;
 		}
-#endif
 	}
 }
 
@@ -592,14 +579,14 @@ static void OnChangePlayfieldSizeViaSettings(void)
 
 static void OnChangeDebugInfoInTitleBar(void)
 {
-	SDL_SetWindowTitle(gSDLWindow, "Mighty Mike " PROJECT_VERSION);
+	SDL_SetWindowTitle(gSDLWindow, GAME_FULL_NAME " " GAME_VERSION);
 }
 
 static void OnResetKeys(void)
 {
 	for (int i = 0; i < NUM_CONTROL_NEEDS; i++)
 	{
-		memcpy(gGamePrefs.keys[i].key, kDefaultKeyBindings[i].key, sizeof(gGamePrefs.keys[i].key));
+		SDL_memcpy(gGamePrefs.keys[i].key, kDefaultKeyBindings[i].key, sizeof(gGamePrefs.keys[i].key));
 	}
 
 	PlaySound(SOUND_FIREHOLE);
@@ -610,7 +597,7 @@ static void OnResetGamepad(void)
 {
 	for (int i = 0; i < NUM_CONTROL_NEEDS; i++)
 	{
-		memcpy(gGamePrefs.keys[i].gamepad, kDefaultKeyBindings[i].gamepad, sizeof(gGamePrefs.keys[i].gamepad));
+		SDL_memcpy(gGamePrefs.keys[i].gamepad, kDefaultKeyBindings[i].gamepad, sizeof(gGamePrefs.keys[i].gamepad));
 	}
 
 	PlaySound(SOUND_FIREHOLE);
@@ -657,10 +644,10 @@ static void MoveCursor(void)
 				/* CHANGE ANIM DEPENDING ON DIRECTION */
 
 	int anim = gThisNodePtr->SubType;
-	if (abs(diffX) < 0x8000 && abs(diffY) < 0x8000)
+	if (SDL_abs(diffX) < 0x8000 && SDL_abs(diffY) < 0x8000)
 	{
 	}
-	else if (abs(diffX) > abs(diffY))
+	else if (SDL_abs(diffX) > SDL_abs(diffY))
 	{
 		anim = diffX < 0 ? 3 : 1;
 	}
@@ -750,41 +737,41 @@ static const char* GetPadBindingName(int row, int col)
 		case kButton:
 			switch (kb->gamepad[col].id)
 			{
-				case SDL_CONTROLLER_BUTTON_INVALID:			return kUnboundCaption;
-				case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:	return "lb";
-				case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER:	return "rb";
-				case SDL_CONTROLLER_BUTTON_LEFTSTICK:		return "ls";
-				case SDL_CONTROLLER_BUTTON_RIGHTSTICK:		return "rs";
+				case SDL_GAMEPAD_BUTTON_INVALID:			return kUnboundCaption;
+				case SDL_GAMEPAD_BUTTON_LEFT_SHOULDER:		return "lb";
+				case SDL_GAMEPAD_BUTTON_RIGHT_SHOULDER:		return "rb";
+				case SDL_GAMEPAD_BUTTON_LEFT_STICK:			return "ls";
+				case SDL_GAMEPAD_BUTTON_RIGHT_STICK:		return "rs";
 				default:
-					return SDL_GameControllerGetStringForButton(kb->gamepad[col].id);
+					return SDL_GetGamepadStringForAxis(kb->gamepad[col].id);
 			}
 			break;
 
 		case kAxisPlus:
 			switch (kb->gamepad[col].id)
 			{
-				case SDL_CONTROLLER_AXIS_LEFTX:				return "ls right";
-				case SDL_CONTROLLER_AXIS_LEFTY:				return "ls down";
-				case SDL_CONTROLLER_AXIS_RIGHTX:			return "rs right";
-				case SDL_CONTROLLER_AXIS_RIGHTY:			return "rs down";
-				case SDL_CONTROLLER_AXIS_TRIGGERLEFT:		return "lt";
-				case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:		return "rt";
+				case SDL_GAMEPAD_AXIS_LEFTX:				return "ls right";
+				case SDL_GAMEPAD_AXIS_LEFTY:				return "ls down";
+				case SDL_GAMEPAD_AXIS_RIGHTX:				return "rs right";
+				case SDL_GAMEPAD_AXIS_RIGHTY:				return "rs down";
+				case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:			return "lt";
+				case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:		return "rt";
 				default:
-					return SDL_GameControllerGetStringForAxis(kb->gamepad[col].id);
+					return SDL_GetGamepadStringForAxis(kb->gamepad[col].id);
 			}
 			break;
 
 		case kAxisMinus:
 			switch (kb->gamepad[col].id)
 			{
-				case SDL_CONTROLLER_AXIS_LEFTX:				return "ls left";
-				case SDL_CONTROLLER_AXIS_LEFTY:				return "ls up";
-				case SDL_CONTROLLER_AXIS_RIGHTX:			return "rs left";
-				case SDL_CONTROLLER_AXIS_RIGHTY:			return "rs up";
-				case SDL_CONTROLLER_AXIS_TRIGGERLEFT:		return "lt";
-				case SDL_CONTROLLER_AXIS_TRIGGERRIGHT:		return "rt";
+				case SDL_GAMEPAD_AXIS_LEFTX:				return "ls left";
+				case SDL_GAMEPAD_AXIS_LEFTY:				return "ls up";
+				case SDL_GAMEPAD_AXIS_RIGHTX:				return "rs left";
+				case SDL_GAMEPAD_AXIS_RIGHTY:				return "rs up";
+				case SDL_GAMEPAD_AXIS_LEFT_TRIGGER:			return "lt";
+				case SDL_GAMEPAD_AXIS_RIGHT_TRIGGER:		return "rt";
 				default:
-					return SDL_GameControllerGetStringForAxis(kb->gamepad[col].id);
+					return SDL_GetGamepadStringForAxis(kb->gamepad[col].id);
 			}
 			break;
 
@@ -1051,7 +1038,7 @@ static void OnAwaitingKeyPress(void)
 
 	if (gMenu == gKeyboardMenu)
 	{
-		for (int16_t scancode = 0; scancode < SDL_NUM_SCANCODES; scancode++)
+		for (int16_t scancode = 0; scancode < SDL_SCANCODE_COUNT; scancode++)
 		{
 			if (GetNewSDLKeyState(scancode))
 			{
@@ -1067,26 +1054,26 @@ static void OnAwaitingKeyPress(void)
 	}
 	else if (gMenu == gGamepadMenu)
 	{
-		if (gSDLController)
+		if (gSDLGamepad)
 		{
-			if (SDL_GameControllerGetButton(gSDLController, SDL_CONTROLLER_BUTTON_START))
+			if (SDL_GetGamepadButton(gSDLGamepad, SDL_GAMEPAD_BUTTON_START))
 			{
 				OnDone();
 				return;
 			}
 
-			for (int8_t button = 0; button < SDL_CONTROLLER_BUTTON_MAX; button++)
+			for (int8_t button = 0; button < SDL_GAMEPAD_BUTTON_COUNT; button++)
 			{
 				switch (button)
 				{
-					case SDL_CONTROLLER_BUTTON_DPAD_UP:			// prevent binding those
-					case SDL_CONTROLLER_BUTTON_DPAD_DOWN:
-					case SDL_CONTROLLER_BUTTON_DPAD_LEFT:
-					case SDL_CONTROLLER_BUTTON_DPAD_RIGHT:
+					case SDL_GAMEPAD_BUTTON_DPAD_UP:			// prevent binding those
+					case SDL_GAMEPAD_BUTTON_DPAD_DOWN:
+					case SDL_GAMEPAD_BUTTON_DPAD_LEFT:
+					case SDL_GAMEPAD_BUTTON_DPAD_RIGHT:
 						continue;
 				}
 
-				if (SDL_GameControllerGetButton(gSDLController, button))
+				if (SDL_GetGamepadButton(gSDLGamepad, button))
 				{
 					UnbindPadButtonFromAllRemappableInputNeeds(kButton, button);
 					kb->gamepad[gPadColumn].type = kButton;
@@ -1099,19 +1086,19 @@ static void OnAwaitingKeyPress(void)
 				}
 			}
 
-			for (int8_t axis = 0; axis < SDL_CONTROLLER_AXIS_MAX; axis++)
+			for (int8_t axis = 0; axis < SDL_GAMEPAD_AXIS_COUNT; axis++)
 			{
 				switch (axis)
 				{
-					case SDL_CONTROLLER_AXIS_LEFTX:				// prevent binding those
-					case SDL_CONTROLLER_AXIS_LEFTY:
-					case SDL_CONTROLLER_AXIS_RIGHTX:
-					case SDL_CONTROLLER_AXIS_RIGHTY:
+					case SDL_GAMEPAD_AXIS_LEFTX:				// prevent binding those
+					case SDL_GAMEPAD_AXIS_LEFTY:
+					case SDL_GAMEPAD_AXIS_RIGHTX:
+					case SDL_GAMEPAD_AXIS_RIGHTY:
 						continue;
 				}
 
-				int16_t axisValue = SDL_GameControllerGetAxis(gSDLController, axis);
-				if (abs(axisValue) > kJoystickDeadZone_BindingThreshold)
+				int16_t axisValue = SDL_GetGamepadAxis(gSDLGamepad, axis);
+				if (SDL_abs(axisValue) > kJoystickDeadZone_BindingThreshold)
 				{
 					int axisType = axisValue < 0 ? kAxisMinus : kAxisPlus;
 					UnbindPadButtonFromAllRemappableInputNeeds(axisType, axis);
@@ -1184,7 +1171,7 @@ static void LayOutMenu(MenuItem* menu)
 #if 0
 	// Color test
 	for (int y = 0; y < OFFSCREEN_HEIGHT; y++)
-		memset(*gBackgroundHandle + y*OFFSCREEN_WIDTH, y%256, OFFSCREEN_WIDTH);
+		SDL_memset(*gBackgroundHandle + y*OFFSCREEN_WIDTH, y%256, OFFSCREEN_WIDTH);
 #endif
 
 	OnMenuEntered();

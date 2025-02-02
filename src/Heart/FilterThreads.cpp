@@ -77,7 +77,7 @@ static void ConverterThread(int threadNum, int firstRow, int numRows)
 {
 #if !_WIN32 && _GNU_SOURCE
 	char name[32];
-	snprintf(name, sizeof(name), "Rows %03d-%03d", firstRow, firstRow+numRows-1);
+	SDL_snprintf(name, sizeof(name), "Rows %03d-%03d", firstRow, firstRow+numRows-1);
 	pthread_setname_np(pthread_self(), name);
 #endif
 

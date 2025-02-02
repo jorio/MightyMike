@@ -29,9 +29,7 @@
 #include "input.h"
 #include "version.h"
 #include "externs.h"
-#include <SDL.h>
-#include <stdio.h>
-#include <string.h>
+#include <SDL3/SDL.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -733,8 +731,8 @@ FSSpec		mySpec;
 	if (gPlayerSaveData[gCurrentPlayer^1].donePlayingFlag)
 	{
 delete:
-		gSaveName2x[strlen(gSaveName2x)-2] = '0'+(gCurrentPlayer^1);		// tag player # to end of filename
-		gSaveName2x[strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName2x[SDL_strlen(gSaveName2x)-2] = '0'+(gCurrentPlayer^1);		// tag player # to end of filename
+		gSaveName2x[SDL_strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
 		FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName2x,&mySpec);
 		FSpDelete(&mySpec);
 		return;
@@ -830,12 +828,12 @@ SaveGameFile	saveGame;
 					/* PREPARE DATA TO WRITE */
 					/*************************/
 
-	memset(&saveGame, 0xFF, sizeof(SaveGameFile));
+	SDL_memset(&saveGame, 0xFF, sizeof(SaveGameFile));
 
 	_Static_assert(sizeof(gMyWeapons) == sizeof(saveGame.myWeapons), "size mismatch: weapons on disk vs in memory");
 
-	snprintf(saveGame.magic, sizeof(saveGame.magic), "%s", SAVEGAMEFILE_MAGIC);
-	memcpy(saveGame.myWeapons, gMyWeapons, sizeof(saveGame.myWeapons));
+	SDL_snprintf(saveGame.magic, sizeof(saveGame.magic), "%s", SAVEGAMEFILE_MAGIC);
+	SDL_memcpy(saveGame.myWeapons, gMyWeapons, sizeof(saveGame.myWeapons));
 	saveGame.score					= gScore;
 	saveGame.numCoins				= gNumCoins;
 	saveGame.numLives				= gNumLives;
@@ -854,13 +852,13 @@ SaveGameFile	saveGame;
 
 	if (gPlayerMode == ONE_PLAYER)
 	{
-		gSaveName[strlen(gSaveName)-1] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName[SDL_strlen(gSaveName)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName,&mySpec);
 	}
 	else
 	{
-		gSaveName2x[strlen(gSaveName2x)-2] = '0'+gCurrentPlayer;			// tag player # to end of filename
-		gSaveName2x[strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName2x[SDL_strlen(gSaveName2x)-2] = '0'+gCurrentPlayer;			// tag player # to end of filename
+		gSaveName2x[SDL_strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName2x,&mySpec);
 	}
 	if(iErr != fnfErr)
@@ -916,13 +914,13 @@ SaveGameFile	saveGame;
 
 	if (gPlayerMode == ONE_PLAYER)
 	{
-		gSaveName[strlen(gSaveName)-1] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName[SDL_strlen(gSaveName)-1] = '0'+gameNum;					// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName,&mySpec);
 	}
 	else
 	{
-		gSaveName2x[strlen(gSaveName2x)-2] = '0'+gCurrentPlayer;			// tag player # to end of filename
-		gSaveName2x[strlen(gSaveName2x)-1] = '0'+gameNum;					// tag game # to end of filename
+		gSaveName2x[SDL_strlen(gSaveName2x)-2] = '0'+gCurrentPlayer;		// tag player # to end of filename
+		gSaveName2x[SDL_strlen(gSaveName2x)-1] = '0'+gameNum;				// tag game # to end of filename
 		iErr = FSMakeFSSpec(gPrefsFolderVRefNum, gPrefsFolderDirID,gSaveName2x,&mySpec);
 	}
 
@@ -954,7 +952,7 @@ SaveGameFile	saveGame;
 
 	_Static_assert(sizeof(gMyWeapons) == sizeof(saveGame.myWeapons), "size mismatch: weapons on disk vs in memory");
 
-	memcpy(gMyWeapons, saveGame.myWeapons, sizeof(saveGame.myWeapons));
+	SDL_memcpy(gMyWeapons, saveGame.myWeapons, sizeof(saveGame.myWeapons));
 	gScore					= saveGame.score;
 	gNumCoins				= saveGame.numCoins;
 	gNumLives				= saveGame.numLives;
@@ -1257,8 +1255,8 @@ static void InitDefaultPrefs(void)
 {
 	_Static_assert(sizeof(PREFS_MAGIC) <= sizeof(gGamePrefs.magic), "PREFS_MAGIC won't fit!");
 
-	memset(&gGamePrefs, 0, sizeof(gGamePrefs));
-	snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
+	SDL_memset(&gGamePrefs, 0, sizeof(gGamePrefs));
+	SDL_snprintf(gGamePrefs.magic, sizeof(gGamePrefs.magic), "%s", PREFS_MAGIC);
 	gGamePrefs.interlaceMode = false;
 	gGamePrefs.difficulty = DIFFICULTY_NORMAL;
 
@@ -1272,7 +1270,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.filterDithering = false;
 #endif
 	gGamePrefs.windowedZoom = 0;	// 0 == automatic
-	gGamePrefs.preferredDisplay = 0;
+	gGamePrefs.preferredDisplayMinus1 = 0;
 	gGamePrefs.uncappedFramerate = true;
 	gGamePrefs.music = true;
 	gGamePrefs.soundEffects = true;
@@ -1281,7 +1279,7 @@ static void InitDefaultPrefs(void)
 	gGamePrefs.thermometerScreen = true;
 	gGamePrefs.debugInfoInTitleBar = false;
 	gGamePrefs.colorCorrection = true;
-	memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
+	SDL_memcpy(gGamePrefs.keys, kDefaultKeyBindings, sizeof(kDefaultKeyBindings));
 }
 
 /******************** LOAD PREFS **********************/
@@ -1327,12 +1325,12 @@ PrefsType	prefs;
 		|| count != (long)sizeof(PrefsType)
 		|| 0 != strncmp(PREFS_MAGIC, prefs.magic, sizeof(prefs.magic)))
 	{
-		printf("prefs file appears to be corrupt\n");
+		SDL_Log("prefs file appears to be corrupt");
 		return iErr;
 	}
 
 	// Always reset non-remappable keys to defaults
-	memcpy(
+	SDL_memcpy(
 			&prefs.keys[NUM_REMAPPABLE_NEEDS],
 			&kDefaultKeyBindings[NUM_REMAPPABLE_NEEDS],
 			(NUM_CONTROL_NEEDS - NUM_REMAPPABLE_NEEDS) * sizeof(kDefaultKeyBindings[0])
@@ -1384,7 +1382,7 @@ long				count;
 
 void GameMain(void)
 {
-	TryOpenController(true);
+    TryOpenGamepad(true);
 
 	ToolBoxInit();
 	VerifySystem();
@@ -1404,7 +1402,7 @@ void GameMain(void)
 	LoadHighScores();
 
 #if 0												// Source port TEMP: in debug mode, boot straight to game
-	printf("WARNING: DEBUG MODE: Jumping straight to game\n");
+	SDL_Log("WARNING: DEBUG MODE: Jumping straight to game");
 	gSceneNum = 0;	// 0...4
 	gAreaNum = 0;	// 0...2
 	InitGame();

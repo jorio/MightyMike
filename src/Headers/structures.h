@@ -293,7 +293,7 @@ struct PrefsType
 	Byte		pfSize;
 	Byte		displayMode;
 	Byte		windowedZoom;
-	Byte		preferredDisplay;
+	Byte		preferredDisplayMinus1;
 	Boolean		uncappedFramerate;
 	Boolean		filterDithering;
 	Boolean		music;

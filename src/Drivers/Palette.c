@@ -15,7 +15,6 @@
 #include "window.h"
 
 #include <math.h>
-#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -69,14 +68,14 @@ void InitPaletteStuff(void)
 
 static void MakeBackUpPalette(void)
 {
-	memcpy(&gBackUpPalette, &gGamePalette, sizeof(GamePalette));
+	SDL_memcpy(&gBackUpPalette, &gGamePalette, sizeof(GamePalette));
 }
 
 /********************* RESTORE BACKUP PALETTE *******************/
 
 static void RestoreBackUpPalette(void)
 {
-	memcpy(&gGamePalette, &gBackUpPalette, sizeof(GamePalette));
+	SDL_memcpy(&gGamePalette, &gBackUpPalette, sizeof(GamePalette));
 }
 
 

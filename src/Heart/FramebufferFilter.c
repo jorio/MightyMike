@@ -4,7 +4,6 @@
 
 #include "externs.h"
 #include "framebufferfilter.h"
-#include <string.h>
 
 static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSmearFlags);
 
@@ -92,7 +91,7 @@ static inline void FilterDithering_Row(const uint8_t* indexedRow, uint8_t* rowSm
 #define COMMIT_STRIDE do { \
 	int ditherLength = ditherEnd - ditherStart;								\
 	if (ditherLength > THRESH)												\
-		memset(rowSmearFlags+ditherStart, 1, ditherLength+BLEED);			\
+		SDL_memset(rowSmearFlags+ditherStart, 1, ditherLength+BLEED);		\
 	} while(0)
 
 	for (int x = 0; x < VISIBLE_WIDTH-1; x++)
@@ -146,7 +145,7 @@ void DoublePixels(const color_t* colorx1, color_t* colorx2, int firstRow, int nu
 			*(colorx2++) = pixel;
 		}
 
-		memcpy(colorx2, x2RowStart, sizeof(color_t) * VISIBLE_WIDTH * 2);
+		SDL_memcpy(colorx2, x2RowStart, sizeof(color_t) * VISIBLE_WIDTH * 2);
 		colorx2 += VISIBLE_WIDTH * 2;
 	}
 }

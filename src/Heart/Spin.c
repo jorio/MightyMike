@@ -8,7 +8,6 @@
 /***************/
 /* EXTERNALS   */
 /***************/
-#include <string.h>
 #include "myglobals.h"
 #include "spin.h"
 #include "misc.h"
@@ -321,7 +320,7 @@ Ptr		framePtrBase;
 			frameSize -= count;
 			uint8_t data = *srcPtr++;						// get data byte (upper 3 bytes are trash)
 
-			memset(framePtr, data, count);
+			SDL_memset(framePtr, data, count);
 			framePtr += count;
 		}
 		else												// (+) means NON-PACKED data
@@ -335,7 +334,7 @@ Ptr		framePtrBase;
 					break;
 			}
 
-			memcpy(framePtr, srcPtr, count);
+			SDL_memcpy(framePtr, srcPtr, count);
 			framePtr += count;
 			srcPtr += count;
 		}
@@ -374,7 +373,7 @@ void DrawSpinFrame(Ptr srcPtr)
 		size *= 4;											// memory copy on 68k.
 
 		uint8_t* destPtr = gScreenLookUpTable[y+gSpinY] + gSpinX + x;	// point to screen
-		memcpy(destPtr, srcPtr, size);						// copy data
+		SDL_memcpy(destPtr, srcPtr, size);					// copy data
 		srcPtr += size;
 
 	}while(--numChunks);

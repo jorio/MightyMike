@@ -29,8 +29,6 @@
 #include "externs.h"
 #include "tga.h"
 
-#include <string.h>
-
 /****************************/
 /*    CONSTANTS             */
 /****************************/
@@ -304,7 +302,7 @@ const int	radarCenterY = gGamePrefs.pfSize == PFSIZE_SMALL ? RADAR_CENTER_Y : ((
 
 	for (int i = 0; i < height; i++)
 	{
-		memcpy(destPtr, srcPtr, width);
+		SDL_memcpy(destPtr, srcPtr, width);
 		destPtr += VISIBLE_WIDTH;
 		srcPtr += width;
 	}

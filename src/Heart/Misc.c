@@ -8,9 +8,8 @@
 /* EXTERNALS   */
 /***************/
 
-#include <SDL.h>
-#include <stdio.h>
-#include <string.h>
+#include <SDL3/SDL.h>
+#include "version.h"
 #include "myglobals.h"
 #include "window.h"
 #include "io.h"
@@ -98,9 +97,9 @@ Str255		numStr;
 
 void DoAlert(const char* s)
 {
-	fprintf(stderr, "MIKE ALERT: %s\n", s);
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Game Alert: %s", s);
 
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Mighty Mike", s, NULL);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, GAME_FULL_NAME, s, NULL);
 }
 
 
@@ -108,10 +107,10 @@ void DoAlert(const char* s)
 
 void DoAssert(const char* msg, const char* file, int line)
 {
-	fprintf(stderr, "MIKE ASSERTION FAILED: %s - %s:%d\n", msg, file, line);
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Game Assertion failed: %s - %s:%d\n", msg, file, line);
 	static char alertbuf[1024];
-	snprintf(alertbuf, 1024, "%s\n%s:%d", msg, file, line);
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike: Assertion Failed!", alertbuf, NULL);
+	SDL_snprintf(alertbuf, 1024, "%s\n%s:%d", msg, file, line);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, GAME_FULL_NAME ": Assertion Failed!", alertbuf, NULL);
 	ExitToShell();
 }
 
@@ -120,9 +119,9 @@ void DoAssert(const char* msg, const char* file, int line)
 
 void DoFatalAlert(const char* s)
 {
-	fprintf(stderr, "MIKE FATAL ALERT: %s\n", s);
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Game Fatal Alert: %s", s);
 
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike", s, NULL);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, GAME_FULL_NAME, s, NULL);
 	CleanQuit();
 }
 
@@ -132,10 +131,10 @@ void DoFatalAlert(const char* s)
 void DoFatalAlert2(const char* s1, const char* s2)
 {
 	static char alertbuf[1024];
-	snprintf(alertbuf, 1024, "%s\n%s", s1, s2);
-	fprintf(stderr, "MIKE FATAL ALERT: %s\n", alertbuf);
+	SDL_snprintf(alertbuf, 1024, "%s\n%s", s1, s2);
+	SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Game Fatal Alert: %s", alertbuf);
 
-	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Mighty Mike", alertbuf, NULL);
+	SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, GAME_FULL_NAME, alertbuf, NULL);
 	CleanQuit();
 }
 
@@ -348,7 +347,7 @@ int32_t		decompType;
 		default:
 		{
 				char error[256];
-				snprintf(error, 256, "Unsupported compression type %d", decompType);
+				SDL_snprintf(error, 256, "Unsupported compression type %d", decompType);
 				DoFatalAlert(error);
 		}
 	}
@@ -364,18 +363,18 @@ int32_t		decompType;
 
 #if !_WIN32 && _DEBUG
 	char debugPathBuffer[256];
-	snprintf(debugPathBuffer, sizeof(debugPathBuffer), "/tmp/MikeUnpack_%s",fileName);
+	SDL_snprintf(debugPathBuffer, sizeof(debugPathBuffer), "/tmp/MikeUnpack_%s",fileName);
 
 	for (char* c = debugPathBuffer; *c; c++)	// replace colon characters in path
 		if (*c == ':')
 			*c = '=';
 
-	FILE* debugFile = fopen(debugPathBuffer, "wb");
+	SDL_IOStream* debugFile = SDL_IOFromFile(debugPathBuffer, "wb");
 	if (debugFile)
 	{
-		fwrite(*dataHand, 1, GetHandleSize(dataHand), debugFile);
-		fclose(debugFile);
-		printf("Wrote: %s\n", debugPathBuffer);
+		SDL_WriteIO(debugFile, *dataHand, GetHandleSize(dataHand));
+		SDL_CloseIO(debugFile);
+		SDL_Log("Wrote: %s", debugPathBuffer);
 	}
 	else
 	{
@@ -724,8 +723,8 @@ void FillThermometer(short percent)
 		LoadImage(":Images:charging.tga", LOADIMAGE_FADEIN);
 
 																			// draw thermometer box
-		memset(gScreenLookUpTable[top] + left, borderColor, width);			// top line
-		memset(gScreenLookUpTable[bottom] + left, borderColor, width);		// bottom line
+		SDL_memset(gScreenLookUpTable[top] + left, borderColor, width);		// top line
+		SDL_memset(gScreenLookUpTable[bottom] + left, borderColor, width);	// bottom line
 		for (int y = top; y < bottom; y++)
 		{
 			gScreenLookUpTable[y][left] = borderColor;						// left line
@@ -739,7 +738,7 @@ void FillThermometer(short percent)
 		int filledWidth = (width-2) * percent / 100;
 		for (int y = top+1; y < bottom; y++)
 		{
-			memset(gScreenLookUpTable[y] + left+1, fillColor, filledWidth);
+			SDL_memset(gScreenLookUpTable[y] + left+1, fillColor, filledWidth);
 		}
 	}
 

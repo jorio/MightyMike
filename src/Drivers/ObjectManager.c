@@ -14,7 +14,6 @@
 #include "object.h"
 #include "misc.h"
 #include "shape.h"
-#include <string.h>
 #include "externs.h"
 
 /****************************/
@@ -133,7 +132,7 @@ register ObjNode	*newNodePtr,*scanNodePtr,*reNodePtr;
 
 	long nodeNumBackup = newNodePtr->NodeNum;	// back up node number before zeroing out record
 
-	memset(newNodePtr, 0, sizeof(ObjNode));		// set all fields to 0
+	SDL_memset(newNodePtr, 0, sizeof(ObjNode));	// set all fields to 0
 
 	newNodePtr->NodeNum = nodeNumBackup;		// restore node number
 
@@ -673,7 +672,7 @@ void DumpUpdateRegions_DontPresentFramebuffer(void)
 
 		do
 		{
-			memcpy(destPtr, srcPtr, width);
+			SDL_memcpy(destPtr, srcPtr, width);
 
 			destPtr += VISIBLE_WIDTH;					// Bump to start of next row.
 			srcPtr += OFFSCREEN_WIDTH;

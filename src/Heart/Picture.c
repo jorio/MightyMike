@@ -14,7 +14,6 @@
 #include "misc.h"
 #include "externs.h"
 #include "tga.h"
-#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -86,7 +85,7 @@ void LoadImage(const char* fileName, short showMode)
 
 	for (int y = 0; y < height; y++)
 	{
-		memcpy(destPtr, srcPtr, width);
+		SDL_memcpy(destPtr, srcPtr, width);
 		destPtr += destRowBytes;
 		srcPtr += width;
 	}

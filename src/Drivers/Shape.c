@@ -14,7 +14,6 @@
 #include "object.h"
 #include "misc.h"
 #include "shape.h"
-#include <string.h>
 #include "externs.h"
 
 /****************************/
@@ -123,7 +122,7 @@ void LoadShapeTable(const char* fileName, long groupNum)
 	if (gShapeTableHandle[groupNum] != nil)						// see if zap existing shapetable
 	{
 		DisposeHandle(gShapeTableHandle[groupNum]);
-		memset(gSHAPE_HEADER_Ptrs[groupNum], 0, sizeof(gSHAPE_HEADER_Ptrs[groupNum]));
+		SDL_memset(gSHAPE_HEADER_Ptrs[groupNum], 0, sizeof(gSHAPE_HEADER_Ptrs[groupNum]));
 	}
 
 	gShapeTableHandle[groupNum] = LoadPackedFile(fileName);
@@ -220,7 +219,7 @@ void LoadShapeTable(const char* fileName, long groupNum)
 			*/
 		}
 
-//		printf("Num Anims: %d    Num Frames: %d\n", numAnims, numFrames);
+//		SDL_Log("Num Anims: %d    Num Frames: %d", numAnims, numFrames);
 	}
 }
 
@@ -319,7 +318,7 @@ static void DrawFrameToBuffer(
 	{
 		for (int row = fh->height; row; row--)
 		{
-			memcpy(destPtr, pixelData, fh->width);
+			SDL_memcpy(destPtr, pixelData, fh->width);
 
 			destPtr += destBufferWidth;				// next row
 			pixelData += fh->width;
@@ -436,7 +435,7 @@ long	i,i2;
 			gShapeTableHandle[i] = nil;
 
 			// Clear pointers to shapes so the game will segfault if inadvertantly reusing zombie shapes
-			memset(gSHAPE_HEADER_Ptrs[i], 0, sizeof(gSHAPE_HEADER_Ptrs[i]));
+			SDL_memset(gSHAPE_HEADER_Ptrs[i], 0, sizeof(gSHAPE_HEADER_Ptrs[i]));
 		}
 	}
 }
@@ -620,7 +619,7 @@ void EraseASprite(ObjNode *theNodePtr)
 
 	for (; height > 0; height--)
 	{
-		memcpy(destPtr, srcPtr, width);
+		SDL_memcpy(destPtr, srcPtr, width);
 
 		destPtr	+= OFFSCREEN_WIDTH;		// next row
 		srcPtr	+= OFFSCREEN_WIDTH;
@@ -883,7 +882,7 @@ long	originalY;
 	{
 		for (int drawHeight = 0; drawHeight < height; drawHeight++)
 		{
-			memcpy(destPtr, srcPtr, width);			// erase segment
+			SDL_memcpy(destPtr, srcPtr, width);		// erase segment
 
 			if (++y >=  PF_BUFFER_HEIGHT)			// see if wrap buffer vertically
 			{

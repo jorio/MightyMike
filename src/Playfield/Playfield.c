@@ -27,7 +27,6 @@
 #include "enemy5.h"
 #include "racecar.h"
 #include "externs.h"
-#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -325,7 +324,7 @@ int16_t* tileXparentList		= nil;
 		UnpackIntsBE(2, tileAnimDef->numFrames, tileAnimDef->tileNums);			// byteswap tileNums array
 
 #if _DEBUG
-//		printf("PrepareTileAnims #%d: \"%s\", %d frames\n", i, name, tileAnimDef->numFrames);
+//		SDL_Log("PrepareTileAnims #%d: \"%s\", %d frames", i, name, tileAnimDef->numFrames);
 #endif
 
 		// Set tile anim
@@ -1396,8 +1395,8 @@ unsigned long	rowS,colS;								// shifted version of row & col
 
 	for (int y = 0; y < TILE_SIZE; y++)
 	{
-		memcpy(destPtr,		srcPtr,	TILE_SIZE);
-		memcpy(destCopyPtr,	srcPtr,	TILE_SIZE);
+		SDL_memcpy(destPtr,		srcPtr,	TILE_SIZE);
+		SDL_memcpy(destCopyPtr,	srcPtr,	TILE_SIZE);
 		destPtr		+= PF_BUFFER_WIDTH;			// next line
 		destCopyPtr	+= PF_BUFFER_WIDTH;
 		srcPtr		+= TILE_SIZE;
@@ -1520,14 +1519,14 @@ long		method;
 						/* DO 1ST SEG */
 			do
 			{
-				memcpy(destPtr, srcPtr, width);
+				SDL_memcpy(destPtr, srcPtr, width);
 				destPtr += width;
 				srcPtr += width;
 
 
 						/* DO 2ND SEG */
 
-				memcpy(destPtr2, srcPtr2, width2);
+				SDL_memcpy(destPtr2, srcPtr2, width2);
 				destPtr2 += width2;
 				srcPtr2 += width2;
 
@@ -1564,7 +1563,7 @@ long		method;
 				destPtr = destStartPtr;
 				srcPtr = srcStartPtr;
 
-				memcpy(destPtr, srcPtr, width);
+				SDL_memcpy(destPtr, srcPtr, width);
 
 				srcStartPtr += srcAdd;									// next line
 				destStartPtr += destAdd;

@@ -1,7 +1,6 @@
 #if !(GLRENDER)
 
-#include <SDL.h>
-#include <stdio.h>
+#include <SDL3/SDL.h>
 #include "myglobals.h"
 #include "externs.h"
 #include "misc.h"
@@ -9,20 +8,20 @@
 #include "framebufferfilter.h"
 
 #if _DEBUG
-#define CHECK_SDL_ERROR(err)											\
+#define CHECK_SDL_ERROR(success)										\
 	do {					 											\
-		if (err)														\
-			DoFatalSDLError(err, __func__, __LINE__);					\
+		if (!success)													\
+			DoFatalSDLError(success, __func__, __LINE__);				\
 	} while(0)
 
 static void DoFatalSDLError(int error, const char* file, int line)
 {
 	static char alertbuf[1024];
-	snprintf(alertbuf, sizeof(alertbuf), "SDL error %d\nin %s:%d\n%s", error, file, line, SDL_GetError());
+	SDL_snprintf(alertbuf, sizeof(alertbuf), "SDL error %d\nin %s:%d\n%s", error, file, line, SDL_GetError());
 	DoFatalAlert(alertbuf);
 }
 #else
-#define CHECK_SDL_ERROR(err) (void) (err)
+#define CHECK_SDL_ERROR(success) (void) (success)
 #endif
 
 static SDL_Renderer*	gSDLRenderer		= NULL;
@@ -33,24 +32,24 @@ Boolean					gCanDoHQStretch		= true;
 
 Boolean SDLRender_Init(void)
 {
-	int rendererFlags = SDL_RENDERER_ACCELERATED;
-#if !(NOVSYNC)
-	rendererFlags |= SDL_RENDERER_PRESENTVSYNC;
-#endif
-	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, -1, rendererFlags);
+	gSDLRenderer = SDL_CreateRenderer(gSDLWindow, NULL);
 	if (!gSDLRenderer)
 		return false;
 	// The texture bound to the renderer is created in-game after loading the prefs.
 
-	SDL_RendererInfo rendererInfo;
-	if (0 == SDL_GetRendererInfo(gSDLRenderer, &rendererInfo))
+#if !(NOVSYNC)
+	SDL_SetRenderVSync(gSDLRenderer, 1);
+#endif
+	
+	const char* sdlRendererName = SDL_GetRendererName(gSDLRenderer);
+	if (sdlRendererName)
 	{
 		static char rendererName[32];
-		snprintf(rendererName, sizeof(rendererName), "sdl-%s-%d", rendererInfo.name, (int) sizeof(color_t) * 8);
+		SDL_snprintf(rendererName, sizeof(rendererName), "sdl-%s-%d", sdlRendererName, (int) sizeof(color_t) * 8);
 		gRendererName = rendererName;
 	}
-
-	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+	
+	SDL_SetRenderLogicalPresentation(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT, SDL_LOGICAL_PRESENTATION_LETTERBOX);
 
 	return true;
 }
@@ -95,9 +94,6 @@ void SDLRender_InitTexture(void)
 	gFinalFramebuffer = (color_t*) NewPtrClear((VISIBLE_WIDTH * 2) * (VISIBLE_HEIGHT * 2) * (int) sizeof(color_t));
 	GAME_ASSERT(gFinalFramebuffer);
 
-	// Set scaling quality before creating texture
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, crisp ? "nearest" : "best");
-
 	// Recreate texture
 	gSDLTexture = SDL_CreateTexture(
 			gSDLRenderer,
@@ -111,18 +107,16 @@ void SDLRender_InitTexture(void)
 			VISIBLE_HEIGHT * textureSizeMultiplier);
 	GAME_ASSERT(gSDLTexture);
 
-	// Set logical size
-	SDL_RenderSetLogicalSize(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT);
+	// Set scaling quality
+	SDL_SetTextureScaleMode(gSDLTexture, crisp ? SDL_SCALEMODE_NEAREST : SDL_SCALEMODE_LINEAR);
 
-	// Set integer scaling setting
-#if SDL_VERSION_ATLEAST(2,0,5)
-	SDL_RenderSetIntegerScale(gSDLRenderer, crisp);
-#endif
+	// Set logical size
+	SDL_SetRenderLogicalPresentation(gSDLRenderer, VISIBLE_WIDTH, VISIBLE_HEIGHT, crisp ? SDL_LOGICAL_PRESENTATION_INTEGER_SCALE : SDL_LOGICAL_PRESENTATION_LETTERBOX);
 }
 
 void SDLRender_PresentFramebuffer(void)
 {
-	int err = 0;
+	bool success = true;
 
 	//-------------------------------------------------------------------------
 	// Convert indexed to RGBA, with optional post-processing
@@ -137,15 +131,15 @@ void SDLRender_PresentFramebuffer(void)
 	if (gEffectiveScalingType == kScaling_HQStretch)
 		pitch *= 2;
 
-	err = SDL_UpdateTexture(gSDLTexture, NULL, gFinalFramebuffer, pitch);
-	CHECK_SDL_ERROR(err);
+	success = SDL_UpdateTexture(gSDLTexture, NULL, gFinalFramebuffer, pitch);
+	CHECK_SDL_ERROR(success);
 
 	//-------------------------------------------------------------------------
 	// Present it
 
 	SDL_RenderClear(gSDLRenderer);
-	err = SDL_RenderCopy(gSDLRenderer, gSDLTexture, NULL, NULL);
-	CHECK_SDL_ERROR(err);
+	success = SDL_RenderTexture(gSDLRenderer, gSDLTexture, NULL, NULL);
+	CHECK_SDL_ERROR(success);
 	SDL_RenderPresent(gSDLRenderer);
 }
 

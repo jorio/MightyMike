@@ -8,9 +8,8 @@
 /***************/
 /* EXTERNALS   */
 /***************/
-#include <SDL.h>
-#include <stdio.h>
-#include <string.h>
+#include <SDL3/SDL.h>
+#include <math.h>
 
 #include "myglobals.h"
 #include "window.h"
@@ -74,7 +73,7 @@ uint8_t**		gPFMaskLookUpTable = nil;
 
 static const uint32_t	kDebugTextUpdateInterval = 1000;
 static uint32_t			gDebugTextFrameAccumulator = 0;
-static uint32_t			gDebugTextLastUpdatedAt = 0;
+static uint64_t			gDebugTextLastUpdatedAt = 0;
 static char				gDebugTextBuffer[1024];
 
 
@@ -83,7 +82,7 @@ static char				gDebugTextBuffer[1024];
 void EraseBackgroundBuffer(void)
 {
 	GAME_ASSERT(GetHandleSize(gBackgroundHandle) == OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
-	memset(*gBackgroundHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// clear to black
+	SDL_memset(*gBackgroundHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);	// clear to black
 }
 
 
@@ -118,7 +117,7 @@ void DumpGameWindow(void)
 
 	for (int y = 0; y < VISIBLE_HEIGHT; y++)
 	{
-		memcpy(destPtr, srcPtr, VISIBLE_WIDTH);
+		SDL_memcpy(destPtr, srcPtr, VISIBLE_WIDTH);
 
 		destPtr += VISIBLE_WIDTH;				// Bump to start of next row
 		srcPtr += OFFSCREEN_WIDTH;
@@ -134,7 +133,7 @@ void DumpGameWindow(void)
 
 void DumpBackground(void)
 {
-	memcpy(gOffScreenLookUpTable[0], gBackgroundLookUpTable[0], OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
+	SDL_memcpy(gOffScreenLookUpTable[0], gBackgroundLookUpTable[0], OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 }
 
 
@@ -152,7 +151,7 @@ long		size;
 				/* COPY PF BUFFER 2 TO BUFFER 1 TO ERASE STORE IMAGE */
 
 	size = GetHandleSize(gPFBufferHandle);
-	memcpy(*gPFBufferHandle, *gPFBufferCopyHandle, size);
+	SDL_memcpy(*gPFBufferHandle, *gPFBufferCopyHandle, size);
 
 				/* ERASE INTERLACING ZONE FROM MAIN SCREEN */
 
@@ -162,7 +161,7 @@ long		size;
 
 		for (short height = PF_WINDOW_HEIGHT>>1; height > 0; height--)
 		{
-			memset(destPtr, 0xFE, PF_WINDOW_WIDTH);		// dark grey
+			SDL_memset(destPtr, 0xFE, PF_WINDOW_WIDTH);		// dark grey
 			destPtr += VISIBLE_WIDTH;
 		}
 	}
@@ -222,7 +221,7 @@ static void InitScreenBuffers(void)
 	GAME_ASSERT(gIndexedFramebuffer);
 
 	// Clear to black
-	memset(gIndexedFramebuffer, 0xFF, VISIBLE_WIDTH * VISIBLE_HEIGHT);
+	SDL_memset(gIndexedFramebuffer, 0xFF, VISIBLE_WIDTH * VISIBLE_HEIGHT);
 
 					/* MAKE OFFSCREEN DRAW BUFFER */
 
@@ -230,7 +229,7 @@ static void InitScreenBuffers(void)
 	GAME_ASSERT(gOffScreenHandle);
 
 	// Clear to black
-	memset(*gOffScreenHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
+	SDL_memset(*gOffScreenHandle, 0xFF, OFFSCREEN_WIDTH*OFFSCREEN_HEIGHT);
 
 					/* MAKE BACKPLANE BUFFER */
 
@@ -357,7 +356,7 @@ long	x,y;
 
 	for (; height > 0; height--)
 	{
-		memset(destPtr, 0xFF, width);
+		SDL_memset(destPtr, 0xFF, width);
 
 		destPtr += VISIBLE_WIDTH;					// next row
 	}
@@ -406,7 +405,7 @@ static void SaveIndexedScreenshot(void)
 
 void DumpIndexedTGA(const char* hostPath, int width, int height, const char* data)
 {
-	FILE* tga = fopen(hostPath, "wb");
+	SDL_IOStream* tga = SDL_IOFromFile(hostPath, "wb");
 	if (!tga)
 	{
 		DoAlert("Couldn't open screenshot file");
@@ -428,23 +427,23 @@ void DumpIndexedTGA(const char* hostPath, int width, int height, const char* dat
 	};
 
 	// write header
-	fwrite(tgaHeader, sizeof(tgaHeader), 1, tga);
+	SDL_WriteIO(tga, tgaHeader, sizeof(tgaHeader));
 
 	// write palette
 	for (int i = 0; i < 256; i++)
 	{
-		fputc((gGamePalette.finalColors32[i]>>8)&0xFF, tga);
-		fputc((gGamePalette.finalColors32[i]>>16)&0xFF, tga);
-		fputc((gGamePalette.finalColors32[i]>>24)&0xFF, tga);
+		SDL_WriteU8(tga, (gGamePalette.finalColors32[i] >>  8) & 0xFF);
+		SDL_WriteU8(tga, (gGamePalette.finalColors32[i] >> 16) & 0xFF);
+		SDL_WriteU8(tga, (gGamePalette.finalColors32[i] >> 24) & 0xFF);
 	}
 
 	// write framebuffer
-	fwrite(data, width, height, tga);
+	SDL_WriteIO(tga, data, width * height);
 
 	// done
-	fclose(tga);
+	SDL_CloseIO(tga);
 
-	printf("wrote %s\n", hostPath);
+	SDL_Log("wrote %s", hostPath);
 }
 #endif
 
@@ -476,17 +475,17 @@ void PresentIndexedFramebuffer(void)
 	// Update debug info
 
 	gDebugTextFrameAccumulator++;
-	uint32_t ticksNow = SDL_GetTicks();
-	uint32_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
+	uint64_t ticksNow = SDL_GetTicks();
+	uint64_t ticksElapsed = ticksNow - gDebugTextLastUpdatedAt;
 	if (ticksElapsed >= kDebugTextUpdateInterval)
 	{
 		if (gGamePrefs.debugInfoInTitleBar && gGamePrefs.displayMode == kDisplayMode_Windowed)
 		{
 			float fps = 1000 * gDebugTextFrameAccumulator / (float)ticksElapsed;
-			snprintf(
+			SDL_snprintf(
 					gDebugTextBuffer, sizeof(gDebugTextBuffer),
 					"Mike%s %s scl:%c thr:%d fps:%d obj:%ld x:%ld y:%ld",
-					PROJECT_VERSION,
+					GAME_VERSION,
 					gRendererName,
 					'A' + gEffectiveScalingType,
 					gNumThreads,
@@ -504,17 +503,16 @@ void PresentIndexedFramebuffer(void)
 
 static void MoveToPreferredDisplay(void)
 {
-#if !(__APPLE__)
-	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+	SDL_DisplayID currentDisplay = SDL_GetDisplayForWindow(gSDLWindow);
+	SDL_DisplayID preferredDisplay = 1 + gGamePrefs.preferredDisplayMinus1;
 
-	if (currentDisplay != gGamePrefs.preferredDisplay)
+	if (currentDisplay != preferredDisplay)
 	{
 		SDL_SetWindowPosition(
 				gSDLWindow,
-				SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay),
-				SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay));
+				SDL_WINDOWPOS_CENTERED_DISPLAY(preferredDisplay),
+				SDL_WINDOWPOS_CENTERED_DISPLAY(preferredDisplay));
 	}
-#endif
 }
 
 void SetFullscreenMode(bool enforceDisplayPref)
@@ -535,7 +533,8 @@ void SetFullscreenMode(bool enforceDisplayPref)
 #else
 	if (gGamePrefs.displayMode == kDisplayMode_Windowed)
 	{
-		SDL_SetWindowFullscreen(gSDLWindow, 0);
+		SDL_SetWindowFullscreen(gSDLWindow, false);
+		SDL_SyncWindow(gSDLWindow);
 		if (enforceDisplayPref)
 		{
 			MoveToPreferredDisplay();
@@ -543,29 +542,41 @@ void SetFullscreenMode(bool enforceDisplayPref)
 	}
 	else
 	{
-#if !(__APPLE__)
 		if (enforceDisplayPref)
 		{
-			int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+			SDL_DisplayID currentDisplay = SDL_GetDisplayForWindow(gSDLWindow);
+			SDL_DisplayID preferredDisplay = gGamePrefs.preferredDisplayMinus1 + 1;
 
-			if (currentDisplay != gGamePrefs.preferredDisplay)
+			if (currentDisplay != preferredDisplay)
 			{
-				// We must switch back to windowed mode for the preferred monitor to take effect
-				SDL_SetWindowFullscreen(gSDLWindow, 0);
+				// We must switch back to windowed mode for the preferred display to take effect
+				SDL_SetWindowFullscreen(gSDLWindow, false);
+				SDL_SyncWindow(gSDLWindow);
 				MoveToPreferredDisplay();
 			}
 		}
-#endif
 
 		// Enter fullscreen mode
-		SDL_SetWindowFullscreen(gSDLWindow, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		SDL_SetWindowFullscreen(gSDLWindow, true);
+		SDL_SyncWindow(gSDLWindow);
 	}
 
 	SetOptimalWindowSize();
 	OnChangeIntegerScaling();
 
-	SDL_ShowCursor(gGamePrefs.displayMode == kDisplayMode_Windowed? 1: 0);
+	if (gGamePrefs.displayMode == kDisplayMode_Windowed)
+		SDL_ShowCursor();
+	else
+		SDL_HideCursor();
 #endif
+}
+
+int GetNumDisplays(void)
+{
+	int numDisplays = 0;
+	SDL_DisplayID* displays = SDL_GetDisplays(&numDisplays);
+	SDL_free(displays);
+	return numDisplays;
 }
 
 int GetMaxIntegerZoom(int displayWidth, int displayHeight)
@@ -579,27 +590,23 @@ int GetMaxIntegerZoom(int displayWidth, int displayHeight)
 
 int GetMaxIntegerZoomForPreferredDisplay(void)
 {
-	int currentDisplay = SDL_GetWindowDisplayIndex(gSDLWindow);
+	SDL_DisplayID currentDisplay = SDL_GetDisplayForWindow(gSDLWindow);
 
-#if !(__APPLE__)
-	int numDisplays = SDL_GetNumVideoDisplays();
-	if (gGamePrefs.preferredDisplay < numDisplays)
-		currentDisplay = gGamePrefs.preferredDisplay;
-#endif
+	int numDisplays = GetNumDisplays();
+	if (gGamePrefs.preferredDisplayMinus1 <= numDisplays)
+		currentDisplay = gGamePrefs.preferredDisplayMinus1 + 1;
 
 	SDL_Rect displayBounds = {.x=0, .y=0, .w=VISIBLE_WIDTH, .h=VISIBLE_HEIGHT};
-#if SDL_VERSION_ATLEAST(2,0,5)
-	SDL_GetDisplayUsableBounds(currentDisplay, &displayBounds);
-#else
-	SDL_GetDisplayBounds(currentDisplay, &displayBounds);
-#endif
+	bool success = SDL_GetDisplayUsableBounds(currentDisplay, &displayBounds);
+
+	GAME_ASSERT_MESSAGE(success, SDL_GetError());
 
 	return GetMaxIntegerZoom(displayBounds.w, displayBounds.h);
 }
 
 void SetOptimalWindowSize(void)
 {
-	Uint32 windowFlags = SDL_GetWindowFlags(gSDLWindow);
+	SDL_WindowFlags windowFlags = SDL_GetWindowFlags(gSDLWindow);
 	SDL_RestoreWindow(gSDLWindow);
 
 	int maxZoom = GetMaxIntegerZoomForPreferredDisplay();
@@ -617,8 +624,8 @@ void SetOptimalWindowSize(void)
 	SDL_SetWindowSize(gSDLWindow, VISIBLE_WIDTH * zoom, VISIBLE_HEIGHT * zoom);
 	SDL_SetWindowPosition(
 			gSDLWindow,
-			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay),
-			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplay));
+			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplayMinus1 + 1),
+			SDL_WINDOWPOS_CENTERED_DISPLAY(gGamePrefs.preferredDisplayMinus1 + 1));
 
 	if (windowFlags & SDL_WINDOW_MAXIMIZED)
 	{
@@ -631,11 +638,7 @@ static int GetEffectiveScalingType(void)
 	int windowWidth = VISIBLE_WIDTH;
 	int windowHeight = VISIBLE_HEIGHT;
 
-#if SDL_VERSION_ATLEAST(2,26,0)
 	SDL_GetWindowSizeInPixels(gSDLWindow, &windowWidth, &windowHeight);
-#else
-	SDL_GetWindowSize(gSDLWindow, &windowWidth, &windowHeight);
-#endif
 
 	if (windowWidth < VISIBLE_WIDTH || windowHeight < VISIBLE_HEIGHT)
 	{

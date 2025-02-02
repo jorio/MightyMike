@@ -11,9 +11,8 @@
 /***************/
 
 #include <Pomme.h>
-#include <SDL.h>
-#include <stdio.h>
-#include <string.h>
+#include <SDL3/SDL.h>
+#include <math.h>
 
 #include "misc.h"
 #include "input.h"
@@ -25,12 +24,11 @@
 /*     PROTOTYPES     */
 /**********************/
 
-SDL_GameController* gSDLController = NULL;
-SDL_JoystickID		gSDLJoystickInstanceID = -1;		// ID of the joystick bound to gSDLController
+SDL_Gamepad*		gSDLGamepad = NULL;
 SDL_Haptic*			gSDLHaptic = NULL;
 
-Byte				gRawKeyboardState[SDL_NUM_SCANCODES];
-char				gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
+Byte				gRawKeyboardState[SDL_SCANCODE_COUNT];
+char				gTextInput[64];
 
 Byte				gNeedStates[NUM_CONTROL_NEEDS];
 
@@ -113,37 +111,31 @@ void UpdateInput(void)
 	{
 		switch (event.type)
 		{
-		case SDL_QUIT:
+		case SDL_EVENT_QUIT:
 			CleanQuit();
 			return;
 
-		case SDL_WINDOWEVENT:
-			switch (event.window.event)
-			{
-			case SDL_WINDOWEVENT_CLOSE:
-				CleanQuit();
-				return;
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			CleanQuit();
+			return;
 
-			case SDL_WINDOWEVENT_RESIZED:
-				OnChangeIntegerScaling();
-				break;
-			}
+		case SDL_EVENT_WINDOW_RESIZED:
+			OnChangeIntegerScaling();
 			break;
 
-		case SDL_TEXTINPUT:
-			memcpy(gTextInput, event.text.text, sizeof(gTextInput));
-			_Static_assert(sizeof(gTextInput) == sizeof(event.text.text), "size mismatch: gTextInput / event.text.text");
+		case SDL_EVENT_TEXT_INPUT:
+			SDL_snprintf(gTextInput, sizeof(gTextInput), "%s", event.text.text);
 			break;
 
-		case SDL_JOYDEVICEADDED:	 // event.jdevice.which is the joy's INDEX (not an instance id!)
-			TryOpenController(false);
+		case SDL_EVENT_GAMEPAD_ADDED:
+			TryOpenGamepad(false);
 			break;
 
-		case SDL_JOYDEVICEREMOVED:	// event.jdevice.which is the joy's UNIQUE INSTANCE ID (not an index!)
-			OnJoystickRemoved(event.jdevice.which);
+		case SDL_EVENT_GAMEPAD_REMOVED:
+			OnJoystickRemoved(event.gdevice.which);
 			break;
 
-		case SDL_MOUSEWHEEL:
+		case SDL_EVENT_MOUSE_WHEEL:
 			mouseWheelDelta += event.wheel.y;
 			mouseWheelDelta += event.wheel.x;
 			break;
@@ -154,11 +146,11 @@ void UpdateInput(void)
 	// Update raw keyboard state
 
 	int numkeys = 0;
-	const UInt8* keystate = SDL_GetKeyboardState(&numkeys);
+	const bool* keystate = SDL_GetKeyboardState(&numkeys);
 	uint32_t mouseButtons = SDL_GetMouseState(NULL, NULL);
 
 	{
-		int minNumKeys = numkeys < SDL_NUM_SCANCODES ? numkeys : SDL_NUM_SCANCODES;
+		int minNumKeys = numkeys < SDL_SCANCODE_COUNT ? numkeys : SDL_SCANCODE_COUNT;
 
 		for (int i = 0; i < minNumKeys; i++)
 		{
@@ -166,7 +158,7 @@ void UpdateInput(void)
 		}
 
 		// fill out the rest
-		for (int i = minNumKeys; i < SDL_NUM_SCANCODES; i++)
+		for (int i = minNumKeys; i < SDL_SCANCODE_COUNT; i++)
 		{
 			UpdateKeyState(&gRawKeyboardState[i], false);
 		}
@@ -200,7 +192,7 @@ void UpdateInput(void)
 		switch (kb->mouse.type)
 		{
 			case kButton:
-				downNow |= KEYSTATE_ACTIVE_BIT & (mouseButtons & SDL_BUTTON(kb->mouse.id));
+				downNow |= KEYSTATE_ACTIVE_BIT & (mouseButtons & SDL_BUTTON_MASK(kb->mouse.id));
 				break;
 
 			case kAxisPlus:
@@ -215,7 +207,7 @@ void UpdateInput(void)
 				break;
 		}
 
-		if (gSDLController)
+		if (gSDLGamepad)
 		{
 			int16_t deadZone = i >= NUM_REMAPPABLE_NEEDS
 								? kJoystickDeadZone_UI
@@ -226,15 +218,15 @@ void UpdateInput(void)
 				switch (kb->gamepad[j].type)
 				{
 					case kButton:
-						downNow |= KEYSTATE_ACTIVE_BIT & SDL_GameControllerGetButton(gSDLController, kb->gamepad[j].id);
+						downNow |= KEYSTATE_ACTIVE_BIT & SDL_GetGamepadButton(gSDLGamepad, kb->gamepad[j].id);
 						break;
 
 					case kAxisPlus:
-						downNow |= SDL_GameControllerGetAxis(gSDLController, kb->gamepad[j].id) > deadZone;
+						downNow |= SDL_GetGamepadAxis(gSDLGamepad, kb->gamepad[j].id) > deadZone;
 						break;
 
 					case kAxisMinus:
-						downNow |= SDL_GameControllerGetAxis(gSDLController, kb->gamepad[j].id) < -deadZone;
+						downNow |= SDL_GetGamepadAxis(gSDLGamepad, kb->gamepad[j].id) < -deadZone;
 						break;
 
 					default:
@@ -249,8 +241,8 @@ void UpdateInput(void)
 
 void ClearInput(void)
 {
-	memset(gRawKeyboardState, KEYSTATE_HELD, sizeof(gRawKeyboardState));
-	memset(gNeedStates, KEYSTATE_HELD, sizeof(gNeedStates));
+	SDL_memset(gRawKeyboardState, KEYSTATE_HELD, sizeof(gRawKeyboardState));
+	SDL_memset(gNeedStates, KEYSTATE_HELD, sizeof(gNeedStates));
 //	ClearMouseState();
 //	EatMouseEvents();
 }
@@ -300,12 +292,12 @@ bool UserWantsOutContinuous(void)
 #pragma mark -
 
 
-bool GetNewSDLKeyState(unsigned short sdlScanCode)
+bool GetNewSDLKeyState(SDL_Scancode sdlScanCode)
 {
 	return gRawKeyboardState[sdlScanCode] == KEYSTATE_DOWN;
 }
 
-bool GetSDLKeyState(unsigned short sdlScanCode)
+bool GetSDLKeyState(SDL_Scancode sdlScanCode)
 {
 	return gRawKeyboardState[sdlScanCode] == KEYSTATE_DOWN || gRawKeyboardState[sdlScanCode] == KEYSTATE_HELD;
 }
@@ -326,7 +318,7 @@ bool IsCmdQPressed(void)
 {
 #if __APPLE__
 	return (GetSDLKeyState(SDL_SCANCODE_LGUI) || GetSDLKeyState(SDL_SCANCODE_RGUI))
-		&& GetNewSDLKeyState(SDL_GetScancodeFromKey(SDLK_q));
+		&& GetNewSDLKeyState(SDL_GetScancodeFromKey(SDLK_Q, NULL));
 #else
 	// on non-mac systems, alt-f4 is handled by the system
 	return false;
@@ -338,42 +330,46 @@ bool IsCmdQPressed(void)
 
 /****************************** SDL JOYSTICK FUNCTIONS ********************************/
 
-SDL_GameController* TryOpenController(bool showMessage)
+SDL_Gamepad* TryOpenGamepad(bool showMessage)
 {
-#if NOJOYSTICK
-	(void) showMessage;
-	return NULL;
-#else
-	if (gSDLController)
+	if (gSDLGamepad)
 	{
-		printf("Already have a valid controller.\n");
-		return gSDLController;
+		SDL_Log("Already have a valid gamepad.");
+		return gSDLGamepad;
 	}
 
-	if (SDL_NumJoysticks() == 0)
+	int numJoysticks = 0;
+	SDL_JoystickID* joysticks = SDL_GetJoysticks(&numJoysticks);
+
+	for (int i = 0; i < numJoysticks && gSDLGamepad == NULL; i++)
+	{
+		SDL_JoystickID joystickID = joysticks[i];
+		if (SDL_IsGamepad(joystickID))
+		{
+			gSDLGamepad = SDL_OpenGamepad(joystickID);
+			if (gSDLGamepad)
+				GAME_ASSERT(SDL_GetGamepadID(gSDLGamepad) == joystickID);
+		}
+	}
+
+	SDL_free(joysticks);
+	joysticks = NULL;
+
+	if (numJoysticks == 0)
 	{
 		return NULL;
 	}
 
-	for (int i = 0; gSDLController == NULL && i < SDL_NumJoysticks(); ++i)
+	if (!gSDLGamepad)
 	{
-		if (SDL_IsGameController(i))
-		{
-			gSDLController = SDL_GameControllerOpen(i);
-			gSDLJoystickInstanceID = SDL_JoystickGetDeviceInstanceID(i);
-		}
-	}
-
-	if (!gSDLController)
-	{
-		printf("Joystick(s) found, but none is suitable as an SDL_GameController.\n");
+		SDL_Log("Joystick(s) found, but none is suitable as an SDL_Gamepad.");
 		if (showMessage)
 		{
 			char messageBuf[1024];
-			snprintf(messageBuf, sizeof(messageBuf),
+			SDL_snprintf(messageBuf, sizeof(messageBuf),
 				"The game does not support your controller yet (\"%s\").\n\n"
 				"You can play with the keyboard instead. Sorry!",
-				SDL_JoystickNameForIndex(0));
+				SDL_GetJoystickNameForID(0));
 			SDL_ShowSimpleMessageBox(
 				SDL_MESSAGEBOX_WARNING,
 				"Controller not supported",
@@ -383,60 +379,51 @@ SDL_GameController* TryOpenController(bool showMessage)
 		return NULL;
 	}
 
-	printf("Opened joystick %d as controller: %s\n", gSDLJoystickInstanceID, SDL_GameControllerName(gSDLController));
+	SDL_Log("Opened joystick %d as controller: %s", SDL_GetGamepadID(gSDLGamepad), SDL_GetGamepadName(gSDLGamepad));
 
-	gSDLHaptic = SDL_HapticOpenFromJoystick(SDL_GameControllerGetJoystick(gSDLController));
+	gSDLHaptic = SDL_OpenHapticFromJoystick(SDL_GetGamepadJoystick(gSDLGamepad));
 	if (gSDLHaptic)
 	{
-		SDL_HapticRumbleInit(gSDLHaptic);
+		SDL_InitHapticRumble(gSDLHaptic);
 	}
 
-	return gSDLController;
-#endif
+	return gSDLGamepad;
 }
 
 static void OnJoystickRemoved(SDL_JoystickID which)
 {
-#if NOJOYSTICK
-	(void) which;
-#else
-	if (NULL == gSDLController)		// don't care, I didn't open any controller
+	if (NULL == gSDLGamepad)		// don't care, I didn't open any controller
 		return;
 
-	if (which != gSDLJoystickInstanceID)	// don't care, this isn't the joystick I'm using
+	if (which != SDL_GetGamepadID(gSDLGamepad))	// don't care, this isn't the joystick I'm using
 		return;
 
-	printf("Current joystick was removed: %d\n", which);
+	SDL_Log("Current joystick was removed: %d", which);
 
 	// Nuke haptic device, if any
 	if (gSDLHaptic)
 	{
-		SDL_HapticClose(gSDLHaptic);
+		SDL_CloseHaptic(gSDLHaptic);
 		gSDLHaptic = NULL;
 	}
 
 	// Nuke reference to this controller+joystick
-	SDL_GameControllerClose(gSDLController);
-	gSDLController = NULL;
-	gSDLJoystickInstanceID = -1;
+	SDL_CloseGamepad(gSDLGamepad);
+	gSDLGamepad = NULL;
 
-	// Try to open another joystick if any is connected.
-	TryOpenController(false);
-#endif
+	// Try to open another gamepad if any is connected.
+	TryOpenGamepad(false);
 }
 
 int32_t GetLeftStickMagnitude_Fix32(void)
 {
-#if NOJOYSTICK
-	return 0;
-#else
-	if (!gSDLController)
+	if (!gSDLGamepad)
 	{
 		return 0;
 	}
 
-	int dxRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_LEFTX);
-	int dyRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_LEFTY);
+	int dxRaw = (int) SDL_GetGamepadAxis(gSDLGamepad, SDL_GAMEPAD_AXIS_LEFTX);
+	int dyRaw = (int) SDL_GetGamepadAxis(gSDLGamepad, SDL_GAMEPAD_AXIS_LEFTY);
 
 	int magnitudeSquared = dxRaw * dxRaw + dyRaw * dyRaw;
 
@@ -446,21 +433,17 @@ int32_t GetLeftStickMagnitude_Fix32(void)
 	}
 
 	return (int32_t)(0x10000 * sqrtf(dxRaw * dxRaw + dyRaw * dyRaw) / 32767.0f);
-#endif
 }
 
 short GetRightStick8WayAim(void)
 {
-#if NOJOYSTICK
-	return -1;
-#else
-	if (!gSDLController)
+	if (!gSDLGamepad)
 	{
 		return AIM_NONE;
 	}
 
-	int dxRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTX);
-	int dyRaw = (int) SDL_GameControllerGetAxis(gSDLController, SDL_CONTROLLER_AXIS_RIGHTY);
+	int dxRaw = (int) SDL_GetGamepadAxis(gSDLGamepad, SDL_GAMEPAD_AXIS_RIGHTX);
+	int dyRaw = (int) SDL_GetGamepadAxis(gSDLGamepad, SDL_GAMEPAD_AXIS_RIGHTY);
 
 	bool right	= dxRaw > kJoystickDeadZone;
 	bool left	= dxRaw < -kJoystickDeadZone;
@@ -485,5 +468,4 @@ short GetRightStick8WayAim(void)
 		else if (left)	return AIM_LEFT;
 		else			return AIM_NONE;
 	}
-#endif
 }

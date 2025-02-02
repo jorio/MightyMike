@@ -14,8 +14,6 @@
 #include "io.h"
 #include "input.h"
 #include "externs.h"
-#include <stdio.h>  // snprintf
-#include <string.h>
 
 /****************************/
 /*    CONSTANTS             */
@@ -133,7 +131,7 @@ OSErr		iErr;
 	gMaxChannels = 0;
 	gNumEffectsLoaded = 0;
 
-	memset(EffectHandles, 0, sizeof(EffectHandles));
+	SDL_memset(EffectHandles, 0, sizeof(EffectHandles));
 
 	const long initBits = GetSoundChannelInitializationParameters();
 
@@ -180,7 +178,7 @@ FSSpec spec;
 short refNum;
 OSErr err;
 
-	snprintf(path, sizeof(path), ":Audio:%s:%s.aiff", bankName, effectName);
+	SDL_snprintf(path, sizeof(path), ":Audio:%s:%s.aiff", bankName, effectName);
 
 	err = FSMakeFSSpec(gDataSpec.vRefNum, gDataSpec.parID, path, &spec);
 	GAME_ASSERT_MESSAGE(err == noErr, path);

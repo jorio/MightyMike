@@ -16,27 +16,21 @@
 
 #if GLRENDER
 
-#include <SDL.h>
-#include <stdio.h>
+#include <SDL3/SDL.h>
 #include "myglobals.h"
 #include "externs.h"
 #include "misc.h"
 #include "renderdrivers.h"
 #include "framebufferfilter.h"
 
-#if __APPLE__
-#include <OpenGL/gl.h>
-#include <OpenGL/glext.h>
-#else
-#include <SDL_opengl.h>
-#include <SDL_opengl_glext.h>
+#include <SDL3/SDL_opengl.h>
+#include <SDL3/SDL_opengl_glext.h>
 PFNGLGENBUFFERSARBPROC glGenBuffersARB;
 PFNGLDELETEBUFFERSARBPROC glDeleteBuffersARB;
 PFNGLBINDBUFFERARBPROC glBindBufferARB;
 PFNGLMAPBUFFERARBPROC glMapBufferARB;
 PFNGLBUFFERDATAARBPROC glBufferDataARB;
 PFNGLUNMAPBUFFERARBPROC glUnmapBufferARB;
-#endif
 
 // Marginal FPS increase at the cost of 1 frame of latency
 #define DEFERRED_TEX_UPDATE 0
@@ -84,7 +78,7 @@ Boolean gCanDoHQStretch = true;
 static void DoFatalGLError(GLenum error, const char* file, int line)
 {
 	static char alertbuf[1024];
-	snprintf(alertbuf, sizeof(alertbuf), "OpenGL error 0x%x\nin %s:%d", error, file, line);
+	SDL_snprintf(alertbuf, sizeof(alertbuf), "OpenGL error 0x%x\nin %s:%d", error, file, line);
 	DoFatalAlert(alertbuf);
 }
 #else
@@ -185,7 +179,7 @@ static void DeleteTextureAndPBO(void)
 
 void GLRender_Init(void)
 {
-	puts("Using special PPC renderer!");
+	SDL_Log("Using special PPC renderer!");
 
 #if FRAMEBUFFER_COLOR_DEPTH == 32
 	gRendererName = "fastgl32";
@@ -198,16 +192,16 @@ void GLRender_Init(void)
 	gGLContext = SDL_GL_CreateContext(gSDLWindow);
 	GAME_ASSERT(gGLContext);
 
-	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
-	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
+	bool didMakeCurrent = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
+	GAME_ASSERT_MESSAGE(didMakeCurrent, SDL_GetError());
 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &gMaxTextureSize);
-	printf("Max texture size: %d\n", (int) gMaxTextureSize);
+	SDL_Log("Max texture size: %d", (int) gMaxTextureSize);
 
 	if (gMaxTextureSize < kFrameTextureWidth)
 	{
 		char message[128];
-		snprintf(message, sizeof(message), "Your graphics card's max texture size (%d)\nis below the game's requirements (%d).", (int) gMaxTextureSize, kFrameTextureWidth);
+		SDL_snprintf(message, sizeof(message), "Your graphics card's max texture size (%d)\nis below the game's requirements (%d).", (int) gMaxTextureSize, kFrameTextureWidth);
 		DoAlert(message);
 	}
 
@@ -217,14 +211,12 @@ void GLRender_Init(void)
 	gCanDoHQStretch = gMaxTextureSize >= 2*kFrameTextureWidth;
 #endif
 
-#if !__APPLE__
 	GL_GET_PROC_ADDRESS(PFNGLGENBUFFERSARBPROC, glGenBuffersARB);
 	GL_GET_PROC_ADDRESS(PFNGLDELETEBUFFERSARBPROC, glDeleteBuffersARB);
 	GL_GET_PROC_ADDRESS(PFNGLBINDBUFFERARBPROC, glBindBufferARB);
 	GL_GET_PROC_ADDRESS(PFNGLUNMAPBUFFERPROC, glUnmapBufferARB);
 	GL_GET_PROC_ADDRESS(PFNGLMAPBUFFERARBPROC, glMapBufferARB);
 	GL_GET_PROC_ADDRESS(PFNGLBUFFERDATAARBPROC, glBufferDataARB);
-#endif
 
 #if !(NOVSYNC)
 	SDL_GL_SetSwapInterval(1);
@@ -262,7 +254,7 @@ void GLRender_Shutdown(void)
 
 	if (gGLContext)
 	{
-		SDL_GL_DeleteContext(gGLContext);
+        SDL_GL_DestroyContext(gGLContext);
 		gGLContext = NULL;
 	}
 }
@@ -274,7 +266,8 @@ static SDL_Rect GetViewportSize(void)
 
 	int dw = 0;
 	int dh = 0;
-	SDL_GL_GetDrawableSize(gSDLWindow, &dw, &dh);	// DON'T use SDL_GetWindowSize as it returns fake scaled pixels in HiDPI displays
+//	SDL_GL_GetDrawableSize(gSDLWindow, &dw, &dh);	// DON'T use SDL_GetWindowSize as it returns fake scaled pixels in HiDPI displays
+	SDL_GetWindowSizeInPixels(gSDLWindow, &dw, &dh);
 
 	SDL_Point size;
 	if (gEffectiveScalingType == kScaling_PixelPerfect)
@@ -305,14 +298,14 @@ void GLRender_PresentFramebuffer(void)
 	const int vw = VISIBLE_WIDTH;
 	const int vh = VISIBLE_HEIGHT;
 
-	int mkc = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
-	GAME_ASSERT_MESSAGE(mkc == 0, SDL_GetError());
+	bool didMakeCurrent = SDL_GL_MakeCurrent(gSDLWindow, gGLContext);
+	GAME_ASSERT_MESSAGE(didMakeCurrent, SDL_GetError());
 
 	//-------------------------------------------------------------------------
 	// Update dimensions
 
 	SDL_Rect viewportRect = GetViewportSize();
-	if (!SDL_RectEquals(&viewportRect, &previousViewportRect))
+    if (!SDL_RectsEqual(&viewportRect, &previousViewportRect))
 	{
 		previousViewportRect = viewportRect;
 		glViewport(viewportRect.x, viewportRect.y, viewportRect.w, viewportRect.h);

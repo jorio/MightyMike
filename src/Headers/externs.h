@@ -4,7 +4,7 @@
 #include "equates.h"
 #include "structures.h"
 #include "window.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 #pragma mark - Bonus
 
@@ -45,8 +45,8 @@ extern	Boolean					gIsGamePaused;
 #pragma mark - Input
 
 extern const KeyBinding			kDefaultKeyBindings[NUM_CONTROL_NEEDS];
-extern char						gTextInput[SDL_TEXTINPUTEVENT_TEXT_SIZE];
-extern SDL_GameController*		gSDLController;
+extern char						gTextInput[64];
+extern SDL_Gamepad*				gSDLGamepad;
 
 #pragma mark - IO
 

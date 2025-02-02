@@ -1,23 +1,23 @@
-#include "Pomme.h"
-#include "PommeInit.h"
-#include "PommeFiles.h"
-#include "PommeGraphics.h"
+// MIGHTY MIKE ENTRY POINT
+// (C) 2025 Iliyas Jorio
+// This file is part of Mighty Mike. https://github.com/jorio/mightymike
 
-#include <SDL.h>
-#include <iostream>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_main.h>
 #include <thread>
+
+#include "Pomme.h"
+#include "PommeFiles.h"
+#include "PommeInit.h"
 
 extern "C"
 {
+	#include "externs.h"
 	#include "renderdrivers.h"
 	#include "framebufferfilter.h"
-	#include "externs.h"
 	#include "version.h"
 
-	// Satisfy externs in game code
-	SDL_Window*			gSDLWindow		= nullptr;
-
-	// Lets the game know where to find its asset files
+	SDL_Window* gSDLWindow = nullptr;
 	FSSpec gDataSpec;
 
 	void GameMain(void);
@@ -64,7 +64,7 @@ tryAgain:
 	dataPath = dataPath.lexically_normal();
 
 	// Set data spec -- Lets the game know where to find its asset files
-	gDataSpec = Pomme::Files::HostPathToFSSpec(dataPath / "Shapes");
+	gDataSpec = Pomme::Files::HostPathToFSSpec(dataPath / "System");
 
 	// Use application resource file
 	auto applicationSpec = Pomme::Files::HostPathToFSSpec(dataPath / "System" / "Application");
@@ -80,47 +80,42 @@ tryAgain:
 	return dataPath;
 }
 
-static void Boot(const char* executablePath)
+static void Boot(int argc, char** argv)
 {
-	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
+	const char* executablePath = argc > 0 ? argv[0] : NULL;
 
-#if OSXPPC
-	gNumThreads = 1;
+	SDL_SetAppMetadata(GAME_FULL_NAME, GAME_VERSION, GAME_IDENTIFIER);
+#if _DEBUG
+	SDL_SetLogPriorities(SDL_LOG_PRIORITY_VERBOSE);
 #else
+	SDL_SetLogPriorities(SDL_LOG_PRIORITY_INFO);
+#endif
+
 	gNumThreads = (int) std::thread::hardware_concurrency();
 	if (gNumThreads >= MAX_RENDER_THREADS)
 		gNumThreads = MAX_RENDER_THREADS;
 	else if (gNumThreads <= 0)
 		gNumThreads = 1;
-#endif
 
 	// Start our "machine"
 	Pomme::Init();
 
 	// Initialize SDL video subsystem
-	if (0 != SDL_Init(SDL_INIT_VIDEO))
+	if (!SDL_Init(SDL_INIT_VIDEO))
+	{
 		throw std::runtime_error("Couldn't initialize SDL video subsystem.");
+	}
 
 #if GLRENDER
-#if !(OSXPPC)
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-#endif // OSXPPC
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #endif // GLRENDER
 
 	// Create window
-	int windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
+	int windowFlags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY;
 #if GLRENDER
 	windowFlags |= SDL_WINDOW_OPENGL;
 #endif
-	gSDLWindow = SDL_CreateWindow(
-			"Mighty Mike " PROJECT_VERSION,
-			SDL_WINDOWPOS_UNDEFINED,
-			SDL_WINDOWPOS_UNDEFINED,
-			VISIBLE_WIDTH,
-			VISIBLE_HEIGHT,
-			windowFlags);
+	gSDLWindow = SDL_CreateWindow(GAME_FULL_NAME " " GAME_VERSION, VISIBLE_WIDTH, VISIBLE_HEIGHT, windowFlags);
 	if (!gSDLWindow)
 		throw std::runtime_error("Couldn't create SDL window.");
 
@@ -131,50 +126,44 @@ static void Boot(const char* executablePath)
 		throw std::runtime_error("Couldn't create SDL renderer.");
 #endif // GLRENDER
 
+	// Find path to game data folder
 	fs::path dataPath = FindGameData(executablePath);
-#if !(__APPLE__)
-//	Pomme::Graphics::SetWindowIconFromIcl8Resource(gSDLWindow, 400);
-#endif
 
-#if !(NOJOYSTICK)
 	// Init joystick subsystem
-	SDL_Init(SDL_INIT_JOYSTICK);
-	SDL_Init(SDL_INIT_HAPTIC);
 	{
+		SDL_Init(SDL_INIT_GAMEPAD);
 		auto gamecontrollerdbPath8 = (dataPath / "System" / "gamecontrollerdb.txt").u8string();
-		if (-1 == SDL_GameControllerAddMappingsFromFile((const char*)gamecontrollerdbPath8.c_str()))
+		if (-1 == SDL_AddGamepadMappingsFromFile((const char*)gamecontrollerdbPath8.c_str()))
 		{
-			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, "Mighty Mike", "Couldn't load gamecontrollerdb.txt!", gSDLWindow);
+			SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_WARNING, GAME_FULL_NAME, "Couldn't load gamecontrollerdb.txt!", gSDLWindow);
 		}
 	}
-#endif
 }
 
 static void Shutdown()
 {
+	// Always restore the user's mouse acceleration before exiting.
+	// SetMacLinearMouse(false);
+
 	Pomme::Shutdown();
 
 	if (gSDLWindow)
 	{
 		SDL_DestroyWindow(gSDLWindow);
-		gSDLWindow = nullptr;
+		gSDLWindow = NULL;
 	}
-	
+
 	SDL_Quit();
 }
 
 int main(int argc, char** argv)
 {
-	int				returnCode				= 0;
-	std::string		finalErrorMessage		= "";
-	bool			showFinalErrorMessage	= false;
+	bool success = true;
+	std::string uncaught = "";
 
-	const char* executablePath = argc > 0 ? argv[0] : NULL;
-
-	// Start the game
 	try
 	{
-		Boot(executablePath);
+		Boot(argc, argv);
 		GameMain();
 	}
 	catch (Pomme::QuitRequest&)
@@ -182,30 +171,27 @@ int main(int argc, char** argv)
 		// no-op, the game may throw this exception to shut us down cleanly
 	}
 #if !(_DEBUG)
-	// In release builds, catch anything that might be thrown by CommonMain
+	// In release builds, catch anything that might be thrown by GameMain
 	// so we can show an error dialog to the user.
 	catch (std::exception& ex)		// Last-resort catch
 	{
-		returnCode = 1;
-		finalErrorMessage = ex.what();
-		showFinalErrorMessage = true;
+		success = false;
+		uncaught = ex.what();
 	}
 	catch (...)						// Last-resort catch
 	{
-		returnCode = 1;
-		finalErrorMessage = "unknown";
-		showFinalErrorMessage = true;
+		success = false;
+		uncaught = "unknown";
 	}
 #endif
 
-	// Clean up!
 	Shutdown();
 
-	if (showFinalErrorMessage)
+	if (!success)
 	{
-		std::cerr << "Uncaught exception: " << finalErrorMessage << "\n";
-		SDL_ShowSimpleMessageBox(0, "Uncaught exception", finalErrorMessage.c_str(), nullptr);
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Uncaught exception: %s", uncaught.c_str());
+		SDL_ShowSimpleMessageBox(0, GAME_FULL_NAME, uncaught.c_str(), nullptr);
 	}
 
-	return returnCode;
+	return success ? 0 : 1;
 }

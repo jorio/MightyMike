@@ -595,6 +595,8 @@ ObjNode		*nameObj;
 
 						/* ENTER NAME */
 
+	SDL_StartTextInput(gSDLWindow);
+
 	do
 	{
 		RegulateSpeed2(1);
@@ -668,6 +670,7 @@ ObjNode		*nameObj;
 
 exit:;
 
+	SDL_StopTextInput(gSDLWindow);
 	ZapShapeTable(GROUP_WIN);
 }
 
