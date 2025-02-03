@@ -29,6 +29,7 @@
 #include "input.h"
 #include "version.h"
 #include "externs.h"
+#include "framebufferfilter.h"
 #include <SDL3/SDL.h>
 
 /****************************/
@@ -1382,6 +1383,7 @@ long				count;
 
 void GameMain(void)
 {
+	InitRenderThreads();
     TryOpenGamepad(true);
 
 	ToolBoxInit();

@@ -4,7 +4,6 @@
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
-#include <thread>
 
 #include "Pomme.h"
 #include "PommeFiles.h"
@@ -21,8 +20,6 @@ extern "C"
 	FSSpec gDataSpec;
 
 	void GameMain(void);
-
-	int gNumThreads = 0;
 }
 
 static fs::path FindGameData(const char* executablePath)
@@ -90,12 +87,6 @@ static void Boot(int argc, char** argv)
 #else
 	SDL_SetLogPriorities(SDL_LOG_PRIORITY_INFO);
 #endif
-
-	gNumThreads = (int) std::thread::hardware_concurrency();
-	if (gNumThreads >= MAX_RENDER_THREADS)
-		gNumThreads = MAX_RENDER_THREADS;
-	else if (gNumThreads <= 0)
-		gNumThreads = 1;
 
 	// Start our "machine"
 	Pomme::Init();

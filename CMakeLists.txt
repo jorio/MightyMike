@@ -96,7 +96,6 @@ endif()
 add_subdirectory(extern/Pomme)
 
 find_package(OpenGL REQUIRED)  # only actually required if we want to force GLRENDER
-find_package(Threads REQUIRED)
 
 #------------------------------------------------------------------------------
 # EXECUTABLE TARGET
@@ -211,7 +210,7 @@ else()
 endif()
 
 # Link core dependencies
-target_link_libraries(${GAME_TARGET} PRIVATE Pomme OpenGL::GL ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(${GAME_TARGET} PRIVATE Pomme OpenGL::GL)
 
 # Add required frameworks for KillMacMouseAcceleration
 if(APPLE)

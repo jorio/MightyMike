@@ -25,4 +25,5 @@ void IndexedFramebufferToColor_FilterDithering(color_t* color, int threadNum, in
 void DoublePixels(const color_t* colorx1, color_t* colorx2, int firstRow, int numRows);
 
 void ConvertFramebufferMT(color_t* colorBuffer);
+void InitRenderThreads(void);
 void ShutdownRenderThreads(void);
